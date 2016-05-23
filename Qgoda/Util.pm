@@ -12,7 +12,7 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format read_body);
+                expand_perl_format read_body merge_data);
 
 sub empty($) {
     my ($what) = @_;
@@ -124,4 +124,44 @@ sub expand_perl_format {
 	
 	
 	return $string;
+}
+
+sub merge_data {
+	my ($data, $overlay) = @_;
+	
+	# Return $overlay if it is of a different type than $data.
+	sub equal_ref {
+		my ($x, $y) = @_;
+		
+		return 1 if ref $x && ref $y && ref $x eq ref $y;
+	}
+
+	return $overlay if !equal_ref $overlay, $data;
+    return $overlay if UNIVERSAL::isa($overlay, 'ARRAY');
+    
+    my $merger;
+    $merger = sub {
+    	my ($d, $o) = @_;
+    	
+    	foreach my $key (keys %$d) {
+    		if (exists $o->{$key}) {
+    			if (!equal_ref $d->{$key}, $o->{$key}) {
+    				$d->{$key} = $o->{$key};
+    			} elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
+    				$merger->($d->{$key}, $o->{$key});
+    			} else {
+    				$d->{$key} = $o->{$key};
+    			}
+    		}
+    	}
+    	foreach my $key (keys %$o) {
+    		if (!exists $d->{$key}) {
+    			$d->{$key} = $o->{$key};
+    		}
+    	}
+    };
+	
+	$merger->($data, $overlay);
+		
+	return $data;
 }
