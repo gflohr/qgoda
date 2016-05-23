@@ -57,10 +57,14 @@ sub new {
     $config->{outdir} = File::Spec->catpath($config->{srcdir}, '_site')
         if empty $config->{outdir};
     $config->{processors} ||= {
-    	md => {
-    		module => 'Markdown', 
+    	'm(?:arkdown|down|kdn|dwn|kd|d)' => {
+    		convertor => 'Markdown', 
     		suffix => 'html'
-    	}
+    	},
+    	'html?' => {
+    		convertor => 'Null',
+    		suffix => 'html'
+    	},
     };
 
     unless ($self->__isHash($config->{processors})) {
@@ -69,7 +73,7 @@ sub new {
         foreach my $suffix (keys %{$config->{processors}}) {
         	my $record = $config->{processors}->{$suffix};
         	unless ($self->__isHash($record)
-        	        && !empty $record->{module}
+        	        && !empty $record->{convertor}
         	        && !empty $record->{suffix}) {
                 $logger->fatal(__x("{filename}: invalid processor specification for '{$suffix}'",
                                    filename => $filename,
@@ -117,9 +121,14 @@ sub ignorePath {
 sub getProcessorSuffix {
 	my ($self, $asset) = @_;
 	
-	my $processor = $self->{processors}->{$asset->{suffix}} or return '';
+	my $suffix = $asset->{suffix};
+	foreach my $key (keys %{$self->{processors}}) {
+		if ($suffix =~ /^(?:$key)$/) {
+			return $self->{processors}->{$key}->{suffix};
+		}
+	}
 	
-	return $processor->{suffix};
+	return '';
 }
 
 sub __isHash {
