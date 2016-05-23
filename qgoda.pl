@@ -28,23 +28,28 @@ display_version if $options{version};
 usage_error __"The options '--dump-config' and '--watch' are mutually exclusve."
     if $options{dump_config} && $options{watch};
 
-my $method = 'build';
-if ($options{watch}) {
+my $method;
+if ($options{build}) {
+	$method = 'build';
+} elsif ($options{watch}) {
 	$method = 'watch';
 } elsif ($options{dump_config}) {
 	delete $options{verbose};
 	$options{quiet} = 1;
 	$method = 'dumpConfig';
+} else {
+	usage_error __"Nothing to do.";
 }
 
 Qgoda->new(%options)->$method;
 
 sub display_usage {
-    my $msg = __x('Usage: {program} [OPTIONS]
+    my $msg = __x(q(Usage: {program} [OPTIONS]
 Mandatory arguments to long options, are mandatory to short options, too.
 
 Operation mode:
-  -w, --watch                 watch for changes
+  -b, --build                 build site and exit
+  -w, --watch                 watch for changes and build on demand
   -q, --quiet                 quiet mode
   -v, --verbose               display progress on standard error
 
@@ -53,9 +58,12 @@ Informative output:
   -h, --help                  display this help and exit
   -V, --version               output version information and exit
 
+In order to build your site one of the options '--build' or '--watch'
+is mandatory.
+
 The Qgoda static site generator renders your site by default into the
 directory "_site" inside the current working directory.
-', program => $0);
+), program => $0);
 
     print $msg;
 
