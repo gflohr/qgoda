@@ -41,11 +41,15 @@ sub addArtefact {
 }
 
 sub getArtefact {
-	my ($self, $name) = @_;
-	
-	return if !exists $self->{artefacts}->{$name};
-	
-	return $self->{artefacts}->{$name};
+    my ($self, $name) = @_;
+    
+    return if !exists $self->{artefacts}->{$name};
+    
+    return $self->{artefacts}->{$name};
+}
+
+sub getArtefacts {
+	values %{shift->{artefacts}};
 }
 
 1;

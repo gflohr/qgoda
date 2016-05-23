@@ -48,7 +48,7 @@ sub build {
     my $logger = $self->{__logger};
     my $config = $self->{__config};
     
-    $logger->debug(__"start building site");
+    $logger->info(__"start building site");
     
     chdir $self->{__config}->{srcdir} 
         or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
@@ -64,7 +64,12 @@ sub build {
     
     $self->__prune($site);
     
-    $logger->debug(__"finished building site");
+    $DB::single = 1;
+    my $num_artefacts = $site->getArtefacts;
+    $logger->info(__nx("finished building site with one artefact",
+                       "finished building site with {num} artefacts",
+                       $num_artefacts,
+                       num => $num_artefacts));
 
     return $self; 
 }

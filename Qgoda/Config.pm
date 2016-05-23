@@ -11,6 +11,7 @@ use Cwd;
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(read_file empty yaml_error);
+use Qgoda::Convertor::Null;
 
 sub new {
     my ($class, %args) = @_;
@@ -130,6 +131,34 @@ sub getProcessorSuffix {
 	}
 	
 	return '';
+}
+
+sub getProcessor {
+	my ($self, $asset) = @_;
+	
+	require Qgoda;
+	my $logger = Qgoda->new->logger('config');
+	
+    my $suffix = $asset->{suffix};
+    foreach my $key (keys %{$self->{processors}}) {
+        if ($suffix =~ /^(?:$key)$/) {
+            my $class = $self->{processors}->{$key}->{convertor} or next;
+            $class = 'Qgoda::Convertor::' . $class;
+            my $module = $class;
+            $module =~ s{(?:::|')}{/}g;
+            $module .= '.pm';
+            eval { require $module };
+            if ($@) {
+                $logger->error($@);
+                next;
+            } else {
+            	my $options = $self->{processors}->{$key}->{options} || {};
+            	return $class->new(%$options);
+            }
+        }
+    }
+
+    return Qgoda::Convertor::Null->new;    
 }
 
 sub __isHash {

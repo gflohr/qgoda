@@ -19,6 +19,7 @@ sub build {
 	
     my $logger = $self->logger;
     $logger->debug(__"start building posts");
+    my $config = $site->{config};
     
     foreach my $asset ($site->getAssets) {
     	$logger->debug(__x("building post '{relpath}'",
@@ -29,6 +30,9 @@ sub build {
                            permalink => $permalink));
 
         my $content = $self->readAssetContent($asset, $site);
+        $DB::single = 1;
+        my $processor = $config->getProcessor($asset);
+        $content = $processor->convert($asset, $site, $content);
 
         $self->saveArtefact($asset, $site, $permalink, $content);
     }   
