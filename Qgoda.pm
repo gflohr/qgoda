@@ -60,13 +60,11 @@ sub build {
     $self->__scan($site);
     
     $self->__analyze($site);
+    $self->__build($site);
     
     $self->__prune($site);
     
     $logger->debug(__"finished building site");
-
-use Data::Dumper;
-warn Dumper $site;
 
     return $self; 
 }
@@ -76,37 +74,39 @@ sub watch {
 
     my $logger = $self->{__logger};
 
+    my $init;
+    
     eval {
-    	$self->build;
-
-        $logger->info(__"watching for changes after initial build");
-    	
     	my $config = $self->{__config};
     	
         require Filesys::Notify::Simple;
         my $watcher = Filesys::Notify::Simple->new([$config->{srcdir}]);
         while (1) {
+        	if ($init) {
+                $logger->debug(__x("waiting for changes in '{dir}'", 
+                                   dir => $config->{srcdir}));
+
+                my @files;
+                $watcher->wait(sub {
+                    foreach my $event (@_) {
+                    	if ($config->ignorePath($event->{path})) {
+                    	    $logger->debug(__x("changed file '{filename}' is ignored",
+                	                          filename => $event->{path}));
+                	       next;
+                	    }
+                        $logger->debug(__x("file '{filename}' has changed",
+                                           filename => $event->{path}));
+                        push @files, $event->{path};
+                    }
+                });
+
+                next if !@files;
+        	}
+            $logger->info(__"start rebuilding site because of file system change")
+                if !$init;
+            $init = 1;
+            eval { $self->build };
             $logger->error($@) if $@;
-            $logger->debug(__x("waiting for changes in '{dir}'", 
-                               dir => $config->{srcdir}));
-
-            my @files;
-            $watcher->wait(sub {
-                foreach my $event (@_) {
-                	if ($config->ignorePath($event->{path})) {
-                	    $logger->debug(__x("changed file '{filename}' is ignored",
-                	                       filename => $event->{path}));
-                	    next;
-                	}
-                    $logger->debug(__x("file '{filename}' has changed",
-                                       filename => $event->{path}));
-                    push @files, $event->{path};
-                }
-            });
-
-            next if !@files;
-            $logger->info(__"start rebuilding site because of file system change");
-            $self->build;
         }
     };
     $logger->fatal($@) if $@;
@@ -129,6 +129,7 @@ sub config {
 	shift->{__config};
 }
 
+# FIXME! This should instantiate scanner plug-ins and use them instead.
 sub __scan {
 	my ($self, $site) = @_;
 	
@@ -197,6 +198,7 @@ sub __build {
 	return $self;
 }
 
+# FIXME! This should instantiate plug-ins and use them instead.
 sub __prune {
 	my ($self, $site) = @_;
 	
