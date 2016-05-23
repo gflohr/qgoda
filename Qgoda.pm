@@ -64,7 +64,6 @@ sub build {
     
     $self->__prune($site);
     
-    $DB::single = 1;
     my $num_artefacts = $site->getArtefacts;
     $logger->info(__nx("finished building site with one artefact",
                        "finished building site with {num} artefacts",

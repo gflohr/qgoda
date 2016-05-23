@@ -113,8 +113,8 @@ sub __fillMeta {
     $asset->{slug} = $self->__slug($asset);
 
     $asset->{index} = '/index';
-    my $processor_suffix = $config->getProcessorSuffix($asset);
-    $asset->{index} .= '.' . $processor_suffix if !empty $processor_suffix;
+    my $convertor_suffix = $config->getConvertorSuffix($asset);
+    $asset->{index} .= '.' . $convertor_suffix if !empty $convertor_suffix;
 
     return $self;
 }

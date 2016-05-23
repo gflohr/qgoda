@@ -7,8 +7,7 @@ use strict;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
 sub new {
-	my $self = '';
-	bless \$self, shift;
+	bless {}, shift;
 }
 
 sub convert {

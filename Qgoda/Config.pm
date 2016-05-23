@@ -57,7 +57,7 @@ sub new {
         if empty $config->{srcdir};
     $config->{outdir} = File::Spec->catpath($config->{srcdir}, '_site')
         if empty $config->{outdir};
-    $config->{processors} ||= {
+    $config->{convertors} ||= {
     	'm(?:arkdown|down|kdn|dwn|kd|d)' => {
     		convertor => 'Markdown', 
     		suffix => 'html'
@@ -68,21 +68,21 @@ sub new {
     	},
     };
 
-    unless ($self->__isHash($config->{processors})) {
-        $logger->fatal(__x("{filename}: processors must be a hash",
+    unless ($self->__isHash($config->{convertors})) {
+        $logger->fatal(__x("{filename}: convertors must be a hash",
                            filename => $filename));
-        foreach my $suffix (keys %{$config->{processors}}) {
-        	my $record = $config->{processors}->{$suffix};
+        foreach my $suffix (keys %{$config->{convertors}}) {
+        	my $record = $config->{convertors}->{$suffix};
         	unless ($self->__isHash($record)
         	        && !empty $record->{convertor}
         	        && !empty $record->{suffix}) {
-                $logger->fatal(__x("{filename}: invalid processor specification for '{$suffix}'",
+                $logger->fatal(__x("{filename}: invalid convertor specification for '{$suffix}'",
                                    filename => $filename,
                                    suffix => $suffix));
         	}
         	$record->{suffix} = lowercase $record->{suffix};
-        	$config->{processors}->{lowercase $suffix}
-        	    = delete $config->{processors}->{$suffix};
+        	$config->{convertors}->{lowercase $suffix}
+        	    = delete $config->{convertors}->{$suffix};
         }
     }
 
@@ -120,29 +120,30 @@ sub ignorePath {
     return;
 }
 
-sub getProcessorSuffix {
+sub getConvertorSuffix {
 	my ($self, $asset) = @_;
 	
 	my $suffix = $asset->{suffix};
-	foreach my $key (keys %{$self->{processors}}) {
+	foreach my $key (keys %{$self->{convertors}}) {
 		if ($suffix =~ /^(?:$key)$/) {
-			return $self->{processors}->{$key}->{suffix};
+			return $self->{convertors}->{$key}->{suffix};
 		}
 	}
 	
 	return '';
 }
 
-sub getProcessor {
+sub getConvertor {
 	my ($self, $asset) = @_;
 	
 	require Qgoda;
 	my $logger = Qgoda->new->logger('config');
 	
     my $suffix = $asset->{suffix};
-    foreach my $key (keys %{$self->{processors}}) {
+    foreach my $key (keys %{$self->{convertors}}) {
         if ($suffix =~ /^(?:$key)$/) {
-            my $class = $self->{processors}->{$key}->{convertor} or next;
+            my $class = $self->{convertors}->{$key}->{convertor} or next;
+            my $options = $self->{options}->{convertors}->{$class} || {};
             $class = 'Qgoda::Convertor::' . $class;
             my $module = $class;
             $module =~ s{(?:::|')}{/}g;
@@ -152,7 +153,6 @@ sub getProcessor {
                 $logger->error($@);
                 next;
             } else {
-            	my $options = $self->{processors}->{$key}->{options} || {};
             	return $class->new(%$options);
             }
         }

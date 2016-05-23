@@ -30,9 +30,12 @@ sub build {
                            permalink => $permalink));
 
         my $content = $self->readAssetContent($asset, $site);
-        $DB::single = 1;
-        my $processor = $config->getProcessor($asset);
-        $content = $processor->convert($asset, $site, $content);
+        my $convertor = $config->getConvertor($asset);
+        $content = eval { $convertor->convert($asset, $site, $content) };
+        if ($@) {
+        	$logger->error($@);
+        	next;
+        }
 
         $self->saveArtefact($asset, $site, $permalink, $content);
     }   
