@@ -5,8 +5,9 @@ package Qgoda;
 use strict;
 
 use base 'Exporter';
-use vars qw(@EXPORT $qgoda);
-@EXPORT = qw($qgoda);
+use vars qw(@EXPORT $qgoda $VERSION);
+@EXPORT = qw($qgoda $VERSION);
+$VERSION = '0.1.1';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
