@@ -1,10 +1,10 @@
 #! /bin/false
 
-package Qgoda::Convertor::Markdown;
+package Qgoda::Converter::Markdown;
 
 use strict;
 
-use base qw(Qgoda::Convertor);
+use base qw(Qgoda::Converter);
 
 use Text::Markdown qw(markdown);
 
@@ -27,4 +27,4 @@ sub convert {
 
 =head1 NAME
 
-Qgoda::Convertor::Markdown - Default builder for Qgoda posts.
+Qgoda::Converter::Markdown - Default builder for Qgoda posts.

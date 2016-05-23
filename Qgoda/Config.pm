@@ -11,7 +11,7 @@ use Cwd;
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
-use Qgoda::Convertor::Null;
+use Qgoda::Converter::Null;
 
 sub new {
     my ($class, %args) = @_;
@@ -35,7 +35,7 @@ sub new {
     my $config = {
     	title => __"A New Qgoda Powered Site",
     	srcdir => '.',
-    	convertors => {
+    	converters => {
             chains => {
                 markdown => {
                 	modules => [qw(Markdown HTML)],
@@ -101,50 +101,50 @@ sub checkConfig {
 	
 	die __"invalid format (not a hash)\n"
 	    unless ($self->__isHash($config));
-	die __x("'{variable}' must be a dictionary", variable => 'convertors')
-	    unless $self->__isHash($config->{convertors});
-    die __x("'{variable}' must be a dictionary", variable => 'convertors.chains')
-        unless $self->__isHash($config->{convertors}->{chains});
-    foreach my $chain (keys %{$config->{convertors}->{chains}}) {
-        die __x("'{variable}' must be a dictionary", variable => "convertors.chains.$chain")
-            unless $self->__isHash($config->{convertors}->{chains}->{$chain});
-        if (exists $config->{convertors}->{chains}->{$chain}->{modules}) {
-            die __x("'{variable}' must not be a dictionary", variable => "convertors.chains.$chain.modules")
-                if $self->__isHash($config->{convertors}->{chains}->{$chain}->{modules});
-            if (!$self->__isArray($config->{convertors}->{chains}->{$chain}->{modules})) {
-                $config->{convertors}->{chains}->{$chain}->{modules} =
-                    [$config->{convertors}->{chains}->{$chain}->{modules}],
+	die __x("'{variable}' must be a dictionary", variable => 'converters')
+	    unless $self->__isHash($config->{converters});
+    die __x("'{variable}' must be a dictionary", variable => 'converters.chains')
+        unless $self->__isHash($config->{converters}->{chains});
+    foreach my $chain (keys %{$config->{converters}->{chains}}) {
+        die __x("'{variable}' must be a dictionary", variable => "converters.chains.$chain")
+            unless $self->__isHash($config->{converters}->{chains}->{$chain});
+        if (exists $config->{converters}->{chains}->{$chain}->{modules}) {
+            die __x("'{variable}' must not be a dictionary", variable => "converters.chains.$chain.modules")
+                if $self->__isHash($config->{converters}->{chains}->{$chain}->{modules});
+            if (!$self->__isArray($config->{converters}->{chains}->{$chain}->{modules})) {
+                $config->{converters}->{chains}->{$chain}->{modules} =
+                    [$config->{converters}->{chains}->{$chain}->{modules}],
             }
         } else {
-            $config->{convertors}->{chains}->{$chain}->{modules} = ['Null'];
+            $config->{converters}->{chains}->{$chain}->{modules} = ['Null'];
         };
-        if (exists $config->{convertors}->{chains}->{$chain}->{suffix}) {
-            die __x("'{variable}' must be a single value", variable => "convertors.chains.$chain.suffix")
-                if ref $config->{convertors}->{chains}->{$chain}->{suffix};
+        if (exists $config->{converters}->{chains}->{$chain}->{suffix}) {
+            die __x("'{variable}' must be a single value", variable => "converters.chains.$chain.suffix")
+                if ref $config->{converters}->{chains}->{$chain}->{suffix};
         }
     }
-    die __x("'{variable}' must be a dictionary", variable => 'convertors.suffixes')
-        unless $self->__isHash($config->{convertors}->{suffixes});
-    foreach my $suffix (keys %{$config->{convertors}->{suffixes}}) {
+    die __x("'{variable}' must be a dictionary", variable => 'converters.suffixes')
+        unless $self->__isHash($config->{converters}->{suffixes});
+    foreach my $suffix (keys %{$config->{converters}->{suffixes}}) {
     	my $lc_suffix = lowercase $suffix;
-    	$config->{convertors}->{suffixes}->{$lc_suffix}
-    	     = delete $config->{convertors}->{suffixes}->{$suffix};
+    	$config->{converters}->{suffixes}->{$lc_suffix}
+    	     = delete $config->{converters}->{suffixes}->{$suffix};
         $suffix = $lc_suffix;
-    	my $chain = $config->{convertors}->{suffixes}->{$suffix};
-        die __x("convertor chain suffix '{suffix}' references undefined chain '{chain}'",
+    	my $chain = $config->{converters}->{suffixes}->{$suffix};
+        die __x("converter chain suffix '{suffix}' references undefined chain '{chain}'",
                 suffix => $suffix, chain => $chain)
-            unless exists $config->{convertors}->{chains}->{$chain};
+            unless exists $config->{converters}->{chains}->{$chain};
     }
-    die __x("'{variable}' must be a dictionary", variable => 'convertors.modules')
-        unless $self->__isHash($config->{convertors}->{modules});
-    foreach my $module (keys %{$config->{convertors}->{modules}}) {
-        die __x("'{variable}' must be a scalar", variable => "convertors.chains.$module")
-            if ref $config->{convertors}->{modules}->{$module};
-        die __x("'{variable}' must not be empty", variable => "convertors.chains.$module")
-            if empty $config->{convertors}->{modules}->{$module};
+    die __x("'{variable}' must be a dictionary", variable => 'converters.modules')
+        unless $self->__isHash($config->{converters}->{modules});
+    foreach my $module (keys %{$config->{converters}->{modules}}) {
+        die __x("'{variable}' must be a scalar", variable => "converters.chains.$module")
+            if ref $config->{converters}->{modules}->{$module};
+        die __x("'{variable}' must not be empty", variable => "converters.chains.$module")
+            if empty $config->{converters}->{modules}->{$module};
     }
-    die __x("'{variable}' must be a dictionary", variable => 'convertors.options')
-        unless $self->__isHash($config->{convertors}->{options});
+    die __x("'{variable}' must be a dictionary", variable => 'converters.options')
+        unless $self->__isHash($config->{converters}->{options});
         
     return $self;
 }
@@ -182,9 +182,9 @@ sub getConvertedSuffix {
     return if empty $asset->{suffix};
     my @suffixes = reverse split /^\./, $asset->{suffix};
     foreach my $suffix (@suffixes) {
-    	if ($self->{convertors}->{suffixes}->{$suffix}) {
-    		my $chain = $self->{convertors}->{suffixes}->{$suffix};
-    		$suffix = $self->{convertors}->{chains}->{$chain}->{suffix};
+    	if ($self->{converters}->{suffixes}->{$suffix}) {
+    		my $chain = $self->{converters}->{suffixes}->{$suffix};
+    		$suffix = $self->{converters}->{chains}->{$chain}->{suffix};
     		return if empty $suffix;
     		
     	    return join '.', reverse @suffixes;
@@ -194,18 +194,18 @@ sub getConvertedSuffix {
     return;
 }
 
-sub getConvertors {
+sub getConverters {
 	my ($self, $asset) = @_;
 	
 	require Qgoda;
 	my $logger = Qgoda->new->logger('config');
 	
     my $suffix = $asset->{suffix};
-    foreach my $key (keys %{$self->{convertors}}) {
+    foreach my $key (keys %{$self->{converters}}) {
         if ($suffix =~ /^(?:$key)$/) {
-            my $class = $self->{convertors}->{$key}->{convertor} or next;
-            my $options = $self->{options}->{convertors}->{$class} || {};
-            $class = 'Qgoda::Convertor::' . $class;
+            my $class = $self->{converters}->{$key}->{converter} or next;
+            my $options = $self->{options}->{converters}->{$class} || {};
+            $class = 'Qgoda::Converter::' . $class;
             my $module = $class;
             $module =~ s{(?:::|')}{/}g;
             $module .= '.pm';
@@ -219,7 +219,7 @@ sub getConvertors {
         }
     }
 
-    return Qgoda::Convertor::Null->new;    
+    return Qgoda::Converter::Null->new;    
 }
 
 sub getProcessor {

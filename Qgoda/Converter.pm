@@ -1,6 +1,6 @@
 #! /bin/false
 
-package Qgoda::Convertor;
+package Qgoda::Converter;
 
 use strict;
 
@@ -13,7 +13,7 @@ sub new {
 sub convert {
 	my ($self, $asset, $site, $content) = @_;
 	
-	die __x("Convertor class '{class}' does not implement the method convert().\n",
+	die __x("Converter class '{class}' does not implement the method convert().\n",
 	        class => ref $self);
 }
 
@@ -21,4 +21,4 @@ sub convert {
 
 =head1 NAME
 
-Qgoda::Convertor - Abstract base class for all Qgoda Convertors.
+Qgoda::Converter - Abstract base class for all Qgoda Converters.

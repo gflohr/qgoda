@@ -30,8 +30,8 @@ sub build {
                            permalink => $permalink));
 
         my $content = $self->readAssetContent($asset, $site);
-        my $convertor = $config->getConvertor($asset);
-        $content = eval { $convertor->convert($asset, $site, $content) };
+        my $converter = $config->getConverter($asset);
+        $content = eval { $converter->convert($asset, $site, $content) };
         if ($@) {
         	$logger->error($@);
         	next;
