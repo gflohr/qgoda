@@ -104,17 +104,17 @@ sub __fillMeta {
 
     my $stem = fileparse $asset->getPath;
     my $suffix = '';
-    if ($stem =~ s/\.([^.]+)$//) {
-        $suffix = $1;
+    if ($stem =~ s/^([^.]+)\.(.+)$/$1/) {
+        $suffix = $2;
     }
     $asset->{stem} = $stem;
     $asset->{title} = $asset->{stem} if !exists $asset->{title};
-    $asset->{suffix} = $suffix;
+    $asset->{suffix} = lowercase $suffix;
     $asset->{slug} = $self->__slug($asset);
 
     $asset->{index} = '/index';
-    my $convertor_suffix = $config->getConvertorSuffix($asset);
-    $asset->{index} .= '.' . $convertor_suffix if !empty $convertor_suffix;
+    my $converted_suffix = $config->getConvertedSuffix($asset);
+    $asset->{index} .= '.' . $converted_suffix if !empty $converted_suffix;
 
     return $self;
 }

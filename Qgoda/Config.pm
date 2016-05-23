@@ -10,7 +10,7 @@ use YAML;
 use Cwd;
 use Scalar::Util qw(reftype);
 
-use Qgoda::Util qw(read_file empty yaml_error merge_data);
+use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
 use Qgoda::Convertor::Null;
 
 sub new {
@@ -126,6 +126,10 @@ sub checkConfig {
     die __x("'{variable}' must be a dictionary", variable => 'convertors.suffixes')
         unless $self->__isHash($config->{convertors}->{suffixes});
     foreach my $suffix (keys %{$config->{convertors}->{suffixes}}) {
+    	my $lc_suffix = lowercase $suffix;
+    	$config->{convertors}->{suffixes}->{$lc_suffix}
+    	     = delete $config->{convertors}->{suffixes}->{$suffix};
+        $suffix = $lc_suffix;
     	my $chain = $config->{convertors}->{suffixes}->{$suffix};
         die __x("convertor chain suffix '{suffix}' references undefined chain '{chain}'",
                 suffix => $suffix, chain => $chain)
@@ -172,20 +176,25 @@ sub ignorePath {
     return;
 }
 
-sub getConvertorSuffix {
-	my ($self, $asset) = @_;
-	
-	my $suffix = $asset->{suffix};
-	foreach my $key (keys %{$self->{convertors}}) {
-		if ($suffix =~ /^(?:$key)$/) {
-			return $self->{convertors}->{$key}->{suffix};
-		}
-	}
-	
-	return '';
+sub getConvertedSuffix {
+    my ($self, $asset) = @_;
+    
+    return if empty $asset->{suffix};
+    my @suffixes = reverse split /^\./, $asset->{suffix};
+    foreach my $suffix (@suffixes) {
+    	if ($self->{convertors}->{suffixes}->{$suffix}) {
+    		my $chain = $self->{convertors}->{suffixes}->{$suffix};
+    		$suffix = $self->{convertors}->{chains}->{$chain}->{suffix};
+    		return if empty $suffix;
+    		
+    	    return join '.', reverse @suffixes;
+    	}
+    }
+    
+    return;
 }
 
-sub getConvertor {
+sub getConvertors {
 	my ($self, $asset) = @_;
 	
 	require Qgoda;
