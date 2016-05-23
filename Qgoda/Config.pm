@@ -37,8 +37,14 @@ sub new {
     	srcdir => '.',
     	convertors => {
             chains => {
-                markdown => [qw(Markdown HTML)],
-                html => [qw(HTML)]
+                markdown => {
+                	modules => [qw(Markdown HTML)],
+                	suffix => 'html',
+                },
+                html => {
+                	modules => 'HTML',
+                	suffix => 'html',
+                },
             },
             suffixes => {
                 md => 'markdown',
@@ -101,8 +107,22 @@ sub checkConfig {
     die __x("'{variable}' must be a dictionary", variable => 'convertors.chains')
         unless $self->__isHash($config->{convertors}->{chains});
     foreach my $chain (keys %{$config->{convertors}->{chains}}) {
-        die __x("'{variable}' must be an array", variable => "convertors.chains.$chain")
-            unless $self->__isArray($config->{convertors}->{chains}->{$chain});
+        die __x("'{variable}' must be a dictionary", variable => "convertors.chains.$chain")
+            unless $self->__isHash($config->{convertors}->{chains}->{$chain});
+        if (exists $config->{convertors}->{chains}->{$chain}->{modules}) {
+            die __x("'{variable}' must not be a dictionary", variable => "convertors.chains.$chain.modules")
+                if $self->__isHash($config->{convertors}->{chains}->{$chain}->{modules});
+            if (!$self->__isArray($config->{convertors}->{chains}->{$chain}->{modules})) {
+                $config->{convertors}->{chains}->{$chain}->{modules} =
+                    [$config->{convertors}->{chains}->{$chain}->{modules}],
+            }
+        } else {
+            $config->{convertors}->{chains}->{$chain}->{modules} = ['Null'];
+        };
+        if (exists $config->{convertors}->{chains}->{$chain}->{suffix}) {
+            die __x("'{variable}' must be a single value", variable => "convertors.chains.$chain.suffix")
+                if ref $config->{convertors}->{chains}->{$chain}->{suffix};
+        }
     }
     die __x("'{variable}' must be a dictionary", variable => 'convertors.suffixes')
         unless $self->__isHash($config->{convertors}->{suffixes});
