@@ -66,7 +66,8 @@ sub saveArtefact {
 	
     require Qgoda;
     my $config = Qgoda->new->config;
-    my $path = File::Spec->catdir($config->{outdir}, $asset->getRelpath);
+    $permalink = '/' . $asset->getRelpath if empty $permalink;
+    my $path = File::Spec->catdir($config->{outdir}, $permalink);
     
     my $existing = $site->getArtefact($path);
     if ($existing) {
