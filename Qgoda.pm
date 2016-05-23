@@ -103,7 +103,7 @@ sub watch {
                 next if !@files;
         	}
             $logger->info(__"start rebuilding site because of file system change")
-                if !$init;
+                if $init;
             $init = 1;
             eval { $self->build };
             $logger->error($@) if $@;

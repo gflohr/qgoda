@@ -9,7 +9,8 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase);
+@EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
+                expand_perl_format);
 
 sub empty($) {
     my ($what) = @_;
@@ -69,4 +70,24 @@ sub lowercase($) {
 	my ($str) = @_;
 	
 	return lc $str;
+}
+
+sub expand_perl_format {
+	my ($string, $hash) = @_;
+	
+	my $keys = join '|', keys %$hash, '{', '}';
+	$string =~ s/
+	            \{($keys)\}
+	            /
+	            if (defined $hash->{$1}) {
+	            	$hash->{$1}
+	            } elsif ('{' eq $1 || '}' eq $1) {
+	            	$1
+	            } else {
+	            	''
+	            }
+	            /gxe;
+	
+	
+	return $string;
 }

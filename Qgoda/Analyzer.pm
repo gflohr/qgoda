@@ -110,17 +110,9 @@ sub __fillMeta {
     $asset->{suffix} = $suffix;
     $asset->{slug} = $self->__slug($asset);
 
-    # Expand the output path.
-    # FIXME! This belongs into the builder!
-    if (defined $asset->{permalink}) {
-    	my %expand = %{$asset->{date}};
-    	$expand{slug} = $asset->{slug};
-        $expand{stem} = $asset->{stem};
-        $expand{index} = '/index';
-        my $suffix = $config->getProcessorSuffix($asset);
-        $expand{suffix} = empty $suffix ? '' : $suffix;
-        $expand{index} .= '.' . $expand{suffix} if !empty $expand{suffix};
-    }
+    $asset->{index} = '/index';
+    $asset->{suffix} = $config->getProcessorSuffix($asset);
+    $asset->{index} .= '.' . $asset->{suffix} if !empty $asset->{suffix};
 
     return $self;
 }

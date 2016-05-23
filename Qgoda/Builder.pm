@@ -6,6 +6,8 @@ use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
 
+use Qgoda::Util qw(empty expand_perl_format);
+
 sub new {
 	my $self = '';
 	bless \$self, shift;
@@ -18,7 +20,12 @@ sub build {
     $logger->debug(__"start building posts");
     
     foreach my $asset ($site->getAssets) {
-    	my $permalink = $self->expandLink($asset->{permalink});
+    	$logger->debug(__x("building post '{relpath}'",
+    	                   relpath => $asset->getRelpath));
+    	                   
+    	my $permalink = $self->expandLink($asset, $asset->{permalink});
+        $logger->debug(__x("permalink '{permalink}'",
+                           permalink => $permalink));
     }   
      
     return $self;
@@ -31,6 +38,13 @@ sub logger {
     my $logger = Qgoda->new->logger('builder');    
 }
 
+sub expandLink {
+	my ($self, $asset, $link) = @_;
+	
+	return '/' . $asset->getRelpath if empty $link;
+
+	return expand_perl_format $link, $asset;
+}
 
 1;
 

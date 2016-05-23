@@ -117,7 +117,9 @@ sub ignorePath {
 sub getProcessorSuffix {
 	my ($self, $asset) = @_;
 	
-	return 'html';
+	my $processor = $self->{processors}->{$asset->{suffix}} or return '';
+	
+	return $processor->{suffix};
 }
 
 sub __isHash {
