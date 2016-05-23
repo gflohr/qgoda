@@ -87,6 +87,7 @@ sub new {
 
     # Clean up certain variables or overwrite them unconditionally.
     $config->{srcdir} = Cwd::abs_path($config->{srcdir});
+    $config->{outdir} = Cwd::abs_path($config->{outdir});
     
     return $self;
 }

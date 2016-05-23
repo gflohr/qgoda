@@ -54,7 +54,7 @@ sub build {
         or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
                               dir => $config->{srcdir},
                               error => $!));
-    my $site = Qgoda::Site->new;
+    my $site = Qgoda::Site->new($config);
 
     $self->{__outfiles} = [];    
     $self->__scan($site);
@@ -216,6 +216,7 @@ sub __prune {
 			# Mark the containing directory as generated.
 			my ($volume, $directory, $filename) = File::Spec->splitpath($outfile);
 			my $container = File::Spec->catpath($volume, $directory, '');
+			$container =~ s{/$}{};
 			$directories{$container} = 1;
 		} elsif (-d $outfile) {
 			$logger->error(__x("cannot remove directory '{directory}': {error}",
