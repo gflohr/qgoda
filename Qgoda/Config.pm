@@ -10,7 +10,7 @@ use YAML;
 use Cwd;
 use Scalar::Util qw(reftype);
 
-use Qgoda::Util qw(read_file empty yaml_error);
+use Qgoda::Util qw(read_file empty yaml_error merge_data);
 use Qgoda::Convertor::Null;
 
 sub new {
@@ -31,7 +31,34 @@ sub new {
                            . "proceeding with defaults.");
     }
 
-    my $config = {};
+    # Default configuration.
+    my $config = {
+    	title => __"A New Qgoda Powered Site",
+    	srcdir => '.',
+    	convertors => {
+            chains => {
+                markdown => [qw(Markdown HTML)],
+                html => [qw(HTML)]
+            },
+            suffixes => {
+                md => 'markdown',
+                mdown => 'markdown',
+                mkdn => 'markdown',
+                mdwn => 'markdown',
+                mkd => 'markdown',
+                html => 'html',
+                htm => 'html',
+            },
+            modules => {
+                Markdown => 'Markdown',
+                HTML => 'Template::Toolkit',
+            },
+            options => {
+                Markdown => []
+            },
+    	},
+    };
+    
     if (!empty $filename) {
         $logger->info(__x("reading configuration from '{filename}'",
                           filename => '_config.yaml'));
@@ -40,56 +67,62 @@ sub new {
         	$logger->fatal(__x("error reading file '{filename}': {error}",
         	                   filename => $filename, error => $!));
         }
-        $config = eval { YAML::Load($yaml) };
+        my $local = eval { YAML::Load($yaml) };
         $logger->fatal(yaml_error $filename, $@) if $@;
+        $config = merge_data $config, $local;
     }
     my $self = bless $config, $class;
 
-    unless ($self->__isHash($config)) {
-    	$logger->fatal(__x("invalid configuration file '{filename}' (not a hash)",
-    	                   filename => $filename));
+    eval { $self->checkConfig($self) };
+    if ($@) {
+        $logger->fatal(__x("{filename}: {error}",
+                           filename => $filename, error => $@));
     }
     
     # Fill in defaults and consistency checks.
-    $config->{title} = __"A site powered by Qgoda"
-        if empty $config->{title};
-    $config->{srcdir} = '.'
-        if empty $config->{srcdir};
     $config->{outdir} = File::Spec->catpath($config->{srcdir}, '_site')
         if empty $config->{outdir};
-    $config->{convertors} ||= {
-    	'm(?:arkdown|down|kdn|dwn|kd|d)' => {
-    		convertor => 'Markdown', 
-    		suffix => 'html'
-    	},
-    	'html?' => {
-    		convertor => 'Null',
-    		suffix => 'html'
-    	},
-    };
-
-    unless ($self->__isHash($config->{convertors})) {
-        $logger->fatal(__x("{filename}: convertors must be a hash",
-                           filename => $filename));
-        foreach my $suffix (keys %{$config->{convertors}}) {
-        	my $record = $config->{convertors}->{$suffix};
-        	unless ($self->__isHash($record)
-        	        && !empty $record->{convertor}
-        	        && !empty $record->{suffix}) {
-                $logger->fatal(__x("{filename}: invalid convertor specification for '{$suffix}'",
-                                   filename => $filename,
-                                   suffix => $suffix));
-        	}
-        	$record->{suffix} = lowercase $record->{suffix};
-        	$config->{convertors}->{lowercase $suffix}
-        	    = delete $config->{convertors}->{$suffix};
-        }
-    }
 
     # Clean up certain variables or overwrite them unconditionally.
     $config->{srcdir} = Cwd::abs_path($config->{srcdir});
     $config->{outdir} = Cwd::abs_path($config->{outdir});
     
+    return $self;
+}
+
+# Consistency check.
+sub checkConfig {
+	my ($self, $config) = @_;
+	
+	die __"invalid format (not a hash)\n"
+	    unless ($self->__isHash($config));
+	die __x("'{variable}' must be a dictionary", variable => 'convertors')
+	    unless $self->__isHash($config->{convertors});
+    die __x("'{variable}' must be a dictionary", variable => 'convertors.chains')
+        unless $self->__isHash($config->{convertors}->{chains});
+    foreach my $chain (keys %{$config->{convertors}->{chains}}) {
+        die __x("'{variable}' must be an array", variable => "convertors.chains.$chain")
+            unless $self->__isArray($config->{convertors}->{chains}->{$chain});
+    }
+    die __x("'{variable}' must be a dictionary", variable => 'convertors.suffixes')
+        unless $self->__isHash($config->{convertors}->{suffixes});
+    foreach my $suffix (keys %{$config->{convertors}->{suffixes}}) {
+    	my $chain = $config->{convertors}->{suffixes}->{$suffix};
+        die __x("convertor chain suffix '{suffix}' references undefined chain '{chain}'",
+                suffix => $suffix, chain => $chain)
+            unless exists $config->{convertors}->{chains}->{$chain};
+    }
+    die __x("'{variable}' must be a dictionary", variable => 'convertors.modules')
+        unless $self->__isHash($config->{convertors}->{modules});
+    foreach my $module (keys %{$config->{convertors}->{modules}}) {
+        die __x("'{variable}' must be a scalar", variable => "convertors.chains.$module")
+            if ref $config->{convertors}->{modules}->{$module};
+        die __x("'{variable}' must not be empty", variable => "convertors.chains.$module")
+            if empty $config->{convertors}->{modules}->{$module};
+    }
+    die __x("'{variable}' must be a dictionary", variable => 'convertors.options')
+        unless $self->__isHash($config->{convertors}->{options});
+        
     return $self;
 }
 
@@ -161,12 +194,30 @@ sub getConvertor {
     return Qgoda::Convertor::Null->new;    
 }
 
+sub getProcessor {
+	my ($self, $asset, $site) = @_;
+	
+	my $config = $site->{config};
+	my $class = $asset->{processor};
+	$class = $site->{config}->{processor} if empty $class;
+	$class = 'Null' if emtpy $class;
+	my $full_class = ''
+}
+
 sub __isHash {
-	my ($self, $what) = @_;
-	
-	return unless $what && ref $what && 'HASH' eq reftype $what;
-	
-	return $self;
+    my ($self, $what) = @_;
+    
+    return unless $what && ref $what && 'HASH' eq reftype $what;
+    
+    return $self;
+}
+
+sub __isArray {
+    my ($self, $what) = @_;
+    
+    return unless $what && ref $what && 'ARRAY' eq reftype $what;
+    
+    return $self;
 }
 
 1;

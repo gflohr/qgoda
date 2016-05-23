@@ -11,6 +11,7 @@ $VERSION = '0.1.1';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
+use YAML;
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -131,6 +132,16 @@ sub logger {
 
 sub config {
 	shift->{__config};
+}
+
+sub dumpConfig {
+	my ($self) = @_;
+	
+	# Make a shallow copy so that we unbless the reference.
+	my %config = %{$self->{__config}};
+	print YAML::Dump(\%config);
+	
+	return $self;
 }
 
 # FIXME! This should instantiate scanner plug-ins and use them instead.

@@ -16,15 +16,27 @@ Getopt::Long::Configure('bundling');
 GetOptions (
             'w|watch' => \$options{watch},
             'q|quiet' => \$options{quiet},
-	    'h|help' => \$options{help},
-	    'v|verbose' => \$options{verbose},
+            'dump-config' => \$options{dump_config},
+	        'h|help' => \$options{help},
+	        'v|verbose' => \$options{verbose},
             'V|version' => \$options{version}
 	    ) or exit 1;
 
 display_usage if $options{help};
 display_version if $options{version};
 
-my $method = $options{watch} ? 'watch' : 'build';
+usage_error __"The options '--dump-config' and '--watch' are mutually exclusve."
+    if $options{dump_config} && $options{watch};
+
+my $method = 'build';
+if ($options{watch}) {
+	$method = 'watch';
+} elsif ($options{dump_config}) {
+	delete $options{verbose};
+	$options{quiet} = 1;
+	$method = 'dumpConfig';
+}
+
 Qgoda->new(%options)->$method;
 
 sub display_usage {
@@ -37,6 +49,7 @@ Operation mode:
   -v, --verbose               display progress on standard error
 
 Informative output:
+      --dump-config           dump the cooked configuration
   -h, --help                  display this help and exit
   -V, --version               output version information and exit
 
