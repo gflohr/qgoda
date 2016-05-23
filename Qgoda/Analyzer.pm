@@ -44,6 +44,8 @@ sub analyze {
             if (!defined $meta->{permalink}) {
                 $meta->{permalink} = '/{slug}{index}';
             }
+		} else {
+			$meta->{raw} = 1;
 		}
 		
 		foreach my $key (keys %$meta) {

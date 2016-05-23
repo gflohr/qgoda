@@ -23,4 +23,14 @@ sub getRelpath {
 	shift->{relpath};
 }
 
+sub getOrigin {
+	my ($self) = @_;
+	
+	if (exists $self->{origin}) {
+		return $self->{origin};
+	} else {
+		return $self->getPath;
+	}
+}
+
 1;

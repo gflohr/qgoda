@@ -4,6 +4,8 @@ package Qgoda::Site;
 
 use strict;
 
+use Qgoda::Artefact;
+
 sub new {
     my ($class, $config) = @_;
 
@@ -27,6 +29,15 @@ sub addAsset {
 
 sub getAssets {
     values %{shift->{assets}};
+}
+
+sub addArtefact {
+	my ($self, $path, $origin) = @_;
+	
+	my $artefact = Qgoda::Artefact->new($path, $origin);
+    $self->{artefacts}->{$path} = $artefact;
+    
+    return $self;
 }
 
 sub getArtefact {

@@ -5,12 +5,14 @@ package Qgoda::Util;
 use strict;
 
 use IO::File;
+use File::Path qw(make_path);
+use File::Basename qw(fileparse);
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format);
+                expand_perl_format read_body);
 
 sub empty($) {
     my ($what) = @_;
@@ -54,8 +56,40 @@ sub front_matter($) {
     return;
 }
 
+sub read_body($) {
+    my ($filename) = @_;
+    
+    my $fh = IO::File->new;
+    $fh->open("< $filename") or return;
+    
+    my $first_line = <$fh>;
+    return if empty $first_line;
+    return if $first_line !~ /---[ \t]*\n$/o;
+    
+    while (1) {
+        my $line = <$fh>;
+        return if !defined $line;
+        last if $line =~ /---[ \t]*\n$/o;
+    }
+
+    local $/;
+    
+    return <$fh>;
+}
+
 sub write_file($$) {
-    my ($filename, $data) = @_;
+    my ($path, $data) = @_;
+
+    my (undef, $directory) = fileparse $path;
+    make_path $directory unless -e $directory;
+
+    my $fh = IO::File->new;
+    $fh->open("> $path") or return;
+    
+    $fh->print($data) or return;
+    $fh->close or return;
+    
+    return 1;
 }
 
 sub yaml_error {
