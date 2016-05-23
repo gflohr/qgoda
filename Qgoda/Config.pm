@@ -43,7 +43,6 @@ sub new {
                 },
                 html => {
                 	modules => 'HTML',
-                	suffix => 'html',
                 },
             },
             suffixes => {
