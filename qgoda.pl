@@ -14,6 +14,7 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 my %options;
 Getopt::Long::Configure('bundling');
 GetOptions (
+            'b|build' => \$options{build},
             'w|watch' => \$options{watch},
             'q|quiet' => \$options{quiet},
             'dump-config' => \$options{dump_config},
