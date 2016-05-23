@@ -12,6 +12,7 @@ use Qgoda;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
 my %options;
+Getopt::Long::Configure('bundling');
 GetOptions (
             'w|watch' => \$options{watch},
             'q|quiet' => \$options{quiet},
