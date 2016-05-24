@@ -275,14 +275,29 @@ sub js_unescape() {
     );
     
     $string =~ s/
-                \\(u[0-9a-f]{4}|.)
+                \\
+                  (
+                    x[0-9a-fA-F]{2}
+                    |
+                    u[0-9a-fA-F]{4}
+                    |
+                    u\{[0-9a-fA-F]+\}
+                    |
+                    .
+                  )
                 /
                 if (exists $escapes{$1}) {
                 	$escapes{$1}
                 } elsif (1 == length $1) {
                 	$1;
+                } elsif ('x' eq substr $1, 0, 1) {
+                	chr oct '0' . $1;
                 } elsif ('u' eq substr $1, 0, 1) {
-                    chr oct '0x' . substr $1, 1;
+                	if ('u{' eq substr $1, 0, 2) {
+                		chr oct '0x' . substr $1, 0, 2;
+                	} else {
+                        chr oct '0x' . substr $1, 1;
+                	}
                 }
                 /xegs;
     

@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 7;
+use Test::More tests => 10;
 use Qgoda::Util;
 
 sub js_unescape($) { &Qgoda::Util::js_unescape };
@@ -30,3 +30,6 @@ is js_unescape "null\\0byte", "null\000byte", "line continuation";
 is js_unescape "\\157ctal", "157ctal", "octal not supported";
 is js_unescape "x\\tx\\tx\\tx\\t", "x\tx\tx\tx\t", "multiple escapes";
 is js_unescape "\\u0055nicode", "Unicode", "unicode escacpe sequences";
+is js_unescape "\\u55nicode", "u55nicode", "invalid unicode escacpe sequences";
+is js_unescape "\\x48exadecima\\x6c", "Hexadecimal", "hexadecimal esccpe sequences";
+is js_unescape "\\x4Hexadecima\\x6c", "x4Hexadecimal", "invalid hexadecimal escacpe sequences";
