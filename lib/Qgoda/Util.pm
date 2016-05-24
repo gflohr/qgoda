@@ -258,7 +258,7 @@ sub interpolate($$) {
     return $result . $string;
 }
 
-sub js_unescape() {
+sub js_unescape($) {
 	my ($string) = @_;
 
     my %escapes = (
@@ -310,7 +310,7 @@ sub js_unescape() {
 
 # The following tokens are recognized:
 #
-# * string ('s')     - a single or double-quoted string, unescaped
+# * string ('q')     - a single or double-quoted string, unescaped
 # * number ('n')     - any recognized number-like construct
 # * opening bracket ('[')
 # * closing bracked (']')
@@ -350,10 +350,42 @@ sub tokenize($) {
     		}	
     	}
     	
-    	# TODO: Check for quoted strings.
+        # Double-quoted string?
+        if (!@tokens || $tokens[-2] eq '[') {
+            if ($string =~ s/
+                      ^
+                      "
+                      (
+                        [^\\"]*
+                        (?:
+                          \\.
+                          [^\\"]*
+                        )*
+                      )
+                      "//sx) {
+                push @tokens, q => js_unescape $1;
+            }
+        }
+ 
+        # Single-quoted string?
+        if (!@tokens || $tokens[-2] eq '[') {
+            if ($string =~ s/
+                      ^
+                      '
+                      (
+                        [^\\']*
+                        (?:
+                          \\.
+                          [^\\']*
+                        )*
+                      )
+                      '//sx) {
+                push @tokens, q => js_unescape $1;
+            }
+        }
  
         # Opening bracket?   	
-        if (@tokens && $tokens[-2] ne '[' && $tokens[-2] ne 's' 
+        if (@tokens && $tokens[-2] ne '[' && $tokens[-2] ne 'q' 
             && $tokens[-2] ne '.') {
         	if ('[' eq substr $string, 0, 1) {
         		$string = substr $string, 1;
@@ -373,7 +405,7 @@ sub tokenize($) {
     	}
     	
     	# Dot?
-    	if (@tokens && $tokens[-2] ne 's' && $tokens[-2] ne '['
+    	if (@tokens && $tokens[-2] ne 'q' && $tokens[-2] ne '['
     	    && $tokens[-2] ne '.') {
             if (']' eq substr $string, 0, 1) {
                 $string = substr $string, 1;

@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 7;
 use Qgoda::Util;
 
 sub tokenize { &Qgoda::Util::tokenize };
@@ -44,3 +44,18 @@ $input = qq{[42]};
 $expect = [v => '[42]'];
 $got = tokenize $input;
 is_deeply $got, $expect, 'leading bracket';
+
+$input = qq{foo['bar']};
+$expect = [ v => 'foo', '[' => '[', q => 'bar', ']' => ']'];
+$got = tokenize $input;
+is_deeply $got, $expect, 'single-quoted string';
+
+$input = qq{foo['b\\'a\\'r']};
+$expect = [ v => 'foo', '[' => '[', q => 'b\'a\'r', ']' => ']'];
+$got = tokenize $input;
+is_deeply $got, $expect, 'single-quoted string with backslash escapes';
+
+$input = qq{foo["bar"]};
+$expect = [ v => 'foo', '[' => '[', q => 'bar', ']' => ']'];
+$got = tokenize $input;
+is_deeply $got, $expect, 'double-quoted string';
