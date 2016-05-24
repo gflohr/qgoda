@@ -8,11 +8,12 @@ use IO::File;
 use File::Path qw(make_path);
 use File::Basename qw(fileparse);
 use Locale::TextDomain qw(com.cantanea.qgoda);
+use Scalar::Util qw(reftype);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format read_body merge_data);
+                expand_perl_format read_body merge_data interpolate);
 
 sub empty($) {
     my ($what) = @_;
@@ -164,4 +165,32 @@ sub merge_data {
 	$merger->($data, $overlay);
 		
 	return $data;
+}
+
+sub __interpolate($$) {
+	my ($string, $cursor) = @_;
+	
+	return $string, $string;
+}
+
+sub interpolate($$) {
+    my ($string, $data) = @_;
+    
+    return $string if empty $string;
+    
+    my $result = '';
+    while ($string =~ s/([^{]+)//) {
+    	$result .= $1;
+    	last if !length $string;
+    	$string = substr $string, 1;
+    	my ($cooked, $remainder) = __interpolate $string, $data;
+    	if ('}' eq substr $remainder, 0, 1) {
+            $result .= $cooked;
+            $string = substr $remainder, 1;
+    	} else {
+    		$result .= '{';
+    	}
+    }
+    
+    return $result;
 }

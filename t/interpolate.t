@@ -18,14 +18,11 @@
 
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 1;
 use Qgoda::Util qw(interpolate);
 
 my $data = {
     simple => 2304,
 };
 
-is interpolate "verbatim", "verbatim", "verbatim";
-is interpolate "2{30}4", "2304", "numbers";
-is interpolate "2{'30'}4", "2304", "single-quoted strings";
-is interpolate '2{"30"}4', "2304", "single-quoted strings";
+is((interpolate "verbatim", $data), "verbatim", "verbatim");
