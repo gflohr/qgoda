@@ -11,7 +11,8 @@ use Cwd;
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
-use Qgoda::Converter::Null;
+
+my %converters;
 
 sub new {
     my ($class, %args) = @_;
@@ -176,6 +177,24 @@ sub ignorePath {
     return;
 }
 
+sub getConverterChain {
+	my ($self, $asset) = @_;
+	
+	return $asset->{chain} if exists $asset->{chain};
+	
+	my $suffix = $asset->{suffix};
+	return if empty $asset->{suffix};
+	
+    my @suffixes = reverse split /^\./, $asset->{suffix};
+    foreach my $suffix (@suffixes) {
+        if ($self->{converters}->{suffixes}->{$suffix}) {
+            return $self->{converters}->{suffixes}->{$suffix};
+        }
+    }
+    
+    return;
+}
+
 sub getConvertedSuffix {
     my ($self, $asset) = @_;
     
@@ -199,9 +218,14 @@ sub getConverters {
 	
 	require Qgoda;
 	my $logger = Qgoda->new->logger('config');
+
+    # Read the converter chain from the asset if 
+    my $chain = $asset->{chain};
 	
+=cut
     my $suffix = $asset->{suffix};
-    foreach my $key (keys %{$self->{converters}}) {
+    foreach my $key (keys %{$self->{converters}->{suffixes}}) {
+    	
         if ($suffix =~ /^(?:$key)$/) {
             my $class = $self->{converters}->{$key}->{converter} or next;
             my $options = $self->{options}->{converters}->{$class} || {};
@@ -218,8 +242,9 @@ sub getConverters {
             }
         }
     }
+=cut
 
-    return Qgoda::Converter::Null->new;    
+    return [];
 }
 
 sub getProcessor {

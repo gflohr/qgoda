@@ -21,7 +21,7 @@ sub build {
     $logger->debug(__"start building posts");
     my $config = $site->{config};
     
-    foreach my $asset ($site->getAssets) {
+    ASSET: foreach my $asset ($site->getAssets) {
     	$logger->debug(__x("building post '{relpath}'",
     	                   relpath => $asset->getRelpath));
     	                   
@@ -30,11 +30,13 @@ sub build {
                            permalink => $permalink));
 
         my $content = $self->readAssetContent($asset, $site);
-        my $converter = $config->getConverter($asset);
-        $content = eval { $converter->convert($asset, $site, $content) };
-        if ($@) {
-        	$logger->error($@);
-        	next;
+        my $converters = $config->getConverters($asset);
+        foreach my $converter (@$converters) {
+            $content = eval { $converter->convert($asset, $site, $content) };
+            if ($@) {
+        	    $logger->error($@);
+        	    next ASSET;
+            }
         }
 
         $self->saveArtefact($asset, $site, $permalink, $content);
