@@ -1,0 +1,7 @@
+- concept for creation of automatic list pages
+- rename outdir to sitedir
+- refactor convertor to processor
+- check for a YAML implementation before using Qgoda.
+- processors should not directly depend on 3rd party modules, in particular:
+  * Markdown
+  * Template::Toolkit
