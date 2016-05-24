@@ -222,41 +222,17 @@ sub extract_number($) {
 	return;
 }
 
-sub __interpolate($$) {
-	my ($string, $cursor) = @_;
-
-    return '', '' if empty $string;
-    my $reftype = reftype $cursor;
-    if (!$reftype) {
-    	$cursor = {};
-    	$reftype = 'HASH';
-    }
-    
-    if ($string =~ s/^([^\}\[\.\"\']+)//) {
-    	my $match = $1;
-
-        if ($match =~ /^[-+]?[0-9]+$/) {
-        }   	
-    }
-    
-	return $string, $string;
-}
-
 sub interpolate($$) {
     my ($string, $data) = @_;
     
-    return $string if empty $string;
+    return if !defined $string;
     
     my $result = '';
     while ($string =~ s/^([^{]*){//) {
     	$result .= $1;
-    	my ($cooked, $remainder) = __interpolate $string, $data;
-    	if ('}' eq substr $remainder, 0, 1) {
-            $result .= $cooked;
-            $string = substr $remainder, 1;
-    	} else {
-    		$result .= '{';
-    	}
+    	my ($remainder, @tokens) = tokenize $string;
+    	last if $remainder !~ s/^\}//;
+    	$string = $remainder;
     }
     
     return $result . $string;
