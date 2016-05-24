@@ -13,8 +13,7 @@ use Scalar::Util qw(reftype looks_like_number);
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format read_body merge_data interpolate
-                extract_number);
+                expand_perl_format read_body merge_data interpolate);
 
 sub empty($) {
     my ($what) = @_;
@@ -256,4 +255,35 @@ sub interpolate($$) {
     }
     
     return $result . $string;
+}
+
+sub js_unescape() {
+	my ($string) = @_;
+
+    sub escape_other {
+    	
+    }
+    
+    my %escapes = (
+        "\n" => '',
+        b => "\x08",
+        f => "\x0c",
+        n => "\x0a",
+        r => "\x0d",
+        t => "\x09",
+        v => "\x0b",
+        "'" => "'",
+        '"' => '"',
+        '\\' => '\\'
+    );
+    
+    $string =~ s/\\(.)/$escapes{$1} || escape_other $1/egs;
+    
+    return $string;
+}
+
+sub tokenize() {
+	my ($string) = @_;
+    
+    return [123400, 'n'];	
 }
