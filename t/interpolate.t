@@ -18,11 +18,12 @@
 
 use strict;
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Qgoda::Util qw(interpolate);
 
 my $data = {
-    simple => 2304,
+    answer => 42,
 };
 
-is((interpolate "verbatim", $data), "verbatim", "verbatim");
+is interpolate("verbatim", $data), "verbatim", "verbatim";
+is interpolate("The answer is {answer}.", $data), "The answer is 42.", "simple";

@@ -23,39 +23,39 @@ use Qgoda::Util;
 
 sub tokenize { &Qgoda::Util::tokenize };
 
-my ($input, $expect, $got);
+my ($input, $expect, @got, $tail);
 
 $input = qq{12.34e4};
 $expect = [n => 123400];
-$got = tokenize $input;
-is_deeply $got, $expect, 'lone float';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'lone float';
 
 $input = qq{site-wide};
 $expect = [v => 'site-wide'];
-$got = tokenize $input;
-is_deeply $got, $expect, 'hyphen in variable names';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'hyphen in variable names';
 
 $input = qq{drink-7up};
 $expect = [v => 'drink-7up'];
-$got = tokenize $input;
-is_deeply $got, $expect, 'hyphen in variable names with numbers';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'hyphen in variable names with numbers';
 
 $input = qq{[42]};
 $expect = [v => '[42]'];
-$got = tokenize $input;
-is_deeply $got, $expect, 'leading bracket';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'leading bracket';
 
 $input = qq{foo['bar']};
 $expect = [ v => 'foo', '[' => '[', q => 'bar', ']' => ']'];
-$got = tokenize $input;
-is_deeply $got, $expect, 'single-quoted string';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'single-quoted string';
 
 $input = qq{foo['b\\'a\\'r']};
 $expect = [ v => 'foo', '[' => '[', q => 'b\'a\'r', ']' => ']'];
-$got = tokenize $input;
-is_deeply $got, $expect, 'single-quoted string with backslash escapes';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'single-quoted string with backslash escapes';
 
 $input = qq{foo["bar"]};
 $expect = [ v => 'foo', '[' => '[', q => 'bar', ']' => ']'];
-$got = tokenize $input;
-is_deeply $got, $expect, 'double-quoted string';
+($tail, @got) = tokenize $input;
+is_deeply \@got, $expect, 'double-quoted string';

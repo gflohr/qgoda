@@ -15,6 +15,10 @@ use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate);
 
+sub __interpolate($$);
+sub js_unescape($);
+sub tokenize($);
+
 sub empty($) {
     my ($what) = @_;
 
@@ -337,7 +341,7 @@ sub tokenize($) {
     my $string = $_string;
     
     my @tokens; 
-    while (length $string) {
+    while (length $string && '}' ne substr $string, 0, 1) {
     	# Numbers are allowed at the beginning of a string, after a dot,
     	# or after a opening bracket.
     	if (!@tokens || $tokens[-2] eq '[' || $tokens[-2] eq '.') {
@@ -414,13 +418,15 @@ sub tokenize($) {
             }    	    	
     	}
     	
-    	if ($string =~ s/^(.[^\[\.\"\']*)//) {
-    	    push @tokens, v => $1;	
+    	if ('}' eq $string) {
+    		last;
+    	} elsif ($string =~ s/^(.[^\[\.\"\'\}]*)//) {
+    	    push @tokens, v => $1;
     	} else {
             warn "invalid loop detected :(";
             return [];
         }
     }
 
-    return \@tokens;	
+    return $string, @tokens;	
 }
