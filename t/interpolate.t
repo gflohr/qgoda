@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 use Qgoda::Util qw(interpolate);
 
 my $data = {
@@ -26,4 +26,3 @@ my $data = {
 };
 
 is((interpolate "verbatim", $data), "verbatim", "verbatim");
-is((interpolate "{42}", $data), "42", "integers");

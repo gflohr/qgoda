@@ -8,12 +8,13 @@ use IO::File;
 use File::Path qw(make_path);
 use File::Basename qw(fileparse);
 use Locale::TextDomain qw(com.cantanea.qgoda);
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype looks_like_number);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format read_body merge_data interpolate);
+                expand_perl_format read_body merge_data interpolate
+                extract_number);
 
 sub empty($) {
     my ($what) = @_;
@@ -167,9 +168,73 @@ sub merge_data {
 	return $data;
 }
 
+sub extract_number($) {
+	my ($string) = @_;
+	
+	if ($string =~ s/^([-+]?
+                     (?:0x[0-9a-f]+)           # Binary.
+                     |
+	                 (?:0[0-7]+)               # Octal.
+	                 |
+	                 (?:0b[01]+)               # Binary.
+	                 )//xi) {
+	    my $number = eval { oct $1 };
+	    if ($@) {
+	    	$number = '';
+	    	$string = $1;
+	    }
+		return wantarray ? ($number, $string) : $number;
+	}
+	
+	if ($string =~ s/^([-+]?
+  	                # Integer part.
+	                  (?:
+	                    0                          # Lone 0.
+	                    |
+	                    [1-9][0-9]*                # Other integers.
+	                  )
+	                  # Fractional part.
+	                  (?:
+	                    \.
+	                    [0-9]+
+	                    (
+	                      e
+	                      [-+]?
+  	                      (?:
+	                        0
+	                        |
+	                        [1-9][0-9]*
+	                      )
+	                    )?
+	                  )?
+	                )//xi) {
+	    my $number = eval "$1";
+	    if ($@) {
+            $number = '';
+            $string = $1;
+        }
+        return wantarray ? ($number, $string) : $number;
+	 }
+	
+}
+
 sub __interpolate($$) {
 	my ($string, $cursor) = @_;
-	
+
+    return '', '' if empty $string;
+    my $reftype = reftype $cursor;
+    if (!$reftype) {
+    	$cursor = {};
+    	$reftype = 'HASH';
+    }
+    
+    if ($string =~ s/^([^\}\[\.\"\']+)//) {
+    	my $match = $1;
+
+        if ($match =~ /^[-+]?[0-9]+$/) {
+        }   	
+    }
+    
 	return $string, $string;
 }
 
@@ -179,10 +244,8 @@ sub interpolate($$) {
     return $string if empty $string;
     
     my $result = '';
-    while ($string =~ s/([^{]+)//) {
+    while ($string =~ s/^([^{]*){//) {
     	$result .= $1;
-    	last if !length $string;
-    	$string = substr $string, 1;
     	my ($cooked, $remainder) = __interpolate $string, $data;
     	if ('}' eq substr $remainder, 0, 1) {
             $result .= $cooked;
@@ -192,5 +255,5 @@ sub interpolate($$) {
     	}
     }
     
-    return $result;
+    return $result . $string;
 }
