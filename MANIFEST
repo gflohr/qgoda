@@ -16,4 +16,5 @@ NEWS
 qgoda
 README.md
 ReleaseNotes
+t/interpolate.t
 TODO
