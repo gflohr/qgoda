@@ -294,7 +294,10 @@ sub js_unescape() {
                 	chr oct '0' . $1;
                 } elsif ('u' eq substr $1, 0, 1) {
                 	if ('u{' eq substr $1, 0, 2) {
-                		chr oct '0x' . substr $1, 0, 2;
+                		my $code = substr $1, 0, 2;
+                		$code =~ s{^0+}{};
+                		$code ||= '0';
+                		chr oct '0x' . $code;
                 	} else {
                         chr oct '0x' . substr $1, 1;
                 	}
