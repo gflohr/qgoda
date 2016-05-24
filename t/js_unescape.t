@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 7;
 use Qgoda::Util;
 
 sub js_unescape($) { &Qgoda::Util::js_unescape };
@@ -27,3 +27,6 @@ is js_unescape "verbatim", "verbatim", "verbatim";
 is js_unescape "\\tMakefile\\t", "\tMakefile\t", "one-character escapes";
 is js_unescape "line 1 \\\nline 2", "line 1 line 2", "line continuation";
 is js_unescape "null\\0byte", "null\000byte", "line continuation";
+is js_unescape "\\157ctal", "157ctal", "octal not supported";
+is js_unescape "x\\tx\\tx\\tx\\t", "x\tx\tx\tx\t", "multiple escapes";
+is js_unescape "\\u0055nicode", "Unicode", "unicode escacpe sequences";

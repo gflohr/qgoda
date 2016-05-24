@@ -260,20 +260,9 @@ sub interpolate($$) {
 sub js_unescape() {
 	my ($string) = @_;
 
-    sub escape_other {
-    	my ($char, $ctx) = @_;
-    	
-    	$ctx = '' if !defined $ctx;
-    	my $first = substr $ctx, 0, 1;
-    	
-    	return $ctx if "\n" eq $char;
-    	return "\000" . $ctx
-    	    if '0' eq $char && ($first eq '' || $first lt '0' || $first gt '9');
-    	
-    	return $char; 
-    }
-    
     my %escapes = (
+        "\n" => '',
+        0 => "\000",    # Note that octal escapes are not supported!
         b => "\x08",
         f => "\x0c",
         n => "\x0a",
@@ -282,10 +271,20 @@ sub js_unescape() {
         v => "\x0b",
         "'" => "'",
         '"' => '"',
-        '\\' => '\\'
+        '\\' => '\\',
     );
     
-    $string =~ s/\\(.)(.{0,3})/exists $escapes{$1} ? ($escapes{$1} . $2) : escape_other $1, $2/egs;
+    $string =~ s/
+                \\(u[0-9a-f]{4}|.)
+                /
+                if (exists $escapes{$1}) {
+                	$escapes{$1}
+                } elsif (1 == length $1) {
+                	$1;
+                } elsif ('u' eq substr $1, 0, 1) {
+                    chr oct '0x' . substr $1, 1;
+                }
+                /xegs;
     
     return $string;
 }
