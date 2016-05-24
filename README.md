@@ -140,7 +140,7 @@ customization:
       leading slash.</dd>
   <dt>`directory`</dt>
   <dd>The directory portion of `path` including a leading slash.  This will
-      be `/` for assets in the top-level source directory.`</dd>`.
+      be `/` for assets in the top-level source directory.</dd>.
   <dt>`basename`</dt>
   <dd>The basename portion of the filename.</dd>
   <dt>`suffix`</dt>
