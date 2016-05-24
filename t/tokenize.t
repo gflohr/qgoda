@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 1;
+use Test::More tests => 3;
 use Qgoda::Util;
 
 sub tokenize { &Qgoda::Util::tokenize };
@@ -26,6 +26,17 @@ sub tokenize { &Qgoda::Util::tokenize };
 my ($input, $expect, $got);
 
 $input = qq{12.34e4};
-$expect = [123400, 'n'];
+$expect = [n => 123400];
 $got = tokenize $input;
 is_deeply $got, $expect, 'lone float';
+
+$input = qq{site-wide};
+$expect = [v => 'site-wide'];
+$got = tokenize $input;
+is_deeply $got, $expect, 'hyphen in variable names';
+
+
+$input = qq{drink-7up};
+$expect = [v => 'drink-7up'];
+$got = tokenize $input;
+is_deeply $got, $expect, 'hyphen in variable names with numbers';

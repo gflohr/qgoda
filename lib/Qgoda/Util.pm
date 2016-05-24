@@ -214,7 +214,8 @@ sub extract_number($) {
         }
         return wantarray ? ($number, $string) : $number;
 	 }
-	
+
+	return;
 }
 
 sub __interpolate($$) {
@@ -307,8 +308,87 @@ sub js_unescape() {
     return $string;
 }
 
-sub tokenize() {
-	my ($string) = @_;
+# The following tokens are recognized:
+#
+# * string ('s')     - a single or double-quoted string, unescaped
+# * number ('n')     - any recognized number-like construct
+# * opening bracket ('[')
+# * closing bracked (']')
+# * dot ('.')
+# * "variable" ('v') - everything else
+#
+# The function returns a stream of tokens.  Each token consists of two
+# items, the type of the token (in parentheses above) and its value. 
+#
+# A variable can contain everything except for the specials above.
+# 
+# The function does some syntactic checks as well.  For example, it only
+# recognizes numbers and quoted strings at the beginning of the string or
+# after a opening bracket.  Numbers are also allowed after dots.  This is
+# not only simplifies the parsing but also puts less restrictions on the
+# possible format of our "variables".
+#
+# Note that the tokenizer cannot decide whether something that looks like
+# a number is really a number.  It can also be a "variable", depending on the
+# evaluation context.
+sub tokenize($) {
+	my ($_string) = @_;
+
+    my $string = $_string;
     
-    return [123400, 'n'];	
+    my @tokens; 
+    while (length $string) {
+    	# Numbers are allowed at the beginning of a string, after a dot,
+    	# or after a opening bracket.
+    	if (!@tokens || $tokens[-2] eq '[' || $tokens[-2] eq '.') {
+    		my ($number, $tail) = extract_number $string;
+    		if (defined $number
+    		    && ($tail eq '' || $tail =~ /^[.\[]/)) {
+    			$string = $tail;
+    			push @tokens, n => $number;
+    			next;
+    		}	
+    	}
+    	
+    	# TODO: Check for quoted strings.
+ 
+        # Opening bracket?   	
+        if (@tokens && $tokens[-2] ne '[' && $tokens[-2] ne 's' 
+            && $tokens[-2] ne '.') {
+        	if ('[' eq substr $string, 0, 1) {
+        		$string = substr $string, 1;
+        		push @tokens, '[', '[';
+        		next;
+        	}
+        }
+    	
+    	# Closing bracket?
+    	if (@tokens && $tokens[-2] ne '[' && $tokens[-2] ne ']' 
+    	    && $tokens[-2] ne '.') {
+            if (']' eq substr $string, 0, 1) {
+                $string = substr $string, 1;
+                push @tokens, ']', ']';
+                next;
+            }    		
+    	}
+    	
+    	# Dot?
+    	if (@tokens && $tokens[-2] ne 's' && $tokens[-2] ne '['
+    	    && $tokens[-2] ne '.') {
+            if (']' eq substr $string, 0, 1) {
+                $string = substr $string, 1;
+                push @tokens, ']', ']';
+                next;
+            }    	    	
+    	}
+    	
+    	if ($string =~ s/^(.[^\[\.\"\']*)//) {
+    	    push @tokens, v => $1;	
+    	} else {
+            warn "invalid loop detected :(";
+            return [];
+        }
+    }
+
+    return \@tokens;	
 }
