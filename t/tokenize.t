@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 use Qgoda::Util;
 
 sub tokenize { &Qgoda::Util::tokenize };
@@ -35,8 +35,12 @@ $expect = [v => 'site-wide'];
 $got = tokenize $input;
 is_deeply $got, $expect, 'hyphen in variable names';
 
-
 $input = qq{drink-7up};
 $expect = [v => 'drink-7up'];
 $got = tokenize $input;
 is_deeply $got, $expect, 'hyphen in variable names with numbers';
+
+$input = qq{[42]};
+$expect = [v => '[42]'];
+$got = tokenize $input;
+is_deeply $got, $expect, 'leading bracket';
