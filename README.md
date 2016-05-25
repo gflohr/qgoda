@@ -38,11 +38,11 @@ The starting point is the relative path to the source directory
 `/posts/en/version-0.2-released.md` which has the following components:
 
 <dl>
-  <dt>`posts/en`</dt>`
+  <dt>posts/en</dt>`
   <dd>The directory portion.</dd>
-  <dt>`version-0.2-released`</dt>
+  <dt>version-0.2-released</dt>
   <dd>The basename, that is the filename portion without the suffix or suffixes.</dd>
-  <dt>`md`</dt>
+  <dt>md</dt>
   <dd>The suffix or filename extension.</dd>
 </dl>
 
@@ -135,60 +135,60 @@ The following variables are meaningful for location and permalink
 customization:
 
 <dl>
-  <dt>`path`</dt>
+  <dt>path</dt>
   <dd>The relative path of the asset to the source directory including 
       leading slash.</dd>
-  <dt>`directory`</dt>
-  <dd>The directory portion of `path` including a leading slash.  This will
-      be `/` for assets in the top-level source directory.</dd>.
-  <dt>`basename`</dt>
+  <dt>directory</dt>
+  <dd>The directory portion of "path" including a leading slash.  This will
+      be "/" for assets in the top-level source directory.</dd>
+  <dt>basename</dt>
   <dd>The basename portion of the filename.</dd>
-  <dt>`suffix`</dt>
+  <dt>suffix</dt>
   <dd>The calculated suffix after the suffix translation</dd>
-  <dt>`config`</dt>
-  <dd>The site configuration as read from `_config.yaml`</dd>
-  <dt>`date`</dt>
+  <dt>config</dt>
+  <dd>The site configuration as read from "_config.yaml"</dd>
+  <dt>date</dt>
   <dd>The date of the asset.  Do not use directly but one of the
       subkeys below.</dd>
-  <dt>`date.year`</dt>
+  <dt>date.year</dt>
   <dd>The four-digit year.</dd>
-  <dt>`date.month`</dt>
+  <dt>date.month</dt>
   <dd>The two-digit month (01-12).</dd>
-  <dt>`date.imonth`</dt>
+  <dt>date.imonth</dt>
   <dd>The month (1-12) without the leading zero.</dd>
-  <dt>`date.mday`</dt>
+  <dt>date.mday</dt>
   <dd>The two-digit day of the month (01-31).</dd>
-  <dt>`date.imday`</dt>
+  <dt>date.imday</dt>
   <dd>The day of the month (1-31) without the leading zero.</dd>
-  <dt>`date.day`</dt>
-  <dd>A synonym for `date.mday`.</dd>
-  <dt>`date.iday`</dt>
-  <dd>A synonym for `date.imday`.</dd>
-  <dt>`date.hour`</dt>
+  <dt>date.day</dt>
+  <dd>A synonym for "date.mday".</dd>
+  <dt>date.iday</dt>
+  <dd>A synonym for "date.imday".</dd>
+  <dt>date.hour</dt>
   <dd>The hour of the day (01-24).</dd>
-  <dt>`date.ihour`</dt>
+  <dt>date.ihour</dt>
   <dd>The hour of the day (1-24) without the leading zero.</dd>
-  <dt>`date.hour12`</dt>
+  <dt>date.hour12</dt>
   <dd>The hour of the day (01-12) on a 12-hour clock.</dd>
-  <dt>`date.ihour12`</dt>
+  <dt>date.ihour12</dt>
   <dd>The hour of the day (1-12) on a 12-hour clock without the leading zero.</dd>
-  <dt>`date.ampm`</dt>
+  <dt>date.ampm</dt>
   <dd>The string "am" before noon, the string "pm" after noon.  Note that
       this is not localized!</dd>
-  <dt>`date.min`</dt>
+  <dt>date.min</dt>
   <dd>The minutes (01-59).</dd>
-  <dt>`date.imin`</dt>
+  <dt>date.imin</dt>
   <dd>The minutes (1-59) without the leading zero.</dd>
-  <dt>`date.sec`</dt>
+  <dt>date.sec</dt>
   <dd>The seconds (01-60).</dd>
-  <dt>`date.isec`</dt>
+  <dt>date.isec</dt>
   <dd>The seconds (1-60) without the leading zero.</dd>
-  <dt>`date.dst`</dt>
-  <dd>The string `dst` if daylight savings time is in use.  Note that this
+  <dt>date.dst</dt>
+  <dd>The string "dst" if daylight savings time is in use.  Note that this
       is not localized!</dd>
   <dt>location</dt>
   <dd>The computed location of the document.  Before the location is computed,
-      the variable is a synonym for `path`.</dd>
+      the variable is a synonym for "path".</dd>
   <dt>permalink</dt>
   <dd>The computed permalink of the document.  Before the permalink is computed,
       the variable is a synonym for `location`.</dd>
