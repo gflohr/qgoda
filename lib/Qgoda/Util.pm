@@ -16,9 +16,9 @@ use vars qw(@EXPORT_OK);
                 expand_perl_format read_body merge_data interpolate);
 
 sub js_unescape($);
-sub tokenize($);
-sub extract_number($);
-sub dereference($$$);
+sub tokenize($$);
+sub evaluate($$);
+sub lookup($$);
 
 sub empty($) {
     my ($what) = @_;
@@ -174,18 +174,33 @@ sub merge_data {
 
 sub interpolate($$) {
     my ($string, $data) = @_;
-    
-    return if !defined $string;
-    
+
+    $data ||= {};
+
+    my $type = reftype $data;
+    if ($type ne 'ARRAY' && $type ne 'HASH') {
+        $type = 'HASH';
+        $data = {};
+    }
+
     my $result = '';
     while ($string =~ s/^([^{]*){//) {
-    	$result .= $1;
-    	my ($remainder, @tokens) = tokenize $string;
-    	last if $remainder !~ s/^\}//;
-    	$result .= dereference \@tokens, $data, $data;
-    	$string = $remainder;
+        $result .= $1;
+        
+        my ($remainder, @tokens) = tokenize $string, $type;
+        
+        # Syntax errors can be handled in different ways.
+        # You can handle it gracefully and either leave
+        # everything uninterpolated, or you could replace the
+        # faulty string with the emtpy string or you can throw an
+        # exception.  We just throw an exception.
+        die "syntax error before: '$remainder'\n" if !@tokens;
+
+        my $value = evaluate \@tokens, $data;
+        $result .= $value if defined $value;
+        $string = $remainder;
     }
-    
+
     return $result . $string;
 }
 
@@ -193,8 +208,142 @@ sub interpolate($$) {
 # The methods below are not exported.
 ##############################################################################
 
+sub tokenize($$) {
+    my ($string, $type) = @_;
+
+    my @tokens;
+    
+    my $depth = 0;
+    while (1) {
+        $string =~ s/^[ \t\r\n]+//;
+        last if !length $string;
+        last if $string =~ s/^\}//;
+
+        my $last = @tokens ? $tokens[-1]->[0] : '[';
+
+        if ($last eq '.') {
+            # Only variables are allowed but they are interpreted as
+            # a quoted string.  We will repair that later, however.
+            return $string unless $string =~ s/^([^\[\]\}\.]+)//;
+            push @tokens, ['v', $1];
+        } elsif ($last eq 'v' || $last eq ']') {
+            # Only brackets or a dot are allowed.  Everything else is a
+            # syntax error.
+            return $string unless $string =~ s/^([\[\]\.])//;
+
+            if ('[' eq $1) {
+                ++$depth;
+                push @tokens, ['[' => ''];
+            } elsif (']' eq $1) {
+                --$depth;
+                return "]$string" if $depth < 0;
+                push @tokens, [']' => ''];
+            } else {
+                # A dot.
+                push @tokens, ['.', ''];
+            }
+        } elsif ($last eq '[') {
+            # At the beginning or after an opening bracket only quoted
+            # strings are allowed.  Everything but a quoted string is
+            # treated as a variable.
+            if ($string =~ s/^(["'])([^\\\1]*(?:\\.[^\\\1]*)*)\1//) {
+                push @tokens, ['q', $2];
+            } elsif ($string =~ s/^([^\[\]\}\.]+)//) {
+                push @tokens, ['v', $1];
+            } elsif (!@tokens && $string =~ s/^\[//) {
+                # Special case.  We want to allow starting an expression
+                # with an opening bracket so that you can write something
+                # like ["key with special characters"].
+                push @tokens, ['[', ''];
+            } else {
+                return $string;
+            }
+        } else {
+            # The last token was a quoted string (because all other 
+            # possibilities are handled above.  The only legal token after
+            # a quoted string is the closing bracket.
+            return $string unless $string =~ s/^]//;
+            push @tokens, [']', ''];
+        }
+    }
+
+    # Bracket not closed.
+    return '}' if $depth;
+
+    # We may have a trailing dot in our expression.  We check that now
+    # and change the type of "variables" following a dot to a quoted
+    # string.
+    #
+    # We also must repair the type for "variables" that look like numbers
+    # and are enclosed in angle brackets.  Only in this case they are 
+    # treated like numbers.  And numbers are the same as quoted strings
+    # for our purposes.
+    # If they are exactly between two brackets they are numbers, otherwise
+    # we try them as variables.
+    for (my $i = 0; $i < @tokens; ++$i) {
+        if ('.' eq $tokens[$i]->[0]) {
+            return $string if $i >= $#tokens;
+            $tokens[++$i]->[0] = 'q';
+        } elsif ('[' eq $tokens[$i]->[0]
+                 && 'v' eq $tokens[$i + 1]->[0]
+                 && ']' eq $tokens[$i + 2]->[0]
+                 && $tokens[$i + 1]->[1] =~ /^[-+]?(?:0|[1-9][0-9]*)$/) {
+            # Change the type to a quoted string.
+            $tokens[$i + 1]->[0] = 'q';
+
+            # And shorten the loop again.
+            $i = $i + 2;
+        }
+    }
+
+    return $string, @tokens;
+}
+
+sub evaluate($$) {
+    my ($tokens, $data) = @_;
+
+    my $cursor = $data;
+
+    while (@$tokens) {
+        my $token = shift @$tokens;
+        my ($toktype, $value) = @$token;
+
+        if ('[' eq $toktype) {
+            # We have to recurse.
+            my $key = evaluate $tokens, $data;
+            $cursor = lookup $cursor, $key;
+        } elsif (']' eq $toktype) {
+            return $cursor;
+        } elsif ('.' eq $toktype) {
+            $token = shift @$tokens;
+            $cursor = lookup $cursor, $token->[1]; 
+        } elsif ('v' eq $toktype) {
+            $cursor = lookup $cursor, $value;
+        } elsif ('q' eq $toktype) {
+            $cursor = $value;
+        } else {
+            die "unknown token type '$toktype'";
+        }
+    }
+
+    return $cursor;
+}
+
+sub lookup($$) {
+    my ($data, $key) = @_;
+
+    my $type = reftype $data;
+    if ('HASH' eq $type) {
+        return $data->{$key};
+    } elsif ('ARRAY' eq $type) {
+        return $data->[$key];
+    } else {
+        return;
+    }
+}
+
 sub js_unescape($) {
-	my ($string) = @_;
+    my ($string) = @_;
 
     my %escapes = (
         "\n" => '',
@@ -223,198 +372,22 @@ sub js_unescape($) {
                   )
                 /
                 if (exists $escapes{$1}) {
-                	$escapes{$1}
+                    $escapes{$1}
                 } elsif (1 == length $1) {
-                	$1;
+                    $1;
                 } elsif ('x' eq substr $1, 0, 1) {
-                	chr oct '0' . $1;
+                    chr oct '0' . $1;
                 } elsif ('u' eq substr $1, 0, 1) {
-                	if ('u{' eq substr $1, 0, 2) {
-                		my $code = substr $1, 0, 2;
-                		$code =~ s{^0+}{};
-                		$code ||= '0';
-                		chr oct '0x' . $code;
-                	} else {
+                    if ('u{' eq substr $1, 0, 2) {
+                        my $code = substr $1, 0, 2;
+                        $code =~ s{^0+}{};
+                        $code ||= '0';
+                        chr oct '0x' . $code;
+                    } else {
                         chr oct '0x' . substr $1, 1;
-                	}
+                    }
                 }
                 /xegs;
     
     return $string;
-}
-
-# The following tokens are recognized:
-#
-# * string ('q')     - a single or double-quoted string, unescaped
-# * number ('n')     - any recognized number-like construct
-# * opening bracket ('[')
-# * closing bracked (']')
-# * dot ('.')
-# * "variable" ('v') - everything else
-#
-# The function returns a stream of tokens.  Each token consists of two
-# items, the type of the token (in parentheses above) and its value. 
-#
-# A variable can contain everything except for the specials above.
-# 
-# The function does some syntactic checks as well.  For example, it only
-# recognizes numbers and quoted strings at the beginning of the string or
-# after a opening bracket.  Numbers are also allowed after dots.  This is
-# not only simplifies the parsing but also puts less restrictions on the
-# possible format of our "variables".
-#
-# Note that the tokenizer cannot decide whether something that looks like
-# a number is really a number.  It can also be a "variable", depending on the
-# evaluation context.
-sub tokenize($) {
-	my ($_string) = @_;
-
-    my $string = $_string;
-    
-    my @tokens; 
-    while (length $string && '}' ne substr $string, 0, 1) {
-    	# Numbers are allowed at the beginning of a string, after a dot,
-    	# or after a opening bracket.
-    	if (!@tokens || $tokens[-2] eq '[' || $tokens[-2] eq '.') {
-    		my ($number, $tail) = extract_number $string;
-    		if (defined $number
-    		    && ($tail eq '' || $tail =~ /^[.\[]/)) {
-    			$string = $tail;
-    			push @tokens, n => $number;
-    			next;
-    		}	
-    	}
-    	
-        # Double-quoted string?
-        if (!@tokens || $tokens[-2] eq '[') {
-            if ($string =~ s/
-                      ^
-                      "
-                      (
-                        [^\\"]*
-                        (?:
-                          \\.
-                          [^\\"]*
-                        )*
-                      )
-                      "//sx) {
-                push @tokens, q => js_unescape $1;
-            }
-        }
- 
-        # Single-quoted string?
-        if (!@tokens || $tokens[-2] eq '[') {
-            if ($string =~ s/
-                      ^
-                      '
-                      (
-                        [^\\']*
-                        (?:
-                          \\.
-                          [^\\']*
-                        )*
-                      )
-                      '//sx) {
-                push @tokens, q => js_unescape $1;
-            }
-        }
- 
-        # Opening bracket?   	
-        if (@tokens && $tokens[-2] ne '[' && $tokens[-2] ne 'q' 
-            && $tokens[-2] ne '.') {
-        	if ('[' eq substr $string, 0, 1) {
-        		$string = substr $string, 1;
-        		push @tokens, '[', '[';
-        		next;
-        	}
-        }
-    	
-    	# Closing bracket?
-    	if (@tokens && $tokens[-2] ne '[' && $tokens[-2] ne ']' 
-    	    && $tokens[-2] ne '.') {
-            if (']' eq substr $string, 0, 1) {
-                $string = substr $string, 1;
-                push @tokens, ']', ']';
-                next;
-            }    		
-    	}
-    	
-    	# Dot?
-    	if (@tokens && $tokens[-2] ne 'q' && $tokens[-2] ne '['
-    	    && $tokens[-2] ne '.') {
-            if (']' eq substr $string, 0, 1) {
-                $string = substr $string, 1;
-                push @tokens, ']', ']';
-                next;
-            }    	    	
-    	}
-    	
-    	if ('}' eq $string) {
-    		last;
-    	} elsif ($string =~ s/^(.[^\[\.\"\'\}]*)//) {
-    	    push @tokens, v => $1;
-    	} else {
-            warn "invalid loop detected :(";
-            return [];
-        }
-    }
-
-    return $string, @tokens;	
-}
-
-sub extract_number($) {
-    my ($string) = @_;
-    
-    if ($string =~ s/^([-+]?
-                     (?:0x[0-9a-f]+)           # Binary.
-                     |
-                     (?:0[0-7]+)               # Octal.
-                     |
-                     (?:0b[01]+)               # Binary.
-                     )//xi) {
-        my $number = eval { oct $1 };
-        if ($@) {
-            $number = '';
-            $string = $1;
-        }
-        return wantarray ? ($number, $string) : $number;
-    }
-    
-    if ($string =~ s/^([-+]?
-                    # Integer part.
-                      (?:
-                        0                          # Lone 0.
-                        |
-                        [1-9][0-9]*                # Other integers.
-                      )
-                      # Fractional part.
-                      (?:
-                        \.
-                        [0-9]+
-                        (
-                          e
-                          [-+]?
-                          (?:
-                            0
-                            |
-                            [1-9][0-9]*
-                          )
-                        )?
-                      )?
-                    )//xi) {
-        my $number = eval "$1";
-        if ($@) {
-            $number = '';
-            $string = $1;
-        }
-        return wantarray ? ($number, $string) : $number;
-     }
-
-    return;
-}
-
-sub dereference {
-	my ($tokens, $data, $cursor) = @_;
-	
-	return '';
 }
