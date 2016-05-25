@@ -38,7 +38,7 @@ The starting point is the relative path to the source directory
 `/posts/en/version-0.2-released.md` which has the following components:
 
 <dl>
-  <dt>posts/en</dt>`
+  <dt>posts/en</dt>
   <dd>The directory portion.</dd>
   <dt>version-0.2-released</dt>
   <dd>The basename, that is the filename portion without the suffix or suffixes.</dd>
