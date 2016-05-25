@@ -15,9 +15,10 @@ use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate);
 
-sub __interpolate($$);
 sub js_unescape($);
 sub tokenize($);
+sub extract_number($);
+sub dereference($$$);
 
 sub empty($) {
     my ($what) = @_;
@@ -171,57 +172,6 @@ sub merge_data {
 	return $data;
 }
 
-sub extract_number($) {
-	my ($string) = @_;
-	
-	if ($string =~ s/^([-+]?
-                     (?:0x[0-9a-f]+)           # Binary.
-                     |
-	                 (?:0[0-7]+)               # Octal.
-	                 |
-	                 (?:0b[01]+)               # Binary.
-	                 )//xi) {
-	    my $number = eval { oct $1 };
-	    if ($@) {
-	    	$number = '';
-	    	$string = $1;
-	    }
-		return wantarray ? ($number, $string) : $number;
-	}
-	
-	if ($string =~ s/^([-+]?
-  	                # Integer part.
-	                  (?:
-	                    0                          # Lone 0.
-	                    |
-	                    [1-9][0-9]*                # Other integers.
-	                  )
-	                  # Fractional part.
-	                  (?:
-	                    \.
-	                    [0-9]+
-	                    (
-	                      e
-	                      [-+]?
-  	                      (?:
-	                        0
-	                        |
-	                        [1-9][0-9]*
-	                      )
-	                    )?
-	                  )?
-	                )//xi) {
-	    my $number = eval "$1";
-	    if ($@) {
-            $number = '';
-            $string = $1;
-        }
-        return wantarray ? ($number, $string) : $number;
-	 }
-
-	return;
-}
-
 sub interpolate($$) {
     my ($string, $data) = @_;
     
@@ -232,11 +182,16 @@ sub interpolate($$) {
     	$result .= $1;
     	my ($remainder, @tokens) = tokenize $string;
     	last if $remainder !~ s/^\}//;
+    	$result .= dereference \@tokens, $data, $data;
     	$string = $remainder;
     }
     
     return $result . $string;
 }
+
+##############################################################################
+# The methods below are not exported.
+##############################################################################
 
 sub js_unescape($) {
 	my ($string) = @_;
@@ -405,4 +360,61 @@ sub tokenize($) {
     }
 
     return $string, @tokens;	
+}
+
+sub extract_number($) {
+    my ($string) = @_;
+    
+    if ($string =~ s/^([-+]?
+                     (?:0x[0-9a-f]+)           # Binary.
+                     |
+                     (?:0[0-7]+)               # Octal.
+                     |
+                     (?:0b[01]+)               # Binary.
+                     )//xi) {
+        my $number = eval { oct $1 };
+        if ($@) {
+            $number = '';
+            $string = $1;
+        }
+        return wantarray ? ($number, $string) : $number;
+    }
+    
+    if ($string =~ s/^([-+]?
+                    # Integer part.
+                      (?:
+                        0                          # Lone 0.
+                        |
+                        [1-9][0-9]*                # Other integers.
+                      )
+                      # Fractional part.
+                      (?:
+                        \.
+                        [0-9]+
+                        (
+                          e
+                          [-+]?
+                          (?:
+                            0
+                            |
+                            [1-9][0-9]*
+                          )
+                        )?
+                      )?
+                    )//xi) {
+        my $number = eval "$1";
+        if ($@) {
+            $number = '';
+            $string = $1;
+        }
+        return wantarray ? ($number, $string) : $number;
+     }
+
+    return;
+}
+
+sub dereference {
+	my ($tokens, $data, $cursor) = @_;
+	
+	return '';
 }

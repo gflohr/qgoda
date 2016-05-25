@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Qgoda::Util qw(interpolate);
 
 my $data = {
