@@ -5,8 +5,8 @@ package Qgoda;
 use strict;
 
 use base 'Exporter';
-use vars qw(@EXPORT $qgoda $VERSION);
-@EXPORT = qw($qgoda $VERSION);
+use vars qw(@EXPORT $VERSION);
+@EXPORT = qw($VERSION);
 $VERSION = '0.1.1';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
@@ -19,6 +19,8 @@ use Qgoda::Site;
 use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
+
+my $qgoda;
 
 sub new {
     return $qgoda if $qgoda;
