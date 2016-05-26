@@ -16,37 +16,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Asset;
+package Qgoda::Converter;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw(com.cantanea.qgoda);
 
 sub new {
-    my ($class, $path, $relpath) = @_;
-
-    bless {
-        path => $path,
-        relpath => $relpath,
-    }, $class;
+	bless {}, shift;
 }
 
-sub getPath {
-	shift->{path};
-}
-
-sub getRelpath {
-	shift->{relpath};
-}
-
-sub getOrigin {
-	my ($self) = @_;
+sub convert {
+	my ($self, $asset, $site, $content) = @_;
 	
-	if (exists $self->{origin}) {
-		return $self->{origin};
-	} else {
-		return $self->getPath;
-	}
+	die __x("Converter class '{class}' does not implement the method convert().\n",
+	        class => ref $self);
 }
 
 1;
+
+=head1 NAME
+
+Qgoda::Converter - Abstract base class for all Qgoda Converters.

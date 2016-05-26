@@ -1,3 +1,4 @@
+- Important! /index.html must end up as /index.html not as /index/index.html
 - concept for creation of automatic list pages
 - rename outdir to sitedir
 - refactor convertor to processor

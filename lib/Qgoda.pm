@@ -1,5 +1,21 @@
 #! /bin/false
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package Qgoda;
 
 use strict;
@@ -11,7 +27,6 @@ $VERSION = '0.1.1';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
-use YAML;
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -19,6 +34,7 @@ use Qgoda::Site;
 use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
+use Qgoda::Util qw(empty);
 
 my $qgoda;
 
@@ -41,6 +57,7 @@ sub new {
     $self->{__config} = Qgoda::Config->new;
     $self->{__analyzers} = [Qgoda::Analyzer->new];
     $self->{__builders} = [Qgoda::Builder->new];
+    $self->{__processors} = {};
 
     return $qgoda;
 }
@@ -141,9 +158,113 @@ sub dumpConfig {
 	
 	# Make a shallow copy so that we unbless the reference.
 	my %config = %{$self->{__config}};
+	require YAML;
 	print YAML::Dump(\%config);
 	
 	return $self;
+}
+
+sub getProcessors {
+	my ($self, $asset, $site) = @_;
+	
+    my $chain_name = $asset->{chain};
+    return [] if !defined $chain_name;
+    my $processors = $self->config->{converters};
+    my $chain = $processors->{chains}->{$chain_name} or return [];
+
+    my $names = $chain->{modules} or return [];
+    my @processors;
+    
+    foreach my $name (@$names) {
+    	my $module = $processors->{modules}->{$name} || $name;
+    	my $class_name = 'Qgoda::Processor::' . $module;
+
+        if ($self->{__processors}->{$class_name}) {
+        	push @processors, $self->{__processors}->{$class_name};
+        	next;
+        }   	
+
+    	my $module_name = $class_name . '.pm';
+    	$module_name =~ s{::|'}{/}g;
+    	
+    	require $module_name;
+    	my $options = $processors->{options}->{$module};
+    	
+    	my $processor = $class_name->new($options);
+    	$self->{__processors}->{$class_name} = $processor;
+    	push @processors, $processor;
+    }
+    
+    return \@processors;
+}
+
+sub installTheme {
+    my ($self) = @_;
+    
+    my $logger = $self->logger;
+    my $theme = $self->{__install_theme};
+
+    my $theme_dir = $self->getThemeDirectory($theme);
+        
+    if (-e $theme_dir) {
+    	$logger->info(__x("theme directory {directory} exists, updating from remote",
+    	                  directory => $theme_dir));
+    	$self->{__update_theme} = $theme;
+    	return $self->updateTheme;
+    }
+
+    $self->__requireGit;
+    
+    eval {
+    	my @lines = Git::command(clone => $theme => $theme_dir);
+    	foreach my $line (@lines) {
+    		$logger->info($line);
+    	}
+    };
+    $logger->fatal($@) if $@;
+    
+    return $self;
+}
+
+sub updateTheme {
+    my ($self) = @_;
+    
+    my $logger = $self->logger;
+    my $theme = $self->{__update_theme};
+
+    my $theme_dir = $self->getThemeDirectory($theme);
+    return if empty $theme_dir;
+
+    $self->__requireGit;
+    
+    eval {
+    	my $git = Git->repository(Directory => $theme_dir);
+    	my @lines = $git->command('pull');
+    };
+    $logger->fatal($@) if $@;
+    
+    return $self;
+}
+
+sub getThemeDirectory {
+	my ($self, $theme) = @_;
+	
+	$theme =~ s{/+$}{};
+	
+    require URI;
+    my $uri = URI->new($theme);
+    
+    my $short_name = $uri->path;
+    $short_name =~ s{.*/}{};
+    $short_name =~ s{\.git$}{}i;
+    
+    $self->logger->error(__x("invalid theme repository {theme}",
+                             theme => $theme)) if empty $short_name;
+    
+    my $theme_dir = File::Spec->catdir($self->config->{srcdir}, 
+                                       '_themes', $short_name);
+	
+	return $theme_dir;
 }
 
 # FIXME! This should instantiate scanner plug-ins and use them instead.
@@ -219,9 +340,6 @@ sub __build {
 sub __prune {
 	my ($self, $site) = @_;
 	
-	warn;
-	return;
-	
 	# Sort the output files by length first.  That ensures that we do a 
 	# depth first clean-up.
 	my @outfiles = sort {
@@ -247,6 +365,18 @@ sub __prune {
                                filename => $outfile, error => $!))
                 if !unlink $outfile;
 		}
+	}
+	
+	return $self;
+}
+
+sub __requireGit {
+	my ($self) = @_;
+	
+	eval { require Git };
+	if ($@) {
+		$self->logger->error($@);
+		$self->logger->fatal(__"Git not fully installed, please proceed manually!");
 	}
 	
 	return $self;

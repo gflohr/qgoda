@@ -55,11 +55,11 @@ used by all common web servers.
 ### Suffix Translation
 
 Asset processing is triggered by the suffixes of the source file.  The triggers
-are defined in the variable `processors.suffixes` in the site configuration
+are defined in the variable `processors.triggers` in the site configuration
 file `_config.yaml`.  Look at this excerpt of the Qgoda default configuration:
 
     processors:
-        suffixes:
+        triggers:
             md: markdown
             html: html
             htm: html
@@ -148,7 +148,8 @@ customization:
   <dt>basename</dt>
   <dd>The basename portion of the filename (without suffix/suffixes).</dd>
   <dt>suffix</dt>
-  <dd>The suffix (resp. suffixes), subject to translation</dd>
+  <dd>The suffix (resp. suffixes) with a leading dot, subject to translation.
+      If there are no suffixes the variable does not exist.</dd>
   <dt>config</dt>
   <dd>The site configuration as read from "_config.yaml"</dd>
   <dt>date</dt>

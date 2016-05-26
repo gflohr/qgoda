@@ -1,5 +1,21 @@
 #! /usr/bin/env perl
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 use strict;
 
 sub usage_error;
@@ -17,6 +33,7 @@ GetOptions (
             'b|build' => \$options{build},
             'w|watch' => \$options{watch},
             'q|quiet' => \$options{quiet},
+            'install-theme=s' => \$options{install_theme},
             'dump-config' => \$options{dump_config},
 	        'h|help' => \$options{help},
 	        'v|verbose' => \$options{verbose},
@@ -26,18 +43,17 @@ GetOptions (
 display_usage if $options{help};
 display_version if $options{version};
 
-usage_error __"The options '--dump-config' and '--watch' are mutually exclusve."
-    if $options{dump_config} && $options{watch};
-
 my $method;
-if ($options{build}) {
+if ($options{dump_config}) {
+    delete $options{verbose};
+    $options{quiet} = 1;
+    $method = 'dumpConfig';
+} elsif ($options{install_theme}) {
+    $method = 'installTheme';
+} elsif ($options{build}) {
 	$method = 'build';
 } elsif ($options{watch}) {
 	$method = 'watch';
-} elsif ($options{dump_config}) {
-	delete $options{verbose};
-	$options{quiet} = 1;
-	$method = 'dumpConfig';
 } else {
 	usage_error __"Nothing to do.";
 }
@@ -53,6 +69,9 @@ Operation mode:
   -w, --watch                 watch for changes and build on demand
   -q, --quiet                 quiet mode
   -v, --verbose               display progress on standard error
+
+Helpers:
+      --install-theme=REPO    install theme from git repository REPO
 
 Informative output:
       --dump-config           dump the cooked configuration

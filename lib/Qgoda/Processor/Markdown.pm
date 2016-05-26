@@ -16,37 +16,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Asset;
+package Qgoda::Processor::Markdown;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use base qw(Qgoda::Converter);
+
+use Text::Markdown qw(markdown);
 
 sub new {
-    my ($class, $path, $relpath) = @_;
-
-    bless {
-        path => $path,
-        relpath => $relpath,
-    }, $class;
-}
-
-sub getPath {
-	shift->{path};
-}
-
-sub getRelpath {
-	shift->{relpath};
-}
-
-sub getOrigin {
-	my ($self) = @_;
+	my ($class, %options) = @_;
 	
-	if (exists $self->{origin}) {
-		return $self->{origin};
-	} else {
-		return $self->getPath;
-	}
+	my $self = $class->SUPER::new(%options);
+	$self->{__options} = \%options;
+	
+	return $self;
+}
+
+sub convert {
+	my ($self, $asset, $site) = @_;
+	
+	return markdown $asset->{content}, $self->{__options};
 }
 
 1;
+
+=head1 NAME
+
+Qgoda::Converter::Markdown - Default builder for Qgoda posts.

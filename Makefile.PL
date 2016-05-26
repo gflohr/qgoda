@@ -1,4 +1,4 @@
-#! /usr/bin/env perl # -*- perl -*-
+#! /usr/bin/env perl
 
 # Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
 # all rights reserved.

@@ -1,5 +1,21 @@
 #! /bin/false
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package Qgoda::Config;
 
 use strict;
@@ -28,7 +44,7 @@ sub new {
     } elsif (-e '_config.yml') {
         $filename = '_config.yml';
     } else {
-        $logger->warning(__"config file 'config.yaml' not found, "
+        $logger->warning(__"config file '_config.yaml' not found, "
                            . "proceeding with defaults.");
     }
 
@@ -36,9 +52,11 @@ sub new {
     my $config = {
     	title => __"A New Qgoda Powered Site",
     	srcdir => '.',
-    	location => '/{directory}/{basename}/{index}.{suffix}',
-    	permalink => '/{directory}/{basename}/{index}.{suffix}',
+    	location => '/{directory}/{basename}/{index}{suffix}',
+    	permalink => '{significant-path}',
     	index => 'index',
+    	'case-sensitive' => 0,
+    	template => 'default.html',
     	converters => {
             chains => {
                 markdown => {
@@ -49,7 +67,7 @@ sub new {
                 	modules => 'HTML',
                 },
             },
-            suffixes => {
+            triggers => {
                 md => 'markdown',
                 mdown => 'markdown',
                 mkdn => 'markdown',
@@ -127,14 +145,10 @@ sub checkConfig {
                 if ref $config->{converters}->{chains}->{$chain}->{suffix};
         }
     }
-    die __x("'{variable}' must be a dictionary", variable => 'converters.suffixes')
-        unless $self->__isHash($config->{converters}->{suffixes});
-    foreach my $suffix (keys %{$config->{converters}->{suffixes}}) {
-    	my $lc_suffix = lowercase $suffix;
-    	$config->{converters}->{suffixes}->{$lc_suffix}
-    	     = delete $config->{converters}->{suffixes}->{$suffix};
-        $suffix = $lc_suffix;
-    	my $chain = $config->{converters}->{suffixes}->{$suffix};
+    die __x("'{variable}' must be a dictionary", variable => 'converters.triggers')
+        unless $self->__isHash($config->{converters}->{triggers});
+    foreach my $suffix (keys %{$config->{converters}->{triggers}}) {
+    	my $chain = $config->{converters}->{triggers}->{$suffix};
         die __x("converter chain suffix '{suffix}' references undefined chain '{chain}'",
                 suffix => $suffix, chain => $chain)
             unless exists $config->{converters}->{chains}->{$chain};
@@ -178,86 +192,6 @@ sub ignorePath {
     }
     
     return;
-}
-
-sub getConverterChain {
-	my ($self, $asset) = @_;
-	
-	return $asset->{chain} if exists $asset->{chain};
-	
-	my $suffix = $asset->{suffix};
-	return if empty $asset->{suffix};
-	
-    my @suffixes = reverse split /^\./, $asset->{suffix};
-    foreach my $suffix (@suffixes) {
-        if ($self->{converters}->{suffixes}->{$suffix}) {
-            return $self->{converters}->{suffixes}->{$suffix};
-        }
-    }
-    
-    return;
-}
-
-sub getConvertedSuffix {
-    my ($self, $asset) = @_;
-    
-    return if empty $asset->{suffix};
-    my @suffixes = reverse split /^\./, $asset->{suffix};
-    foreach my $suffix (@suffixes) {
-    	if ($self->{converters}->{suffixes}->{$suffix}) {
-    		my $chain = $self->{converters}->{suffixes}->{$suffix};
-    		$suffix = $self->{converters}->{chains}->{$chain}->{suffix};
-    		return if empty $suffix;
-    		
-    	    return join '.', reverse @suffixes;
-    	}
-    }
-    
-    return;
-}
-
-sub getConverters {
-	my ($self, $asset) = @_;
-	
-	require Qgoda;
-	my $logger = Qgoda->new->logger('config');
-
-    # Read the converter chain from the asset if 
-    my $chain = $asset->{chain};
-	
-=cut
-    my $suffix = $asset->{suffix};
-    foreach my $key (keys %{$self->{converters}->{suffixes}}) {
-    	
-        if ($suffix =~ /^(?:$key)$/) {
-            my $class = $self->{converters}->{$key}->{converter} or next;
-            my $options = $self->{options}->{converters}->{$class} || {};
-            $class = 'Qgoda::Converter::' . $class;
-            my $module = $class;
-            $module =~ s{(?:::|')}{/}g;
-            $module .= '.pm';
-            eval { require $module };
-            if ($@) {
-                $logger->error($@);
-                next;
-            } else {
-            	return $class->new(%$options);
-            }
-        }
-    }
-=cut
-
-    return [];
-}
-
-sub getProcessor {
-	my ($self, $asset, $site) = @_;
-	
-	my $config = $site->{config};
-	my $class = $asset->{processor};
-	$class = $site->{config}->{processor} if empty $class;
-	$class = 'Null' if emtpy $class;
-	my $full_class = ''
 }
 
 sub __isHash {

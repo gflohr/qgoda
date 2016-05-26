@@ -1,5 +1,21 @@
 #! /bin/false
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package Qgoda::Util;
 
 use strict;
@@ -14,7 +30,7 @@ use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
-                normalize_directory strip_suffix);
+                normalize_path strip_suffix);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -113,26 +129,6 @@ sub lowercase($) {
 	return lc $str;
 }
 
-sub expand_perl_format {
-	my ($string, $hash) = @_;
-	
-	my $keys = join '|', keys %$hash, '{', '}';
-	$string =~ s/
-	            \{($keys)\}
-	            /
-	            if (defined $hash->{$1}) {
-	            	$hash->{$1}
-	            } elsif ('{' eq $1 || '}' eq $1) {
-	            	$1
-	            } else {
-	            	''
-	            }
-	            /gxe;
-	
-	
-	return $string;
-}
-
 sub merge_data {
 	my ($data, $overlay) = @_;
 	
@@ -205,29 +201,29 @@ sub interpolate($$) {
     return $result . $string;
 }
 
-sub normalize_directory {
-	my ($self, $dir) = @_;
+sub normalize_path($;$) {
+	my ($dir, $trailing_slash) = @_;
 	
 	$dir =~ s{[\\/]+}{/}g;
-	$dir =~ s{/$}{};
+	$dir =~ s{/$}{} unless $trailing_slash;
 	
 	return $dir;
 }
 
-sub strip_suffix {
-	my ($self, $filename) = @_;
+sub strip_suffix($) {
+	my ($filename) = @_;
 	
 	my @parts = split /\./, $filename;
 	my @suffixes;
 	
 	while (@parts > 1) {
-		my $part = pop @parts;
-		last if $part =~ /[^a-zA-Z0-9]/;
+		last if $parts[-1] =~ /[^a-zA-Z0-9]/;
+		unshift @suffixes, pop @parts
 	}
 	
-	my $basename = join '', @parts;
+	my $basename = join '.', @parts;
 	
-	return $basename, @suffixes;
+	return $basename, grep { /./ } @suffixes;
 }
 
 ##############################################################################

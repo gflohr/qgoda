@@ -1,13 +1,31 @@
 #! /bin/false
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package Qgoda::Builder;
 
 use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
+use File::Basename qw(fileparse);
 
-use Qgoda::Util qw(empty expand_perl_format read_file read_body write_file);
+use Qgoda::Util qw(empty read_file read_body write_file interpolate
+                   normalize_path strip_suffix);
 
 sub new {
 	my $self = '';
@@ -21,27 +39,60 @@ sub build {
     $logger->debug(__"start building posts");
     my $config = $site->{config};
     
+    my $qgoda = Qgoda->new;
+    my $errors = 0;
     ASSET: foreach my $asset ($site->getAssets) {
-    	$logger->debug(__x("building post '/{relpath}'",
-    	                   relpath => $asset->getRelpath));
-    	                   
-    	my $location = $self->expandLink($asset, $site, $asset->{location});
-        $logger->debug(__x("location '{location}'",
-                           location => $location));
-
-        my $content = $self->readAssetContent($asset, $site);
-        my $converters = $config->getConverters($asset);
-        foreach my $converter (@$converters) {
-            $content = eval { $converter->convert($asset, $site, $content) };
-            if ($@) {
-        	    $logger->error($@);
-        	    next ASSET;
-            }
-        }
-
-        $self->saveArtefact($asset, $site, $location, $content);
+    	eval {
+	    	$logger->debug(__x("building asset '/{relpath}'",
+	    	                   relpath => $asset->getRelpath));
+	
+	    	my $location = $asset->{raw} ? '/' . $asset->getRelpath
+	    	        : $self->expandLink($asset, $site, $asset->{location});
+	        $logger->debug(__x("location '{location}'",
+	                           location => $location));
+	        $asset->{location} = $location;
+	
+	        my ($significant, $directory) = fileparse $location;
+	        ($significant) = strip_suffix $significant;
+	        if ($significant eq $asset->{index}) {
+	        	$asset->{'significant-path'} = $directory . '/';
+	        } else {
+	        	$asset->{'significant-path'} = $location;
+	        }
+	        my $permalink = $self->expandLink($asset, $site, $asset->{permalink}, 1);
+	        $logger->debug(__x("permalink '{permalink}'",
+	                           permalink => $permalink));
+	        $asset->{permalink} = $permalink;
+	
+	        my $content = $self->readAssetContent($asset, $site);
+	        $asset->{content} = $content;
+	        my $converters = $qgoda->getProcessors($asset, $site);
+	        foreach my $converter (@$converters) {
+	        	my $short_name = ref $converter;
+	        	$short_name =~ s/^Qgoda::Processor:://;
+	        	$logger->debug(__x("processing with {processor}",
+	        	                   processor => $short_name));
+	            $asset->{content} = $converter->convert($asset, $site);
+	        }
+	
+	        $self->saveArtefact($asset, $site, $location);
+            $logger->debug(__x("successfully built '{location}'",
+                               location => $location));
+    	};
+    	if ($@) {
+    		++$errors;
+    		my $path = $asset->getPath;
+       	    $logger->error("$path: $@");
+    	}
     }   
-     
+    
+    if ($errors) {
+    	$logger->error(">>>>>>>>>>>>>>>>>>>");
+        $logger->error(__nx("one artefact have not been built because of errors (see above)", 
+                            "{num} artefacts have not been built because of errors (see above)",
+                            $errors, num => $errors)) if $errors;
+        $logger->error(">>>>>>>>>>>>>>>>>>>");
+    }
     return $self;
 }
 
@@ -53,11 +104,10 @@ sub logger {
 }
 
 sub expandLink {
-	my ($self, $asset, $site, $link) = @_;
-	
-	return '/' . $asset->getRelpath if empty $link;
+	my ($self, $asset, $site, $link, $trailing_slash) = @_;
 
-	return expand_perl_format $link, $asset;
+	my $interpolated = interpolate $link, $asset;
+	return normalize_path $interpolated, $trailing_slash;
 }
 
 sub readAssetContent {
@@ -71,7 +121,7 @@ sub readAssetContent {
 }
 
 sub saveArtefact {
-	my ($self, $asset, $site, $permalink, $content) = @_;
+	my ($self, $asset, $site, $permalink) = @_;
 	
     require Qgoda;
     my $config = Qgoda->new->config;
@@ -88,7 +138,7 @@ sub saveArtefact {
                              origin => $origin ? $origin->getOrigin : __"[unknown origin]"));
     }
     
-    unless (write_file $path, $content) {
+    unless (write_file $path, $asset->{content}) {
     	my $logger = $self->logger;
     	$logger->error(__x("error writing '{filename}': {error}",
     	                   filename => $path, error => $!));

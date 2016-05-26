@@ -1,5 +1,21 @@
 #! /bin/false
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package Qgoda::Analyzer;
 
 use strict;
@@ -10,7 +26,7 @@ use YAML;
 use File::Basename qw(fileparse);
 
 use Qgoda::Util qw(read_file empty yaml_error front_matter lowercase
-                   normalize_directory strip_suffix);
+                   normalize_path strip_suffix);
 
 sub new {
     my ($class) = @_;
@@ -54,7 +70,7 @@ sub analyze {
 			next if 'relpath' eq $key;
 			$asset->{$key} = $meta->{$key};
 		}
-		$self->__fillMeta($asset, $site);
+		$self->__fillMeta($asset, $site) if !$asset->{raw};
 	}
 	
 	return $self;
@@ -88,8 +104,6 @@ sub __fillMeta {
         }
     }
  
-    $self->__fillPathInformation($asset, $site);
-        
     my ($seconds, $minutes, $hour, $mday, $month, $year, $wday, $yday, $isdst)
         = localtime $date;
     $asset->{date} = {
@@ -115,12 +129,13 @@ sub __fillMeta {
         isdst => $isdst,
     };
 
+    $self->__fillPathInformation($asset, $site);
+
     $asset->{title} = $asset->{basename} if !exists $asset->{title};
     $asset->{slug} = $self->__slug($asset);
 
-    $asset->{index} = '/index';
-    my $converted_suffix = $config->getConvertedSuffix($asset);
-    $asset->{index} .= '.' . $converted_suffix if !empty $converted_suffix;
+    $asset->{template} = $site->getMetaValue(template => $asset);
+    $asset->{theme} = $site->getMetaValue(theme => $asset);
 
     return $self;
 }
@@ -149,14 +164,31 @@ sub __fillPathInformation {
 	
 	$asset->{filename} = $filename;
 	
-    $directory = normalize_directory $directory;
+    $directory = normalize_path $directory;
+    $directory = '' if '.' eq $directory;
     $asset->{directory} = $directory;
     
-    my ($basename, @suffixes) = strip_suffixes $filename;
+    my ($basename, @suffixes) = strip_suffix $filename;
     $asset->{basename} = $basename;
+    
+    my $trigger = $site->getTrigger(@suffixes);
+    if (!empty $trigger) {
+    	my ($chain, $name) = $site->getChainByTrigger($trigger);
+    	$asset->{chain} = $name if $chain;
+    	if ($chain && exists $chain->{suffix}) {
+            for (my $i = $#suffixes; $i >= 0; --$i) {
+                if ($suffixes[$i] eq $trigger) {
+                    $suffixes[$i] = $chain->{suffix};
+                    last;
+                }
+            }
+    	}
+    }
+    
     $asset->{suffixes} = \@suffixes;
-    $asset->{suffix} = join '.', @suffixes;
-
+    if (@suffixes) {
+        $asset->{suffix} = '.' . join '.', @suffixes;
+    }
     $asset->{location} = $site->getMetaValue(location => $asset);
     $asset->{permalink} = $site->getMetaValue(permalink => $asset);
     $asset->{index} = $site->getMetaValue(index => $asset);

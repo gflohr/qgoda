@@ -1,5 +1,21 @@
 #! /bin/false
 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 package Qgoda::Site;
 
 use strict;
@@ -63,6 +79,40 @@ sub getMetaValue {
 	}
 	
 	return;
+}
+
+sub getTrigger {
+	my ($self, @suffixes) = @_;
+	
+	my $triggers = $self->{config}->{converters}->{triggers};
+	for (my $i = $#suffixes; $i >= 0; --$i) {
+		return $suffixes[$i] 
+		    if exists $triggers->{$suffixes[$i]};
+	}
+	
+	return;
+}
+
+sub getChainByTrigger {
+	my ($self, $trigger) = @_;
+	
+	my $converters = $self->{config}->{converters};
+	my $name = $converters->{triggers}->{$trigger};
+	return if !defined $name;
+	my $chain = $converters->{chains}->{$name} || return;
+    
+    return wantarray ? ($chain, $name) : $chain;
+}
+
+sub getChain {
+	my ($self, $asset) = @_;
+	
+	my $suffixes = $asset->{suffixes} or return;
+	my $trigger = $self->getTrigger(@$suffixes);
+	return unless defined $trigger;
+	my $chain = $self->getChainByTrigger($trigger) or return;
+	
+	return $chain;
 }
 
 1;
