@@ -13,7 +13,8 @@ use Scalar::Util qw(reftype looks_like_number);
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format read_body merge_data interpolate);
+                expand_perl_format read_body merge_data interpolate
+                normalize_directory strip_suffix);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -202,6 +203,31 @@ sub interpolate($$) {
     }
 
     return $result . $string;
+}
+
+sub normalize_directory {
+	my ($self, $dir) = @_;
+	
+	$dir =~ s{[\\/]+}{/}g;
+	$dir =~ s{/$}{};
+	
+	return $dir;
+}
+
+sub strip_suffix {
+	my ($self, $filename) = @_;
+	
+	my @parts = split /\./, $filename;
+	my @suffixes;
+	
+	while (@parts > 1) {
+		my $part = pop @parts;
+		last if $part =~ /[^a-zA-Z0-9]/;
+	}
+	
+	my $basename = join '', @parts;
+	
+	return $basename, @suffixes;
 }
 
 ##############################################################################

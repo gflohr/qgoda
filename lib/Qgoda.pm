@@ -217,6 +217,9 @@ sub __build {
 sub __prune {
 	my ($self, $site) = @_;
 	
+	warn;
+	return;
+	
 	# Sort the output files by length first.  That ensures that we do a 
 	# depth first clean-up.
 	my @outfiles = sort {

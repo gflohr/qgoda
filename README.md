@@ -136,15 +136,19 @@ customization:
 
 <dl>
   <dt>path</dt>
-  <dd>The relative path of the asset to the source directory including 
-      leading slash.</dd>
+  <dd>The absolute path of the asset.</dd>
+  <dt>relpath</dt>
+  <dd>The relative path of the asset, without a leading slash.</dd>
   <dt>directory</dt>
-  <dd>The directory portion of "path" including a leading slash.  This will
-      be "/" for assets in the top-level source directory.</dd>
+  <dd>The directory portion of "path" without a leading or trailing slash.  
+      This will be the empty string for assets in the top-level source
+      directory.</dd>
+  <dt>filename</dt>
+  <dd>The current filename</dd>
   <dt>basename</dt>
-  <dd>The basename portion of the filename.</dd>
+  <dd>The basename portion of the filename (without suffix/suffixes).</dd>
   <dt>suffix</dt>
-  <dd>The calculated suffix after the suffix translation</dd>
+  <dd>The suffix (resp. suffixes), subject to translation</dd>
   <dt>config</dt>
   <dd>The site configuration as read from "_config.yaml"</dd>
   <dt>date</dt>

@@ -7,9 +7,10 @@ use strict;
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use Date::Parse;
 use YAML;
-use File::Basename;
+use File::Basename qw(fileparse);
 
-use Qgoda::Util qw(read_file empty yaml_error front_matter lowercase);
+use Qgoda::Util qw(read_file empty yaml_error front_matter lowercase
+                   normalize_directory strip_suffix);
 
 sub new {
     my ($class) = @_;
@@ -33,6 +34,8 @@ sub analyze {
 		$logger->debug(__x("analyzing asset '{path}'", 
 		                   path => $asset->getPath));
 		my $front_matter = front_matter $path;
+		
+		# FIXME! Fill $meta with defaults!
 		my $meta = {};
 		if (!empty $front_matter) {
 			$meta = eval { YAML::Load($front_matter) };
@@ -40,14 +43,12 @@ sub analyze {
 				$logger->error(yaml_error $path, $@);
 				next;
 			}
-			
-            if (!defined $meta->{permalink}) {
-                $meta->{permalink} = '/{slug}{index}';
-            }
 		} else {
 			$meta->{raw} = 1;
 		}
 		
+		# FIXME! Merge the front matter into the meta information preserving
+		# the immutable properties.
 		foreach my $key (keys %$meta) {
 			next if 'path' eq $key;
 			next if 'relpath' eq $key;
@@ -87,6 +88,8 @@ sub __fillMeta {
         }
     }
  
+    $self->__fillPathInformation($asset);
+        
     my ($seconds, $minutes, $hour, $mday, $month, $year, $wday, $yday, $isdst)
         = localtime $date;
     $asset->{date} = {
@@ -134,6 +137,28 @@ sub __slug {
 	$slug =~ s/--+/-/g;
 	
 	return $slug;
+}
+
+sub __fillPathInformation {
+	my ($self, $asset) = @_;
+	
+	my $relpath = $asset->getRelpath;
+	my ($filename, $directory) = fileparse $relpath;
+	
+	$asset->{filename} = $filename;
+	
+    $directory = normalize_directory $directory;
+    $asset->{directory} = $directory;
+    
+    my ($basename, @suffixes) = strip_suffixes $filename;
+    $asset->{basename} = $basename;
+    $asset->{suffixes} = \@suffixes;
+    $asset->{suffix} = join '.', @suffixes;
+
+    $asset->{location} = '/{directory}/{basename}/{index}.{suffix}'
+        if !exists $asset->{location};
+    
+	return $self;
 }
 
 1;

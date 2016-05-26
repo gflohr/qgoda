@@ -22,12 +22,12 @@ sub build {
     my $config = $site->{config};
     
     ASSET: foreach my $asset ($site->getAssets) {
-    	$logger->debug(__x("building post '{relpath}'",
+    	$logger->debug(__x("building post '/{relpath}'",
     	                   relpath => $asset->getRelpath));
     	                   
-    	my $permalink = $self->expandLink($asset, $site, $asset->{permalink});
-        $logger->debug(__x("permalink '{permalink}'",
-                           permalink => $permalink));
+    	my $location = $self->expandLink($asset, $site, $asset->{location});
+        $logger->debug(__x("location '{location}'",
+                           location => $location));
 
         my $content = $self->readAssetContent($asset, $site);
         my $converters = $config->getConverters($asset);
@@ -39,7 +39,7 @@ sub build {
             }
         }
 
-        $self->saveArtefact($asset, $site, $permalink, $content);
+        $self->saveArtefact($asset, $site, $location, $content);
     }   
      
     return $self;
