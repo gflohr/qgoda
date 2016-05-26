@@ -52,4 +52,17 @@ sub getArtefacts {
 	values %{shift->{artefacts}};
 }
 
+# Only works for top-level keys!
+sub getMetaValue {
+	my ($self, $key, $asset) = @_;
+	
+	if (exists $asset->{$key}) {
+		return $asset->{$key};
+	} elsif (exists $self->{config}->{$key}) {
+		return $self->{config}->{$key};
+	}
+	
+	return;
+}
+
 1;

@@ -54,14 +54,14 @@ sub analyze {
 			next if 'relpath' eq $key;
 			$asset->{$key} = $meta->{$key};
 		}
-		$self->__fillMeta($asset);
+		$self->__fillMeta($asset, $site);
 	}
 	
 	return $self;
 }
 
 sub __fillMeta {
-	my ($self, $asset) = @_;
+	my ($self, $asset, $site) = @_;
 	
 	my $logger = $self->{__logger};
 	my $config = $self->{__config};
@@ -88,31 +88,34 @@ sub __fillMeta {
         }
     }
  
-    $self->__fillPathInformation($asset);
+    $self->__fillPathInformation($asset, $site);
         
     my ($seconds, $minutes, $hour, $mday, $month, $year, $wday, $yday, $isdst)
         = localtime $date;
     $asset->{date} = {
     	epoch => $date,
-    	seconds => (sprintf '%02u', $seconds),
-        minutes => (sprintf '%02u', $minutes),
+        sec => (sprintf '%02u', $seconds),
+        isec => (sprintf '%u', $seconds),
+        min => (sprintf '%02u', $minutes),
+        imin => (sprintf '%u', $minutes),
         hour => (sprintf '%02u', $hour),
+        ihour => (sprintf '%u', $hour),
+        hour12 => (sprintf '%02u', $hour % 12 || 12),
+        ihour12 => (sprintf '%u', $hour % 12 || 12),
+        ampm => ($hour < 12 ? 'a. m.' : 'p. m.'),
         mday => (sprintf '%02u', $mday),
+        imday => (sprintf '%u', $mday),
+        day => (sprintf '%02u', $mday),
+        iday => (sprintf '%u', $mday),
         month => (sprintf '%02u', $month + 1),
+        imonth => (sprintf '%u', $month + 1),
         year => (sprintf '%02u', $year + 1900),
         wday => $wday,
         yday => $yday,
         isdst => $isdst,
     };
 
-    my $stem = fileparse $asset->getPath;
-    my $suffix = '';
-    if ($stem =~ s/^([^.]+)\.(.+)$/$1/) {
-        $suffix = $2;
-    }
-    $asset->{stem} = $stem;
-    $asset->{title} = $asset->{stem} if !exists $asset->{title};
-    $asset->{suffix} = lowercase $suffix;
+    $asset->{title} = $asset->{basename} if !exists $asset->{title};
     $asset->{slug} = $self->__slug($asset);
 
     $asset->{index} = '/index';
@@ -126,7 +129,6 @@ sub __slug {
 	my ($self, $asset) = @_;
 	
 	my $title = $asset->{title};
-	$title = $asset->{stem} if empty $title;
 	
 	use utf8;
 	my $slug = lowercase $title;
@@ -140,7 +142,7 @@ sub __slug {
 }
 
 sub __fillPathInformation {
-	my ($self, $asset) = @_;
+	my ($self, $asset, $site) = @_;
 	
 	my $relpath = $asset->getRelpath;
 	my ($filename, $directory) = fileparse $relpath;
@@ -155,12 +157,9 @@ sub __fillPathInformation {
     $asset->{suffixes} = \@suffixes;
     $asset->{suffix} = join '.', @suffixes;
 
-    $asset->{location} = '/{directory}/{basename}/{index}.{suffix}'
-        if !exists $asset->{location};
-    
-    my $config = Qgoda->new->config;
-    $asset->{index} = $config->{index};
-    $asset->{index} = $config->{index} if empty $asset->{index};
+    $asset->{location} = $site->getMetaValue(location => $asset);
+    $asset->{permalink} = $site->getMetaValue(permalink => $asset);
+    $asset->{index} = $site->getMetaValue(index => $asset);
     
 	return $self;
 }

@@ -36,6 +36,9 @@ sub new {
     my $config = {
     	title => __"A New Qgoda Powered Site",
     	srcdir => '.',
+    	location => '/{directory}/{basename}/{index}.{suffix}',
+    	permalink => '/{directory}/{basename}/{index}.{suffix}',
+    	index => 'index',
     	converters => {
             chains => {
                 markdown => {

@@ -154,6 +154,8 @@ customization:
   <dt>date</dt>
   <dd>The date of the asset.  Do not use directly but one of the
       subkeys below.</dd>
+  <dt>date.epoch</dt>
+  <dd>Seconds since the Epoch (00:00:00 UTC, January 1, 1970)</dd>
   <dt>date.year</dt>
   <dd>The four-digit year.</dd>
   <dt>date.month</dt>
@@ -177,7 +179,7 @@ customization:
   <dt>date.ihour12</dt>
   <dd>The hour of the day (1-12) on a 12-hour clock without the leading zero.</dd>
   <dt>date.ampm</dt>
-  <dd>The string "am" before noon, the string "pm" after noon.  Note that
+  <dd>The string "a. m." before noon, the string "p. m." after noon.  Note that
       this is not localized!</dd>
   <dt>date.min</dt>
   <dd>The minutes (01-59).</dd>
