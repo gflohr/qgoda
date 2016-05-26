@@ -158,6 +158,10 @@ sub __fillPathInformation {
     $asset->{location} = '/{directory}/{basename}/{index}.{suffix}'
         if !exists $asset->{location};
     
+    my $config = Qgoda->new->config;
+    $asset->{index} = $config->{index};
+    $asset->{index} = $config->{index} if empty $asset->{index};
+    
 	return $self;
 }
 
