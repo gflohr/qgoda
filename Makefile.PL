@@ -62,8 +62,8 @@ WriteMakefile (
     ABSTRACT            => 'Qgoda static site generator',
     AUTHOR              => 'Guido Flohr <guido.flohr@cantanea.com>',
     PREREQ_PM => {
-        'Date::Parse' => 2.30,
-        'Locale::TextDomain' => 1.24,
+        'Date::Parse' => '2.30',
+        'Locale::TextDomain' => '1.24',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
