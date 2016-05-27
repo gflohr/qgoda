@@ -25,7 +25,7 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 
 use Qgoda::Util qw(empty);
 
-use base qw(Qgoda::Converter);
+use base qw(Qgoda::Processor);
 
 my %instances;
 
@@ -47,7 +47,7 @@ sub new {
 	return $self;
 }
 
-sub convert {
+sub process {
 	my ($self, $asset, $site, $content) = @_;
 
     my $view = $asset->{view};
@@ -92,4 +92,4 @@ sub convert {
 
 =head1 NAME
 
-Qgoda::Converter::Markdown - Default builder for Qgoda posts.
+Qgoda::Processor::TT2 - Qgoda Processor For the Template Toolkit Version 2

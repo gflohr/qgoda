@@ -20,7 +20,7 @@ package Qgoda::Processor::Markdown;
 
 use strict;
 
-use base qw(Qgoda::Converter);
+use base qw(Qgoda::Processor);
 
 use Text::Markdown qw(markdown);
 
@@ -33,7 +33,7 @@ sub new {
 	return $self;
 }
 
-sub convert {
+sub process {
 	my ($self, $asset, $site) = @_;
 	
 	return markdown $asset->{content}, $self->{__options};
@@ -43,4 +43,4 @@ sub convert {
 
 =head1 NAME
 
-Qgoda::Converter::Markdown - Default builder for Qgoda posts.
+Qgoda::Processor::Markdown - Qgoda Processor For Markdown

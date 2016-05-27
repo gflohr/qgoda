@@ -84,7 +84,7 @@ sub getMetaValue {
 sub getTrigger {
 	my ($self, @suffixes) = @_;
 	
-	my $triggers = $self->{config}->{converters}->{triggers};
+	my $triggers = $self->{config}->{processors}->{triggers};
 	for (my $i = $#suffixes; $i >= 0; --$i) {
 		return $suffixes[$i] 
 		    if exists $triggers->{$suffixes[$i]};
@@ -96,10 +96,10 @@ sub getTrigger {
 sub getChainByTrigger {
 	my ($self, $trigger) = @_;
 	
-	my $converters = $self->{config}->{converters};
-	my $name = $converters->{triggers}->{$trigger};
+	my $config = $self->{config}->{processors};
+	my $name = $config->{triggers}->{$trigger};
 	return if !defined $name;
-	my $chain = $converters->{chains}->{$name} || return;
+	my $chain = $config->{chains}->{$name} || return;
     
     return wantarray ? ($chain, $name) : $chain;
 }

@@ -28,7 +28,7 @@ use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
 
-my %converters;
+my %processors;
 
 sub new {
     my ($class, %args) = @_;
@@ -57,7 +57,7 @@ sub new {
     	index => 'index',
     	'case-sensitive' => 0,
     	view => 'default.html',
-    	converters => {
+    	processors => {
             chains => {
                 markdown => {
                 	modules => [qw(Markdown HTML)],
@@ -123,46 +123,46 @@ sub checkConfig {
 	
 	die __"invalid format (not a hash)\n"
 	    unless ($self->__isHash($config));
-	die __x("'{variable}' must be a dictionary", variable => 'converters')
-	    unless $self->__isHash($config->{converters});
-    die __x("'{variable}' must be a dictionary", variable => 'converters.chains')
-        unless $self->__isHash($config->{converters}->{chains});
-    foreach my $chain (keys %{$config->{converters}->{chains}}) {
-        die __x("'{variable}' must be a dictionary", variable => "converters.chains.$chain")
-            unless $self->__isHash($config->{converters}->{chains}->{$chain});
-        if (exists $config->{converters}->{chains}->{$chain}->{modules}) {
-            die __x("'{variable}' must not be a dictionary", variable => "converters.chains.$chain.modules")
-                if $self->__isHash($config->{converters}->{chains}->{$chain}->{modules});
-            if (!$self->__isArray($config->{converters}->{chains}->{$chain}->{modules})) {
-                $config->{converters}->{chains}->{$chain}->{modules} =
-                    [$config->{converters}->{chains}->{$chain}->{modules}],
+	die __x("'{variable}' must be a dictionary", variable => 'processors')
+	    unless $self->__isHash($config->{processors});
+    die __x("'{variable}' must be a dictionary", variable => 'processors.chains')
+        unless $self->__isHash($config->{processors}->{chains});
+    foreach my $chain (keys %{$config->{processors}->{chains}}) {
+        die __x("'{variable}' must be a dictionary", variable => "processors.chains.$chain")
+            unless $self->__isHash($config->{processors}->{chains}->{$chain});
+        if (exists $config->{processors}->{chains}->{$chain}->{modules}) {
+            die __x("'{variable}' must not be a dictionary", variable => "processors.chains.$chain.modules")
+                if $self->__isHash($config->{processors}->{chains}->{$chain}->{modules});
+            if (!$self->__isArray($config->{processors}->{chains}->{$chain}->{modules})) {
+                $config->{processors}->{chains}->{$chain}->{modules} =
+                    [$config->{processors}->{chains}->{$chain}->{modules}],
             }
         } else {
-            $config->{converters}->{chains}->{$chain}->{modules} = ['Null'];
+            $config->{processors}->{chains}->{$chain}->{modules} = ['Null'];
         };
-        if (exists $config->{converters}->{chains}->{$chain}->{suffix}) {
-            die __x("'{variable}' must be a single value", variable => "converters.chains.$chain.suffix")
-                if ref $config->{converters}->{chains}->{$chain}->{suffix};
+        if (exists $config->{processors}->{chains}->{$chain}->{suffix}) {
+            die __x("'{variable}' must be a single value", variable => "processors.chains.$chain.suffix")
+                if ref $config->{processors}->{chains}->{$chain}->{suffix};
         }
     }
-    die __x("'{variable}' must be a dictionary", variable => 'converters.triggers')
-        unless $self->__isHash($config->{converters}->{triggers});
-    foreach my $suffix (keys %{$config->{converters}->{triggers}}) {
-    	my $chain = $config->{converters}->{triggers}->{$suffix};
-        die __x("converter chain suffix '{suffix}' references undefined chain '{chain}'",
+    die __x("'{variable}' must be a dictionary", variable => 'processors.triggers')
+        unless $self->__isHash($config->{processors}->{triggers});
+    foreach my $suffix (keys %{$config->{processors}->{triggers}}) {
+    	my $chain = $config->{processors}->{triggers}->{$suffix};
+        die __x("processor chain suffix '{suffix}' references undefined chain '{chain}'",
                 suffix => $suffix, chain => $chain)
-            unless exists $config->{converters}->{chains}->{$chain};
+            unless exists $config->{processors}->{chains}->{$chain};
     }
-    die __x("'{variable}' must be a dictionary", variable => 'converters.modules')
-        unless $self->__isHash($config->{converters}->{modules});
-    foreach my $module (keys %{$config->{converters}->{modules}}) {
-        die __x("'{variable}' must be a scalar", variable => "converters.chains.$module")
-            if ref $config->{converters}->{modules}->{$module};
-        die __x("'{variable}' must not be empty", variable => "converters.chains.$module")
-            if empty $config->{converters}->{modules}->{$module};
+    die __x("'{variable}' must be a dictionary", variable => 'processors.modules')
+        unless $self->__isHash($config->{processors}->{modules});
+    foreach my $module (keys %{$config->{processors}->{modules}}) {
+        die __x("'{variable}' must be a scalar", variable => "processors.chains.$module")
+            if ref $config->{processors}->{modules}->{$module};
+        die __x("'{variable}' must not be empty", variable => "processors.chains.$module")
+            if empty $config->{processors}->{modules}->{$module};
     }
-    die __x("'{variable}' must be a dictionary", variable => 'converters.options')
-        unless $self->__isHash($config->{converters}->{options});
+    die __x("'{variable}' must be a dictionary", variable => 'processors.options')
+        unless $self->__isHash($config->{processors}->{options});
         
     return $self;
 }

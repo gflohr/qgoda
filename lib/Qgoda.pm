@@ -169,7 +169,7 @@ sub getProcessors {
 	
     my $chain_name = $asset->{chain};
     return [] if !defined $chain_name;
-    my $processors = $self->config->{converters};
+    my $processors = $self->config->{processors};
     my $chain = $processors->{chains}->{$chain_name} or return [];
 
     my $names = $chain->{modules} or return [];

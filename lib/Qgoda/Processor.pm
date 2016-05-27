@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Converter;
+package Qgoda::Processor;
 
 use strict;
 
@@ -26,10 +26,10 @@ sub new {
 	bless {}, shift;
 }
 
-sub convert {
+sub process {
 	my ($self, $asset, $site, $content) = @_;
 	
-	die __x("Converter class '{class}' does not implement the method convert().\n",
+	die __x("Processor class '{class}' does not implement the method process().\n",
 	        class => ref $self);
 }
 
@@ -37,4 +37,4 @@ sub convert {
 
 =head1 NAME
 
-Qgoda::Converter - Abstract base class for all Qgoda Converters.
+Qgoda::Processor - Abstract base class for all Qgoda Processors.
