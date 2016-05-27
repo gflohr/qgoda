@@ -135,7 +135,6 @@ sub __fillMeta {
     $asset->{slug} = $self->__slug($asset);
 
     $asset->{view} = $site->getMetaValue(view => $asset);
-    $asset->{theme} = $site->getMetaValue(theme => $asset);
 
     return $self;
 }

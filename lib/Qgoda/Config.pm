@@ -78,7 +78,7 @@ sub new {
             },
             modules => {
                 Markdown => 'Markdown',
-                HTML => 'Template::Toolkit',
+                HTML => 'TT2',
             },
             options => {
                 Markdown => []
@@ -96,7 +96,7 @@ sub new {
         }
         my $local = eval { YAML::Load($yaml) };
         $logger->fatal(yaml_error $filename, $@) if $@;
-        $config = merge_data $config, $local;
+        $config = merge_data $config, $local if $local;
     }
     my $self = bless $config, $class;
 
