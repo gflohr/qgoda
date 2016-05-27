@@ -183,8 +183,9 @@ sub ignorePath {
 
     my $relpath = File::Spec->abs2rel($path, $self->{srcdir});
     
-    # Ignore all underscore files and directories but only on the top-level.
-    return $self if '_' eq substr $relpath, 0, 1;
+    # Ignore all underscore files and directories but only on the top-level
+    # except for "_views".
+    return $self if '_' eq substr $relpath, 0, 1 && $relpath !~ m{^_views/};
     
     # Ignore all hidden files and directories.
     foreach my $part (File::Spec->splitdir($relpath)) {
