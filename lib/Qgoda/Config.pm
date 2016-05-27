@@ -56,7 +56,7 @@ sub new {
     	permalink => '{significant-path}',
     	index => 'index',
     	'case-sensitive' => 0,
-    	template => 'default.html',
+    	view => 'default.html',
     	converters => {
             chains => {
                 markdown => {

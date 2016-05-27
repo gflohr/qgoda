@@ -134,7 +134,7 @@ sub __fillMeta {
     $asset->{title} = $asset->{basename} if !exists $asset->{title};
     $asset->{slug} = $self->__slug($asset);
 
-    $asset->{template} = $site->getMetaValue(template => $asset);
+    $asset->{view} = $site->getMetaValue(view => $asset);
     $asset->{theme} = $site->getMetaValue(theme => $asset);
 
     return $self;

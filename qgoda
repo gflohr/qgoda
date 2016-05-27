@@ -33,7 +33,6 @@ GetOptions (
             'b|build' => \$options{build},
             'w|watch' => \$options{watch},
             'q|quiet' => \$options{quiet},
-            'install-theme=s' => \$options{install_theme},
             'dump-config' => \$options{dump_config},
 	        'h|help' => \$options{help},
 	        'v|verbose' => \$options{verbose},
@@ -48,8 +47,6 @@ if ($options{dump_config}) {
     delete $options{verbose};
     $options{quiet} = 1;
     $method = 'dumpConfig';
-} elsif ($options{install_theme}) {
-    $method = 'installTheme';
 } elsif ($options{build}) {
 	$method = 'build';
 } elsif ($options{watch}) {
@@ -69,9 +66,6 @@ Operation mode:
   -w, --watch                 watch for changes and build on demand
   -q, --quiet                 quiet mode
   -v, --verbose               display progress on standard error
-
-Helpers:
-      --install-theme=REPO    install theme from git repository REPO
 
 Informative output:
       --dump-config           dump the cooked configuration

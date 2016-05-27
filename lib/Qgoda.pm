@@ -198,75 +198,6 @@ sub getProcessors {
     return \@processors;
 }
 
-sub installTheme {
-    my ($self) = @_;
-    
-    my $logger = $self->logger;
-    my $theme = $self->{__install_theme};
-
-    my $theme_dir = $self->getThemeDirectory($theme);
-        
-    if (-e $theme_dir) {
-    	$logger->info(__x("theme directory {directory} exists, updating from remote",
-    	                  directory => $theme_dir));
-    	$self->{__update_theme} = $theme;
-    	return $self->updateTheme;
-    }
-
-    $self->__requireGit;
-    
-    eval {
-    	my @lines = Git::command(clone => $theme => $theme_dir);
-    	foreach my $line (@lines) {
-    		$logger->info($line);
-    	}
-    };
-    $logger->fatal($@) if $@;
-    
-    return $self;
-}
-
-sub updateTheme {
-    my ($self) = @_;
-    
-    my $logger = $self->logger;
-    my $theme = $self->{__update_theme};
-
-    my $theme_dir = $self->getThemeDirectory($theme);
-    return if empty $theme_dir;
-
-    $self->__requireGit;
-    
-    eval {
-    	my $git = Git->repository(Directory => $theme_dir);
-    	my @lines = $git->command('pull');
-    };
-    $logger->fatal($@) if $@;
-    
-    return $self;
-}
-
-sub getThemeDirectory {
-	my ($self, $theme) = @_;
-	
-	$theme =~ s{/+$}{};
-	
-    require URI;
-    my $uri = URI->new($theme);
-    
-    my $short_name = $uri->path;
-    $short_name =~ s{.*/}{};
-    $short_name =~ s{\.git$}{}i;
-    
-    $self->logger->error(__x("invalid theme repository {theme}",
-                             theme => $theme)) if empty $short_name;
-    
-    my $theme_dir = File::Spec->catdir($self->config->{srcdir}, 
-                                       '_themes', $short_name);
-	
-	return $theme_dir;
-}
-
 # FIXME! This should instantiate scanner plug-ins and use them instead.
 sub __scan {
 	my ($self, $site) = @_;
@@ -365,18 +296,6 @@ sub __prune {
                                filename => $outfile, error => $!))
                 if !unlink $outfile;
 		}
-	}
-	
-	return $self;
-}
-
-sub __requireGit {
-	my ($self) = @_;
-	
-	eval { require Git };
-	if ($@) {
-		$self->logger->error($@);
-		$self->logger->fatal(__"Git not fully installed, please proceed manually!");
 	}
 	
 	return $self;
