@@ -32,7 +32,7 @@ my %instances;
 sub new {
 	my ($class, %options) = @_;
 	
-	my $self = $class->SUPER::new(%options);
+	my $self = bless {}, $class;
 	$self->{__options} = \%options;
 
     require Qgoda;
@@ -59,9 +59,13 @@ sub process {
         config => $site->{config},
     };
 
-    # TODO! Cook the inner content by default so that you can use TT2
-    # syntax!
     my $cooked;
+    if (!empty $asset->{content} && $self->{__options}->{'cook-content'}) {
+        $self->{__tt}->process(\$asset->{content}, $vars, \$cooked)
+            or die $self->{__tt}->error, "\n" if !defined $cooked;
+    	$asset->{content} = $cooked;
+    	undef $cooked;
+    }
     $self->{__tt}->process($view, $vars, \$cooked)
         or die $self->{__tt}->error, "\n" if !defined $cooked;
 

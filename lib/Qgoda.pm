@@ -27,6 +27,7 @@ $VERSION = '0.1.1';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
+use Scalar::Util qw(reftype);
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -189,8 +190,20 @@ sub getProcessors {
     	
     	require $module_name;
     	my $options = $processors->{options}->{$module};
+    	my @options;
+    	if (defined $options) {
+    		if (ref $options) {
+    			if ('HASH' eq reftype $options) {
+    				@options = %{$options};
+    			} else {
+    				@options = @{$options};
+    			}
+    		} else {
+    			@options = $options;
+    		}
+    	}
     	
-    	my $processor = $class_name->new($options);
+    	my $processor = $class_name->new(@options);
     	$self->{__processors}->{$class_name} = $processor;
     	push @processors, $processor;
     }

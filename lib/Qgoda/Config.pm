@@ -81,7 +81,10 @@ sub new {
                 HTML => 'TT2',
             },
             options => {
-                Markdown => []
+                Markdown => [],
+                TT2 => {
+                	'cook-content' => 1
+                }
             },
     	},
     };
