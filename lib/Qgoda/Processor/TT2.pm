@@ -59,6 +59,8 @@ sub process {
         config => $site->{config},
     };
 
+    # TODO! Cook the inner content by default so that you can use TT2
+    # syntax!
     my $cooked;
     $self->{__tt}->process($view, $vars, \$cooked)
         or die $self->{__tt}->error, "\n" if !defined $cooked;
