@@ -54,10 +54,11 @@ sub process {
     die __"no view specified" if empty $view;
 
     my $vars = {
-        asset => $asset.
+        asset => $asset,
         site => $site,
         config => $site->{config},
     };
+
     my $cooked;
     $self->{__tt}->process($view, $vars, \$cooked)
         or die $self->{__tt}->error, "\n" if !defined $cooked;
