@@ -5,4 +5,5 @@
 - check for a YAML implementation before using Qgoda.
 - processors should not directly depend on 3rd party modules, in particular:
   * Markdown
-  * Template::Toolkit
+  * TT2
+- Check what goes to stdout and what to stderr

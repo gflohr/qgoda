@@ -42,6 +42,9 @@ GetOptions (
 display_usage if $options{help};
 display_version if $options{version};
 
+autoflush STDOUT, 1;
+autoflush STDERR, 1;
+
 my $method;
 if ($options{dump_config}) {
     delete $options{verbose};
