@@ -88,7 +88,7 @@ sub build {
     
     if ($errors) {
     	$logger->error(">>>>>>>>>>>>>>>>>>>");
-        $logger->error(__nx("one artefact have not been built because of errors (see above)", 
+        $logger->error(__nx("one artefact has not been built because of errors (see above)", 
                             "{num} artefacts have not been built because of errors (see above)",
                             $errors, num => $errors)) if $errors;
         $logger->error(">>>>>>>>>>>>>>>>>>>");
