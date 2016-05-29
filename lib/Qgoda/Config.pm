@@ -185,6 +185,11 @@ sub ignorePath {
     return if $path eq $self->{srcdir};
 
     my $relpath = File::Spec->abs2rel($path, $self->{srcdir});
+
+    if ($self->{exclude}) {
+    	my %excludes = map { $_ => 1 } @{$self->{exclude}};
+    	return $self if $excludes{$relpath};
+    }
     
     # Ignore all underscore files and directories but only on the top-level
     # except for "_views".
