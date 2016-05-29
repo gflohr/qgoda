@@ -166,6 +166,8 @@ sub checkConfig {
     }
     die __x("'{variable}' must be a dictionary", variable => 'processors.options')
         unless $self->__isHash($config->{processors}->{options});
+    die __x("'{variable}' must be a list", variable => 'exclude')
+        if exists $self->{exclude} && !$self->__isArray($self->{exclude});
         
     return $self;
 }
