@@ -5,11 +5,13 @@ lib/Qgoda/Artefact.pm
 lib/Qgoda/Asset.pm
 lib/Qgoda/Builder.pm
 lib/Qgoda/Config.pm
-lib/Qgoda/Converter.pm
-lib/Qgoda/Converter/Markdown.pm
 lib/Qgoda/Logger.pm
+lib/Qgoda/Processor.pm
+lib/Qgoda/Processor/Markdown.pm
+lib/Qgoda/Processor/TT2.pm
 lib/Qgoda/Site.pm
 lib/Qgoda/Util.pm
+lib/Template/Plugin/Qgoda.pm
 Makefile.PL
 MANIFEST
 NEWS
@@ -17,4 +19,6 @@ qgoda
 README.md
 ReleaseNotes
 t/interpolate.t
+t/js_unescape.t
+t/strip_suffix.t
 TODO
