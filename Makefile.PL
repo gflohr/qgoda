@@ -51,7 +51,31 @@ push @extra, 'META_MERGE' => {
                         }
                     }
                 }
-            }
+            },
+            watch => {
+                description => "Support for watching file system changes",
+                prereqs => {
+                    runtime => {
+                        requires => {
+                            'AnyEvent::Filesys::Notify' => '1.21',
+                            'AnyEvent' => '7.12',
+                        }
+                    }
+                }
+            },
+            helpers => {
+                description => "Run third-party helpers in parallel",
+                prereqs => {
+                    runtime => {
+                        requires => {
+                            'AnyEvent::Open3::Simple' => '0.86',
+                            # Helpers are only executed, when watching.
+                            'AnyEvent::Filesys::Notify' => '1.21',
+                            'AnyEvent' => '7.12',
+                        }
+                    }
+                }
+            },
         },
         release_status => 'unstable'
     } unless $ExtUtils::MakeMaker::VERSION < 6.46;
