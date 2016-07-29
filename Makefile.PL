@@ -58,7 +58,6 @@ push @extra, 'META_MERGE' => {
                     runtime => {
                         requires => {
                             'AnyEvent::Filesys::Notify' => '1.21',
-                            'AnyEvent' => '7.12',
                         }
                     }
                 }
@@ -71,7 +70,6 @@ push @extra, 'META_MERGE' => {
                             'AnyEvent::Open3::Simple' => '0.86',
                             # Helpers are only executed, when watching.
                             'AnyEvent::Filesys::Notify' => '1.21',
-                            'AnyEvent' => '7.12',
                         }
                     }
                 }
@@ -88,6 +86,7 @@ WriteMakefile (
     PREREQ_PM => {
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
+        'AnyEvent' => '7.12',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
