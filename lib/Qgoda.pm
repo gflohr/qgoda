@@ -28,6 +28,8 @@ $VERSION = '0.1.1';
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
 use Scalar::Util qw(reftype);
+use AnyEvent;
+use AnyEvent::Loop;
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -99,41 +101,29 @@ sub watch {
 
     my $logger = $self->{__logger};
 
-    my $init;
+    eval { require AnyEvent::Filesys::Notify };
+    if ($@) {
+    	$logger->error($@);
+    	$logger->fatal(__("You have to install AnyEvent::Filesys::Notify"
+    	                  . " in order to use the watch functionality"));
+    }
     
     eval {
     	my $config = $self->{__config};
     	
-        require Filesys::Notify::Simple;
-        my $watcher = Filesys::Notify::Simple->new([$config->{srcdir}]);
-        while (1) {
-        	if ($init) {
-                $logger->debug(__x("waiting for changes in '{dir}'", 
-                                   dir => $config->{srcdir}));
-
-                my @files;
-                $watcher->wait(sub {
-                    foreach my $event (@_) {
-                    	if ($config->ignorePath($event->{path})) {
-                    	    $logger->debug(__x("changed file '{filename}' is ignored",
-                	                          filename => $event->{path}));
-                	       next;
-                	    }
-                        $logger->debug(__x("file '{filename}' has changed",
-                                           filename => $event->{path}));
-                        push @files, $event->{path};
-                    }
-                });
-
-                next if !@files;
-        	}
-            $logger->info(__"start rebuilding site because of file system change")
-                if $init;
-            $init = 1;
-            eval { $self->build };
-            $logger->error($@) if $@;
-        }
+        $logger->debug(__x("waiting for changes in '{dir}'", 
+                           dir => $config->{srcdir}));
+                                   
+        AnyEvent::Filesys::Notify->new(
+            dirs => [$config->{srcdir}],
+            interval => 0.5,
+            parse_events => 1,
+            cb => sub { $self->__onFilesysChange(@_) }
+        );
+        
+        AnyEvent::Loop::run;
     };
+    
     $logger->fatal($@) if $@;
 }
 
@@ -310,6 +300,35 @@ sub __prune {
                 if !unlink $outfile;
 		}
 	}
+	
+	return $self;
+}
+
+sub __onFilesysChange {
+	my ($self, @events) = @_;
+    
+    my @files;
+              
+    my $logger = $self->{__logger};
+    my $config = $self->{__config};
+      
+    foreach my $event (@events) {
+        if ($config->ignorePath($event->{path})) {
+            $logger->debug(__x("changed file '{filename}' is ignored",
+                               filename => $event->{path}));
+            next;
+        }
+        $logger->debug(__x("file '{filename}' has changed",
+                           filename => $event->{path}));
+        push @files, $event->{path};
+    }
+
+    return if !@files;
+
+    $logger->info(__"start rebuilding site because of file system change");
+
+    eval { $self->build };
+    $logger->error($@) if $@;
 	
 	return $self;
 }
