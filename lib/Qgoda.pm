@@ -109,6 +109,9 @@ sub watch {
     }
     
     eval {
+    	# An initial build failure is fatal.
+    	$self->build;
+    	
     	my $config = $self->{__config};
     	
         $logger->debug(__x("waiting for changes in '{dir}'", 
@@ -118,7 +121,8 @@ sub watch {
             dirs => [$config->{srcdir}],
             interval => 0.5,
             parse_events => 1,
-            cb => sub { $self->__onFilesysChange(@_) }
+            cb => sub { $self->__onFilesysChange(@_) },
+            filter => sub { $self->__filesysChangeFilter(@_) },
         );
         
         AnyEvent::Loop::run;
@@ -304,6 +308,21 @@ sub __prune {
 	return $self;
 }
 
+sub __filesysChangeFilter {
+	my ($self, $filename) = @_;
+	
+    my $config = $self->{__config};
+
+    if ($config->ignorePath($filename)) {
+        my $logger = $self->{__logger};
+        $logger->debug(__x("changed file '{filename}' is ignored",
+                           filename => $filename));
+        return;
+    }
+    
+    return $self;
+}
+
 sub __onFilesysChange {
 	my ($self, @events) = @_;
     
@@ -313,11 +332,6 @@ sub __onFilesysChange {
     my $config = $self->{__config};
       
     foreach my $event (@events) {
-        if ($config->ignorePath($event->{path})) {
-            $logger->debug(__x("changed file '{filename}' is ignored",
-                               filename => $event->{path}));
-            next;
-        }
         $logger->debug(__x("file '{filename}' has changed",
                            filename => $event->{path}));
         push @files, $event->{path};
