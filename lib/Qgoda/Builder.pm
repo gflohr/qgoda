@@ -64,16 +64,7 @@ sub build {
 	                           permalink => $permalink));
 	        $asset->{permalink} = $permalink;
 	
-	        my $content = $self->readAssetContent($asset, $site);
-	        $asset->{content} = $content;
-	        my $processors = $qgoda->getProcessors($asset, $site);
-	        foreach my $processor (@$processors) {
-	        	my $short_name = ref $processor;
-	        	$short_name =~ s/^Qgoda::Processor:://;
-	        	$logger->debug(__x("processing with {processor}",
-	        	                   processor => $short_name));
-	            $asset->{content} = $processor->process($asset, $site);
-	        }
+	        $self->processAsset($asset, $site);
 	
 	        $self->saveArtefact($asset, $site, $location);
             $logger->debug(__x("successfully built '{location}'",
@@ -146,6 +137,29 @@ sub saveArtefact {
     }
     
     $site->addArtefact($path, $asset);
+}
+
+sub processAsset {
+	my ($self, $asset, $site) = @_;
+	
+	my $qgoda = Qgoda->new;
+	my $logger = $self->logger;
+	
+	$logger->debug(__x("processing asset '/{relpath}'",
+                       relpath => $asset->getRelpath));
+	
+    my $content = $self->readAssetContent($asset, $site);
+    $asset->{content} = $content;
+    my $processors = $qgoda->getProcessors($asset, $site);
+    foreach my $processor (@$processors) {
+        my $short_name = ref $processor;
+        $short_name =~ s/^Qgoda::Processor:://;
+        $logger->debug(__x("processing with {processor}",
+                           processor => $short_name));
+        $asset->{content} = $processor->process($asset, $site);
+    }
+
+    return $self;	
 }
 
 1;
