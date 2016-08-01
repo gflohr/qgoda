@@ -22,7 +22,9 @@ use strict;
 
 use base qw(Template::Plugin);
 
+use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
+use Cwd;
 use URI;
 
 sub new {
@@ -53,6 +55,36 @@ sub bust_cache {
     } else {
     	return "$uri?$stat[9]"
     }
+}
+
+sub include {
+	my ($self, $_path) = @_;
+
+    require Qgoda;
+    my $q = Qgoda->new;
+    my $srcdir = $q->config->{srcdir};
+    
+    my $path = Cwd::abs_path($_path);
+    if (!defined $path) {
+    	die __x("error including '{path}': {error}.\n",
+    	        path => $_path, error => $!);
+    }
+
+    my $relpath = File::Spec->abs2rel($path, $srcdir);
+    my $asset = Qgoda::Asset->new($path, $relpath);
+    
+    my $site = $q->getSite;
+    my $analyzers = $q->getAnalyzers;
+    foreach my $analyzer (@{$analyzers}) {
+        $analyzer->analyzeAsset($asset, $site);
+    }
+    
+    my $builders = $q->getBuilders;
+    foreach my $builder (@{$builders}) {
+    	$builder->processAsset($asset, $site);
+    }
+    
+	return $asset->{content};
 }
 
 1;

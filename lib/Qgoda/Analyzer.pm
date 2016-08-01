@@ -44,35 +44,45 @@ sub new {
 sub analyze {
 	my ($self, $site) = @_;
 	
-	my $logger = $self->{__logger};
 	foreach my $asset ($site->getAssets) {
-		my $path = $asset->getPath;
-		$logger->debug(__x("analyzing asset '{path}'", 
-		                   path => $asset->getPath));
-		my $front_matter = front_matter $path;
-		
-		# FIXME! Fill $meta with defaults!
-		my $meta = {};
-		if (!empty $front_matter) {
-			$meta = eval { YAML::Load($front_matter) };
-			if ($@) {
-				$logger->error(yaml_error $path, $@);
-				next;
-			}
-		} else {
-			$meta->{raw} = 1;
-		}
-		
-		# FIXME! Merge the front matter into the meta information preserving
-		# the immutable properties.
-		foreach my $key (keys %$meta) {
-			next if 'path' eq $key;
-			next if 'relpath' eq $key;
-			$asset->{$key} = $meta->{$key};
-		}
-		$self->__fillMeta($asset, $site) if !$asset->{raw};
+		$self->analyzeAsset($asset, $site);
 	}
 	
+	return $self;
+}
+
+sub analyzeAsset {
+	my ($self, $asset, $site) = @_;
+	
+    my $logger = $self->{__logger};
+
+    my $path = $asset->getPath;
+    $logger->debug(__x("analyzing asset '{path}'", 
+                       path => $asset->getPath));
+    my $front_matter = front_matter $path;
+        
+    # FIXME! Fill $meta with defaults!
+    my $meta = {};
+    if (!empty $front_matter) {
+        $meta = eval { YAML::Load($front_matter) };
+        if ($@) {
+            $logger->error(yaml_error $path, $@);
+            next;
+        }
+    } else {
+        $meta->{raw} = 1;
+    }
+        
+    # FIXME! Merge the front matter into the meta information preserving
+    # the immutable properties.
+    foreach my $key (keys %$meta) {
+        next if 'path' eq $key;
+        next if 'relpath' eq $key;
+        $asset->{$key} = $meta->{$key};
+    }
+    
+    $self->__fillMeta($asset, $site) if !$asset->{raw};
+    
 	return $self;
 }
 

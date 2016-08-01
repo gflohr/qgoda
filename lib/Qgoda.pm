@@ -77,7 +77,7 @@ sub build {
         or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
                               dir => $config->{srcdir},
                               error => $!));
-    my $site = Qgoda::Site->new($config);
+    my $site = $self->{__site} = Qgoda::Site->new($config);
 
     $self->{__outfiles} = [];    
     $self->__scan($site);
@@ -345,6 +345,24 @@ sub __onFilesysChange {
     $logger->error($@) if $@;
 	
 	return $self;
+}
+
+sub getAnalyzers {
+    my ($self) = @_;
+    
+    return $self->{__analyzers};
+}
+
+sub getBuilders {
+    my ($self) = @_;
+    
+    return $self->{__builders};
+}
+
+sub getSite {
+    my ($self) = @_;
+    
+    return $self->{__site};
 }
 
 1;
