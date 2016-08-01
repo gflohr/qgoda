@@ -72,7 +72,7 @@ sub analyzeAsset {
     } else {
         $meta->{raw} = 1;
     }
-        
+    
     # FIXME! Merge the front matter into the meta information preserving
     # the immutable properties.
     foreach my $key (keys %$meta) {
@@ -180,18 +180,20 @@ sub __fillPathInformation {
     my ($basename, @suffixes) = strip_suffix $filename;
     $asset->{basename} = $basename;
     
-    my $trigger = $site->getTrigger(@suffixes);
-    if (!empty $trigger) {
-    	my ($chain, $name) = $site->getChainByTrigger($trigger);
-    	$asset->{chain} = $name if $chain;
-    	if ($chain && exists $chain->{suffix}) {
-            for (my $i = $#suffixes; $i >= 0; --$i) {
-                if ($suffixes[$i] eq $trigger) {
-                    $suffixes[$i] = $chain->{suffix};
-                    last;
-                }
-            }
-    	}
+    if (empty $asset->{chain}) {
+	    my $trigger = $site->getTrigger(@suffixes);
+	    if (!empty $trigger) {
+	        my ($chain, $name) = $site->getChainByTrigger($trigger);
+	        $asset->{chain} = $name if $chain;
+	        if ($chain && exists $chain->{suffix}) {
+	            for (my $i = $#suffixes; $i >= 0; --$i) {
+	                if ($suffixes[$i] eq $trigger) {
+	                    $suffixes[$i] = $chain->{suffix};
+	                    last;
+	                }
+	            }
+	        }
+	    }
     }
     
     $asset->{suffixes} = \@suffixes;
