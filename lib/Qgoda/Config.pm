@@ -168,7 +168,14 @@ sub checkConfig {
         unless $self->__isHash($config->{processors}->{options});
     die __x("'{variable}' must be a list", variable => 'exclude')
         if exists $self->{exclude} && !$self->__isArray($self->{exclude});
-        
+    die __x("'{variable}' must be a dictionary", variable => 'defaults')
+        if exists $self->{defaults} && !$self->__isHash($config->{defaults});
+    
+    if (exists $self->{defaults}) {
+    	my $cursor = delete $self->{defaults};
+    	$self->{defaults} = {};
+    	$self->__copyDefaults($self->{defaults}, $cursor);
+    }    
     return $self;
 }
 
@@ -219,6 +226,40 @@ sub __isArray {
     return unless $what && ref $what && 'ARRAY' eq reftype $what;
     
     return $self;
+}
+
+sub __copyDefaults {
+    my ($self, $config, $cursor, $base) = @_;
+
+    $base = '' if !defined $base;
+
+    while (my ($dir, $rec) = each %$cursor) {
+        next if !defined $dir;
+        $dir =~ s{^/+}{};
+        $dir =~ s{/+$}{};
+        $dir =~ s{//+}{/}g;
+        next if !length $dir;
+
+        my $path = $base . '/' . $dir;
+        if (exists $rec->{values}) {
+            if (!$self->__isHash($rec->{values})) {
+                die __x("defaults: values for '{path}' must be hash",
+                        path => $path);
+            }
+
+            $config->{$path} ||= {};
+            while (my ($key, $value) = each %{$rec->{values}}) {
+                $config->{$path}->{$key} = $value;
+            }
+        }
+        if (exists $rec->{subdirs}) {
+            if (!ref $rec->{subdirs} || 'HASH' ne ref $rec->{subdirs}) {
+                die __x("defaults: subdirs for '{path}' must be hash",
+                        path => $path);
+            }
+            $self->__copyConfig($config, $rec->{subdirs}, $path);
+        }
+    }
 }
 
 1;

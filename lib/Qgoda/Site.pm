@@ -70,14 +70,31 @@ sub getArtefacts {
 
 # Only works for top-level keys!
 sub getMetaValue {
-	my ($self, $key, $asset) = @_;
+	my ($self, $key, $asset, $default) = @_;
+	
+	my $value;
 	
 	if (exists $asset->{$key}) {
 		return $asset->{$key};
-	} elsif (exists $self->{config}->{$key}) {
-		return $self->{config}->{$key};
 	}
 	
+	my $config = $self->{config};
+	my $defaults = $config->{defaults};
+	my $relpath = '/' . $asset->getRelpath;
+	while ($defaults && length $relpath) {
+		if (exists $defaults->{$relpath}
+		    && exists $defaults->{$relpath}->{$key}) {
+		    return $defaults->{$relpath}->{$key};    	
+		}
+		$relpath =~ s{/[^/]+$}{};
+	}
+	
+	if (exists $config->{$key}) {
+		return $config->{$key};
+	}
+	
+	return $default if defined $default;
+    
 	return;
 }
 
