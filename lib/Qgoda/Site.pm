@@ -70,7 +70,7 @@ sub getArtefacts {
 
 # Only works for top-level keys!
 sub getMetaValue {
-	my ($self, $key, $asset, $default) = @_;
+	my ($self, $key, $asset) = @_;
 	
 	my $value;
 	
@@ -93,8 +93,6 @@ sub getMetaValue {
 		return $config->{$key};
 	}
 	
-	return $default if defined $default;
-    
 	return;
 }
 

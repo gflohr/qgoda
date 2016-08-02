@@ -51,6 +51,7 @@ sub new {
     # Default configuration.
     my $config = {
     	title => __"A New Qgoda Powered Site",
+    	type => 'page',
     	srcdir => '.',
     	location => '/{directory}/{basename}/{index}{suffix}',
     	permalink => '{significant-path}',
@@ -176,6 +177,10 @@ sub checkConfig {
     	$self->{defaults} = {};
     	$self->__copyDefaults($self->{defaults}, $cursor);
     }    
+
+    die __x("'{variable}' must be a single value", variable => 'type')
+        if ref $config->{type};
+
     return $self;
 }
 

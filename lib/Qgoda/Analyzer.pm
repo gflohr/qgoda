@@ -145,7 +145,7 @@ sub __fillMeta {
     $asset->{slug} = $self->__slug($asset);
 
     $asset->{view} = $site->getMetaValue(view => $asset);
-    $asset->{type} = $site->getMetaValue(type => $asset, 'page');
+    $asset->{type} = $site->getMetaValue(type => $asset);
     
     return $self;
 }
