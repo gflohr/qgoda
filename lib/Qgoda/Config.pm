@@ -24,7 +24,7 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
 use YAML;
 use Cwd;
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype looks_like_number);
 
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
 
@@ -87,6 +87,16 @@ sub new {
                 	'cook-content' => 1
                 }
             },
+    	},
+    	taxonomies => {
+    		type => undef,
+    		linguas => undef,
+    		tags => {
+    			simweight => 2,
+    		},
+    		categories => {
+    			simweight => 3,
+    		},
     	},
     };
     
@@ -176,8 +186,25 @@ sub checkConfig {
     	my $cursor = delete $self->{defaults};
     	$self->{defaults} = {};
     	$self->__copyDefaults($self->{defaults}, $cursor);
-    }    
-
+    }
+    
+    die __x("'{variable}' must be a dictionary", variable => 'taxonomies')
+        if exists $self->{taxonomies} && !$self->__isHash($config->{taxonomies});
+    foreach my $taxonomy (keys %{$config->{taxonomies}}) {
+    	my $record = $config->{taxonomies}->{$taxonomy};
+    	if (defined $record) {
+            die __x("'{variable}' must be a dictionary", 
+                    variable => "taxonomies.$taxonomy")
+                unless $self->__isHash($config->{taxonomies}->{$taxonomy});
+    		my $simweight = $record->{simweight};
+    		if (defined $simweight) {
+    			die __x("'{variable}' must be a number greater than or equal to zero",
+    			        variable => "taxonomies.$taxonomy.simweight")
+    			    unless $self->__isNumber($simweight) && $simweight >= 0;
+    		}
+    	}
+    }
+    
     die __x("'{variable}' must be a single value", variable => 'type')
         if ref $config->{type};
 
@@ -233,6 +260,16 @@ sub __isArray {
     return $self;
 }
 
+sub __isNumber {
+	my ($self, $what) = @_;
+	
+	return unless defined $what;
+	
+	return $self if looks_like_number $what;
+	
+	return $self;
+}
+
 sub __copyDefaults {
     my ($self, $config, $cursor, $base) = @_;
 
@@ -262,7 +299,7 @@ sub __copyDefaults {
                 die __x("defaults: subdirs for '{path}' must be hash",
                         path => $path);
             }
-            $self->__copyConfig($config, $rec->{subdirs}, $path);
+            $self->__copyDefaults($config, $rec->{subdirs}, $path);
         }
     }
 }
