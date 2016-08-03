@@ -29,6 +29,8 @@ use URI;
 use Scalar::Util qw(reftype);
 
 use Qgoda;
+use Qgoda::Util qw(merge_data);
+use Qgoda::Builder;
 
 sub new {
 	my ($class) = @_;
@@ -61,7 +63,15 @@ sub bust_cache {
 }
 
 sub include {
-	my ($self, $_path) = @_;
+	my ($self, $path) = @_;
+	
+	my $asset = $self->__include($path, {});
+	
+	return $asset->{content};
+}
+
+sub __include {
+	my ($self, $_path, $overlay) = @_;
 
     require Qgoda;
     my $q = Qgoda->new;
@@ -82,6 +92,8 @@ sub include {
         $analyzer->analyzeAsset($asset, $site, 1);
     }
     
+    merge_data $asset, $overlay;
+    
     $q->locateAsset($asset, $site);
     
     my $builders = $q->getBuilders;
@@ -89,7 +101,7 @@ sub include {
     	$builder->processAsset($asset, $site);
     }
     
-	return $asset->{content};
+	return $asset;
 }
 
 sub list {
@@ -107,9 +119,20 @@ sub listPosts {
 }
 
 sub writeAsset {
-	my ($self, $asset, $overlay) = @_;
+	my ($self, $path, $overlay) = @_;
 
+    my $asset = $self->__include($path);
     
+    my $q = Qgoda->new;
+    my $logger = $q->logger('template');
+    my $builder = Qgoda::Builder->new;
+    my $site = $q->getSite;
+
+    $builder->saveArtefact($asset, $site, $asset->{location});
+    $logger->debug(__x("successfully built '{location}'",
+                       location => $asset->{location}));
+    
+    return $self;
 }
 
 # If requested, this could be extended so that a ORing of filters can also
