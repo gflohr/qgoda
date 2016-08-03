@@ -370,29 +370,37 @@ sub getSite {
 sub __locate {
 	my ($self, $site) = @_;
 	
-	my $logger = $self->logger;
     foreach my $asset ($site->getAssets) {
-    	$logger->debug(__x("locating asset '/{relpath}'",
-                           relpath => $asset->getRelpath));
-    	
-        my $location = $asset->{raw} ? '/' . $asset->getRelpath
-                       : $self->expandLink($asset, $site, $asset->{location});
-        $logger->debug(__x("location '{location}'",
-                           location => $location));
-        $asset->{location} = $location;
-    
-        my ($significant, $directory) = fileparse $location;
-        ($significant) = strip_suffix $significant;
-        if ($significant eq $asset->{index}) {
-            $asset->{'significant-path'} = $directory . '/';
-        } else {
-            $asset->{'significant-path'} = $location;
-        }
-        my $permalink = $self->expandLink($asset, $site, $asset->{permalink}, 1);
-        $logger->debug(__x("permalink '{permalink}'",
-                           permalink => $permalink));
-        $asset->{permalink} = $permalink;
     }
+	
+	return $self;
+}
+
+sub locateAsset {
+	my ($self, $asset, $site) = @_;
+	
+    my $logger = $self->logger;
+    
+    $logger->debug(__x("locating asset '/{relpath}'",
+                       relpath => $asset->getRelpath));
+        
+    my $location = $asset->{raw} ? '/' . $asset->getRelpath
+                   : $self->expandLink($asset, $site, $asset->{location});
+    $logger->debug(__x("location '{location}'",
+                       location => $location));
+    $asset->{location} = $location;
+    
+    my ($significant, $directory) = fileparse $location;
+    ($significant) = strip_suffix $significant;
+    if ($significant eq $asset->{index}) {
+        $asset->{'significant-path'} = $directory . '/';
+    } else {
+        $asset->{'significant-path'} = $location;
+    }
+    my $permalink = $self->expandLink($asset, $site, $asset->{permalink}, 1);
+    $logger->debug(__x("permalink '{permalink}'",
+                       permalink => $permalink));
+    $asset->{permalink} = $permalink;
 	
 	return $self;
 }

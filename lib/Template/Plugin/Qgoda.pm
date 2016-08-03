@@ -82,6 +82,8 @@ sub include {
         $analyzer->analyzeAsset($asset, $site, 1);
     }
     
+    $q->locateAsset($asset, $site);
+    
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
     	$builder->processAsset($asset, $site);
@@ -102,6 +104,12 @@ sub listPosts {
     my ($self, @filters) = @_;
     
     return $self->list([type => 'post'], @filters);
+}
+
+sub writeAsset {
+	my ($self, $asset, $overlay) = @_;
+
+    
 }
 
 # If requested, this could be extended so that a ORing of filters can also
