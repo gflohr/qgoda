@@ -133,9 +133,9 @@ sub getChain {
 
 sub addTaxonomy {
     my ($self, $taxonomy, $asset, $value) = @_;
-    
+
     $self->{__taxonomies}->{$taxonomy} ||= {};
-    $self->{__taxonomies}->{$taxonomy}->{$value} = {};
+    $self->{__taxonomies}->{$taxonomy}->{$value} ||= {};
     
     $self->{__taxonomies}->{$taxonomy}->{$value}->{$asset->getRelpath} = $asset;
     

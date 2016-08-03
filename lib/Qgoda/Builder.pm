@@ -22,10 +22,8 @@ use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
-use File::Basename qw(fileparse);
 
-use Qgoda::Util qw(empty read_file read_body write_file interpolate
-                   normalize_path strip_suffix);
+use Qgoda::Util qw(empty read_file read_body write_file);
 
 sub new {
 	my $self = '';
@@ -45,30 +43,11 @@ sub build {
     	eval {
 	    	$logger->debug(__x("building asset '/{relpath}'",
 	    	                   relpath => $asset->getRelpath));
-	
-	    	my $location = $asset->{raw} ? '/' . $asset->getRelpath
-	    	        : $self->expandLink($asset, $site, $asset->{location});
-	        $logger->debug(__x("location '{location}'",
-	                           location => $location));
-	        $asset->{location} = $location;
-	
-	        my ($significant, $directory) = fileparse $location;
-	        ($significant) = strip_suffix $significant;
-	        if ($significant eq $asset->{index}) {
-	        	$asset->{'significant-path'} = $directory . '/';
-	        } else {
-	        	$asset->{'significant-path'} = $location;
-	        }
-	        my $permalink = $self->expandLink($asset, $site, $asset->{permalink}, 1);
-	        $logger->debug(__x("permalink '{permalink}'",
-	                           permalink => $permalink));
-	        $asset->{permalink} = $permalink;
-	
 	        $self->processAsset($asset, $site);
 	
-	        $self->saveArtefact($asset, $site, $location);
+	        $self->saveArtefact($asset, $site, $asset->{location});
             $logger->debug(__x("successfully built '{location}'",
-                               location => $location));
+                               location => $asset->{location}));
     	};
     	if ($@) {
     		++$errors;
@@ -92,13 +71,6 @@ sub logger {
 	
     require Qgoda;
     my $logger = Qgoda->new->logger('builder');    
-}
-
-sub expandLink {
-	my ($self, $asset, $site, $link, $trailing_slash) = @_;
-
-	my $interpolated = interpolate $link, $asset;
-	return normalize_path $interpolated, $trailing_slash;
 }
 
 sub readAssetContent {

@@ -30,6 +30,7 @@ use File::Find;
 use Scalar::Util qw(reftype);
 use AnyEvent;
 use AnyEvent::Loop;
+use File::Basename qw(fileparse);
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -37,7 +38,7 @@ use Qgoda::Site;
 use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
-use Qgoda::Util qw(empty);
+use Qgoda::Util qw(empty strip_suffix interpolate normalize_path);
 
 my $qgoda;
 
@@ -83,6 +84,7 @@ sub build {
     $self->__scan($site);
     
     $self->__analyze($site);
+    $self->__locate($site);
     $self->__build($site);
     
     $self->__prune($site);
@@ -363,6 +365,43 @@ sub getSite {
     my ($self) = @_;
     
     return $self->{__site};
+}
+
+sub __locate {
+	my ($self, $site) = @_;
+	
+	my $logger = $self->logger;
+    foreach my $asset ($site->getAssets) {
+    	$logger->debug(__x("locating asset '/{relpath}'",
+                           relpath => $asset->getRelpath));
+    	
+        my $location = $asset->{raw} ? '/' . $asset->getRelpath
+                       : $self->expandLink($asset, $site, $asset->{location});
+        $logger->debug(__x("location '{location}'",
+                           location => $location));
+        $asset->{location} = $location;
+    
+        my ($significant, $directory) = fileparse $location;
+        ($significant) = strip_suffix $significant;
+        if ($significant eq $asset->{index}) {
+            $asset->{'significant-path'} = $directory . '/';
+        } else {
+            $asset->{'significant-path'} = $location;
+        }
+        my $permalink = $self->expandLink($asset, $site, $asset->{permalink}, 1);
+        $logger->debug(__x("permalink '{permalink}'",
+                           permalink => $permalink));
+        $asset->{permalink} = $permalink;
+    }
+	
+	return $self;
+}
+
+sub expandLink {
+    my ($self, $asset, $site, $link, $trailing_slash) = @_;
+
+    my $interpolated = interpolate $link, $asset;
+    return normalize_path $interpolated, $trailing_slash;
 }
 
 1;
