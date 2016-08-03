@@ -28,7 +28,8 @@ sub new {
     my $self = {
     	config => $config,
         assets => {},
-        artefacts => {}
+        artefacts => {},
+        taxonomies => {},
     };
     
     bless $self, $class;
@@ -128,6 +129,17 @@ sub getChain {
 	my $chain = $self->getChainByTrigger($trigger) or return;
 	
 	return $chain;
+}
+
+sub addTaxonomy {
+    my ($self, $taxonomy, $asset, $value) = @_;
+    
+    $self->{__taxonomies}->{$taxonomy} ||= {};
+    $self->{__taxonomies}->{$taxonomy}->{$value} = [];
+    
+    push @{$self->{__taxonomies}->{$taxonomy}->{$value}}, $asset;
+    
+    return $self;    
 }
 
 1;

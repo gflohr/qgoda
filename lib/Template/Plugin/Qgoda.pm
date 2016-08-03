@@ -76,7 +76,7 @@ sub include {
     my $site = $q->getSite;
     my $analyzers = $q->getAnalyzers;
     foreach my $analyzer (@{$analyzers}) {
-        $analyzer->analyzeAsset($asset, $site);
+        $analyzer->analyzeAsset($asset, $site, 1);
     }
     
     my $builders = $q->getBuilders;

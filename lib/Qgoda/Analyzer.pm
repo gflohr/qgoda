@@ -24,6 +24,7 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 use Date::Parse;
 use YAML;
 use File::Basename qw(fileparse);
+use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(read_file empty yaml_error front_matter lowercase
                    normalize_path strip_suffix);
@@ -42,17 +43,17 @@ sub new {
 }
 
 sub analyze {
-	my ($self, $site) = @_;
+	my ($self, $site, $included) = @_;
 	
 	foreach my $asset ($site->getAssets) {
-		$self->analyzeAsset($asset, $site);
+		$self->analyzeAsset($asset, $site, $included);
 	}
 	
 	return $self;
 }
 
 sub analyzeAsset {
-	my ($self, $asset, $site) = @_;
+	my ($self, $asset, $site, $included) = @_;
 	
     my $logger = $self->{__logger};
 
@@ -82,7 +83,8 @@ sub analyzeAsset {
     }
     
     $self->__fillMeta($asset, $site) if !$asset->{raw};
-    
+    $self->__fillTaxonomies($asset, $site) if !$included && !$asset->{raw};
+     
 	return $self;
 }
 
@@ -146,6 +148,30 @@ sub __fillMeta {
 
     $asset->{view} = $site->getMetaValue(view => $asset);
     $asset->{type} = $site->getMetaValue(type => $asset);
+    
+    return $self;
+}
+
+sub __fillTaxonomies {
+    my ($self, $asset, $site) = @_;
+    
+    my $logger = $self->{__logger};
+    my $config = $self->{__config};
+    
+    my $taxonomies = $config->{taxonomies};
+    foreach my $t (keys %$taxonomies) {
+    	next if !exists $asset->{$t};
+    	my @values;
+    	if (ref $asset->{$t} && 'ARRAY' eq reftype $t) {
+    		@values = @{$asset->{t}};
+    	} else {
+    		@values = $asset->{t};
+    	}
+    	
+    	foreach my $value (@values) {
+    		$site->addTaxonomy($t, $asset, $value);
+    	}
+    }
     
     return $self;
 }
