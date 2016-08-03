@@ -135,11 +135,20 @@ sub addTaxonomy {
     my ($self, $taxonomy, $asset, $value) = @_;
     
     $self->{__taxonomies}->{$taxonomy} ||= {};
-    $self->{__taxonomies}->{$taxonomy}->{$value} = [];
+    $self->{__taxonomies}->{$taxonomy}->{$value} = {};
     
-    push @{$self->{__taxonomies}->{$taxonomy}->{$value}}, $asset;
+    $self->{__taxonomies}->{$taxonomy}->{$value}->{$asset->getRelpath} = $asset;
     
     return $self;    
+}
+
+sub getAssetsInTaxonomy {
+    my ($self, $taxonomy, $value) = @_;
+    
+    return {} if !exists $self->{__taxonomies};
+    return {} if !exists $self->{__taxonomies}->{$taxonomy};
+    
+    return $self->{__taxonomies}->{$taxonomy}->{$value} || {}
 }
 
 1;

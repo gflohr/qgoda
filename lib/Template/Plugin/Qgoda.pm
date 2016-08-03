@@ -26,6 +26,9 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
 use Cwd;
 use URI;
+use Scalar::Util qw(reftype);
+
+use Qgoda;
 
 sub new {
 	my ($class) = @_;
@@ -85,6 +88,46 @@ sub include {
     }
     
 	return $asset->{content};
+}
+
+sub list {
+	my ($self, @filters) = @_;
+	
+	my $site = Qgoda->new->getSite;
+	
+	return $self->__extractAnd([grep {!$_->{raw}} $site->getAssets], \@filters);
+}
+
+sub listPosts {
+    my ($self, @filters) = @_;
+    
+    return $self->list([type => 'post'], @filters);
+}
+
+# If requested, this could be extended so that a ORing of filters can also
+# be implemented.
+sub __extractAnd {
+    my ($self, $set, $filters) = @_;
+
+    die __"list filter must be an array reference"  
+        if !ref $filters || 'ARRAY' ne reftype $filters;
+    
+    my @set = @$set;
+    my $site = Qgoda->new->getSite;
+    foreach my $filter (@$filters) {
+    	@set = ();
+    	die __"filter items must be array references"
+            if !ref $filters || 'ARRAY' ne reftype $filters;
+        my ($taxonomy, $value) = @$filter;
+        my $lookup = $site->getAssetsInTaxonomy($taxonomy, $value);
+        foreach my $asset (@$set) {
+        	push @set, $asset if exists $lookup->{$asset->getRelpath};
+        }
+        return [] if !@set;
+        $set = [@set];
+    }
+    
+    return \@set;
 }
 
 1;

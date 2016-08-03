@@ -162,10 +162,10 @@ sub __fillTaxonomies {
     foreach my $t (keys %$taxonomies) {
     	next if !exists $asset->{$t};
     	my @values;
-    	if (ref $asset->{$t} && 'ARRAY' eq reftype $t) {
-    		@values = @{$asset->{t}};
+    	if (ref $asset->{$t} && 'ARRAY' eq reftype $asset->{$t}) {
+    		@values = @{$asset->{$t}};
     	} else {
-    		@values = $asset->{t};
+    		@values = $asset->{$t};
     	}
     	
     	foreach my $value (@values) {
