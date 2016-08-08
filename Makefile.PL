@@ -87,6 +87,7 @@ WriteMakefile (
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'AnyEvent' => '7.12',
+        'AnyEvent::HTTPD' => '0.93',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
