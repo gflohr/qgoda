@@ -371,6 +371,7 @@ sub __locate {
 	my ($self, $site) = @_;
 	
     foreach my $asset ($site->getAssets) {
+    	$self->locateAsset($asset, $site);
     }
 	
 	return $self;
