@@ -39,6 +39,7 @@ use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
 use Qgoda::Util qw(empty strip_suffix interpolate normalize_path);
+use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
 
@@ -62,12 +63,15 @@ sub new {
     $self->{__analyzers} = [Qgoda::Analyzer->new];
     $self->{__builders} = [Qgoda::Builder->new];
     $self->{__processors} = {};
+    $self->{__load_plugins} = 1;
 
     return $qgoda;
 }
 
 sub build {
     my ($self) = @_;
+
+    delete $self->{__load_plugins} && load_plugins $qgoda;
 
     my $logger = $self->{__logger};
     my $config = $self->{__config};
