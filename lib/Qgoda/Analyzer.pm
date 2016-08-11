@@ -26,7 +26,7 @@ use YAML;
 use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
-use Qgoda::Util qw(read_file empty yaml_error front_matter lowercase
+use Qgoda::Util qw(empty yaml_error front_matter lowercase
                    normalize_path strip_suffix);
 
 sub new {
