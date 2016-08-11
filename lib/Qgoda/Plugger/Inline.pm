@@ -20,6 +20,49 @@ package Qgoda::Plugger::Inline;
 
 use strict;
 
+use Locale::TextDomain qw(com.cantanea.qgoda);
+use Inline;
+
+use Qgoda;
+
 use base qw(Qgoda::Plugger);
+
+sub new {
+	my ($class, $data) = @_;
+	
+	my $self = bless $data, $class;
+	
+    $self->compile;
+    	
+	return $self;
+}
+
+sub language {
+	my ($self) = @_;
+	
+	my $language = ref $self;
+	$language =~ s/^Qgoda::Plugger::Inline:://;
+	
+	return $language;
+}
+
+sub compile {
+	my ($self) = @_;
+	
+	my $language = $self->language;
+	
+	my %config;
+	
+	if ($ENV{"QGODA_DEBUG_$language"}) {
+		$config{print_version} = 1;
+        $config{print_info} = 1;
+	}
+	
+	# FIXME! Pass the source code to the module that has to use the code
+	# so that functions are imported into the right namespace.
+    Inline->bind($language => $self->{main}, %config);
+    
+    return $self;
+}
 
 1;

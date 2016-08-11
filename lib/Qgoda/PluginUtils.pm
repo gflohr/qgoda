@@ -53,6 +53,7 @@ sub load_plugins {
     my $modules_dir = File::Spec->catfile($config->{srcdir}, 'node_modules');    
     my %plugins = map {
     	$_ => {
+    		package_dir => File::Spec->catfile($modules_dir, $_),
     		package_json => File::Spec->catfile($modules_dir, $_, 
     		                                    'package.json'),
     	}
@@ -69,7 +70,6 @@ sub load_plugins {
     	init_plugin $name, $plugin, $logger;
     }
 
-$logger->fatal('stop here');
     return 1;
 }
 
@@ -86,9 +86,10 @@ sub search_local_plugins($$$) {
 	foreach my $name (@subdirs) {
         $logger->debug(__x("plugin {name} found in plugin directory.",
                            name => $name));
+        my $package_dir = File::Spec->catfile($plugin_dir, $name);
         $plugins->{$name} = {
-        	package_json => File::Spec->catfile($plugin_dir, $name, 
-        	                                    'package.json')
+        	package_dir => $package_dir,
+        	package_json => File::Spec->catfile($package_dir, 'package.json'),
         };
 	}
 	
@@ -107,13 +108,20 @@ sub init_plugin($$$) {
         if !defined $json;
 	
 	my $data = decode_json $json;
-	my $plugin_data = $data->{'qgoda'};
+	my $plugin_data = $data->{qgoda};
     $logger->fatal(__x("{file}: plugin definition (key 'qgoda') missing!",
                        file => $package_json))
         if !defined $plugin_data;
     $logger->fatal(__x("{file}: value for key 'qgoda' must be a dictionary!",
                        file => $package_json))
         if !(ref $plugin_data && 'HASH' eq reftype $plugin_data);
+    $plugin_data->{main} ||= $data->{main};
+    $logger->fatal(__x("{file}: 'qgoda.main' or 'main' must point to main source file!",
+                       file => $package_json))
+        if (empty $plugin_data->{main} 
+            || ref $plugin_data->{main});
+    $plugin_data->{main} = File::Spec->catfile($plugin->{package_dir}, 
+                                               $plugin_data->{main});
 	
     my $language = $plugin_data->{language};
     $logger->fatal(__x("{file}: language (qgoda.language) missing!",
@@ -125,15 +133,12 @@ sub init_plugin($$$) {
                        file => $package_json, language => $language))
         if empty $language;
         
-    my $type = $plugin_data->{type};
-    $logger->fatal(__x("{file}: plugin type (qgoda.type) missing!",
-                       file => $package_json))
-        if empty $type;
-    my $plugger_class = $languages{$language};
-    # TRANSLATORS: Language is a programming language.
-    $logger->fatal(__x("{file}: unsupported language '{language}'!",
-                       file => $package_json, language => $language))
-        if empty $language;
-        
+    my $plugger_module = $plugger_class;
+    $plugger_module =~ s{::}{/}g;
+    $plugger_module .= '.pm';
+    
+    require $plugger_module;
+    my $plugger = $plugger_class->new($plugin_data);
+
 	return 1;
 }

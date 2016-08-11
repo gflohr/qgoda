@@ -417,4 +417,10 @@ sub expandLink {
     return normalize_path $interpolated, $trailing_slash;
 }
 
+sub debugging {
+	my ($self) = @_;
+	
+	return $self->{__verbose};
+}
+
 1;
