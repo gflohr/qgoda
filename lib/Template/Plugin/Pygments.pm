@@ -20,6 +20,11 @@ package Template::Plugin::Pygments;
 
 use strict;
 
+use Locale::TextDomain qw(com.cantanea.qgoda);
+
+use Qgoda;
+use Qgoda::Util qw(read_file);
+
 use base qw(Template::Plugin::Filter);
 
 sub init {
@@ -32,9 +37,29 @@ sub init {
 }
 
 sub filter {
-	my ($self, $text) = @_;
+	my ($self, $text, $args, $config) = @_;
 	
-	return 'The text was changed.';
+	return pygments($self, $text, $args, $config);
 }
+
+my $code;
+
+BEGIN {
+    require File::Spec;
+	
+    my $q = Qgoda->new;
+    my $config = $q->config;
+    my $filename = File::Spec->catfile(
+        $config->{srcdir}, 
+        'node_modules', 
+        'qgoda-plugin-pygments',
+        'index.py');
+    $code = read_file $filename;
+    die __x("error reading '{filename}': {error}", 
+            filename => $filename, error => $!)
+        if !defined $code;
+}
+
+use Inline Python => $code;
 
 1;
