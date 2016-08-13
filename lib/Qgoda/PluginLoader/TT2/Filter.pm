@@ -34,16 +34,15 @@ sub new {
     bless $self, $class;
 }
 
-# FIXME! Do not add the name but the entire plugin data.
 sub addPlugin {
-    my ($self, $class_name) = @_;
+    my ($self, $plugin_data) = @_;
 
-    $class_name = 'Qgoda::Plugin::TT2::Filter::' . $class_name;
+    my $class_name = 'Qgoda::Plugin::TT2::Filter::' . $plugin_data->{module};
     my $module_name = $class_name;
     $module_name =~ s{(?:::|\')}{/}g;
     $module_name .= '.pm';
 
-    $self->{__modules}->{$module_name} = 1;
+    $self->{__modules}->{$module_name} = $plugin_data;
 
     no strict 'refs';
 
@@ -72,6 +71,4 @@ sub Qgoda::PluginLoader::TT2::Filter::INC {
     return $fh;
 }
 
-$singleton = Qgoda::PluginLoader::TT2::Filter->new;
-
-1;
+unshift @INC, Qgoda::PluginLoader::TT2::Filter->new;
