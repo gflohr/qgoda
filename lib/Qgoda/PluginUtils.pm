@@ -39,7 +39,7 @@ my %languages = (
 );
 
 my %types = (
-    'TT2::Filter' => 'Qgoda::PluginFactory::TT2::Filter',
+    'TT2::Filter' => 'Qgoda::PluginLoader::TT2::Filter',
 );
 
 sub load_plugins {

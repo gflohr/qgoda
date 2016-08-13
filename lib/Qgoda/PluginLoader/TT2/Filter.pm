@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::PluginFactory::TT2::Filter;
+package Qgoda::PluginLoader::TT2::Filter;
 
 use strict;
 
