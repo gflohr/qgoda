@@ -39,7 +39,7 @@ my %languages = (
 );
 
 my %types = (
-    'TT2::Filter' => 'Qgoda::PluginType::TT2',
+    'TT2::Filter' => 'Qgoda::PluginFactory::TT2::Filter',
 );
 
 sub load_plugins {
@@ -127,6 +127,7 @@ sub init_plugin($$$) {
     $logger->fatal(__x("{file}: language (qgoda.language) missing!",
                        file => $package_json))
         if empty $language;
+
     my $plugger_class = $languages{$language};
     # TRANSLATORS: Language is a programming language.
     $logger->fatal(__x("{file}: unsupported language '{language}'!",
@@ -138,7 +139,25 @@ sub init_plugin($$$) {
     $plugger_module .= '.pm';
     
     require $plugger_module;
-    my $plugger = $plugger_class->new($plugin_data);
+    $plugin_data->{plugger} = $plugger_class->new($plugin_data);
 
+    my $type = $plugin_data->{type};
+    $logger->fatal(__x("{file}: language (qgoda.type) missing!",
+                       file => $package_json))
+        if empty $type;
+
+    my $factory_class = $types{$type};
+    # TRANSLATORS: Language is a programming language.
+    $logger->fatal(__x("{file}: unsupported plugin type '{type}'!",
+                       file => $package_json, type => $type))
+        if empty $type;
+        
+    my $factory_module = $factory_class;
+    $factory_module =~ s{::}{/}g;
+    $factory_module .= '.pm';
+    
+    require $factory_module;
+    $factory_class->new($plugin_data);
+    
 	return 1;
 }

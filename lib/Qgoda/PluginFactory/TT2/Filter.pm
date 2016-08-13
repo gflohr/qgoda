@@ -16,49 +16,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Plugger::Inline;
+package Qgoda::PluginFactory::TT2::Filter;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
-use Inline;
-
-use Qgoda;
-
-use base qw(Qgoda::Plugger);
-
 sub new {
-	my ($class, $data) = @_;
-	
-	my $self = bless $data, $class;
-	
-	return $self;
-}
+	my ($class, $plugin_data) = @_;
 
-sub language {
-	my ($self) = @_;
-	
-	my $language = ref $self;
-	$language =~ s/^Qgoda::Plugger::Inline:://;
-	
-	return $language;
-}
+    use Data::Dumper;
+    print Dumper $plugin_data;
 
-sub compile {
-	my ($self) = @_;
-	
-	my $language = $self->language;
-	
-	my %config;
-	
-	if ($ENV{"QGODA_DEBUG_$language"}) {
-		$config{print_version} = 1;
-        $config{print_info} = 1;
-	}
-
-    return sub {	
-        Inline->bind($language => $self->{main}, %config);
+    eval {
+        package Qgoda::TT2::Plugin::Filter::Pygments;
+    	
+        use strict;
+        
+        use base qw(Template::Plugin::Filter);
+        
+        sub filter {
+            return 'TODO';	
+        }
+        
+        1;	
     };
+
+    require Qgoda::TT2::Plugin::Filter::Pygments;
+    
+    my $self = '';
+    
+    bless \$self, $class;
 }
 
 1;
