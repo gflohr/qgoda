@@ -40,7 +40,6 @@ sub new {
     my $srcdir = $qgoda->config->{srcdir};
     
     # FIXME! Merge options with those from the configuration!
-    $DB::single = 1;
     $self->{__tt} = Template->new({
         INCLUDE_PATH => [File::Spec->join($srcdir, '_views')],
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
