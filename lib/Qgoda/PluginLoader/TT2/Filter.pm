@@ -20,31 +20,58 @@ package Qgoda::PluginLoader::TT2::Filter;
 
 use strict;
 
+my $singleton;
+
 sub new {
-	my ($class, $plugin_data) = @_;
+    my ($class) = @_;
+    
+    return $singleton if $singleton;
 
-    use Data::Dumper;
-    print Dumper $plugin_data;
-
-    eval {
-        package Qgoda::TT2::Plugin::Filter::Pygments;
-    	
-        use strict;
-        
-        use base qw(Template::Plugin::Filter);
-        
-        sub filter {
-            return 'TODO';	
-        }
-        
-        1;	
+    my $self = {
+        __modules => {}
     };
 
-    require Qgoda::TT2::Plugin::Filter::Pygments;
-    
-    my $self = '';
-    
-    bless \$self, $class;
+    bless $self, $class;
 }
+
+# FIXME! Do not add the name but the entire plugin data.
+sub addPlugin {
+    my ($self, $class_name) = @_;
+
+    $class_name = 'Qgoda::Plugin::TT2::Filter::' . $class_name;
+    my $module_name = $class_name;
+    $module_name =~ s{(?:::|\')}{/}g;
+    $module_name .= '.pm';
+
+    $self->{__modules}->{$module_name} = 1;
+
+    no strict 'refs';
+
+    *{"${class_name}::new"} = sub {
+        my ($class, $args, $config) = @_;
+
+        my $self = {
+            _DYNAMIC => 1
+        };
+
+        bless $self, $class;
+    };
+
+    return $self;
+}
+
+sub Qgoda::PluginLoader::TT2::Filter::INC {
+    my ($self, $filename) = @_;
+
+    return if !exists $self->{__modules}->{$filename};
+
+    my $data = '1';
+
+    open my $fh, '<', \$data;
+
+    return $fh;
+}
+
+$singleton = Qgoda::PluginLoader::TT2::Filter->new;
 
 1;
