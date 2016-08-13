@@ -20,6 +20,8 @@ package Qgoda::PluginLoader::TT2::Filter;
 
 use strict;
 
+use Template::Plugin::Filter;
+
 my $singleton;
 
 sub new {
@@ -27,11 +29,11 @@ sub new {
     
     return $singleton if $singleton;
 
-    my $self = {
+    $singleton = {
         __modules => {}
     };
 
-    bless $self, $class;
+    bless $singleton, $class;
 }
 
 sub addPlugin {
@@ -46,20 +48,20 @@ sub addPlugin {
 
     no strict 'refs';
 
-    *{"${class_name}::new"} = sub {
-        my ($class, $args, $config) = @_;
+    *{"${class_name}::init"} = sub {
+        my ($self) = @_;
 
-        my $self = {
-            _DYNAMIC => 1
-        };
+        $self->{_DYNAMIC} = 1;
         $self->install_filter('pygments');
 
-        bless $self, $class;
+        return $self;
     };
     
     *{"${class_name}::pygments"} = sub {
         return 'TODO! Implement pygments!';
     };
+    
+    @{"${class_name}::ISA"} = 'Template::Plugin::Filter';
     
     return $self;
 }
