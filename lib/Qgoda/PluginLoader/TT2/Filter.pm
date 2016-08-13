@@ -37,7 +37,7 @@ sub new {
 sub addPlugin {
     my ($self, $plugin_data) = @_;
 
-    my $class_name = 'Qgoda::Plugin::TT2::Filter::' . $plugin_data->{module};
+    my $class_name = 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
     my $module_name = $class_name;
     $module_name =~ s{(?:::|\')}{/}g;
     $module_name .= '.pm';
@@ -52,10 +52,15 @@ sub addPlugin {
         my $self = {
             _DYNAMIC => 1
         };
+        $self->install_filter('pygments');
 
         bless $self, $class;
     };
-
+    
+    *{"${class_name}::pygments"} = sub {
+        return 'TODO! Implement pygments!';
+    };
+    
     return $self;
 }
 
