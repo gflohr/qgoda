@@ -1,6 +1,6 @@
 # Qgoda
 
-Qgoda (pronounce: yahgoda!) is an extensible static site generator.
+Qgoda (pronounce: yagoda!) is an extensible static site generator.
 
 # Description
 
