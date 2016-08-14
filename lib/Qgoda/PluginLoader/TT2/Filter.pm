@@ -59,9 +59,15 @@ sub addPlugin {
         return $self;
     };
     
-    *{"${class_name}::filter"} = sub {
-        return 'TODO! Implement pygments!';
-    };
+    eval <<EOF;
+    package $class_name;
+    
+    sub filter {
+    	my (\$self, \$text, \$config, \$args) = \@_;
+    	
+    	return pygments(\$self, \$text, \$config, \$args);
+    }
+EOF
     
     @{"${class_name}::ISA"} = 'Template::Plugin::Filter';
     

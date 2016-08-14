@@ -56,7 +56,9 @@ sub compile {
         $config{print_info} = 1;
 	}
 
-    return sub {	
+    return sub {
+    	package Template::Plugin::Pygments;
+    	
         Inline->bind($language => $self->{main}, %config);
     };
 }
