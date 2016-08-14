@@ -157,7 +157,10 @@ sub init_plugin($$$) {
     $factory_module .= '.pm';
     
     require $factory_module;
-    $factory_class->new->addPlugin($plugin_data);
+    my $plugin_loader = $factory_class->new;
+    $plugin_data->{plugin_loader} = $plugin_loader;
+    
+    $plugin_loader->addPlugin($plugin_data);
     
 	return 1;
 }

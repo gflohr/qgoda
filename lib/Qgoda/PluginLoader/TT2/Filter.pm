@@ -36,10 +36,16 @@ sub new {
     bless $singleton, $class;
 }
 
+sub namespace {
+	my ($self, $plugin_data) = @_;
+	
+	return 'Template::Plugin::' . $plugin_data->{module};
+}
+
 sub addPlugin {
     my ($self, $plugin_data) = @_;
 
-    my $class_name = 'Template::Plugin::' . $plugin_data->{module};
+    my $class_name = $self->namespace($plugin_data);
     my $module_name = $class_name;
     $module_name =~ s{(?:::|\')}{/}g;
     $module_name .= '.pm';

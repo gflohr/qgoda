@@ -56,10 +56,18 @@ sub compile {
         $config{print_info} = 1;
 	}
 
+    my $namespace = $self->{plugin_loader}->namespace($self);
+    require Data::Dumper;
+    my $args = Data::Dumper::Dumper([$self->{main}, %config]);
+    $args =~ s{.*?= \[}{};
+    $args =~ s{\];.*?$}{};
+    
     return sub {
-    	package Template::Plugin::Pygments;
-    	
-        Inline->bind($language => $self->{main}, %config);
+    	eval <<EOF;
+package $namespace;
+
+Inline->bind($language => $args);
+EOF
     };
 }
 
