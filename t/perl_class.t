@@ -19,19 +19,19 @@
 use strict;
 
 use Test::More tests => 12;
-use Qgoda::Util qw(perl_module);
+use Qgoda::Util qw(perl_class);
 
-ok perl_module 'foobar';
-ok !perl_module '2foobar';
-ok perl_module '_2foobar';
-ok perl_module '_';
-ok perl_module '__';
+ok perl_class 'foobar';
+ok !perl_class '2foobar';
+ok perl_class '_2foobar';
+ok perl_class '_';
+ok perl_class '__';
 
-ok perl_module 'Foo::Bar';
+ok perl_class 'Foo::Bar';
 # Valid Perl module name but we do not want to support it.
-ok !perl_module "Foo'Bar";
-ok !perl_module '2::Bar';
-ok perl_module '_2::Bar';
-ok perl_module '_::_';
-ok perl_module '__::__';
-ok perl_module 'Foo1::Bar2::Baz3';
+ok !perl_class "Foo'Bar";
+ok !perl_class '2::Bar';
+ok perl_class '_2::Bar';
+ok perl_class '_::_';
+ok perl_class '__::__';
+ok perl_class 'Foo1::Bar2::Baz3';

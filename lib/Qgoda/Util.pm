@@ -30,7 +30,7 @@ use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
-                normalize_path strip_suffix perl_identifier perl_module);
+                normalize_path strip_suffix perl_identifier perl_class);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -420,7 +420,7 @@ sub perl_identifier($) {
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
 }
 
-sub perl_module($) {
+sub perl_class($) {
     my ($name) = @_;
     
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
