@@ -59,8 +59,8 @@ sub load_plugins {
     	}
     } @{$config->{plugins} || []};
     foreach my $name (keys %plugins) {
-    	$logger->debug(__x("plugin {name} found in configuration.",
-    	                   name => $name));
+    	$logger->info(__x("plugin {name} found in configuration.",
+    	                  name => $name));
     }
 
     my $plugin_dir = File::Spec->catfile($config->{srcdir}, '_plugins');
@@ -84,8 +84,8 @@ sub search_local_plugins($$$) {
 	 
 	my @subdirs = grep {!/^[._]/} readdir DIR;
 	foreach my $name (@subdirs) {
-        $logger->debug(__x("plugin {name} found in plugin directory.",
-                           name => $name));
+        $logger->info(__x("plugin {name} found in plugin directory.",
+                          name => $name));
         my $package_dir = File::Spec->catfile($plugin_dir, $name);
         $plugins->{$name} = {
         	package_dir => $package_dir,
