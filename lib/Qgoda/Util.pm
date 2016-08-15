@@ -415,7 +415,13 @@ sub js_unescape($) {
 }
 
 sub perl_identifier($) {
-	my ($name) = @_;
-	
-	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
+    my ($name) = @_;
+    
+    return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
+}
+
+sub perl_module($) {
+    my ($name) = @_;
+    
+    return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
 }
