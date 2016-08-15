@@ -58,7 +58,7 @@ sub addPlugin {
         my ($self) = @_;
 
         $self->{_DYNAMIC} = 1;
-        $self->install_filter('pygments');
+        $self->install_filter($plugin_data->{entry});
         
         $plugin_data->{plugger}->compile->();
 
@@ -71,7 +71,7 @@ sub addPlugin {
     sub filter {
     	my (\$self, \$text, \$config, \$args) = \@_;
     	
-    	return pygments(\$self, \$text, \$config, \$args);
+    	return $plugin_data->{entry}(\$self, \$text, \$config, \$args);
     }
 EOF
     
