@@ -30,7 +30,7 @@ use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
-                normalize_path strip_suffix);
+                normalize_path strip_suffix perl_identifier perl_module);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -412,4 +412,10 @@ sub js_unescape($) {
                 /xegs;
     
     return $string;
+}
+
+sub perl_module($) {
+	my ($name) = @_;
+	
+	return 1;
 }
