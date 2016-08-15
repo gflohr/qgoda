@@ -417,5 +417,5 @@ sub js_unescape($) {
 sub perl_module($) {
 	my ($name) = @_;
 	
-	return 1;
+	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
 }
