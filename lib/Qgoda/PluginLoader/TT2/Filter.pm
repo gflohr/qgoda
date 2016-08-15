@@ -39,7 +39,7 @@ sub new {
 sub namespace {
 	my ($self, $plugin_data) = @_;
 	
-	return 'Template::Plugin::' . $plugin_data->{module};
+	return 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
 }
 
 sub addPlugin {
