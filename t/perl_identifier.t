@@ -19,10 +19,10 @@
 use strict;
 
 use Test::More tests => 5;
-use Qgoda::Util qw(perl_identifier perl_module);
+use Qgoda::Util qw(perl_identifier);
 
-ok perl_module 'foobar';
-ok !perl_module '2foobar';
-ok perl_module '_2foobar';
-ok perl_module '_';
-ok perl_module '__';
+ok perl_identifier 'foobar';
+ok !perl_identifier '2foobar';
+ok perl_identifier '_2foobar';
+ok perl_identifier '_';
+ok perl_identifier '__';
