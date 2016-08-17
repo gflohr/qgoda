@@ -34,9 +34,9 @@ sub new {
 }
 
 sub process {
-	my ($self, $asset, $site) = @_;
+	my ($self, $content, $asset, $site) = @_;
 	
-	return markdown $asset->{content}, $self->{__options};
+	return markdown $content, $self->{__options};
 }
 
 1;

@@ -61,8 +61,9 @@ sub new {
     	processors => {
             chains => {
                 markdown => {
-                	modules => [qw(Markdown HTML)],
+                	modules => [qw(HTML Markdown)],
                 	suffix => 'html',
+                	wrapper => 'html'
                 },
                 html => {
                 	modules => 'HTML',
@@ -83,9 +84,7 @@ sub new {
             },
             options => {
                 Markdown => [],
-                TT2 => {
-                	'cook-content' => 1
-                }
+                TT2 => {}
             },
     	},
     	taxonomies => {

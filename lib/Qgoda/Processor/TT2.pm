@@ -49,10 +49,7 @@ sub new {
 }
 
 sub process {
-	my ($self, $asset, $site, $content) = @_;
-
-    my $view = $asset->{view};
-    die __"no view specified" if empty $view;
+	my ($self, $content, $asset, $site) = @_;
 
     my $vars = {
         asset => $asset,
@@ -61,13 +58,7 @@ sub process {
     };
 
     my $cooked;
-    if (!empty $asset->{content} && $self->{__options}->{'cook-content'}) {
-        $self->{__tt}->process(\$asset->{content}, $vars, \$cooked)
-            or die $self->{__tt}->error, "\n" if !defined $cooked;
-    	$asset->{content} = $cooked;
-    	undef $cooked;
-    }
-    $self->{__tt}->process($view, $vars, \$cooked)
+    $self->{__tt}->process(\$content, $vars, \$cooked)
         or die $self->{__tt}->error, "\n" if !defined $cooked;
 
     return $cooked;

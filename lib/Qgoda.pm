@@ -165,6 +165,65 @@ sub dumpConfig {
 	return $self;
 }
 
+sub __getProcessors {
+	my ($self, @names) = @_;
+	
+	my $processors = $self->config->{processors};
+	
+	my @processors;
+    foreach my $name (@names) {
+        my $module = $processors->{modules}->{$name} || $name;
+        my $class_name = 'Qgoda::Processor::' . $module;
+
+        if ($self->{__processors}->{$class_name}) {
+            push @processors, $self->{__processors}->{$class_name};
+            next;
+        }       
+
+        my $module_name = $class_name . '.pm';
+        $module_name =~ s{::|'}{/}g;
+        
+        require $module_name;
+        my $options = $processors->{options}->{$module};
+        my @options;
+        if (defined $options) {
+            if (ref $options) {
+                if ('HASH' eq reftype $options) {
+                    @options = %{$options};
+                } else {
+                    @options = @{$options};
+                }
+            } else {
+                @options = $options;
+            }
+        }
+        
+        my $processor = $class_name->new(@options);
+        $self->{__processors}->{$class_name} = $processor;
+        push @processors, $processor;
+    }
+    
+    return \@processors;
+}
+
+sub getWrapperProcessors {
+	my ($self, $asset, $site) = @_;
+
+	my $chain_name = $asset->{chain};
+	return [] if !defined $chain_name;
+    my $processors = $self->config->{processors};
+    my $chain = $processors->{chains}->{$chain_name} or return [];
+    
+    # Indirection.
+    $chain_name = $chain->{wrapper};
+    return [] if !defined $chain_name;
+    $chain = $processors->{chains}->{$chain_name} or return [];
+
+    my $names = $chain->{modules} or return [];
+    
+    return $self->__getProcessors(@$names);
+}
+
 sub getProcessors {
 	my ($self, $asset, $site) = @_;
 	
@@ -174,41 +233,8 @@ sub getProcessors {
     my $chain = $processors->{chains}->{$chain_name} or return [];
 
     my $names = $chain->{modules} or return [];
-    my @processors;
     
-    foreach my $name (@$names) {
-    	my $module = $processors->{modules}->{$name} || $name;
-    	my $class_name = 'Qgoda::Processor::' . $module;
-
-        if ($self->{__processors}->{$class_name}) {
-        	push @processors, $self->{__processors}->{$class_name};
-        	next;
-        }   	
-
-    	my $module_name = $class_name . '.pm';
-    	$module_name =~ s{::|'}{/}g;
-    	
-    	require $module_name;
-    	my $options = $processors->{options}->{$module};
-    	my @options;
-    	if (defined $options) {
-    		if (ref $options) {
-    			if ('HASH' eq reftype $options) {
-    				@options = %{$options};
-    			} else {
-    				@options = @{$options};
-    			}
-    		} else {
-    			@options = $options;
-    		}
-    	}
-    	
-    	my $processor = $class_name->new(@options);
-    	$self->{__processors}->{$class_name} = $processor;
-    	push @processors, $processor;
-    }
-    
-    return \@processors;
+    return $self->__getProcessors(@$names);
 }
 
 # FIXME! This should instantiate scanner plug-ins and use them instead.

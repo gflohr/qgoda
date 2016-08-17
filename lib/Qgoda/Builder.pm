@@ -128,10 +128,32 @@ sub processAsset {
         $short_name =~ s/^Qgoda::Processor:://;
         $logger->debug(__x("processing with {processor}",
                            processor => $short_name));
-        $asset->{content} = $processor->process($asset, $site);
+        $asset->{content} = $processor->process($asset->{content},
+                                                $asset, $site);
+    }
+    $processors = $qgoda->getWrapperProcessors($asset, $site);
+    return $self if !@$processors;
+    
+    my $view = $asset->{view};
+    die __"no view specified.\n" if empty $view;
+    
+    my $srcdir = $qgoda->config->{srcdir};
+    my $view_file = File::Spec->join($srcdir, '_views', $view);
+    $content = read_file $view_file;
+    die __x("error reading view '{file}': {error}.\n",
+            file => $view_file, error => $!)
+        if !defined $content;
+    foreach my $processor (@$processors) {
+    	my $short_name = ref $processor;
+    	$short_name =~ s/^Qgoda::Processor:://;
+        $logger->debug(__x("wrapping with {processor}",
+                           processor => $short_name));
+        $content = $processor->process($content, $asset, $site);    	
     }
 
-    return $self;	
+    $asset->{content} = $content;
+    
+    return $self;
 }
 
 1;
