@@ -20,7 +20,10 @@ package Qgoda::PluginLoader::TT2::Filter;
 
 use strict;
 
+use Locale::TextDomain qw(com.cantanea.qgoda);
 use Template::Plugin::Filter;
+
+use Qgoda::Util qw(empty perl_class perl_identifier);
 
 my $singleton;
 
@@ -38,6 +41,12 @@ sub new {
 
 sub namespace {
 	my ($self, $plugin_data) = @_;
+
+    die __x("Field 'qgoda.module' missing in package.json.\n", 
+            name => $plugin_data->{module})
+        if !exists $plugin_data->{module};
+    die __x("Invalid module name '{name}'.\n", name => $plugin_data->{module})
+        if !perl_class $plugin_data->{module};
 	
 	return 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
 }
@@ -46,11 +55,18 @@ sub addPlugin {
     my ($self, $plugin_data) = @_;
 
     my $class_name = $self->namespace($plugin_data);
+        
     my $module_name = $class_name;
     $module_name =~ s{(?:::|\')}{/}g;
     $module_name .= '.pm';
 
     $self->{__modules}->{$module_name} = $plugin_data;
+
+    die __"Field 'qgoda.entry' missing in package.json.\n" 
+        if !exists $plugin_data->{entry};
+    my $entry = $plugin_data->{entry};
+    die __x("Invalid entry point '{entry}'.\n", entry => $entry)
+        if !perl_identifier $entry;
 
     no strict 'refs';
 

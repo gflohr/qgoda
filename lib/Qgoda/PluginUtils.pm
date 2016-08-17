@@ -67,7 +67,13 @@ sub load_plugins {
     search_local_plugins(\%plugins, $plugin_dir, $logger);
     
     while (my ($name, $plugin) = each %plugins) {
-    	init_plugin $name, $plugin, $logger;
+    	eval {
+    	    init_plugin $name, $plugin, $logger;
+    	};
+    	if ($@) {
+    		$logger->fatal(__x("plugin '{name}': {error}",
+    		                   name => $name, error => $@));
+    	}
     }
 
     return 1;
