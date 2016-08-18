@@ -19,6 +19,7 @@
 package Qgoda::Processor::TT2;
 
 use strict;
+use boolean;
 
 use Template;
 use Locale::TextDomain qw(com.cantanea.qgoda);
@@ -55,6 +56,8 @@ sub process {
         asset => $asset,
         site => $site,
         config => $site->{config},
+        True => true,
+        False => false,
     };
 
     my $cooked;

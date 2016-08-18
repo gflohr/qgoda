@@ -87,7 +87,8 @@ WriteMakefile (
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'AnyEvent' => '7.12',
-        'JSON' => '2.90'
+        'JSON' => '2.90',
+        'boolean' => '0.46',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
