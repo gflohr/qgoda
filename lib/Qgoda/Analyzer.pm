@@ -27,7 +27,7 @@ use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(empty yaml_error front_matter lowercase
-                   normalize_path strip_suffix);
+                   normalize_path strip_suffix slugify);
 
 sub new {
     my ($class) = @_;
@@ -179,17 +179,7 @@ sub __fillTaxonomies {
 sub __slug {
 	my ($self, $asset) = @_;
 	
-	my $title = $asset->{title};
-	
-	use utf8;
-	my $slug = lowercase $title;
-	# We only allow alphanumerical characters, the dot, the hyphen and the underscore.
-	# Everything else gets converted into hyphens, and sequences of hyphens
-	# are condensed into one.
-	$slug =~ s/[\x00-\x2c\x2f\x3a-\x5e\x60\x7b-\x7f]/-/g;
-	$slug =~ s/--+/-/g;
-	
-	return $slug;
+	return slugify $asset->{title};
 }
 
 sub __fillPathInformation {

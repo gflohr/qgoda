@@ -30,7 +30,8 @@ use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
-                normalize_path strip_suffix perl_identifier perl_class);
+                normalize_path strip_suffix perl_identifier perl_class
+                slugify);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -424,4 +425,21 @@ sub perl_class($) {
     my ($name) = @_;
     
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
+}
+
+sub slugify($) {
+	my ($string) = @_;
+
+    return '' if emtpy $string;
+
+    use utf8;
+    my $slug = lowercase $string;
+
+    # We only allow alphanumerical characters, the dot, the hyphen and the underscore.
+    # Everything else gets converted into hyphens, and sequences of hyphens
+    # are condensed into one.
+    $slug =~ s/[\x00-\x2c\x2f\x3a-\x5e\x60\x7b-\x7f]/-/g;
+    $slug =~ s/--+/-/g;
+
+    return $slug;	
 }
