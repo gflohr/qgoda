@@ -9,3 +9,4 @@
 - Check what goes to stdout and what to stderr
 - consistency check for external plugin data
 - informative verbose output, when compiling plugins
+- Aria builder plug-in for aria enhancements
