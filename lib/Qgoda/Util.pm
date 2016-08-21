@@ -430,7 +430,7 @@ sub perl_class($) {
 sub slugify($) {
 	my ($string) = @_;
 
-    return '' if emtpy $string;
+    return '' if empty $string;
 
     use utf8;
     my $slug = lowercase $string;
