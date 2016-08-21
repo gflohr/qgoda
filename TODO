@@ -11,3 +11,4 @@
 - informative verbose output, when compiling plugins
 - Aria builder plug-in for aria enhancements
 - Ctrl-C no longer works
+- Better location in TT error messages
