@@ -89,7 +89,8 @@ sub new {
     	},
     	taxonomies => {
     		type => undef,
-    		linguas => undef,
+    		lingua => undef,
+    		name => undef,
     		tags => {
     			simweight => 2,
     		},

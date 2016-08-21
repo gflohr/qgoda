@@ -118,6 +118,32 @@ sub listPosts {
     return $self->list([type => 'post'], @filters);
 }
 
+sub link {
+    my ($self, @filters) = @_;
+    
+    my $set = $self->list(@filters);
+    if (@$set == 0) {
+        die "broken link()\n";
+    } if (@$set > 1) {
+        die "ambiguous link()\n"; 
+    }
+    
+    return $set->[0]->{permalink};
+}
+
+sub linkPost {
+    my ($self, @filters) = @_;
+    
+    my $set = $self->list([type => 'post'], @filters);
+    if (@$set == 0) {
+        die "broken linkPost()\n";
+    } if (@$set > 1) {
+        die "ambiguous linkPost()\n"; 
+    }
+    
+    return $set->[0]->{permalink};
+}
+
 sub writeAsset {
 	my ($self, $path, $overlay) = @_;
 
