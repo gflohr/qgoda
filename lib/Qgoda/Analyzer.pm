@@ -27,7 +27,7 @@ use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(empty yaml_error front_matter lowercase
-                   normalize_path strip_suffix slugify);
+                   normalize_path strip_suffix merge_data slugify);
 
 sub new {
     my ($class) = @_;
@@ -82,10 +82,30 @@ sub analyzeAsset {
         $asset->{$key} = $meta->{$key};
     }
     
+    $self->__fillDefaults($asset, $site);
+    
     $self->__fillMeta($asset, $site) if !$asset->{raw};
     $self->__fillTaxonomies($asset, $site) if !$included && !$asset->{raw};
      
 	return $self;
+}
+
+sub __fillDefaults {
+    my ($self, $asset, $site) = @_;
+    
+    my $logger = $self->{__logger};
+    my $config = $self->{__config};
+    
+    my $defaults = $config->{defaults};
+    my $relpath = '/' . $asset->getRelpath;
+    while ($defaults && length $relpath) {
+        if (exists $defaults->{$relpath}) {
+        	merge_data $asset, $defaults->{$relpath};
+        }
+        $relpath =~ s{/[^/]+$}{};
+    }
+    
+    return $self;
 }
 
 sub __fillMeta {
@@ -148,7 +168,7 @@ sub __fillMeta {
 
     $asset->{view} = $site->getMetaValue(view => $asset);
     $asset->{type} = $site->getMetaValue(type => $asset);
-    
+
     return $self;
 }
 
@@ -217,6 +237,7 @@ sub __fillPathInformation {
     if (@suffixes) {
         $asset->{suffix} = '.' . join '.', @suffixes;
     }
+
     $asset->{location} = $site->getMetaValue(location => $asset);
     $asset->{permalink} = $site->getMetaValue(permalink => $asset);
     $asset->{index} = $site->getMetaValue(index => $asset);

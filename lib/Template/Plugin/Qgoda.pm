@@ -106,7 +106,7 @@ sub __include {
 
 sub list {
 	my ($self, @filters) = @_;
-	
+
 	my $site = Qgoda->new->getSite;
 	
 	return $self->__extractAnd([grep {!$_->{raw}} $site->getAssets], \@filters);
@@ -185,6 +185,18 @@ sub __extractAnd {
     }
     
     return \@set;
+}
+
+sub sortBy {
+    my ($self, $field, $assets) = @_;
+
+    return [sort { $a->{$field} cmp $b->{$field} } @$assets];
+}
+
+sub nsortBy {
+    my ($self, $field, $assets) = @_;
+
+    return [sort { $a->{$field} <=> $b->{$field} } @$assets];
 }
 
 1;

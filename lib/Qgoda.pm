@@ -379,7 +379,7 @@ sub __onFilesysChange {
 
     eval { $self->build };
     $logger->error($@) if $@;
-	
+    
 	return $self;
 }
 

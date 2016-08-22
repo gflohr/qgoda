@@ -137,11 +137,17 @@ sub merge_data {
 	sub equal_ref {
 		my ($x, $y) = @_;
 		
-		return 1 if ref $x && ref $y && ref $x eq ref $y;
+		return if !ref $x;
+		return if !ref $y;
+		
+		my $ref_x = reftype $x;
+		my $ref_y = reftype $y;
+		
+		return $ref_x = $ref_y;
 	}
 
 	return $overlay if !equal_ref $overlay, $data;
-    return $overlay if UNIVERSAL::isa($overlay, 'ARRAY');
+    return $overlay if 'ARRAY' eq reftype $overlay;
     
     my $merger;
     $merger = sub {

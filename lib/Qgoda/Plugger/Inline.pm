@@ -67,6 +67,8 @@ sub compile {
 package $namespace;
 
 Inline->bind($language => $args);
+
+\$SIG{INT} = 'DEFAULT';
 EOF
     };
 }
