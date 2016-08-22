@@ -12,3 +12,9 @@
 - Aria builder plug-in for aria enhancements
 - Ctrl-C no longer works
 - Better location in TT error messages
+- Error for list filters that are not taxonomies, or rather do not require
+  configuration of taxonomies.
+- Relative links must be possible so that qgoda content can be deployed into
+  a document root subdirectory.
+- q.include must merge the parent asset data! This is why the docs link
+  does not work
