@@ -63,9 +63,9 @@ sub bust_cache {
 }
 
 sub include {
-	my ($self, $path) = @_;
+	my ($self, $path, $overlay) = @_;
 	
-	my $asset = $self->__include($path, {});
+	my $asset = $self->__include($path, $overlay);
 	
 	return $asset->{content};
 }
@@ -85,16 +85,23 @@ sub __include {
 
     my $relpath = File::Spec->abs2rel($path, $srcdir);
     my $asset = Qgoda::Asset->new($path, $relpath);
-    
+
     my $site = $q->getSite;
     my $analyzers = $q->getAnalyzers;
     foreach my $analyzer (@{$analyzers}) {
         $analyzer->analyzeAsset($asset, $site, 1);
     }
     
-    merge_data $asset, $overlay;
-    
     $q->locateAsset($asset, $site);
+    
+    if ($overlay) {
+        my %overlay = %$overlay;
+        delete $overlay{path};
+        delete $overlay{view};
+        delete $overlay{chain};
+        delete $overlay{wrapper};
+        merge_data $asset, \%overlay;
+    }
     
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
