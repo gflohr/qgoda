@@ -136,13 +136,13 @@ sub list {
 	my ($self, @filters) = @_;
 
 	my $site = Qgoda->new->getSite;
-	
+
 	return $self->__extractAnd([grep {!$_->{raw}} $site->getAssets], \@filters);
 }
 
 sub listPosts {
     my ($self, @filters) = @_;
-    
+
     return $self->list([type => 'post'], @filters);
 }
 
@@ -202,7 +202,7 @@ sub __extractAnd {
     foreach my $filter (@$filters) {
     	@set = ();
     	die __"filter items must be array references"
-            if !ref $filters || 'ARRAY' ne reftype $filters;
+            if !ref $filter || 'ARRAY' ne reftype $filter;
         my ($taxonomy, $value) = @$filter;
         my $lookup = $site->getAssetsInTaxonomy($taxonomy, $value);
         foreach my $asset (@$set) {
