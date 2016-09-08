@@ -27,10 +27,32 @@ sub new {
 }
 
 sub process {
-	my ($self, $asset, $site, $content) = @_;
+	my ($self, $content, $asset, $site) = @_;
 	
 	die __x("Processor class '{class}' does not implement the method process().\n",
 	        class => ref $self);
+}
+
+sub excerpt {
+	my ($self, $content, $asset, $site) = @_;
+	
+	require HTML::TreeBuilder;
+	my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
+                                  ignore_ignorable_whitespace => 1);
+	$tree->parse($content);
+	my @paragraphs = $tree->find('p', 'div');
+    foreach my $paragraph (@paragraphs) {
+    my @children = $paragraph->content_list;
+    foreach my $child (@children) {
+        next if $child->isa('HTML::Element');
+        $child =~ s/^[ \t\r\n]+//;
+        $child =~ s/[ \t\r\n]+$//;
+        return $child;
+    }
+    
+    return '';
+}
+	
 }
 
 1;

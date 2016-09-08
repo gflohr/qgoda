@@ -62,16 +62,33 @@ sub bust_cache {
     }
 }
 
+# TT2 distinguishes between hash and list arguments ...
+sub __unwrapHash {
+    my ($self, %hash) = @_;
+
+    foreach my $key (keys %hash) {
+        if (ref $key && 'HASH' eq ref $key && !defined $hash{$key}) {
+            my $subhash = $key;
+            foreach my $subkey (keys %hash) {
+                $hash{$subkey} = $subhash->{$subkey};
+            }
+            last;
+        }
+    }
+
+    return %hash;
+}
+
 sub include {
-	my ($self, $path, $overlay) = @_;
-	
-	my $asset = $self->__include($path, $overlay);
+	my ($self, $path, $overlay, %extra) = @_;
+
+	my $asset = $self->__include($path, $overlay, %extra);
 	
 	return $asset->{content};
 }
 
 sub __include {
-	my ($self, $_path, $overlay) = @_;
+	my ($self, $_path, $overlay, %extra) = @_;
 
     require Qgoda;
     my $q = Qgoda->new;
@@ -101,6 +118,10 @@ sub __include {
         delete $overlay{chain};
         delete $overlay{wrapper};
         merge_data $asset, \%overlay;
+    }
+
+    foreach my $key (keys %extra) {
+        $asset->{$key} = $extra{$key};
     }
     
     my $builders = $q->getBuilders;
@@ -152,9 +173,9 @@ sub linkPost {
 }
 
 sub writeAsset {
-	my ($self, $path, $overlay) = @_;
+	my ($self, $path, $overlay, %extra) = @_;
 
-    my $asset = $self->__include($path);
+    my $asset = $self->__include($path, $overlay, %extra);
     
     my $q = Qgoda->new;
     my $logger = $q->logger('template');
