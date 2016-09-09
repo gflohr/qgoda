@@ -133,7 +133,8 @@ sub processAsset {
     }
     
     if (@$processors && !exists $asset->{excerpt}) {
-    	$asset->{excerpt} = $processors->[-1]->excerpt($asset->{content});
+    	$asset->{excerpt} = $processors->[-1]->excerpt($asset->{content},
+    	                                               $asset, $site);
     }
     
     $processors = $qgoda->getWrapperProcessors($asset, $site);

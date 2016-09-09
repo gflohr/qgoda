@@ -45,7 +45,7 @@ sub addAsset {
 }
 
 sub getAssets {
-    values %{shift->{assets}};
+    sort { $a->{priority} <=> $b->{priority} }values %{shift->{assets}};
 }
 
 sub addArtefact {
