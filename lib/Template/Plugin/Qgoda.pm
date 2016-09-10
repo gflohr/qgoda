@@ -216,13 +216,13 @@ sub __extractAnd {
 }
 
 sub sortBy {
-    my ($self, $field, $assets) = @_;
+    my ($self, $assets, $field) = @_;
 
     return [sort { $a->{$field} cmp $b->{$field} } @$assets];
 }
 
 sub nsortBy {
-    my ($self, $field, $assets) = @_;
+    my ($self, $assets, $field) = @_;
 
     return [sort { $a->{$field} <=> $b->{$field} } @$assets];
 }
