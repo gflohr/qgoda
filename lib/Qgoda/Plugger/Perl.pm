@@ -16,12 +16,33 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Plugger;
+package Qgoda::Plugger::Perl;
 
 use strict;
 
+use Locale::TextDomain qw(com.cantanea.qgoda);
+use Inline;
+
+use Qgoda;
+
+use base qw(Qgoda::Plugger);
+
+sub new {
+	my ($class, $data) = @_;
+	
+	my $self = bless $data, $class;
+	
+	require $data->{main};
+	
+	return $self;
+}
+
+sub language {
+	return 'Perl';
+}
+
 sub native {
-	return;
+	return 1;
 }
 
 1;

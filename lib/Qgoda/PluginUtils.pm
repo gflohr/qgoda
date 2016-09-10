@@ -35,6 +35,7 @@ sub search_local_plugins($$$);
 sub init_plugin($$$);
 
 my %languages = (
+    Perl => 'Qgoda::Plugger::Perl',
     Python => 'Qgoda::Plugger::Inline::Python',
 );
 
@@ -147,8 +148,10 @@ sub init_plugin($$$) {
     require $plugger_module;
     $plugin_data->{plugger} = $plugger_class->new($plugin_data);
 
+    return 1 if $plugger_class->native;
+
     my $type = $plugin_data->{type};
-    $logger->fatal(__x("{file}: language (qgoda.type) missing!",
+    $logger->fatal(__x("{file}: type (qgoda.type) missing!",
                        file => $package_json))
         if empty $type;
 
