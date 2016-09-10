@@ -280,7 +280,6 @@ sub __copyDefaults {
         $dir =~ s{^/+}{};
         $dir =~ s{/+$}{};
         $dir =~ s{//+}{/}g;
-        next if !length $dir;
 
         my $path = $base . '/' . $dir;
         if (exists $rec->{values}) {
