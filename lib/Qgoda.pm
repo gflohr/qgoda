@@ -331,10 +331,14 @@ sub __prune {
 			$container =~ s{/$}{};
 			$directories{$container} = 1;
 		} elsif (-d $outfile) {
+			$logger->debug(__x("pruning directory '{directory}'",
+			                   directory => $outfile));
 			$logger->error(__x("cannot remove directory '{directory}': {error}",
 			                   directory => $outfile, error => $!))
 			    if !rmdir $outfile;
 		} else {
+            $logger->debug(__x("pruning file '{file}'",
+                               file => $outfile));
             $logger->error(__x("cannot remove file '{filename}': {error}",
                                filename => $outfile, error => $!))
                 if !unlink $outfile;
