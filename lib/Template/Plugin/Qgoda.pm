@@ -29,14 +29,97 @@ use URI;
 use Scalar::Util qw(reftype);
 
 use Qgoda;
-use Qgoda::Util qw(merge_data);
+use Qgoda::Util qw(merge_data empty);
 use Qgoda::Builder;
 
 sub new {
-	my ($class) = @_;
+	my ($class, $context) = @_;
 	
 	return $class if ref $class;
-	
+
+    my $get_values = sub {
+        my ($assets, @fields) = @_;
+        
+        my $stash = $context->stash->clone;
+        
+        # Find a random variable name.
+        my $name = 'a';
+        while (1) {
+        	last if empty $stash->get($name);
+        	++$name;
+        }
+        
+        my @values;
+        my $i = 0;
+        foreach my $asset (@$assets) {
+        	my @subvalues;
+        	push @values, [$i++, \@subvalues];
+        	
+        	# The variable name 'asset' is therefore not available.
+        	$stash->set($name => $asset);
+        	foreach my $field (@fields) {
+        		push @subvalues, $stash->get("$name.$field");
+        	}
+        }
+        
+        $stash->declone;
+        
+        return @values;
+    };
+    
+    sub compare_array {
+        my $arr1 = $a->[1];
+        my $arr2 = $b->[1];
+        
+        for (my $i = 0; $i < @$arr1; ++$i) {
+            my ($val1, $val2) = ($arr1->[$i], $arr2->[$i]);
+            
+            return $val1 cmp $val2 if $val1 cmp $val2;
+        }
+        
+        return 0;
+    }
+    
+    sub ncompare_array {
+        my $arr1 = $a->[1];
+        my $arr2 = $b->[1];
+        
+        for (my $i = 0; $i < @$arr1; ++$i) {
+            my ($val1, $val2) = ($arr1->[$i], $arr2->[$i]);
+            
+            return $val1 <=> $val2 if $val1 <=> $val2;
+        }
+        
+        return 0;
+    }
+    
+    my $sort_by = sub {
+        my ($assets, $field) = @_;
+
+        # Schwartzian transform.
+        return [
+            map { $assets->[$_->[0]] }
+            sort compare_array $get_values->($assets, $field)
+        ];
+                
+        return [sort { $a->{$field} cmp $b->{$field} } @$assets];
+    };
+
+    my $nsort_by = sub {
+        my ($assets, $field) = @_;
+
+        # Schwartzian transform.
+        return [
+            map { $assets->[$_->[0]] }
+            sort ncompare_array $get_values->($assets, $field)
+        ];
+                
+        return [sort { $a->{$field} cmp $b->{$field} } @$assets];
+    };
+
+    $context->define_vmethod(list => sortBy => $sort_by);
+    $context->define_vmethod(list => nsortBy => $nsort_by);
+    
 	my $self = '';
 	bless \$self, $class;
 }
@@ -186,7 +269,7 @@ sub writeAsset {
     $logger->debug(__x("successfully built '{location}'",
                        location => $asset->{location}));
     
-    return $self;
+    return '';
 }
 
 # If requested, this could be extended so that a ORing of filters can also
@@ -213,18 +296,6 @@ sub __extractAnd {
     }
     
     return \@set;
-}
-
-sub sortBy {
-    my ($self, $assets, $field) = @_;
-
-    return [sort { $a->{$field} cmp $b->{$field} } @$assets];
-}
-
-sub nsortBy {
-    my ($self, $assets, $field) = @_;
-
-    return [sort { $a->{$field} <=> $b->{$field} } @$assets];
 }
 
 1;
