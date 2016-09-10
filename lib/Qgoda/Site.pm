@@ -139,4 +139,13 @@ sub getAssetsInTaxonomy {
     return $self->{__taxonomies}->{$taxonomy}->{$value} || {}
 }
 
+sub getTaxonomyValues {
+	my ($self, $taxonomy) = @_;
+	
+	return [] if !exists $self->{__taxonomies};
+    return [] if !exists $self->{__taxonomies}->{$taxonomy};
+
+    return [keys %{$self->{__taxonomies}->{$taxonomy}}];
+}
+
 1;
