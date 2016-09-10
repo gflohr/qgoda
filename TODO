@@ -1,5 +1,9 @@
 - Try to unfold arguments to virtual methods.  If that does not work,
   use either only named arguments or positional arguments.
+  We need a utility function that creates a hash with named arguments
+  like in the ImgSrcset plugin.
+- Template function that removes all markup.  This is needed for the
+  <title> attribute that does not allow markup.
 - Important! /index.html must end up as /index.html not as /index/index.html
 - concept for creation of automatic list pages
 - rename outdir to sitedir
@@ -25,3 +29,5 @@
   remove them later.
 - just two lone --- lines do not work
 - arbitrary taxonomies (drop need to declare them first)
+- strftime()
+
