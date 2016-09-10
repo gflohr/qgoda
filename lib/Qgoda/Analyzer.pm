@@ -59,9 +59,11 @@ sub analyzeAsset {
 
     my $path = $asset->getPath;
     $logger->debug(__x("analyzing asset '{path}'", 
-                       path => $asset->getPath));
+                       path => $path));
+    stat $path or die __x("error reading '{path}': {err}",
+                          path => $path, err => $!);
     my $front_matter = front_matter $path;
-        
+
     # FIXME! Fill $meta with defaults!
     my $meta = {};
     if (!empty $front_matter) {
@@ -95,7 +97,7 @@ sub __fillDefaults {
     
     my $logger = $self->{__logger};
     my $config = $self->{__config};
-    
+
     my $defaults = $config->{defaults};
     my $relpath = '/' . $asset->getRelpath;
     while ($defaults && length $relpath) {
@@ -104,7 +106,10 @@ sub __fillDefaults {
         }
         $relpath =~ s{/[^/]+$}{};
     }
-    
+
+    if (exists $defaults->{'/'}) {
+    	merge_data $asset, $defaults->{'/'};
+    }    
     return $self;
 }
 
