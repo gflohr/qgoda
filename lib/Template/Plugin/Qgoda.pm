@@ -119,6 +119,7 @@ sub new {
 
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
+    $context->define_vmethod(scalar => slugify => \&Qgoda::Util::slugify);
     
 	my $self = '';
 	bless \$self, $class;

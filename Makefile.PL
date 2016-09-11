@@ -89,6 +89,7 @@ WriteMakefile (
         'AnyEvent' => '7.12',
         'JSON' => '2.90',
         'HTML::TreeBuilder' => '5.03',
+        'Text::Unidecode' => '1.27',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},

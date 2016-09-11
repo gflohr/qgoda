@@ -30,4 +30,4 @@
 - just two lone --- lines do not work
 - arbitrary taxonomies (drop need to declare them first)
 - strftime()
-
+- real implementation for slugify (language dependant)

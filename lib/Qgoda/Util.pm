@@ -25,6 +25,7 @@ use File::Path qw(make_path);
 use File::Basename qw(fileparse);
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use Scalar::Util qw(reftype looks_like_number);
+use Encode qw(_utf8_on);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -433,13 +434,15 @@ sub perl_class($) {
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
 }
 
-sub slugify($) {
-	my ($string) = @_;
+sub slugify($;$) {
+	my ($string, $locale) = @_;
 
     return '' if empty $string;
 
-    use utf8;
-    my $slug = lowercase $string;
+    Encode::_utf8_on($string);
+
+    require Text::Unidecode;
+    my $slug = lc Text::Unidecode::unidecode($string);
 
     # We only allow alphanumerical characters, the dot, the hyphen and the underscore.
     # Everything else gets converted into hyphens, and sequences of hyphens
