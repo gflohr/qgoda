@@ -31,3 +31,4 @@
 - arbitrary taxonomies (drop need to declare them first)
 - strftime()
 - real implementation for slugify (language dependant)
+- option for taxonomies to be case-insensitive

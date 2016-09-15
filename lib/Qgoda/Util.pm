@@ -32,7 +32,7 @@ use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
-                slugify);
+                slugify html_escape unmarkup);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -437,7 +437,7 @@ sub perl_class($) {
 sub slugify($;$) {
 	my ($string, $locale) = @_;
 
-    return '' if empty $string;
+    return '' if !defined $string;
 
     Encode::_utf8_on($string);
 
@@ -451,4 +451,47 @@ sub slugify($;$) {
     $slug =~ s/--+/-/g;
 
     return $slug;	
+}
+
+sub html_escape($) {
+	my ($string) = @_;
+	
+	return '' if !defined $string;
+	
+	my %escapes = (
+        '"' => '&#34;',
+        "&" => '&#38;',
+        "'" => '&#39;',
+        "<" => '&#60;',
+        ">" => '&#62;',
+	);
+	
+	$string =~ s/(["&'<>])/$escapes{$1}/gs;
+	
+	return $string;
+}
+
+sub unmarkup($) {
+	my ($string) = @_;
+	
+	return '' if !defined $string;
+	
+	require HTML::Parser;
+	
+	my $escaped = '';
+	my $text_handler = sub {
+		my ($string) = @_;
+		
+		$escaped .= $string;
+		
+	};
+	
+	my $parser = HTML::Parser->new(api_version => 3,
+	                               text_h => [$text_handler, 'text'],
+	                               marked_sections => 1);
+    	
+	$parser->parse($string);
+	$parser->eof;
+	
+	return $escaped;
 }

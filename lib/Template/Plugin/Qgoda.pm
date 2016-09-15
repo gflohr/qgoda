@@ -120,6 +120,8 @@ sub new {
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
     $context->define_vmethod(scalar => slugify => \&Qgoda::Util::slugify);
+    $context->define_vmethod(scalar => escape => \&Qgoda::Util::html_escape);
+    $context->define_vmethod(scalar => unmarkup => \&Qgoda::Util::unmarkup);
     
 	my $self = '';
 	bless \$self, $class;
