@@ -1,4 +1,4 @@
-#! /bin/false
+#! /usr/bin/env perl # -*- perl -*-
 
 # Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
 # all rights reserved.
@@ -16,12 +16,16 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Util::Globber;
-
 use strict;
 
-sub new {
-    bless {}, shift;
-}
+use Test::More tests => 2;
 
-1;
+use Qgoda::Util qw(globstar);
+
+my $dir = __FILE__;
+$dir =~ s{[-_a-zA-Z0-9.]+$}{globstar};
+ok chdir $dir;
+
+my @files = globstar '*.empty';
+is_deeply [sort @files],
+          [('one.empty', 'three.empty', 'two.empty')];

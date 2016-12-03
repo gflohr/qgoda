@@ -32,7 +32,7 @@ use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
-                slugify html_escape unmarkup);
+                slugify html_escape unmarkup globstar);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -494,4 +494,36 @@ sub unmarkup($) {
 	$parser->eof;
 	
 	return $escaped;
+}
+
+sub globstar {
+	my ($pattern) = @_;
+
+	$pattern = $_ if !@_;
+	
+	my @patterns;
+	my $current = '';
+    while ($pattern =~ s/(.)//s) {
+    	if ($1 eq '\\') {
+    		$pattern =~ s/(..?)//s;
+    		$current .= $1;
+    	} elsif ('/' eq $1 && '/**/' eq substr $pattern, 0, 4) {
+    		push @patterns, $current;
+    		$current = '';
+    	} else {
+    		$current .= $1;
+    	}
+    }
+    
+    push @patterns, $current if length $current;
+    @patterns = '' if !@patterns;
+    
+    if (1 == @patterns) {
+    	# No globstar used.  Return the default.
+    	return glob $patterns[0];
+    }
+    
+    use Data::Dumper;
+    die Dumper \@patterns;
+    
 }
