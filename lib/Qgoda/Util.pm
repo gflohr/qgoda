@@ -592,8 +592,9 @@ sub globstar($;$) {
     		# And search in every subdirectory;
             my %found_dirs;
             foreach my $directory (@directories) {
-            	foreach my $subdirectory (@directories) {
-            		$found_dirs{$subdirectory} = 1;
+            	$found_dirs{$directory} = 1;
+            	foreach my $subdirectory (_find_directories $directory) {
+            		$found_dirs{$subdirectory . '/'} = 1;
             	}
             }
             
