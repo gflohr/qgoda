@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use Qgoda::Util qw(globstar);
 
@@ -29,3 +29,23 @@ ok chdir $dir;
 my @files = globstar '*.empty';
 is_deeply [sort @files],
           [('one.empty', 'three.empty', 'two.empty')];
+
+@files = globstar '**';
+is_deeply [sort @files],
+          [qw (
+               first
+               first/one.empty
+               first/second
+               first/second/one.empty
+               first/second/third
+               first/second/third/one.empty
+               first/second/third/three.empty
+               first/second/third/two.empty
+               first/second/three.empty
+               first/second/two.empty
+               first/three.empty
+               first/two.empty
+               one.empty
+               three.empty
+               two.empty
+              )];

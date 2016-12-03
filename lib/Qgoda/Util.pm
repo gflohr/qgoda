@@ -26,6 +26,7 @@ use File::Basename qw(fileparse);
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use Scalar::Util qw(reftype looks_like_number);
 use Encode qw(_utf8_on);
+use File::Find ();
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -38,6 +39,7 @@ sub js_unescape($);
 sub tokenize($$);
 sub evaluate($$);
 sub lookup($$);
+sub globstar($;$);
 
 sub empty($) {
     my ($what) = @_;
@@ -496,34 +498,127 @@ sub unmarkup($) {
 	return $escaped;
 }
 
-sub globstar {
-	my ($pattern) = @_;
+sub _find_files {
+    my ($directory) = @_;
+    
+    my $empty = empty $directory;
+    $directory = '.' if $empty;
+    
+    my @hits;
+    File::Find::find sub {
+        return if -d $_;
+        return if '.' eq substr $_, 0, 1;
+        push @hits, $File::Find::name;      
+    }, $directory;
+    
+    if ($empty) {
+        @hits = map { substr $_, 2 } @hits;
+    }
+    
+    return @hits;
+}
 
+sub _find_directories {
+    my ($directory) = @_;
+    
+    my $empty = empty $directory;
+    $directory = '.' if $empty;
+    
+    my @hits;
+    File::Find::find sub {
+        return if !-d $_;
+        return if '.' eq substr $_, 0, 1;
+        push @hits, $File::Find::name;      
+    }, $directory;
+    
+    if ($empty) {
+        @hits = map { substr $_, 2 } @hits;
+    }
+    
+    return @hits;
+}
+
+sub _find_all {
+    my ($directory) = @_;
+    
+    my $empty = empty $directory;
+    $directory = '.' if $empty;
+    
+    my @hits;
+    File::Find::find sub {
+        return if '.' eq substr $_, 0, 1;
+        push @hits, $File::Find::name;      
+    }, $directory;
+    
+    if ($empty) {
+        @hits = map { substr $_, 2 } @hits;
+    }
+    
+    return @hits;
+}
+
+sub globstar($;$) {
+	my ($pattern, $directory) = @_;
+
+    $directory = '' if !defined $directory;
 	$pattern = $_ if !@_;
-	
-	my @patterns;
-	my $current = '';
+
+	if ('**' eq $pattern) {
+		return _find_all $directory;
+	} elsif ('**/' eq $pattern) {
+		return _find_directories $directory;
+	} elsif ($pattern =~ s{^\*\*/}{}) {
+		my %found_files;
+		my @dirs = _find_directories $directory;
+		foreach my $directory (_find_directories $directory) {
+			foreach my $file (globstar $pattern, $directory) {
+				$found_files{$file} = 1;
+			}
+		}
+		return keys %found_files;
+	}
+
+    my $current = quotemeta $directory;
     while ($pattern =~ s/(.)//s) {
     	if ($1 eq '\\') {
     		$pattern =~ s/(..?)//s;
     		$current .= $1;
-    	} elsif ('/' eq $1 && '/**/' eq substr $pattern, 0, 4) {
-    		push @patterns, $current;
-    		$current = '';
+    	} elsif ('/' eq $1 && $pattern =~ s{^\*\*/}{}) {
+    		$current .= $1;
+    		
+    		# Expand until here.
+    		my @directories = glob $current;
+    		
+    		# And search in every subdirectory;
+            my %found_dirs;
+            foreach my $directory (@directories) {
+            	foreach my $subdirectory (@directories) {
+            		$found_dirs{$subdirectory} = 1;
+            	}
+            }
+            
+            my %found_files;
+            foreach my $directory (keys %found_dirs) {
+            	foreach my $hit (globstar $pattern, $directory) {
+            		$found_files{$hit} = 1;
+            	}
+            }
+            return keys %found_files;
+    	} elsif ('**' eq $pattern) {
+    		my %found_files;
+    		foreach my $directory (glob $current) {
+    			foreach my $file (_find_all $directory) {
+    				$found_files{$file} = 1;
+    			}
+    		}
+    		return keys %found_files;
     	} else {
     		$current .= $1;
     	}
     }
-    
-    push @patterns, $current if length $current;
-    @patterns = '' if !@patterns;
-    
-    if (1 == @patterns) {
-    	# No globstar used.  Return the default.
-    	return glob $patterns[0];
-    }
-    
-    use Data::Dumper;
-    die Dumper \@patterns;
-    
+
+    # Pattern without globstar.  Just return the normal expansion.
+    return glob $current;
 }
+
+1;
