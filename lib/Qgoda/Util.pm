@@ -584,7 +584,7 @@ sub globstar($;$) {
     		$pattern =~ s/(..?)//s;
     		$current .= $1;
     	} elsif ('/' eq $1 && $pattern =~ s{^\*\*/}{}) {
-    		$current .= $1;
+    		$current .= '/';
     		
     		# Expand until here.
     		my @directories = glob $current;
@@ -597,6 +597,16 @@ sub globstar($;$) {
             	}
             }
             
+            if ('' eq $pattern) {
+            	my %found_subdirs;
+            	foreach my $directory (keys %found_dirs) {
+            		$found_subdirs{$directory} = 1;
+            		foreach my $subdirectory (_find_directories $directory) {
+            		    $found_subdirs{$subdirectory . '/'} = 1;
+            		}
+            	}
+            	return keys %found_subdirs;
+            }
             my %found_files;
             foreach my $directory (keys %found_dirs) {
             	foreach my $hit (globstar $pattern, $directory) {
