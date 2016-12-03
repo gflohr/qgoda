@@ -28,52 +28,8 @@ push @extra, 'META_MERGE' => {
             #    web => 'https://github.com/gflohr/qgoda',
             #},
             repository => 'git://github.com/gflohr/qgoda.git',
-            bugtracker => 'https://rt.perl.org/rt3/',
-            homepage   => "http://www.guido-flohr.net/en/projects#qgoda",
-        },
-        optional_features => {
-            markdown => {
-                description => "Markdown to HTML translation",
-                prereqs => {
-                    runtime => {
-                        requires => {
-                            'Text::Markdown' => '1.000031'
-                        }
-                    }
-                }
-            },
-            tt => {
-                description => "Support for Template Toolkit templates",
-                prereqs => {
-                    runtime => {
-                        requires => {
-                            'Template' => '2.26'
-                        }
-                    }
-                }
-            },
-            watch => {
-                description => "Support for watching file system changes",
-                prereqs => {
-                    runtime => {
-                        requires => {
-                            'AnyEvent::Filesys::Notify' => '1.21',
-                        }
-                    }
-                }
-            },
-            helpers => {
-                description => "Run third-party helpers in parallel",
-                prereqs => {
-                    runtime => {
-                        requires => {
-                            'AnyEvent::Open3::Simple' => '0.86',
-                            # Helpers are only executed, when watching.
-                            'AnyEvent::Filesys::Notify' => '1.21',
-                        }
-                    }
-                }
-            },
+            bugtracker => 'https://github.com/gflohr/qgoda/issues',
+            homepage   => "http://www.qgoda.net/",
         },
         release_status => 'unstable'
     } unless $ExtUtils::MakeMaker::VERSION < 6.46;
@@ -87,9 +43,13 @@ WriteMakefile (
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'AnyEvent' => '7.12',
+        'AnyEvent::Filesys::Notify' => '1.21',
+        'AnyEvent::Open3::Simple' => '0.86',
         'JSON' => '2.90',
         'HTML::TreeBuilder' => '5.03',
         'Text::Unidecode' => '1.27',
+        'Text::Markdown' => '1.000031',
+        'Template' => '2.26',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
