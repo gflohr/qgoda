@@ -633,10 +633,24 @@ sub _globstar($;$) {
     return glob $current;
 }
 
-sub globstar($;$) {
-	my ($pattern, $directory) = @_;
-	
-	return _globstar $pattern, $directory;
+sub globstar($) {
+	my ($pattern) = @_;
+
+    if (!ref $pattern || 'ARRAY' ne reftype $pattern) {
+        return _globstar $pattern;
+    }
+
+    my %found;
+    foreach my $p (@$pattern) {
+    	if ($p =~ s/^!//) {
+    		my @found = _globstar $p;
+    		delete $found{$_} foreach _globstar $p;
+    	} else {
+    	    $found{$_} = 1 foreach _globstar $p;
+    	}
+    }
+    
+    return keys %found;
 }
 
 1;
