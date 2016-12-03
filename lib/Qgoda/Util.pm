@@ -607,6 +607,7 @@ sub globstar($;$) {
     	} elsif ('**' eq $pattern) {
     		my %found_files;
     		foreach my $directory (glob $current) {
+    			$found_files{$directory . '/'} = 1;
     			foreach my $file (_find_all $directory) {
     				$found_files{$file} = 1;
     			}
