@@ -94,6 +94,11 @@ sub new {
     			simweight => 3,
     		},
     	},
+    	po => {
+            xgettext => {
+            	tt2 => [qw(_views _includes)],
+            }
+    	},
     };
     
     if (!empty $filename) {
@@ -195,6 +200,15 @@ sub checkConfig {
     
     die __x("'{variable}' must be a single value", variable => 'type')
         if ref $config->{type};
+
+    die __x("'{variable}' must be a dictionary", variable => 'po')
+        if exists $self->{po} && !$self->__isHash($config->{po});
+    die __x("'{variable}' must be a dictionary", variable => 'po.xgettext')
+        if exists $self->{po}->{xgettext} 
+        && !$self->__isHash($config->{po}->{xgettext});
+    foreach my $xgettext (keys %{$config->{po}->{xgettext} || {}}) {
+    	
+    }
 
     return $self;
 }
