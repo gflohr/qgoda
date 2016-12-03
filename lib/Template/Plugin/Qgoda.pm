@@ -245,6 +245,12 @@ sub link {
     return $set->[0]->{permalink};
 }
 
+sub llink {
+    my ($self, $lingua, @filters) = @_;
+
+    return $self->link([lingua => $lingua], @filters);
+}
+
 sub linkPost {
     my ($self, @filters) = @_;
     
@@ -256,6 +262,12 @@ sub linkPost {
     }
     
     return $set->[0]->{permalink};
+}
+
+sub llinkPost {
+    my ($self, $lingua, @filters) = @_;
+
+    return $self->linkPost([lingua => $lingua], @filters);
 }
 
 sub writeAsset {
