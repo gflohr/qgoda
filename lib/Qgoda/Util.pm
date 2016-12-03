@@ -39,7 +39,7 @@ sub js_unescape($);
 sub tokenize($$);
 sub evaluate($$);
 sub lookup($$);
-sub globstar($;$);
+sub _globstar($;$);
 
 sub empty($) {
     my ($what) = @_;
@@ -557,7 +557,7 @@ sub _find_all {
     return @hits;
 }
 
-sub globstar($;$) {
+sub _globstar($;$) {
 	my ($pattern, $directory) = @_;
 
     $directory = '' if !defined $directory;
@@ -571,7 +571,7 @@ sub globstar($;$) {
 		my %found_files;
 		my @dirs = _find_directories $directory;
 		foreach my $directory (_find_directories $directory) {
-			foreach my $file (globstar $pattern, $directory) {
+			foreach my $file (_globstar $pattern, $directory) {
 				$found_files{$file} = 1;
 			}
 		}
@@ -610,7 +610,7 @@ sub globstar($;$) {
             }
             my %found_files;
             foreach my $directory (keys %found_dirs) {
-            	foreach my $hit (globstar $pattern, $directory) {
+            	foreach my $hit (_globstar $pattern, $directory) {
             		$found_files{$hit} = 1;
             	}
             }
@@ -631,6 +631,12 @@ sub globstar($;$) {
 
     # Pattern without globstar.  Just return the normal expansion.
     return glob $current;
+}
+
+sub globstar($;$) {
+	my ($pattern, $directory) = @_;
+	
+	return _globstar $pattern, $directory;
 }
 
 1;
