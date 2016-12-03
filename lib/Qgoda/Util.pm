@@ -547,7 +547,7 @@ sub _find_all {
     my @hits;
     File::Find::find sub {
         return if '.' eq substr $_, 0, 1;
-        push @hits, $File::Find::name;      
+        push @hits, $File::Find::name;
     }, $directory;
     
     if ($empty) {
@@ -566,7 +566,7 @@ sub globstar($;$) {
 	if ('**' eq $pattern) {
 		return _find_all $directory;
 	} elsif ('**/' eq $pattern) {
-		return _find_directories $directory;
+		return map { $_ . '/' } _find_directories $directory;
 	} elsif ($pattern =~ s{^\*\*/}{}) {
 		my %found_files;
 		my @dirs = _find_directories $directory;

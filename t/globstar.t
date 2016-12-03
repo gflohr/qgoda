@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 3;
+use Test::More tests => 4; 
 
 use Qgoda::Util qw(globstar);
 
@@ -48,4 +48,12 @@ is_deeply [sort @files],
                one.empty
                three.empty
                two.empty
+              )];
+
+@files = globstar '**/';
+is_deeply [sort @files],
+          [qw (
+               first/
+               first/second/
+               first/second/third/
               )];
