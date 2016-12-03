@@ -569,8 +569,7 @@ sub _globstar($;$) {
 		return map { $_ . '/' } _find_directories $directory;
 	} elsif ($pattern =~ s{^\*\*/}{}) {
 		my %found_files;
-		my @dirs = _find_directories $directory;
-		foreach my $directory (_find_directories $directory) {
+		foreach my $directory ('', _find_directories $directory) {
 			foreach my $file (_globstar $pattern, $directory) {
 				$found_files{$file} = 1;
 			}
@@ -579,6 +578,9 @@ sub _globstar($;$) {
 	}
 
     my $current = quotemeta $directory;
+    if ($directory ne '' && '/' ne substr $directory, -1, 1) {
+    	$current .= '/';
+    }
     while ($pattern =~ s/(.)//s) {
     	if ($1 eq '\\') {
     		$pattern =~ s/(..?)//s;
