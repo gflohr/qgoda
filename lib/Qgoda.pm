@@ -171,8 +171,7 @@ sub __getProcessors {
 	my $processors = $self->config->{processors};
 	
 	my @processors;
-    foreach my $name (@names) {
-        my $module = $processors->{modules}->{$name} || $name;
+    foreach my $module (@names) {
         my $class_name = 'Qgoda::Processor::' . $module;
 
         if ($self->{__processors}->{$class_name}) {

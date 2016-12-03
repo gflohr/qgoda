@@ -61,12 +61,12 @@ sub new {
     	processors => {
             chains => {
                 markdown => {
-                	modules => [qw(HTML Markdown)],
+                	modules => [qw(TT2 Markdown)],
                 	suffix => 'html',
                 	wrapper => 'html'
                 },
                 html => {
-                	modules => 'HTML',
+                	modules => 'TT2',
                 },
             },
             triggers => {
@@ -77,10 +77,6 @@ sub new {
                 mkd => 'markdown',
                 html => 'html',
                 htm => 'html',
-            },
-            modules => {
-                Markdown => 'Markdown',
-                HTML => 'TT2',
             },
             options => {
                 Markdown => [],
@@ -166,14 +162,6 @@ sub checkConfig {
         die __x("processor chain suffix '{suffix}' references undefined chain '{chain}'",
                 suffix => $suffix, chain => $chain)
             unless exists $config->{processors}->{chains}->{$chain};
-    }
-    die __x("'{variable}' must be a dictionary", variable => 'processors.modules')
-        unless $self->__isHash($config->{processors}->{modules});
-    foreach my $module (keys %{$config->{processors}->{modules}}) {
-        die __x("'{variable}' must be a scalar", variable => "processors.chains.$module")
-            if ref $config->{processors}->{modules}->{$module};
-        die __x("'{variable}' must not be empty", variable => "processors.chains.$module")
-            if empty $config->{processors}->{modules}->{$module};
     }
     die __x("'{variable}' must be a dictionary", variable => 'processors.options')
         unless $self->__isHash($config->{processors}->{options});
