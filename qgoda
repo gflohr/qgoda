@@ -33,7 +33,9 @@ GetOptions (
             'q|quiet' => \$options{quiet},
             'h|help' => \$options{help},
             'v|verbose' => \$options{verbose},
-            'V|version' => \$options{version}
+            'V|version' => \$options{version},
+            'from-system=s' => \$options{from_system},
+            'n|nochange|dry-run' => \$options{nochange},
 	    ) or exit 1;
 
 display_usage if $options{help};
@@ -48,19 +50,21 @@ my $command = shift @ARGV;
 $command ||= '';
 
 my $method;
-if ('config' eq $command) {
+if ('watch' eq $command) {
+    $method = 'watch';
+} elsif ('build' eq $command) {
+	$method = 'build';
+} elsif ('config' eq $command) {
     delete $options{verbose};
     $options{quiet} = 1;
     $method = 'dumpConfig';
-} elsif ('build' eq $command) {
-	$method = 'build';
-} elsif ('watch' eq $command) {
-	$method = 'watch';
+} elsif ('migrate' eq $command) {
+    $method = 'migrate';
 } else {
 	usage_error __"Nothing to do.";
 }
 
-Qgoda->new(%options)->$method;
+Qgoda->new($command, %options)->$method;
 
 sub display_usage {
     my $msg = __x(q(Usage: {program} COMMAND [OPTIONS]
@@ -71,6 +75,7 @@ The following commands are currently supported:
   build                       build site and exit
   watch                       build, then watch for changes and build on demand
   config                      dump the current configuration and exit
+  migrate                     migrate from another software
 
 Operation mode:
   -q, --quiet                 quiet mode
@@ -79,6 +84,11 @@ Operation mode:
 Informative output:
   -h, --help                  display this help and exit
   -V, --version               output version information and exit
+
+Options for command 'migrate':
+      --from-system=SYSTEM    migrate from system SYSTEM (only "Jekyll" is
+                              currently supported)
+  -n, --nochange, --dry-run   just print what would be done (implies --verbose)
 
 The Qgoda static site generator renders your site by default into the
 directory "_site" inside the current working directory.  See

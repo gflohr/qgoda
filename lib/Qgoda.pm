@@ -46,7 +46,7 @@ my $qgoda;
 sub new {
     return $qgoda if $qgoda;
 
-    my ($class, %options) = @_;
+    my ($class, $command, %options) = @_;
 
     my $self = $qgoda = bless {}, $class;
 
@@ -56,14 +56,16 @@ sub new {
 
     $self->{__logger} = $self->logger;
 
-    my $logger = $self->{__logger};
-    $logger->info(__"initializing");
+    if ($command ne 'migrate') {
+        my $logger = $self->{__logger};
+        $logger->info(__"initializing");
     
-    $self->{__config} = Qgoda::Config->new;
-    $self->{__analyzers} = [Qgoda::Analyzer->new];
-    $self->{__builders} = [Qgoda::Builder->new];
-    $self->{__processors} = {};
-    $self->{__load_plugins} = 1;
+        $self->{__config} = Qgoda::Config->new;
+        $self->{__analyzers} = [Qgoda::Analyzer->new];
+        $self->{__builders} = [Qgoda::Builder->new];
+        $self->{__processors} = {};
+        $self->{__load_plugins} = 1;
+    }
 
     return $qgoda;
 }
@@ -163,6 +165,41 @@ sub dumpConfig {
 	print YAML::Dump(\%config);
 	
 	return $self;
+}
+
+sub migrate {
+	my ($self) = @_;
+	
+	my $from = $self->{__from_system};
+	die __"The option '--from-system' is mandatory!\n" if empty $from;
+
+    # Check for valid module names.  Yes, you can use an apostrophe as the
+    # separator in Perl but not allowing it here is at our discretion.
+    die __x("Invalid source system name '{software}'", software => $from)
+        unless $from =~ /^[a-z][a-z0-9_]+(?:(?:::|-)[a-z][a-z0-9_]+)*$/i;
+    
+    my $module_name = 'Qgoda::Migrator::'  . $from;
+    $module_name =~ s/-/::/g;
+    $module_name = lc $module_name;
+    $module_name = ucfirst $module_name;
+    $module_name =~ s/::(.)/'::' . ucfirst $1/ge;
+    
+    my $class_name = $module_name;
+    $module_name =~ s{::}{/}g;
+    $module_name .= '.pm';
+    
+    eval {require $module_name};
+    if ($@) {
+    	my $error = $@;
+    	my $message = __x("Unsupported source system '{software}'!\nTry the"
+    	                  . " additional option '--verbose' for more"
+    	                  . " information!\n",
+    	                  software => $from);
+    	$message .= $@ if $self->{__verbose};
+    	die $message;
+    }
+    
+    die "TODO";
 }
 
 sub __getProcessors {
