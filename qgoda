@@ -30,12 +30,9 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 my %options;
 Getopt::Long::Configure('bundling');
 GetOptions (
-            'b|build' => \$options{build},
-            'w|watch' => \$options{watch},
             'q|quiet' => \$options{quiet},
-            'dump-config' => \$options{dump_config},
-	        'h|help' => \$options{help},
-	        'v|verbose' => \$options{verbose},
+            'h|help' => \$options{help},
+            'v|verbose' => \$options{verbose},
             'V|version' => \$options{version}
 	    ) or exit 1;
 
@@ -45,14 +42,19 @@ display_version if $options{version};
 autoflush STDOUT, 1;
 autoflush STDERR, 1;
 
+usage_error __"Too many commands." if @ARGV > 1;
+
+my $command = shift @ARGV;
+$command ||= '';
+
 my $method;
-if ($options{dump_config}) {
+if ('config' eq $command) {
     delete $options{verbose};
     $options{quiet} = 1;
     $method = 'dumpConfig';
-} elsif ($options{build}) {
+} elsif ('build' eq $command) {
 	$method = 'build';
-} elsif ($options{watch}) {
+} elsif ('watch' eq $command) {
 	$method = 'watch';
 } else {
 	usage_error __"Nothing to do.";
@@ -61,25 +63,26 @@ if ($options{dump_config}) {
 Qgoda->new(%options)->$method;
 
 sub display_usage {
-    my $msg = __x(q(Usage: {program} [OPTIONS]
+    my $msg = __x(q(Usage: {program} COMMAND [OPTIONS]
 Mandatory arguments to long options, are mandatory to short options, too.
 
+The following commands are currently supported:
+
+  build                       build site and exit
+  watch                       build, then watch for changes and build on demand
+  config                      dump the current configuration and exit
+
 Operation mode:
-  -b, --build                 build site and exit
-  -w, --watch                 watch for changes and build on demand
   -q, --quiet                 quiet mode
   -v, --verbose               display progress on standard error
 
 Informative output:
-      --dump-config           dump the cooked configuration
   -h, --help                  display this help and exit
   -V, --version               output version information and exit
 
-In order to build your site one of the options '--build' or '--watch'
-is mandatory.
-
 The Qgoda static site generator renders your site by default into the
-directory "_site" inside the current working directory.
+directory "_site" inside the current working directory.  See
+http://www.qgoda.net/ for more information.
 ), program => $0);
 
     print $msg;
@@ -97,7 +100,7 @@ sub usage_error {
         $message = '';
     }
     die <<EOF;
-${message}Usage: $0 [OPTIONS]
+${message}Usage: $0 COMMAND [OPTIONS]
 Try '$0 --help' for more information!
 EOF
 }
