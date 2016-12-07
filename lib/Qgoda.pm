@@ -50,10 +50,7 @@ sub new {
 
     my $self = $qgoda = bless {}, $class;
 
-    while (my ($key, $value) = each %options) {
-        $self->{'__' . $key} = $value;
-    }
-
+    $self->{__options} = { %options };
     $self->{__logger} = $self->logger;
 
     if ($command ne 'migrate') {
@@ -143,9 +140,9 @@ sub logger {
     my ($self, $prefix) = @_;
 
     my %args = (prefix => $prefix);
-    if ($self->{__verbose}) {
+    if ($self->{__options}->{verbose}) {
         $args{debug} = 1;
-    } elsif ($self->{__quiet}) {
+    } elsif ($self->{__options}->{quiet}) {
         $args{quiet} = 1;
     }
 
@@ -161,8 +158,8 @@ sub dumpConfig {
 	
 	# Make a shallow copy so that we unbless the reference.
 	my %config = %{$self->{__config}};
-	require YAML;
-	print YAML::Dump(\%config);
+	require YAML::XS;
+	print YAML::XS::Dump(\%config);
 	
 	return $self;
 }
@@ -170,7 +167,7 @@ sub dumpConfig {
 sub migrate {
 	my ($self) = @_;
 	
-	my $from = $self->{__from_system};
+	my $from = $self->getOption('from_system');
 	die __"The option '--from-system' is mandatory!\n" if empty $from;
 
     # Check for valid module names.  Yes, you can use an apostrophe as the
@@ -195,11 +192,14 @@ sub migrate {
     	                  . " additional option '--verbose' for more"
     	                  . " information!\n",
     	                  software => $from);
-    	$message .= $@ if $self->{__verbose};
+    	$message .= $@ if $self->getOption('verbose');
     	die $message;
     }
     
-    die "TODO";
+    my $migrator = $class_name->new;
+    $migrator->migrate;
+    
+    return $self;
 }
 
 sub __getProcessors {
@@ -490,7 +490,15 @@ sub expandLink {
 sub debugging {
 	my ($self) = @_;
 	
-	return $self->{__verbose};
+	return $self->{__options}->{__verbose};
+}
+
+sub getOption {
+	my ($self, $name) = @_;
+	
+	return if !exists $self->{__options}->{$name};
+	
+	return $self->{__options}->{$name};
 }
 
 1;

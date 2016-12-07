@@ -51,6 +51,9 @@ WriteMakefile (
         'Text::Markdown' => '1.000031',
         'Template' => '2.26',
         'Template::Plugin::Gettext' => '0.1',
+        # The pure Perl YAML has problems parsing comments and is not
+        # sufficient.
+        'YAML::LibYAML' => '0.63',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},

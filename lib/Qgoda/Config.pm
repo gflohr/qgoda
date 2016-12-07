@@ -22,7 +22,7 @@ use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
-use YAML;
+use YAML::XS;
 use Cwd;
 use Scalar::Util qw(reftype looks_like_number);
 
@@ -58,6 +58,9 @@ sub new {
     	index => 'index',
     	'case-sensitive' => 0,
     	view => 'default.html',
+    	directories => {
+    		views => '_views'
+    	},
     	processors => {
             chains => {
                 markdown => {
@@ -103,13 +106,13 @@ sub new {
     
     if (!empty $filename) {
         $logger->info(__x("reading configuration from '{filename}'",
-                          filename => '_config.yaml'));
+                          filename => $filename));
         my $yaml = read_file $filename;
         if (!defined $yaml) {
         	$logger->fatal(__x("error reading file '{filename}': {error}",
         	                   filename => $filename, error => $!));
         }
-        my $local = eval { YAML::Load($yaml) };
+        my $local = eval { YAML::XS::Load($yaml) };
         $logger->fatal(yaml_error $filename, $@) if $@;
         $config = merge_data $config, $local if $local;
     }

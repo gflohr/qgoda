@@ -38,10 +38,11 @@ sub new {
     require Qgoda;
     my $qgoda = Qgoda->new;
     my $srcdir = $qgoda->config->{srcdir};
+    my $viewdir = $qgoda->config->{directories}->{views};
     
     # FIXME! Merge options with those from the configuration!
     $self->{__tt} = Template->new({
-        INCLUDE_PATH => [File::Spec->join($srcdir, '_views')],
+        INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
     }) or die Template->error;
 

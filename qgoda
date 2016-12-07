@@ -45,9 +45,9 @@ autoflush STDOUT, 1;
 autoflush STDERR, 1;
 
 usage_error __"Too many commands." if @ARGV > 1;
+usage_error __"No command given." if !@ARGV;
 
 my $command = shift @ARGV;
-$command ||= '';
 
 my $method;
 if ('watch' eq $command) {
@@ -61,7 +61,7 @@ if ('watch' eq $command) {
 } elsif ('migrate' eq $command) {
     $method = 'migrate';
 } else {
-	usage_error __"Nothing to do.";
+	usage_error __x"Unknown command '{command}'.";
 }
 
 Qgoda->new($command, %options)->$method;
@@ -89,6 +89,7 @@ Options for command 'migrate':
       --from-system=SYSTEM    migrate from system SYSTEM (only "Jekyll" is
                               currently supported)
   -n, --nochange, --dry-run   just print what would be done (implies --verbose)
+      --output-directory=DIR  write output into DIR (defaults to "_migrated")
 
 The Qgoda static site generator renders your site by default into the
 directory "_site" inside the current working directory.  See

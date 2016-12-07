@@ -144,7 +144,8 @@ sub processAsset {
     die __"no view specified.\n" if empty $view;
     
     my $srcdir = $qgoda->config->{srcdir};
-    my $view_file = File::Spec->join($srcdir, '_views', $view);
+    my $view_dir = $qgoda->config->{directories}->{views};
+    my $view_file = File::Spec->join($srcdir, $view_dir, $view);
     $content = read_file $view_file;
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
