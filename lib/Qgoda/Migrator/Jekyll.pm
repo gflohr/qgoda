@@ -57,6 +57,13 @@ sub migrate {
 	
 	$self->writeConfig($new_config);
 	
+	$self->createFile("$out_dir/index.html", <<EOF);
+---
+view: default.html
+---
+proof-of-concept
+EOF
+	
 	return $self;
 }
 

@@ -48,9 +48,9 @@ sub convert {
     my $output = '';
     while ($code =~ s/^(.*?)(\{\{|\{%|\n)//) {
         $output .= $1;
-        if ('{{' eq $1) {
+        if ('{{' eq $2) {
             $output .= $open;
-        } elsif ('{%' eq $1) {
+        } elsif ('{%' eq $2) {
             $output .= $open;
         } else {
             $output .= $2;
