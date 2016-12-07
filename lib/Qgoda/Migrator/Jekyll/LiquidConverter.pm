@@ -46,7 +46,7 @@ sub convert {
     my ($open, $close) = ('[%', '%]');
 
     my $output = '';
-    while ($code =~ s/^(.*?)(\{\{|\{%|\n|\Z)//) {
+    while ($code =~ s/^(.*?)(\{\{|\{%|\n)//) {
         $output .= $1;
         if ('{{' eq $1) {
             $output .= $open;
@@ -57,6 +57,8 @@ sub convert {
             ++$self->{__options}->{lineno};
         }
     }
+    
+    $output .= $code if length $code;
 
     return $output;
 }

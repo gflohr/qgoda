@@ -80,17 +80,29 @@ sub migrateLayouts {
     
     $self->createDirectory($view_dir);
     
+    my @jobs;
     my $wanted = sub {
     	return if -d $_;
-    	
-    	my $relpath = File::Spec->abs2rel($File::Find::name, $in_dir);
-    	my $outpath = File::Spec->catfile($view_dir, $relpath);
-    	
-    	$logger->debug("  '$File::Find::name' => '$outpath'");
-    	
-    };
+    	push @jobs, $File::Find::name;
+    }; 	
     File::Find::find($wanted, $in_dir);
-    
+
+    foreach my $name (@jobs) {
+        my $relpath = File::Spec->abs2rel($name, $in_dir);
+        my $outpath = File::Spec->catfile($view_dir, $relpath);
+    	
+        $logger->debug("  '$name' => '$outpath'");
+    	
+        my $code = read_file $name
+            or return $self->logError(__x("Error reading '{file}': {error}!",
+                                          file => $name, error => $!));
+        my $converter = Qgoda::Migrator::Jekyll::LiquidConverter->new($name,
+     	                                                              $code);
+        my $tt2 = $converter->convert($code);
+    	
+        $self->createFile($outpath, $tt2);
+    }
+       
     return $self;
 }
 

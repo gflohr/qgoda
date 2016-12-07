@@ -121,10 +121,23 @@ sub createDirectory {
     return $self if $self->dryRun;
     
     make_path $directory 
-        or return $self->logError(__x("Error creating '{directory}': {error}!",
+        or return $self->logError(__x("Error creating directory '{directory}': {error}!",
                                       directory => $directory, error => $!));
     
     return $self;
+}
+
+sub createFile {
+	my ($self, $path, $data) = @_;
+	
+	my ($volume, $directory, $filename) = File::Spec->splitpath($path);
+	$self->createDirectory(File::Spec->catpath($volume, $directory));
+	
+	write_file $path, $data
+		or $self->logError(__x("Error creating file '{file}': {error}!",
+		                       file => $path, error => $!));
+		                       
+	return $self;
 }
 
 1;
