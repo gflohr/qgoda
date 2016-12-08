@@ -57,7 +57,7 @@ sub migrate {
 	
 	$self->writeConfig($new_config);
 	
-	$self->createFile("$out_dir/index.html", <<EOF);
+	$self->createFile("$out_dir/index.md", <<EOF);
 ---
 view: default.html
 ---

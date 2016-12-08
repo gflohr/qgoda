@@ -52,15 +52,38 @@ sub convert {
             $output .= $open;
         } elsif ('{%' eq $2) {
             $output .= $open;
+            $output .= $self->convertTag(\$code);
         } else {
             $output .= $2;
-            ++$self->{__options}->{lineno};
+            ++$self->{__lineno};
         }
     }
     
     $output .= $code if length $code;
 
     return $output;
+}
+
+sub convertTag {
+	my ($self, $coderef) = @_;
+	
+	my $output .= '';
+    $output .= consumeWhitespace($coderef);
+    
+    
+	return $output;
+}
+
+sub consumeWhitspace {
+	my ($self, $coderef) = @_;
+	
+	my $output .= '';
+	
+	while ($$coderef = s/^([\x09-\x0d])//g) {
+		++$self->{__lineno} if $1 eq "\n";
+	}
+	
+	return $output;
 }
 
 1;
