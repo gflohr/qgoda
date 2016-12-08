@@ -33,7 +33,7 @@ use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
-                slugify html_escape unmarkup globstar);
+                slugify html_escape unmarkup globstar trim);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -653,6 +653,15 @@ sub globstar($) {
     }
     
     return keys %found;
+}
+
+sub trim($) {
+	my ($string) = @_;
+	
+    $string =~ s{^[ \x09-\x0d]+}{};
+    $string =~ s{[ \x09-\x0d]+$}{};
+	
+	return $string;
 }
 
 1;

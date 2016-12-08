@@ -54,6 +54,8 @@ WriteMakefile (
         # The pure Perl YAML has problems parsing comments and is not
         # sufficient.
         'YAML::LibYAML' => '0.63',
+        'File::Copy::Recursive' => '0.38',
+        'Hook::LexWrap' => '0.25',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},

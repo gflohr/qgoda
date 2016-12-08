@@ -36,6 +36,7 @@ GetOptions (
             'V|version' => \$options{version},
             'from-system=s' => \$options{from_system},
             'n|nochange|dry-run' => \$options{nochange},
+            'output-directory=s' => \$options{output_directory},
 	    ) or exit 1;
 
 display_usage if $options{help};

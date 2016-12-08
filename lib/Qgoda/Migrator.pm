@@ -23,7 +23,9 @@ use strict;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Path qw(remove_tree make_path);
 use File::Spec;
+use File::Copy::Recursive qw(rcopy);
 use YAML::XS;
+use Hook::LexWrap;
 
 use Qgoda;
 use Qgoda::Util qw(write_file);
@@ -137,6 +139,56 @@ sub createFile {
 		or $self->logError(__x("Error creating file '{file}': {error}!",
 		                       file => $path, error => $!));
 		                       
+	return $self;
+}
+
+sub markFileDone {
+	my ($self, @files) = @_;
+	
+	$self->{_files_done} ||= {};
+	
+	foreach my $file (@files) {
+		$self->{_files_done}->{$file} = 1;
+	}
+	
+	return $self;
+}
+
+sub copyUndone {
+	my ($self, $fcopy) = @_;
+	
+	my $logger = $self->logger;
+	$logger->info(__"Copying all other files as is.");
+	
+	$self->{_files_done}->{$self->{_out_dir}} = 1;
+	
+	opendir my $dh, $self->{_src_dir}
+	    or return $self->logError(__x("Error opening directory '{directory}':"
+	                                  . " {error}!\n"));
+	my @files = grep {
+		!$self->{_files_done}->{$_};
+	} grep {
+		$_ ne '.';
+	} grep {
+		$_ ne '..';
+	} readdir $dh;
+	
+	$fcopy ||= sub { return $_[-1] };
+	
+	my $lexical_wrapper = wrap 'File::Copy::Recursive::fcopy', post => $fcopy;
+	
+	foreach my $file (@files) {
+		$logger->debug(__x("Copying '{file}'.",
+		                    file => $file));
+		 my $dest = File::Spec->catfile($self->{_out_dir}, $file);
+	     rcopy $file, $dest
+	         or $self->logError(__x("Error copying '{file}' to '{dest}':"
+	                                . " {error}!\n", 
+	                                file => $file, 
+	                                dest => $dest,
+	                                error => $!));
+	}
+	
 	return $self;
 }
 

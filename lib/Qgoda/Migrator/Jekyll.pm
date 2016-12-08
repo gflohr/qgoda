@@ -25,7 +25,7 @@ use YAML::XS;
 use File::Find;
 
 use Qgoda;
-use Qgoda::Util qw(empty read_file yaml_error);
+use Qgoda::Util qw(empty read_file write_file yaml_error);
 use Qgoda::Migrator::Jekyll::LiquidConverter;
 
 use base qw(Qgoda::Migrator);
@@ -49,43 +49,157 @@ sub migrate {
     $layouts_dir = '_layouts' if empty $layouts_dir;
     $self->{__layouts_dir} = $layouts_dir;
 
+    my $plugins_dir = delete $config->{plugins_dir};
+    $plugins_dir = '_plugins' if empty $plugins_dir;
+    $self->markFileDone($plugins_dir);
+
+    my $destination = delete $config->{destination};
+    $destination = '_site' if empty $destination;
+    $self->markFileDone($destination);
+
+    my $includes_dir = delete $config->{includes_dir};
+    $includes_dir = '_includes' if empty $includes_dir;
+    $self->{__includes_dir} = $includes_dir;
+
+    my $new_config = $self->{_config} = $self->migrateConfig($config);
+    
+    my $views_dir = '_views';
+    my $cc = -1;
+    while (-e File::Spec->catdir($layouts_dir, $views_dir)) {
+    	$views_dir .= --$cc;
+    	$self->{_config}->{directory}->{views} = $views_dir;
+    }
+    $self->{__views_dir} = $views_dir;
+    
+    my $partials_dir = 'partials';
+    while (-e File::Spec->catdir($layouts_dir, $partials_dir)) {
+        $partials_dir .= 'X';
+    }
+    $self->{__partials_dir} = $partials_dir;
+    
 	$self->createOutputDirectory;
 	
-	my $new_config = $self->{_config} = $self->migrateConfig($config);
-	
-	$self->migrateLayouts;
+    $self->migrateLayouts;
+    $self->migrateIncludes;
+	$self->migratePosts;
 	
 	$self->writeConfig($new_config);
+    
+	# Convert assets while they are copied.
+	my $fcopy = sub {
+		my ($from, $to) = @_;
+		
+		return if !-e $to;
+
+		my $liquid = read_file $to;
+		# Front matter?
+		if ($liquid !~ /^---[ \t\r]*\n.*\n---[ \t\r]*\n/s) {
+			return $_[-1];
+		}
+		
+		my $tt2 = $self->convertLiquidTemplate($to);
+		write_file $to, $tt2
+		    or return $self->logError(__x("Error writing '{filename}':"
+		                                  . " {error}!\n",
+		                                  filename => $to,
+		                                  error => $!));
+		
+		return $_[-1];
+	};
+	$self->copyUndone($fcopy);
 	
-	$self->createFile("$out_dir/index.md", <<EOF);
----
-view: default.html
----
-proof-of-concept
+	if ($self->{_err_count}) {
+		$self->logger->error(__(<<EOF));
+The migration had errors! See above for details!
 EOF
+	}
 	
 	return $self;
 }
 
-sub migrateLayouts {
+sub migratePosts {
 	my ($self) = @_;
 	
-	my $in_dir = $self->{__layouts_dir};
-	my $out_dir = $self->outputDirectory;
-	
+	# This does not seem to be configurable in Jekyll.
+	my $in_dir = '_posts';
+	$self->markFileDone($in_dir);
+    my $out_dir = $self->outputDirectory;
+    
+    my $posts_dir = 'posts';
+    while (-e File::Spec->catfile($out_dir, $posts_dir)) {
+        $posts_dir .= 'X';
+    }
+    $posts_dir = File::Spec->catfile($out_dir, $posts_dir);
+
     my $logger = $self->logger;
-    $logger->info(__x("Migrating Jekyll layouts from '{from_dir}' to "
+    $logger->info(__x("Migrating Jekyll posts from '{from_dir}' to "
                       . "Qgoda views in '{to_dir}'.\n",
                       from_dir => $in_dir, to_dir => $out_dir));
     
-    my $view_dir = '_views';
-    while (-e File::Spec->catfile($out_dir, $view_dir)) {
-    	$view_dir .= 'X';
-    	$self->{_config}->{directory}->{views} = $view_dir;
+    my @jobs;
+    my $wanted = sub {
+        return if -d $_;
+        push @jobs, $File::Find::name;
+    };  
+    File::Find::find($wanted, $in_dir);
+
+    foreach my $name (@jobs) {
+        my $relpath = File::Spec->abs2rel($name, $in_dir);
+        my ($volume, $directory, $filename) = File::Spec->splitpath($relpath);
+        $filename =~ s/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//;
+        $relpath = File::Spec->catpath($volume, $directory, $filename);
+        my $outpath = File::Spec->catfile($posts_dir, $relpath);
+        
+        my $count = -1;
+        while (-e $outpath) {
+        	# Conflict.
+        	my ($stem, $extender) = ($relpath, '');
+            if ($relpath =~ /(.*)(\..+)/) {
+            	($stem, $extender) = ($1, $2);
+            }
+            $stem .= --$count;
+            $relpath = $stem . $extender;
+            $outpath = File::Spec->catfile($posts_dir, $relpath);
+        }
+        
+        $logger->debug("  '$name' => '$outpath'");
+        
+        my $tt2 = $self->convertLiquidTemplate($name);
+        
+        $self->createFile($outpath, $tt2);
     }
-    $view_dir = File::Spec->catfile($out_dir, $view_dir);
+       
+    return $self;
+}
+
+sub migrateLayouts {
+    my ($self) = @_;
     
-    $self->createDirectory($view_dir);
+    return $self->migrateLiquidDirectory($self->{__layouts_dir}, 
+                                         $self->{__views_dir});
+}
+
+sub migrateIncludes {
+    my ($self) = @_;
+
+    my $partials_dir = File::Spec->catdir($self->{__views_dir}, 
+                                          $self->{__partials_dir});
+    return $self->migrateLiquidDirectory($self->{__includes_dir}, 
+                                         $partials_dir);
+}
+
+sub migrateLiquidDirectory {
+	my ($self, $in_dir, $out_dir) = @_;
+	
+	$self->markFileDone($in_dir);	
+    $out_dir = File::Spec->catfile($self->outputDirectory, $out_dir);
+
+    my $logger = $self->logger;
+    $logger->info(__x("Migrating Jekyll liquid template from '{from_dir}' to "
+                      . "Qgoda views in '{to_dir}'.\n",
+                      from_dir => $in_dir, to_dir => $out_dir));
+    
+    $self->createDirectory($out_dir);
     
     my @jobs;
     my $wanted = sub {
@@ -96,26 +210,43 @@ sub migrateLayouts {
 
     foreach my $name (@jobs) {
         my $relpath = File::Spec->abs2rel($name, $in_dir);
-        my $outpath = File::Spec->catfile($view_dir, $relpath);
+        my $outpath = File::Spec->catfile($out_dir, $relpath);
     	
         $logger->debug("  '$name' => '$outpath'");
     	
-        my $code = read_file $name
-            or return $self->logError(__x("Error reading '{file}': {error}!",
-                                          file => $name, error => $!));
-        my $converter = Qgoda::Migrator::Jekyll::LiquidConverter->new($name,
-     	                                                              $code);
-        my $tt2 = $converter->convert($code);
+        my $tt2 = $self->convertLiquidTemplate($name);
     	
         $self->createFile($outpath, $tt2);
     }
        
-    return $self;
+    return $out_dir;
+}
+
+sub convertLiquidTemplate {
+	my ($self, $name) = @_;
+	
+    my $code = read_file $name
+        or return $self->logError(__x("Error reading '{file}': {error}!",
+                                      file => $name, error => $!));
+    my $logger = $self->logger;
+    my %options = (
+        partials_dir => $self->{__partials_dir},
+        includes_dir => $self->{__includes_dir},
+    );
+    my $converter = Qgoda::Migrator::Jekyll::LiquidConverter->new($name,
+                                                                  $code,
+                                                                  $logger,
+                                                                  %options);
+    my $tt2 = $converter->convert($code);
+    $self->{_err_count} += $converter->errorCount;
+    
+    return $tt2;
 }
 
 sub migrateConfig {
 	my ($self, $config) = @_;
 	
+	$self->markFileDone('_config.yml');
     $self->migrateDefaults($config);
     
     # Variables which currently do not exist in qgoda.  This is actually a
