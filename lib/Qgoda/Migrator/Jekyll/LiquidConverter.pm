@@ -37,6 +37,7 @@ sub new {
         __code => $code,
         __logger => $logger,
         __options => { %options },
+        __plugins => {},
     }, $class;
 }
 
@@ -63,7 +64,12 @@ sub convert {
     
     $output .= $code if length $code;
 
-    return $output;
+    my $plugins = '';
+    foreach my $plugin (keys %{$self->{__plugins}}) {
+    	$plugins .= "[%- USE $plugin -%]\n";
+    }
+
+    return $plugins . $output;
 }
 
 sub errorCount {
@@ -323,6 +329,14 @@ sub translateToken {
 	            $1 . $self->translateVariable($2) . $3/ges;
 	
 	return $token;
+}
+
+sub addPlugin {
+	my ($self, $plugin) = @_;
+	
+	$self->{__plugins}->{$plugin} = 1;
+	
+	return $self;
 }
 
 1;
