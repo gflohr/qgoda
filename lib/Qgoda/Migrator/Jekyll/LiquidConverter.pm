@@ -102,6 +102,10 @@ sub convertTag {
     		$output .= $self->onTagFor($coderef);
     	} elsif ('include' eq $1) {
     		$output .= $self->onTagInclude($coderef);
+        } elsif ('endif' eq $1) {
+            $output .= $self->onTagEnd($coderef);
+        } elsif ('endfor' eq $1) {
+            $output .= $self->onTagEnd($coderef);
     	} else {
     		$output .= __x("# Unknown liquid tag '{tag}'!\n", tag => $1);
     		$output .= $1;
@@ -195,17 +199,27 @@ sub endTag {
 }
 
 sub onTagIf {
-	my ($self, $coderef) = @_;
-	
-	my $output = 'IF';
-	$output .= $self->consumeWhitespace($coderef);
-	
+    my ($self, $coderef) = @_;
+    
+    my $output = 'IF';
+    $output .= $self->consumeWhitespace($coderef);
+    
     my $token = $self->consumeNonWhitespace($coderef);
     $output .= $self->translateToken($token);
-	
-	$output .= $self->proceedToTagEnd($coderef);
-	
-	return $output;
+    
+    $output .= $self->proceedToTagEnd($coderef);
+    
+    return $output;
+}
+
+sub onTagEnd {
+    my ($self, $coderef) = @_;
+    
+    my $output = 'END';
+    
+    $output .= $self->proceedToTagEnd($coderef);
+    
+    return $output;
 }
 
 sub onTagFor {
