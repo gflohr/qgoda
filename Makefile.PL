@@ -65,6 +65,14 @@ WriteMakefile (
 );
 
 sub MY::postamble {
+    if (-e 'maintainer.mk') {
+        open my $fh, '<maintainer.mk'
+            or die "Cannot open 'maintainer.mk': $!\n";
+        local $/;
+        return <$fh>;
+    } else {
+        return '';
+    }
    	q ( 
 all :: ReleaseNotes
 
