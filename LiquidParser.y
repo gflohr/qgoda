@@ -26,70 +26,18 @@ use Qgoda::Util qw(read_file empty);
 %}
 
 %token CDATA
+%token SO
+%token ST
 
 %%
 liquid: chunks
       ;
 
-chunks: chunks CDATA
+chunks: chunks CDATA { $_[0]->addOutput($_[2]) }
+      | chunks tag
       | /* empty */
       ;
+
+tag: ST DIRECTIVE
+   ;
 %%
-
-sub _Error {
-    if (exists $_[0]->YYData->{ERRMSG}) {
-        warn delete $_[0]->YYData->{ERRMSG};
-        return;
-    }
-    warn "Syntax error.\n";
-
-    return;
-}
-
-sub _Lexer {
-    my ($parser) = @_;
-
-    $parser->YYData->{INPUT} = <STDIN> if empty $parser->YYData->{INPUT};
-    return '', undef if empty $parser->YYData->{INPUT};
-
-    return $parser->YYData->{INPUT}, 'CDATA';
-}
-
-sub parse {
-    my ($self, $filename) = @_;
-
-    my $logger = $self->logger;
-    my $input = read_file $filename
-        or $logger->fatal(__x("Cannot read '{filename}': {error}!\n"));
-
-    my $lineno = 1;
-    my $state = 0;
-    my $lexer = sub {
-        return '', undef if empty $input;
-
-        if ($state = 0) {
-            $input =~ s/([^\n\{]*)//;
-            return CDATA => $1 if !empty $1;
-        
-            if ("\n" eq $1) {
-                ++$lineno;
-                return CDATA => "\n";
-            } elsif ($input =~ s/^\{\{//) {
-                return SE => '{{';
-            } elsif ($input =~ s/^\{\%//) {
-                return SE => '{%';
-            } else {
-                die;
-            }
-        }
-    };
-    my $error = sub {
-        $logger->error(__"Syntax error!\n");
-    };
-
-    $self->YYParse(yylex => $lexer, yyerror => $error);
-}
-
-sub logger {
-    Qgoda->new->logger('LiquidParser');
-}

@@ -23,173 +23,98 @@ use strict;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
 use Qgoda;
-use Qgoda::Util qw(trim);
+use Qgoda::Util qw(empty trim);
 
-sub new {
-    my ($class, $filename, $code, $logger, %options) = @_;
+use base qw (Qgoda::Migrator::Jekyll::LiquidParser);
+
+sub convert {
+    my ($self, $filename, $input, $logger, %options) = @_;
 
     $options{tt2_start} ||= '[%';
     $options{tt2_end} ||= '%]';
-    $options{offset} ||= 1;
-
-    bless {
-        __filename => $filename,
-        __code => $code,
-        __logger => $logger,
-        __options => { %options },
-        __plugins => {},
-    }, $class;
-}
-
-sub convert {
-    my ($self) = @_;
-
-    my $code = $self->{__code};
-    $self->{__lineno} = 1 + $self->{__options}->{offset};
-
-    my $output = '';
-    while ($code =~ s/^(.*?)(\{\{|\{%|\n)//) {
-        $output .= $1;
-        if ('{{' eq $2) {
-            $output .= $self->startTag;
-            $output .= $self->convertObject(\$code);
-        } elsif ('{%' eq $2) {
-            $output .= $self->startTag;
-            $output .= $self->convertTag(\$code);
-        } else {
-            $output .= $2;
-            ++$self->{__lineno};
-        }
-    }
     
-    $output .= $code if length $code;
+    $self->{__options} = \%options;
+    $self->{__logger} = $logger;
+    $self->{__output} = '';
 
-    my $plugins = '';
-    foreach my $plugin (keys %{$self->{__plugins}}) {
-    	$plugins .= "[%- USE $plugin -%]\n";
-    }
-
-    return $plugins . $output;
-}
-
-sub errorCount {
-	my ($self) = @_;
-	
-	return $self->{__err_count} || 0;
-}
-
-sub convertObject {
-    my ($self, $coderef) = @_;
-    
-    my $output = '';
-    $output .= $self->consumeWhitespace($coderef);
-    
-    # FIXME! We need something like translateExpression that interprets
-    # balanced round parentheses.
-    $output .= $self->translateToken($self->consumeNonWhitespace($coderef));
-    
-    # FIXME! Consume the filters!
-    
-    $output .= $self->proceedToObjectEnd($coderef);
-    
-    return $output;
-}
-
-sub convertTag {
-	my ($self, $coderef) = @_;
-	
-	my $output = '';
-    $output .= $self->consumeWhitespace($coderef);
-    
-    if ($$coderef =~ s{^([a-z]+)}{}) {
-    	if ('if' eq $1) {
-    		$output .= $self->onTagIf($coderef);
-    	} elsif ('for' eq $1) {
-    		$output .= $self->onTagFor($coderef);
-    	} elsif ('include' eq $1) {
-    		$output .= $self->onTagInclude($coderef);
-        } elsif ('endif' eq $1) {
-            $output .= $self->onTagEnd($coderef);
-        } elsif ('endfor' eq $1) {
-            $output .= $self->onTagEnd($coderef);
-    	} else {
-    		$output .= __x("# Unknown liquid tag '{tag}'!\n", tag => $1);
-    		$output .= $1;
-    		$self->logError(__x("Unknown liquid tag '{tag}'!",
-    		                   tag => $1));
-            $output .= $self->proceedToTagEnd($coderef);
+    my $lineno = 1 + $options{offset};
+    # No need for a stack because there is no nesting.
+    my $state = 'INITIAL';
+    my $last_token = __"beginning of file";
+    my $whitespace = sub {
+    	while ($input =~ s/^[ \x09-\x0d]*\n//) {
+    		++$lineno;
     	}
-    }
-    
-	return $output;
-}
+    	$input =~ s/^[ \x09-\x0d]*//;
+    	return if empty $input;
+    	
+    	return 1;
+    };
+    my $lexer = sub {
+        return '', undef if empty $input;
 
-sub consumeWhitespace {
-	my ($self, $coderef) = @_;
-	
-	my $output .= '';
+        if ('INITIAL' eq $state) {
+            $input =~ s/([^\n\{]*)//;
+            return CDATA => $1 if !empty $1;
+        
+            if ($input =~ s/^\n//) {
+                ++$lineno;
+                return CDATA => "\n";
+            } elsif ($input =~ s/^\{\{//) {
+            	$state = 'OBJECT';
+                return SO => '{{';
+            } elsif ($input =~ s/^\{\%//) {
+            	$state = 'TAG';
+                return ST => '{%';
+            } else {
+                $input =~ s/(.)//;
+                return CDATA => $1;
+            }
+        } elsif ('TAG' eq $state) {
+        	$whitespace->() or return '', undef;
 
-	while ($$coderef =~ s/^([\x09-\x0d ])//g) {
-		$output .= $1;
-		++$self->{__lineno} if $1 eq "\n";
-	}
-	
-	return $output;
-}
-
-sub consumeNonWhitespace {
-    my ($self, $coderef) = @_;
-    
-    my $output .= '';
-
-    while ($$coderef =~ s/^([^\x09-\x0d ])//g) {
-        $output .= $1;
-        ++$self->{__lineno} if $1 eq "\n";
-    }
-    
-    return $output;
-}
-
-sub proceedToTagEnd {
-    my ($self, $coderef) = @_;
-    
-    my $output = '';
-    
-    while ($$coderef =~ s/^([^\n%]+)//g) {
-        $output .= $1;
-        if ($$coderef =~ s/^\n//) {
-            ++$self->{__lineno};
-            $output .= "\n";
-        } elsif ($$coderef =~ s/^\%\}//) {
-            $output .= $self->endTag;
-            last;
+        	if ($input =~ s/^([-a-zA-Z0-9_]+)//) {
+        		$state = 'IN-TAG';
+        	    return DIRECTIVE => $1;
+        	} else {
+        		$input =~ s/(.)//;
+        		return CDATA => $1;
+        	}
         } else {
-            $output .= $1;
+        	die "unhandled state $state";
         }
-    }
+    };
     
-    return $output;
+    my $lexer_wrapper = sub {
+    	my ($token, $content) = $lexer->();
+    	$last_token = $content;
+    	
+    	return $token, $content;
+    };
+    
+    my $error = sub {
+    	$state = 0;
+    	
+        my $location = $last_token;
+        $self->logger->error(__x("{filename}:{lineno}: Syntax error at or"
+                                 . " near '{location}'!",
+                                 filename => $filename,
+                                 lineno => $lineno,
+                                 location => $location));
+    };
+
+    $self->YYParse(yylex => $lexer_wrapper, yyerror => $error);
+
+    # FIXME! Check for errors!
+    return $self->{__output};
 }
 
-sub proceedToObjectEnd {
-    my ($self, $coderef) = @_;
-    
-    my $output = '';
-    
-    while ($$coderef =~ s/^([^\n}]+)//g) {
-        $output .= $1;
-        if ($$coderef =~ s/^\n//) {
-            ++$self->{__lineno};
-            $output .= "\n";
-        } elsif ($$coderef =~ s/^\}\}//) {
-            $output .= $self->endTag;
-            last;
-        } else {
-            $output .= $1;
-        }
-    }
-    
-    return $output;
+sub addOutput {
+	my ($self, $chunk) = @_;
+	
+	$self->{__output} .= $chunk;
+	
+	return $self;
 }
 
 sub startTag { 
@@ -204,139 +129,52 @@ sub endTag {
     return $self->{__options}->{tt2_end};
 }
 
-sub onTagIf {
-    my ($self, $coderef) = @_;
-    
-    my $output = 'IF';
-    $output .= $self->consumeWhitespace($coderef);
-    
-    my $token = $self->consumeNonWhitespace($coderef);
-    $output .= $self->translateToken($token);
-    
-    $output .= $self->proceedToTagEnd($coderef);
-    
-    return $output;
-}
-
-sub onTagEnd {
-    my ($self, $coderef) = @_;
-    
-    my $output = 'END';
-    
-    $output .= $self->proceedToTagEnd($coderef);
-    
-    return $output;
-}
-
-sub onTagFor {
-    my ($self, $coderef) = @_;
-    
-    my $output = 'FOREACH';
-    $output .= $self->consumeWhitespace($coderef);
-    $output .= $self->consumeNonWhitespace;
-    $output .= $self->consumeWhitespace($coderef);
-    my $in = $self->consumeNonWhitespace($coderef);
-    if ('in' ne $in) {
-    	$self->logError(__x("Expected 'in', got '{got}!'",
-    	                    got => $in));
-    	$output .= $in;
-    } else {
-    	$output .= 'IN';
-    }
-    
-    $output .= $self->proceedToTagEnd($coderef);
-    
-    return $output;
-}
-
-sub onTagInclude {
-	my ($self, $coderef) = @_;
-	
-	my $output = 'INCLUDE';
-	
-	$output .= $self->consumeWhitespace($coderef);
-
-    my $filename = $self->consumeNonWhitespace($coderef);
-    if ($filename =~ /^"'/) {
-    	# Requote and insert the prefix!
-    	$filename = $self->requote($filename);
-    	$filename =~ s/(.)/$self->{__options}->{partials_dir}/;
-    } else {
-    	if (-e File::Spec->catfile($self->{__options}->{includes_dir}, $filename)) {
-    		# Assume that this is really a filename.
-    	    $filename = $self->{__options}->{partials_dir} . '/' . $filename;
-    	    $output .= $self->requote(qq{"$filename"});
-    	} else {
-    		$output .= $self->translateToken($filename);
-    	}
-    }
-    
-    $output .= $self->proceedToTagEnd($coderef);
-	
-	return $output;
-}
-
-sub logError {
-    my ($self, $msg) = @_;
-    
-    $msg = "$self->{__filename}:$self->{__lineno}: $msg";
-
-    $self->{__logger}->error($msg);
-    ++$self->{__err_count};
-        
-    # This allows the construct $self->logError or return;
-    return;
-}
-
-sub translateVariable {
-	my ($self, $variable) = @_;
-	
-	my %mapping = (
-	    lang => 'lingua',
-	    content => 'asset.content',
-	);
-	
-	return $mapping{$variable} if exists $mapping{$variable};
-	
-	return $variable;
-}
-
-sub requote {
-	my ($self, $quoted) = @_;
-
-    if ($quoted =~ /"(.*)"/s) {
-    	$quoted = $1;
-    	$quoted =~ s/([\\"])/\\$1/gs;
-    	$quoted = qq{"$quoted"};
-    } elsif ($quoted =~ /'(.*)'/s) {
-        $quoted = $1;
-        $quoted =~ s/([\\'])/\\$1/gs;
-        $quoted = qq{'$quoted'};
-    }
-    
-    return $quoted;
-}
-
-sub translateToken {
-	my ($self, $token) = @_;
-
-    # Liquid seems to have no escapes.
-    $token =~ s/(".*?")/$self->requote($1)/ges;
-    $token =~ s/('.*?')/$self->requote($1)/ges;
-    
-    # Now extract everything that looks like a variable.
-	$token =~ s/(\A|[\[\]])(.*?)(\A|[\[\]])/
-	            $1 . $self->translateVariable($2) . $3/ges;
-	
-	return $token;
-}
-
 sub addPlugin {
 	my ($self, $plugin) = @_;
 	
 	$self->{__plugins}->{$plugin} = 1;
 	
 	return $self;
+}
+
+sub parse {
+    my ($self, $filename) = @_;
+
+    my $logger = $self->logger;
+    my $input = read_file $filename
+        or $logger->fatal(__x("Cannot read '{filename}': {error}!\n"));
+
+    my $lineno = 1;
+    my $state = 0;
+    
+    my $lexer = sub {
+        return '', undef if empty $input;
+
+        if ($state == 0) {
+            $input =~ s/([^\n\{]*)//;
+            return CDATA => $1 if !empty $1;
+        
+            if ("\n" eq $1) {
+                ++$lineno;
+                return CDATA => "\n";
+            } elsif ($input =~ s/^\{\{//) {
+                return SE => '{{';
+            } elsif ($input =~ s/^\{\%//) {
+                return SE => '{%';
+            } else {
+                die;
+            }
+        }
+    };
+    my $error = sub {
+        $logger->error(__"Syntax error!\n");
+    };
+
+    $self->YYParse(yylex => $lexer, yyerror => $error);
+}
+
+sub logger {
+    shift->{__logger};
 }
 
 1;
