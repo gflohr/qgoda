@@ -61,13 +61,27 @@ sub parse {
     my $logger = $self->logger;
     my $input = read_file $filename
         or $logger->fatal(__x("Cannot read '{filename}': {error}!\n"));
-   
+
+    my $lineno = 1;
+    my $state = 0;
     my $lexer = sub {
         return '', undef if empty $input;
 
-        my $chunk = $input;
-        $input = '';
-        return CDATA => $chunk;
+        if ($state = 0) {
+            $input =~ s/([^\n\{]*)//;
+            return CDATA => $1 if !empty $1;
+        
+            if ("\n" eq $1) {
+                ++$lineno;
+                return CDATA => "\n";
+            } elsif ($input =~ s/^\{\{//) {
+                return SE => '{{';
+            } elsif ($input =~ s/^\{\%//) {
+                return SE => '{%';
+            } else {
+                die;
+            }
+        }
     };
     my $error = sub {
         $logger->error(__"Syntax error!\n");
