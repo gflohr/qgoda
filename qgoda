@@ -49,7 +49,6 @@ usage_error __"Too many commands." if @ARGV > 1;
 usage_error __"No command given." if !@ARGV;
 
 my $command = shift @ARGV;
-
 my $method;
 if ('watch' eq $command) {
     $method = 'watch';
@@ -62,7 +61,7 @@ if ('watch' eq $command) {
 } elsif ('migrate' eq $command) {
     $method = 'migrate';
 } else {
-	usage_error __x"Unknown command '{command}'.";
+	usage_error __x("Unknown command '{command}'.", command => $command);
 }
 
 Qgoda->new($command, %options)->$method;
