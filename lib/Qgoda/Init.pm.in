@@ -35,11 +35,41 @@ sub init {
 	my $logger = $q->logger;
     my $config = $q->config;
 
+    my $config_filename = File::Spec->catfile($config->{srcdir}, '_config.yaml');
+    my $config_data = $self->__trim($self->__config);
+    $self->__write($config_filename, $config_data);
+    
     my $package_filename = File::Spec->catfile($config->{srcdir}, 'package.json');
     my $package = $self->__trim($self->__package);
     $self->__write($package_filename, $package);
-
+    
+    my $view_dir = $config->{directories}->{views};
+    $self->__mkdir($view_dir);
+    $self->__mkdir(File::Spec->catfile($view_dir, 'functions'));
+    $self->__mkdir(File::Spec->catfile($view_dir, 'partials'));
+    $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'head'));
+    $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'body'));
+    $self->__mkdir(File::Spec->catfile($view_dir, 'wrappers'));
+    
 	return $self;
+}
+
+sub __mkdir {
+    my ($self, $directory) = @_;
+    
+    return $self if -e $directory;
+    
+    my $q = Qgoda->new;
+    my $logger = $q->logger;
+    
+    $logger->info(__x("Creating directory '{directory}.", 
+                      directory => $directory));
+
+    mkdir $directory
+        or $logger->fatal(__x("Error creating directory '{dir}': {error}!",
+                              dir => $directory, error => $!));
+    
+    return $self;
 }
 
 sub __write {
@@ -73,7 +103,7 @@ sub __write {
 sub __trim {
     my ($self, $content) = @_;
     
-    $content =~ s/\n+$//;
+    $content =~ s/\n+$/\n/;
     
     return $content;
 }
@@ -81,6 +111,12 @@ sub __trim {
 sub __package {
     return <<'EOF';
 @package.json@
+EOF
+}
+
+sub __config {
+    return <<'EOF';
+@_config.yaml@
 EOF
 }
 
