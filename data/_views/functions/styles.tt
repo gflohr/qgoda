@@ -1,0 +1,9 @@
+[% seen = {} %]
+[% FOREACH style IN global.styles %]
+  [%- NEXT IF seen.$style; seen.$style = 1 %]
+  [%- IF (style.match('^(/)')) %]
+  <link href="[% q.bust_cache(style) | url %]" rel="stylesheet">
+  [%- ELSE %]
+  <style>[% style %]</style>
+  [%- END %]
+[% END %] 

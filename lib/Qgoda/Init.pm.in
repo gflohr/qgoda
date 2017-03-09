@@ -45,7 +45,16 @@ sub init {
     
     my $view_dir = $config->{directories}->{views};
     $self->__mkdir($view_dir);
+    
     $self->__mkdir(File::Spec->catfile($view_dir, 'functions'));
+
+    my $setup_filename = File::Spec->catfile($view_dir, 'functions', 'setup.tt');
+    $self->__write($setup_filename, $self->__trim($self->__functionsSetup));
+    my $scripts_filename = File::Spec->catfile($view_dir, 'functions', 'scripts.tt');
+    $self->__write($scripts_filename, $self->__trim($self->__functionsScripts));
+    my $styles_filename = File::Spec->catfile($view_dir, 'functions', 'styles.tt');
+    $self->__write($styles_filename, $self->__trim($self->__functionsStyles));
+        
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials'));
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'head'));
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'body'));
@@ -117,6 +126,24 @@ EOF
 sub __config {
     return <<'EOF';
 @_config.yaml@
+EOF
+}
+
+sub __functionsSetup {
+    return <<'EOF';
+@_views/functions/setup.tt@
+EOF
+}
+
+sub __functionsScripts {
+    return <<'EOF';
+@_views/functions/scripts.tt@
+EOF
+}
+
+sub __functionsStyles {
+    return <<'EOF';
+@_views/functions/styles.tt@
 EOF
 }
 
