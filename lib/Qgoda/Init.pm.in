@@ -48,6 +48,11 @@ sub init {
     
     $self->__mkdir(File::Spec->catfile($view_dir, 'functions'));
 
+    $self->__mkdir(File::Spec->catfile($view_dir, 'wrappers'));
+    
+    my $html5_filename = File::Spec->catfile($view_dir, 'wrappers', 'html5.html');
+    $self->__write($html5_filename, $self->__trim($self->__wrappersHTML5));
+
     my $setup_filename = File::Spec->catfile($view_dir, 'functions', 'setup.tt');
     $self->__write($setup_filename, $self->__trim($self->__functionsSetup));
     my $scripts_filename = File::Spec->catfile($view_dir, 'functions', 'scripts.tt');
@@ -56,13 +61,20 @@ sub init {
     $self->__write($styles_filename, $self->__trim($self->__functionsStyles));
         
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials'));
-    $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'head'));
+    
+    my $body_filename = File::Spec->catfile($view_dir, 'partials', 'body.html');
+    $self->__write($body_filename, $self->__trim($self->__partialsBody));
+    
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'body'));
+
+    my $header_filename = File::Spec->catfile($view_dir, 'partials', 'body', 'header.html');
+    $self->__write($header_filename, $self->__trim($self->__partialsBodyHeader));
     
-    $self->__mkdir(File::Spec->catfile($view_dir, 'wrappers'));
+    my $footer_filename = File::Spec->catfile($view_dir, 'partials', 'body', 'footer.html');
+    $self->__write($footer_filename, $self->__trim($self->__partialsBodyFooter));
     
-    my $html5_filename = File::Spec->catfile($view_dir, 'wrappers', 'html5.html');
-    $self->__write($html5_filename, $self->__trim($self->__wrappersHTML5));
+    my $head_filename = File::Spec->catfile($view_dir, 'partials', 'head.html');
+    $self->__write($head_filename, $self->__trim($self->__partialsHead));
 
 	return $self;
 }
@@ -154,6 +166,30 @@ EOF
 sub __wrappersHTML5 {
     return <<'EOF';
 @_views/wrappers/html5.html@
+EOF
+}
+
+sub __partialsBody {
+    return <<'EOF';
+@_views/partials/body.html@
+EOF
+}
+
+sub __partialsBodyHeader {
+    return <<'EOF';
+@_views/partials/body/header.html@
+EOF
+}
+
+sub __partialsBodyFooter {
+    return <<'EOF';
+@_views/partials/body/footer.html@
+EOF
+}
+
+sub __partialsHead {
+    return <<'EOF';
+@_views/partials/body.html@
 EOF
 }
 
