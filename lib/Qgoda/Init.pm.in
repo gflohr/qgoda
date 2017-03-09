@@ -58,8 +58,12 @@ sub init {
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials'));
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'head'));
     $self->__mkdir(File::Spec->catfile($view_dir, 'partials', 'body'));
+    
     $self->__mkdir(File::Spec->catfile($view_dir, 'wrappers'));
     
+    my $html5_filename = File::Spec->catfile($view_dir, 'wrappers', 'html5.html');
+    $self->__write($html5_filename, $self->__trim($self->__wrappersHTML5));
+
 	return $self;
 }
 
@@ -144,6 +148,12 @@ EOF
 sub __functionsStyles {
     return <<'EOF';
 @_views/functions/styles.tt@
+EOF
+}
+
+sub __wrappersHTML5 {
+    return <<'EOF';
+@_views/wrappers/html5.html@
 EOF
 }
 
