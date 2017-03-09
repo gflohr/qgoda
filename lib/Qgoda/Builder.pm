@@ -41,6 +41,10 @@ sub build {
     my $errors = 0;
     ASSET: foreach my $asset ($site->getAssets) {
     	eval {
+                local $SIG{__WARN__} = sub {
+                    my ($msg) = @_;
+                    $logger->warning("$asset->{path}: $msg");
+                };
 	    	$logger->debug(__x("building asset '/{relpath}'",
 	    	                   relpath => $asset->getRelpath));
 	        $self->processAsset($asset, $site);

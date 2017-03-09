@@ -202,6 +202,15 @@ sub migrate {
     return $self;
 }
 
+sub init {
+	my ($self) = @_;
+	
+    require Qgoda::Init;
+    Qgoda::Init->new->init;
+
+	return $self;
+}
+
 sub __getProcessors {
 	my ($self, @names) = @_;
 	

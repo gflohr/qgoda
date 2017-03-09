@@ -1,0 +1,91 @@
+#! /bin/false
+
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+package Qgoda::Init;
+
+use strict;
+
+use Locale::TextDomain qw('com.cantanea.qgoda');
+use File::Spec;
+
+sub new {
+	my $self = '';
+	bless \$self, shift;
+}
+
+sub init {
+	my ($self) = @_;
+	
+	my $q = Qgoda->new;
+	my $logger = $q->logger;
+    my $config = $q->config;
+
+    my $package_filename = File::Spec->catfile($config->{srcdir}, 'package.json');
+    my $package = $self->__trim($self->__package);
+    $self->__write($package_filename, $package);
+
+	return $self;
+}
+
+sub __write {
+    my ($self, $filename, $content) = @_;
+    
+    my $q = Qgoda->new;
+    my $logger = $q->logger;
+    my $config = $q->config;
+    
+    if (-e $filename) {
+        $logger->warning(__x("Not overwriting '{filename}'!",
+                             filename => $filename));
+        return $self;
+    }
+    
+    $content =~ s/\@([^\@]+)\@/$config->{$1}/g;
+    
+    $logger->info(__x("Initializing '{filename}'.", filename => $filename));
+    
+    open my $fh, ">$filename" 
+        or $logger->fatal(__x("Cannot write '{filename}': {error}!\n",
+                              filename => $filename, error => $!));
+    print $fh $content;
+    close $fh 
+        or $logger->fatal(__x("Cannot write '{filename}': {error}!\n",
+                              filename => $filename, error => $!));
+    
+    return $self;
+}
+
+sub __trim {
+    my ($self, $content) = @_;
+    
+    $content =~ s/\n+$//;
+    
+    return $content;
+}
+
+sub __package {
+    return <<'EOF';
+@package.json@
+EOF
+}
+
+1;
+
+=head1 NAME
+
+Qgoda::Init - Initialize Qgoda site in current directory.

@@ -74,9 +74,12 @@ sub MY::postamble {
         return '';
     }
    	q ( 
-all :: ReleaseNotes
+all :: ReleaseNotes lib/Qgoda/Init.pm
 
 ReleaseNotes: NEWS
 	cat NEWS >$@
-	);
+
+lib/Qgoda/Init.pm: lib/Qgoda/Init.pm.in
+	 perl -pe 's/\@(.*)\@/`cat data\/$1`/gxe' lib/Qgoda/Init.pm.in >$@
+         );
 }

@@ -60,6 +60,8 @@ if ('watch' eq $command) {
     $method = 'dumpConfig';
 } elsif ('migrate' eq $command) {
     $method = 'migrate';
+} elsif ('init' eq $command) {
+    $method = 'init';
 } else {
 	usage_error __x("Unknown command '{command}'.", command => $command);
 }

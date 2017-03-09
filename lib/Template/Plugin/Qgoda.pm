@@ -292,6 +292,20 @@ sub writeAsset {
     return '';
 }
 
+sub try {
+    my ($self, $method, @args) = @_;
+
+    my $retval;
+    eval {
+        $retval = $self->$method(@args);
+    };
+    if ($@) {
+        warn $@;
+    }
+
+    return $retval;
+}
+
 # If requested, this could be extended so that a ORing of filters can also
 # be implemented.
 sub __extractAnd {
