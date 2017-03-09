@@ -221,6 +221,11 @@ sub __include {
 sub list {
 	my ($self, @filters) = @_;
 
+        foreach my $filter (@filters) {
+            die __"List filter must be an array reference.\n"  
+                if !ref $filter || 'ARRAY' ne reftype $filter;
+        }
+
 	my $site = Qgoda->new->getSite;
 
 	return $self->__extractAnd([grep {!$_->{raw}} $site->getAssets], \@filters);
@@ -292,9 +297,6 @@ sub writeAsset {
 sub __extractAnd {
     my ($self, $set, $filters) = @_;
 
-    die __"list filter must be an array reference"  
-        if !ref $filters || 'ARRAY' ne reftype $filters;
-    
     my @set = @$set;
     my $site = Qgoda->new->getSite;
     foreach my $filter (@$filters) {
