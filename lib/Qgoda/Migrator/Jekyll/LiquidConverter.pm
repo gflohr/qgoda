@@ -50,6 +50,30 @@ sub convert {
     	
     	return 1;
     };
+    
+    my $next_char = sub {
+    	$input =~ s/(.)//;
+    	return CDATA => $1;
+    };
+    
+    # Re-quote a double-quoted string.
+    my $drequote = sub {
+        my ($string) = @_;
+        
+        $string =~ s/\\/\\\\/g;
+        
+        return qq{"$string"};
+    };
+    
+    # Re-quote a single-quoted string;
+    my $srequote = sub {
+        my ($string) = @_;
+        
+        $string =~ s/\\/\\\\/g;
+        
+        return qq{'$string'};
+    };
+    
     my $lexer = sub {
         return '', undef if empty $input;
 
@@ -67,8 +91,7 @@ sub convert {
             	$state = 'TAG';
                 return ST => '{%';
             } else {
-                $input =~ s/(.)//;
-                return CDATA => $1;
+                return $next_char->();
             }
         } elsif ('TAG' eq $state) {
         	$whitespace->() or return '', undef;
@@ -77,8 +100,17 @@ sub convert {
         		$state = 'IN-TAG';
         	    return DIRECTIVE => $1;
         	} else {
-        		$input =~ s/(.)//;
-        		return CDATA => $1;
+        		return $next_char->();
+        	}
+        } elsif ('IN-TAG' eq $state) {
+        	$whitespace->() or return '', undef;
+        	
+        	if ($input =~ s/^"(.*?)"//) {
+        		return DQUOTE => $drequote->($1);
+        	} elsif ($input =~ s/^'(.*?)'//) {
+        		return SQUOTE => $srequote->($1);
+        	} else {
+        		return $next_char->();
         	}
         } else {
         	die "unhandled state $state";
