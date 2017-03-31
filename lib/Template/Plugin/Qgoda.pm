@@ -27,6 +27,7 @@ use File::Spec;
 use Cwd;
 use URI;
 use Scalar::Util qw(reftype);
+use JSON qw(encode_json);
 
 use Qgoda;
 use Qgoda::Util qw(merge_data empty);
@@ -242,9 +243,11 @@ sub link {
     
     my $set = $self->list(@filters);
     if (@$set == 0) {
-        die "broken link()\n";
+        my $json = encode_json(\@filters);
+        die "broken link($json)\n";
     } if (@$set > 1) {
-        die "ambiguous link()\n"; 
+        my $json = encode_json(\@filters);
+        die "ambiguous link($json)\n"; 
     }
     
     return $set->[0]->{permalink};
