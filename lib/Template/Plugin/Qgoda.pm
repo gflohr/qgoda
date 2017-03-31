@@ -244,9 +244,11 @@ sub link {
     my $set = $self->list(@filters);
     if (@$set == 0) {
         my $json = encode_json(\@filters);
+        $json =~ s{.(.*).}{$1};
         die "broken link($json)\n";
     } if (@$set > 1) {
         my $json = encode_json(\@filters);
+        $json =~ s{.(.*).}{$1};
         die "ambiguous link($json)\n"; 
     }
     
