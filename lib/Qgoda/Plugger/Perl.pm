@@ -21,7 +21,6 @@ package Qgoda::Plugger::Perl;
 use strict;
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
-use Inline;
 
 use Qgoda;
 
