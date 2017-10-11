@@ -1,3 +1,5 @@
+- dependency URI is missing
+- why gets moose included? anyevent::filesys::notify ...
 - Try to unfold arguments to virtual methods.  If that does not work,
   use either only named arguments or positional arguments.
   We need a utility function that creates a hash with named arguments

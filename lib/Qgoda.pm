@@ -38,7 +38,7 @@ use Qgoda::Site;
 use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
-use Qgoda::Util qw(empty strip_suffix interpolate normalize_path);
+use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file);
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
@@ -91,6 +91,12 @@ sub build {
     $self->__build($site);
     
     $self->__prune($site);
+
+    my $timestamp_file = File::Spec->catfile($config->{srcdir}, '_timestamp');
+    if (!write_file($timestamp_file, sprintf "%d\n", time)) {
+            $logger->error(__x("cannot write '{file}': {error}!",
+                           file => $timestamp_file, error => $!));
+    }
     
     my $num_artefacts = $site->getArtefacts;
     $logger->info(__nx("finished building site with one artefact",
