@@ -58,6 +58,7 @@ sub new {
     	index => 'index',
     	'case-sensitive' => 0,
     	view => 'default.html',
+        latency => 0.5,
     	directories => {
     		views => '_views'
     	},

@@ -127,10 +127,9 @@ sub watch {
     	
         $logger->debug(__x("waiting for changes in '{dir}'", 
                            dir => $config->{srcdir}));
-                                   
         AnyEvent::Filesys::Notify->new(
             dirs => [$config->{srcdir}],
-            interval => 0.5,
+            interval => $config->{latency},
             parse_events => 1,
             cb => sub { $self->__onFilesysChange(@_) },
             filter => sub { $self->__filesysChangeFilter(@_) },
