@@ -668,13 +668,15 @@ sub trim($) {
 	return $string;
 }
 
-sub fnstarmatch($$) {
-    my ($pattern, $string) = @_;
+sub fnstarmatch($$;$) {
+    my ($pattern, $string, $is_directory) = @_;
 
     # Translate the pattern into a regular expression.  First collapse
     # multiple slashes into ones, regardless of whether the first one
     # was escaped.
     $pattern =~ s{//+}{/}g;
+    
+    my $directory_match = $pattern =~ s{/+$}{};
     
     $pattern =~ s
                 {
@@ -709,13 +711,18 @@ sub fnstarmatch($$) {
                     $translated;
                 }gsex;
 
-    return 1 if $string =~ /^$pattern$/;
+    $string =~ /^$pattern$/ or return;
 
-    return;
+    return if $directory_match && !$is_directory;
+
+    return 1;
 }
 
-sub match_ignore_patterns($$) {
-    my ($patterns, $path) = @_;
+sub match_ignore_patterns($$;$) {
+    my ($patterns, $path, $is_directory) = @_;
+
+    # Collapse multiple slashes.
+    $path =~ s{//+}{}g;
 
     # Strip-off trailing slashes.
     $path =~ s{/+$}{};
@@ -738,9 +745,9 @@ sub match_ignore_patterns($$) {
         my $what = ('/' eq substr $pattern, 0, 1) ? $path : $filename;
 
         if (defined $ignored && $negated) {
-            $ignored = 0 if fnstarmatch $pattern, $what;
+            $ignored = 0 if fnstarmatch $pattern, $what, $is_directory;
         } elsif (!$ignored && !$negated) {
-            $ignored = 1 if fnstarmatch $pattern, $what;
+            $ignored = 1 if fnstarmatch $pattern, $what, $is_directory;
         }
     }
 

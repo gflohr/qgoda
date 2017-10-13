@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 use Qgoda::Util qw(match_ignore_patterns);
 
@@ -34,13 +34,22 @@ ok match_ignore_patterns(\@patterns, '/path/to/foobar.txt'), 'subdir match';
 ok match_ignore_patterns(\@patterns, '/foobar.txt'), 'top-level match';
 ok !match_ignore_patterns(\@patterns, '/path/to/foobar.txt'), 'subdir match2';
 
-# TODO! Match inside directories!
-
 @patterns = ('*.txt', '!foobar.txt');
 ok match_ignore_patterns(\@patterns, '/barbaz.txt'), 'simple negate matched';
 ok !match_ignore_patterns(\@patterns, '/foobar.txt'), 'simple negate failed';
 
-# Whitespace inside pattern must be removed.
+# Whitespace after an exclamation mark inside pattern must be removed.
 @patterns = ('*.txt', '!        foobar.txt');
 ok match_ignore_patterns(\@patterns, '/barbaz.txt'), 'simple negate matched';
 ok !match_ignore_patterns(\@patterns, '/foobar.txt'), 'simple negate failed';
+
+@patterns = q(foobar/);
+ok match_ignore_patterns(\@patterns, 'foobar', 1), 
+    'dirmatch did not match for directory';
+ok !match_ignore_patterns(\@patterns, 'foobar'), 
+    'dirmatch matched for non-directory';
+
+# TODO:
+# - Files that reside inside a directory that was previously excluded cannot
+#   be included again.  This is needed so that the watch functionality 
+#   matches that of the file collector.

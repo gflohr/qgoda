@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 4;
+use Test::More tests => 6;
 
 use Qgoda::Util qw(fnstarmatch);
 
@@ -26,3 +26,7 @@ ok fnstarmatch 'foobar', 'foobar';
 ok !fnstarmatch 'foobar', 'barbaz';
 ok !fnstarmatch 'ooba', 'foobar';
 ok fnstarmatch '*.txt', 'foobar.txt';
+
+# Match only for directories.
+ok fnstarmatch 'foobar/', 'foobar', 1;
+ok !fnstarmatch 'foobar/', 'foobar';
