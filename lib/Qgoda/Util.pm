@@ -668,9 +668,6 @@ sub trim($) {
 	return $string;
 }
 
-sub match_ignore_patterns($$) {
-}
-
 sub fnstarmatch($$) {
     my ($pattern, $string) = @_;
 
@@ -712,9 +709,31 @@ sub fnstarmatch($$) {
                     $translated;
                 }gsex;
 
-#warn "$pattern";
+    return 1 if $string =~ /^$pattern$/;
 
-    return $string =~ /^$pattern$/;
+    return;
+}
+
+sub match_ignore_patterns($$) {
+    my ($patterns, $filename) = @_;
+
+    # Strip-off trailing slashes.
+    $filename =~ s{/+$}{};
+
+    # Strip-off leading path.
+    $filename =~ s{.*/}{};
+
+    my $match;
+    foreach my $pattern (@$patterns) {
+        if (fnstarmatch $pattern, $filename) {
+            $match = 1;
+            last;
+        }
+    }
+
+    return 1 if $match;
+
+    return;
 }
 
 1;
