@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 5;
+use Test::More tests => 9;
 
 use Qgoda::Util qw(match_ignore_patterns);
 
@@ -33,3 +33,14 @@ ok match_ignore_patterns(\@patterns, '/path/to/foobar.txt'), 'subdir match';
 @patterns = q(/foobar.txt);
 ok match_ignore_patterns(\@patterns, '/foobar.txt'), 'top-level match';
 ok !match_ignore_patterns(\@patterns, '/path/to/foobar.txt'), 'subdir match2';
+
+# TODO! Match inside directories!
+
+@patterns = ('*.txt', '!foobar.txt');
+ok match_ignore_patterns(\@patterns, '/barbaz.txt'), 'simple negate matched';
+ok !match_ignore_patterns(\@patterns, '/foobar.txt'), 'simple negate failed';
+
+# Whitespace inside pattern must be removed.
+@patterns = ('*.txt', '!        foobar.txt');
+ok match_ignore_patterns(\@patterns, '/barbaz.txt'), 'simple negate matched';
+ok !match_ignore_patterns(\@patterns, '/foobar.txt'), 'simple negate failed';

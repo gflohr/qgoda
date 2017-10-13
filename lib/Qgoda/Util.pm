@@ -724,18 +724,27 @@ sub match_ignore_patterns($$) {
     my $filename = $path;
     $filename =~ s{.*/}{};
 
-    my $match;
-    foreach my $pattern (@$patterns) {
+    # Undefined means undecided, 0 means not ignore, everything
+    # else means ignore.
+    my $ignored;
+
+    foreach (@$patterns) {
+        # We have to modify the pattern.  Therefore we need a copy.
+        my $pattern = $_;
+
+        my $negated = $pattern =~ s{^![ \t\r\n]*}{};
+
         # Top-level match?
         my $what = ('/' eq substr $pattern, 0, 1) ? $path : $filename;
 
-        if (fnstarmatch $pattern, $what) {
-            $match = 1;
-            last;
+        if (defined $ignored && $negated) {
+            $ignored = 0 if fnstarmatch $pattern, $what;
+        } elsif (!$ignored && !$negated) {
+            $ignored = 1 if fnstarmatch $pattern, $what;
         }
     }
 
-    return 1 if $match;
+    return 1 if $ignored;
 
     return;
 }
