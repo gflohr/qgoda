@@ -33,7 +33,8 @@ use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
-                slugify html_escape unmarkup globstar trim);
+                slugify html_escape unmarkup globstar trim 
+                match_ignore_patterns fnstarmatch);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -631,7 +632,10 @@ sub _globstar($;$) {
     	}
     }
 
-    # Pattern without globstar.  Just return the normal expansion.
+    # Pattern without globstar.  Just return the normal expansion
+    # but escape all whitespace.
+    $current =~ s/(\s)/\\$1/g;
+
     return glob $current;
 }
 
@@ -662,6 +666,55 @@ sub trim($) {
     $string =~ s{[ \x09-\x0d]+$}{};
 	
 	return $string;
+}
+
+sub match_ignore_patterns($$) {
+}
+
+sub fnstarmatch($$) {
+    my ($pattern, $string) = @_;
+
+    # Translate the pattern into a regular expression.  First collapse
+    # multiple slashes into ones, regardless of whether the first one
+    # was escaped.
+    $pattern =~ s{//+}{/}g;
+    
+    $pattern =~ s
+                {
+                    (.*?)               # Anything, followed by ...
+                    (  
+                       \\.              # escaped character
+                    |                   # or
+                       \A\*\*(?=/)      # leading **/
+                    |                   # or
+                       /\*\*(?=/|\z)    # /**/ or /** at end of string
+                    |                   # or
+                       \.               # a dot
+                    |                   # or
+                       \*               # an asterisk
+                    |
+                    )?
+                }{
+                    my $translated = quotemeta $1;
+                    if ('\\' eq substr $2, 0, 1) {
+                        $translated .= quotemeta substr $2, 1, 1;
+                    } elsif ('**' eq $2) {
+                        $translated .= '.*';
+                    } elsif ('/**' eq $2) {
+                        $translated .= '/.*';
+                    } elsif ('.' eq $2) {
+                        $translated .= '\\.';
+                    } elsif ('*' eq $2) {
+                        $translated .= '[^/]*';
+                    } elsif (length $2) {
+                        die $2; 
+                    }
+                    $translated;
+                }gsex;
+
+#warn "$pattern";
+
+    return $string =~ /^$pattern$/;
 }
 
 1;
