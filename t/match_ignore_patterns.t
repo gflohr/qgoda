@@ -18,7 +18,7 @@
 
 use strict;
 
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 use Qgoda::Util qw(match_ignore_patterns);
 
@@ -26,6 +26,10 @@ my @patterns;
 
 @patterns = q(foobar.txt);
 
-ok match_ignore_patterns(\@patterns, 'foobar.txt'), 'equality';
-ok !match_ignore_patterns(\@patterns, 'xyzfoobar.txt'), 'incomplete match';
+ok match_ignore_patterns(\@patterns, '/foobar.txt'), 'equality';
+ok !match_ignore_patterns(\@patterns, '/xyzfoobar.txt'), 'incomplete match';
 ok match_ignore_patterns(\@patterns, '/path/to/foobar.txt'), 'subdir match';
+
+@patterns = q(/foobar.txt);
+ok match_ignore_patterns(\@patterns, '/foobar.txt'), 'top-level match';
+ok !match_ignore_patterns(\@patterns, '/path/to/foobar.txt'), 'subdir match2';

@@ -715,17 +715,21 @@ sub fnstarmatch($$) {
 }
 
 sub match_ignore_patterns($$) {
-    my ($patterns, $filename) = @_;
+    my ($patterns, $path) = @_;
 
     # Strip-off trailing slashes.
-    $filename =~ s{/+$}{};
+    $path =~ s{/+$}{};
 
     # Strip-off leading path.
+    my $filename = $path;
     $filename =~ s{.*/}{};
 
     my $match;
     foreach my $pattern (@$patterns) {
-        if (fnstarmatch $pattern, $filename) {
+        # Top-level match?
+        my $what = ('/' eq substr $pattern, 0, 1) ? $path : $filename;
+
+        if (fnstarmatch $pattern, $what) {
             $match = 1;
             last;
         }
