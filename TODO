@@ -1,3 +1,4 @@
+- passing the command in the constructor is brain-damaged!
 - dependency URI is missing
 - why gets moose included? anyevent::filesys::notify ...
 - Try to unfold arguments to virtual methods.  If that does not work,
