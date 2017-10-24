@@ -49,4 +49,10 @@ sub getOrigin {
 	}
 }
 
+sub dump {
+	my ($self) = @_;
+
+	%{$self};
+}
+
 1;

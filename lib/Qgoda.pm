@@ -68,7 +68,7 @@ sub new {
 }
 
 sub build {
-    my ($self) = @_;
+    my ($self, $dry_run) = @_;
 
     delete $self->{__load_plugins} && load_plugins $qgoda;
 
@@ -88,6 +88,8 @@ sub build {
     
     $self->__analyze($site);
     $self->__locate($site);
+    return $self if $dry_run;
+
     $self->__build($site);
     
     $self->__prune($site);
@@ -105,6 +107,43 @@ sub build {
                        num => $num_artefacts));
 
     return $self; 
+}
+
+sub dumpAssets {
+    my ($self) = @_;
+
+    $self->build(1);
+
+    return map { {$_->dump} } $self->getSite->getAssets;
+}
+
+sub dump {
+    my ($self) = @_;
+
+    my $data = [$self->dumpAssets];
+
+    my $format = $self->{__options}->{output_format};
+    $format = 'JSON' if empty $format;
+
+    if ('JSON' eq uc $format) {
+        require JSON;
+        print JSON::encode_json($data);
+    } elsif ('YAML' eq uc $format) {
+        require YAML::XS;
+        print YAML::XS::Dump($data);
+    } elsif ('STORABLE' eq uc $format) {
+        require Storable;
+        print Storable::nfreeze($data);
+    } elsif ('PERL' eq uc $format) {
+        require Data::Dumper;
+        $Data::Dumper::Varname = 'Qgoda';
+        print Data::Dumper::Dumper($data);
+    } else {
+        die __x("Unsupported dump output format '{format}'.\n",
+                format => $format);
+    }
+
+    return $self;
 }
 
 sub watch {
@@ -150,6 +189,8 @@ sub logger {
     } elsif ($self->{__options}->{quiet}) {
         $args{quiet} = 1;
     }
+
+    $args{log_fh} = \*STDERR if $self->{__options}->{log_stderr};
 
     return Qgoda::Logger->new(%args);
 }
@@ -482,7 +523,9 @@ sub locateAsset {
     my ($significant, $directory) = fileparse $location;
     ($significant) = strip_suffix $significant;
     if ($significant eq $asset->{index}) {
-        $asset->{'significant-path'} = $directory . '/';
+        $asset->{'significant-path'} = $directory;
+        $asset->{'significant-path'} .= '/' 
+            unless '/' eq substr $directory, -1, 1;
     } else {
         $asset->{'significant-path'} = $location;
     }

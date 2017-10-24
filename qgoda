@@ -27,9 +27,12 @@ use Getopt::Long;
 use Qgoda;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
-my %options;
+my %options = (
+    output_format => 'JSON'
+);
 Getopt::Long::Configure('bundling');
 GetOptions (
+            'log-stderr' => \$options{log_stderr},
             'q|quiet' => \$options{quiet},
             'h|help' => \$options{help},
             'v|verbose' => \$options{verbose},
@@ -37,6 +40,7 @@ GetOptions (
             'from-system=s' => \$options{from_system},
             'n|nochange|dry-run' => \$options{nochange},
             'output-directory=s' => \$options{output_directory},
+            'output-format=s' => \$options{output_format}
 	    ) or exit 1;
 
 display_usage if $options{help};
@@ -58,6 +62,10 @@ if ('watch' eq $command) {
     delete $options{verbose};
     $options{quiet} = 1;
     $method = 'dumpConfig';
+} elsif ('dump' eq $command) {
+    $options{log_stderr} = 1;
+    $options{quiet} = 1 if !$options{verbose};
+    $method = 'dump';
 } elsif ('migrate' eq $command) {
     $method = 'migrate';
 } elsif ('init' eq $command) {
@@ -78,14 +86,22 @@ The following commands are currently supported:
   watch                       build, then watch for changes and build on demand
   config                      dump the current configuration and exit
   migrate                     migrate from another software
+  init                        initialize a new qgoda site
+  dump                        dump the site structure as JSON (implies --quiet)
 
 Operation mode:
+      --log-stderr            log to standard error instead of standard out
   -q, --quiet                 quiet mode
   -v, --verbose               display progress on standard error
 
 Informative output:
   -h, --help                  display this help and exit
   -V, --version               output version information and exit
+
+Options for command 'dump':
+      --output-format=FORMAT  dump output in FORMAT, either JSON (default),
+                              YAML, STORABLE (try "perldoc Storable") or
+                              PERL (Perl code)
 
 Options for command 'migrate':
       --from-system=SYSTEM    migrate from system SYSTEM (only "Jekyll" is
