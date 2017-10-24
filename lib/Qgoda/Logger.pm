@@ -33,6 +33,7 @@ sub new {
         __client => $args{client},
         __logfile => $args{logfile},
         __reqid => $args{reqid},
+        __log_fh => $args{log_fh} || \*STDOUT,
     };
 
     bless $self, $class;
@@ -43,7 +44,7 @@ sub __logFunc {
     
     my $msg = $self->__makeMessage($type, @msg);
 
-    print $msg;
+    $self->{__log_fh}->print($msg);
     
     return 1;
 }
