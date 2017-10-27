@@ -25,6 +25,8 @@ use File::Spec;
 use YAML::XS;
 use Cwd;
 use Scalar::Util qw(reftype looks_like_number);
+use File::Globstar qw(quotestar);
+use File::Globstar::ListMatch;
 
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
 
@@ -60,7 +62,8 @@ sub new {
     	view => 'default.html',
         latency => 0.5,
     	directories => {
-    		views => '_views'
+    		views => '_views',
+            includes => '_includes'
     	},
     	processors => {
             chains => {
@@ -115,8 +118,17 @@ sub new {
         }
         my $local = eval { YAML::XS::Load($yaml) };
         $logger->fatal(yaml_error $filename, $@) if $@;
+
+        foreach my $key (grep { /^__q_/ } keys %{$local || {}}) {
+            $logger->fatal(__x("illegal configuration variable '{var}':"
+                               . " names starting with '__q_' are reserved"
+                               . " for internal purposes.",
+                               var => $key));
+        }
+
         $config = merge_data $config, $local if $local;
     }
+
     my $self = bless $config, $class;
 
     eval { $self->checkConfig($self) };
@@ -132,7 +144,43 @@ sub new {
     # Clean up certain variables or overwrite them unconditionally.
     $config->{srcdir} = Cwd::abs_path($config->{srcdir});
     $config->{outdir} = Cwd::abs_path($config->{outdir});
+
+    my @exclude = (
+        '/_*',
+        '.*'
+    );
+    my @exclude_watch = (
+        '/_*',
+        '.*',
+    );
+
+    my $viewdir = File::Spec->abs2rel($self->{directories}->{views});
+    push @exclude_watch, '!' . quotestar $viewdir
+        if $viewdir !~ m{^\.\./};
+    my $includedir = File::Spec->abs2rel($self->{directories}->{includes});
+    push @exclude_watch, '!' . quotestar $includedir
+        if $includedir !~ m{^\.\./};
+
+    my @config_exclude = @{$config->{exclude} || []};
+    my @config_exclude_watch = @{$config->{exclude_watch} || $config->{exclude} || []};
     
+    push @exclude, @config_exclude;
+    push @exclude_watch, @config_exclude_watch;
+
+    my $outdir = File::Spec->abs2rel($self->{outdir}, $self->{srcdir});
+    if ($outdir !~ m{^\.\./}) {
+        push @exclude, quotestar $outdir, 1;
+        push @exclude_watch, quotestar $outdir, 1;
+    }
+    $self->{__q_exclude} = File::Globstar::ListMatch->new(
+        \@exclude,
+        ignoreCase => !$self->{'case-sensitive'}
+    );
+    $self->{__q_exclude_watch} = File::Globstar::ListMatch->new(
+        \@exclude_watch,
+        ignoreCase => !$self->{'case-sensitive'}
+    );
+
     return $self;
 }
 
@@ -176,6 +224,8 @@ sub checkConfig {
         unless $self->__isHash($config->{processors}->{options});
     die __x("'{variable}' must be a list", variable => 'exclude')
         if exists $self->{exclude} && !$self->__isArray($self->{exclude});
+    die __x("'{variable}' must be a list", variable => 'exclude_watch')
+        if exists $self->{exclude_watch} && !$self->__isArray($self->{exclude_watch});
     die __x("'{variable}' must be a dictionary", variable => 'defaults')
         if exists $self->{defaults} && !$self->__isHash($config->{defaults});
     
@@ -218,7 +268,7 @@ sub checkConfig {
 }
 
 sub ignorePath {
-    my ($self, $path) = @_;
+    my ($self, $path, $watch) = @_;
     
     # We only care about regular files and directories.  Symbolic links are 
     # excluded on purpose.  If, however, the file is deleted, we have to
@@ -233,20 +283,11 @@ sub ignorePath {
 
     my $relpath = File::Spec->abs2rel($path, $self->{srcdir});
 
-    if ($self->{exclude}) {
-    	my %excludes = map { $_ => 1 } @{$self->{exclude}};
-    	return $self if $excludes{$relpath};
-    }
-    
-    # Ignore all underscore files and directories but only on the top-level
-    # except for "_views".
-    return $self if '_' eq substr $relpath, 0, 1 && $relpath !~ m{^_views/};
-    
-    # Ignore all hidden files and directories.
-    foreach my $part (File::Spec->splitdir($relpath)) {
-        return $self if '.' eq substr $part, 0, 1;
-    }
-    
+    if ($watch) {
+        return $self if $self->{__q_exclude_watch}->match($relpath);
+    } else {
+        return $self if $self->{__q_exclude}->match($relpath);
+    } 
     return;
 }
 

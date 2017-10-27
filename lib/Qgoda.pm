@@ -203,7 +203,11 @@ sub dumpConfig {
 	my ($self) = @_;
 	
 	# Make a shallow copy so that we unbless the reference.
-	my %config = %{$self->{__config}};
+	my %config = %{$self->config};
+    foreach my $key (grep { /^__q_/ } keys %config) {
+        delete $config{$key};
+    }
+
 	require YAML::XS;
 	print YAML::XS::Dump(\%config);
 	
@@ -444,7 +448,7 @@ sub __filesysChangeFilter {
 	
     my $config = $self->{__config};
 
-    if ($config->ignorePath($filename)) {
+    if ($config->ignorePath($filename, 1)) {
         my $logger = $self->{__logger};
         $logger->debug(__x("changed file '{filename}' is ignored",
                            filename => $filename));

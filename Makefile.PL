@@ -56,6 +56,8 @@ WriteMakefile (
         'YAML::LibYAML' => '0.63',
         'File::Copy::Recursive' => '0.38',
         'Hook::LexWrap' => '0.25',
+        'Data::Walk' => '2.0',
+        'overload' => '0',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},

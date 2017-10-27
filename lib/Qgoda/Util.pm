@@ -27,6 +27,7 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 use Scalar::Util qw(reftype looks_like_number);
 use Encode qw(_utf8_on);
 use File::Find ();
+use Data::Walk 2.00;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -34,7 +35,7 @@ use vars qw(@EXPORT_OK);
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
                 slugify html_escape unmarkup globstar trim 
-                match_ignore_patterns fnstarmatch);
+                match_ignore_patterns fnstarmatch flatten2hash);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -499,166 +500,6 @@ sub unmarkup($) {
 	return $escaped;
 }
 
-sub _find_files {
-    my ($directory) = @_;
-    
-    my $empty = empty $directory;
-    $directory = '.' if $empty;
-    
-    my @hits;
-    File::Find::find sub {
-        return if -d $_;
-        return if '.' eq substr $_, 0, 1;
-        push @hits, $File::Find::name;      
-    }, $directory;
-    
-    if ($empty) {
-        @hits = map { substr $_, 2 } @hits;
-    }
-    
-    return @hits;
-}
-
-sub _find_directories {
-    my ($directory) = @_;
-    
-    my $empty = empty $directory;
-    $directory = '.' if $empty;
-    
-    my @hits;
-    File::Find::find sub {
-        return if !-d $_;
-        return if '.' eq substr $_, 0, 1;
-        push @hits, $File::Find::name;      
-    }, $directory;
-    
-    if ($empty) {
-        @hits = map { substr $_, 2 } @hits;
-    }
-    
-    return @hits;
-}
-
-sub _find_all {
-    my ($directory) = @_;
-    
-    my $empty = empty $directory;
-    $directory = '.' if $empty;
-    
-    my @hits;
-    File::Find::find sub {
-        return if '.' eq substr $_, 0, 1;
-        push @hits, $File::Find::name;
-    }, $directory;
-    
-    if ($empty) {
-        @hits = map { substr $_, 2 } @hits;
-    }
-    
-    return @hits;
-}
-
-sub _globstar($;$) {
-	my ($pattern, $directory) = @_;
-
-    $directory = '' if !defined $directory;
-	$pattern = $_ if !@_;
-
-	if ('**' eq $pattern) {
-		return _find_all $directory;
-	} elsif ('**/' eq $pattern) {
-		return map { $_ . '/' } _find_directories $directory;
-	} elsif ($pattern =~ s{^\*\*/}{}) {
-		my %found_files;
-		foreach my $directory ('', _find_directories $directory) {
-			foreach my $file (_globstar $pattern, $directory) {
-				$found_files{$file} = 1;
-			}
-		}
-		return keys %found_files;
-	}
-
-    my $current = quotemeta $directory;
-    if ($directory ne '' && '/' ne substr $directory, -1, 1) {
-    	$current .= '/';
-    }
-    while ($pattern =~ s/(.)//s) {
-    	if ($1 eq '\\') {
-    		$pattern =~ s/(..?)//s;
-    		$current .= $1;
-    	} elsif ('/' eq $1 && $pattern =~ s{^\*\*/}{}) {
-    		$current .= '/';
-    		
-    		# Expand until here.
-    		my @directories = glob $current;
-    		
-    		# And search in every subdirectory;
-            my %found_dirs;
-            foreach my $directory (@directories) {
-            	$found_dirs{$directory} = 1;
-            	foreach my $subdirectory (_find_directories $directory) {
-            		$found_dirs{$subdirectory . '/'} = 1;
-            	}
-            }
-            
-            if ('' eq $pattern) {
-            	my %found_subdirs;
-            	foreach my $directory (keys %found_dirs) {
-            		$found_subdirs{$directory} = 1;
-            		foreach my $subdirectory (_find_directories $directory) {
-            		    $found_subdirs{$subdirectory . '/'} = 1;
-            		}
-            	}
-            	return keys %found_subdirs;
-            }
-            my %found_files;
-            foreach my $directory (keys %found_dirs) {
-            	foreach my $hit (_globstar $pattern, $directory) {
-            		$found_files{$hit} = 1;
-            	}
-            }
-            return keys %found_files;
-    	} elsif ('**' eq $pattern) {
-    		my %found_files;
-    		foreach my $directory (glob $current) {
-    			$found_files{$directory . '/'} = 1;
-    			foreach my $file (_find_all $directory) {
-    				$found_files{$file} = 1;
-    			}
-    		}
-    		return keys %found_files;
-    	} else {
-    		$current .= $1;
-    	}
-    }
-
-    # Pattern without globstar.  Just return the normal expansion
-    # but escape all whitespace.
-    $current =~ s/(\s)/\\$1/g;
-
-    return glob $current;
-}
-
-sub globstar($) {
-	my ($pattern) = @_;
-
-    if (!ref $pattern || 'ARRAY' ne reftype $pattern) {
-        return _globstar $pattern;
-    }
-
-    my %found;
-    foreach my $p (@$pattern) {
-    	if ($p =~ s/^!//) {
-    		my @found = _globstar $p;
-    		delete $found{$_} foreach _globstar $p;
-    	} else {
-    	    $found{$_} = 1 foreach _globstar $p;
-    	}
-    }
-    
-    return keys %found;
-}
-
 sub trim($) {
 	my ($string) = @_;
 	
@@ -671,11 +512,7 @@ sub trim($) {
 sub fnstarmatch($$;$) {
     my ($pattern, $string, $is_directory) = @_;
 
-    # Translate the pattern into a regular expression.  First collapse
-    # multiple slashes into ones, regardless of whether the first one
-    # was escaped.
-    $pattern =~ s{//+}{/}g;
-    
+    # Translate the pattern into a regular expression.
     my $directory_match = $pattern =~ s{/+$}{};
     
     $pattern =~ s
@@ -721,9 +558,6 @@ sub fnstarmatch($$;$) {
 sub match_ignore_patterns($$;$) {
     my ($patterns, $path, $is_directory) = @_;
 
-    # Collapse multiple slashes.
-    $path =~ s{//+}{}g;
-
     # Strip-off trailing slashes.
     $path =~ s{/+$}{};
 
@@ -754,6 +588,94 @@ sub match_ignore_patterns($$;$) {
     return 1 if $ignored;
 
     return;
+}
+
+sub flatten2hash {
+    my ($data) = @_;
+
+    my @path;
+    my %pot;
+
+use Data::Dumper;
+    # The preprocess function for Data::Walk.
+    my $preprocess = sub {
+        warn 'in';
+        my (@items) = @_;
+    
+        if ('HASH' eq $Data::Walk::type) {
+            my %items = @items;
+            undef @items;
+            # Sort by key.
+            foreach my $key (sort keys %items) {
+                push @items, $key, $items{$key};
+            }
+        } else {
+        }
+
+        # Add a path slot.  If it is a hash, it gets overwritten, otherwise
+        # incremented.
+        push @path, -1;
+    
+        return @items;
+    };
+    
+    my $postprocess = sub {
+        warn 'out';
+        # Remove the last path component.
+        pop @path;
+    };
+    
+    # The wanted function for Data::Walk.
+    my $wanted = sub {
+        #warn 'item';
+        if ('bazoo' eq $_) {
+            $DB::single = 1;
+        }
+        if ('HASH' eq $Data::Walk::type) {
+            if (defined $Data::Walk::key) {
+                # Value.
+                if (!ref $_) {
+                    my $msgstr = $_;
+                    my $ctx = join '.', @path;
+                    $pot{$ctx} = $msgstr;
+                    #pop @path;
+                }
+            } elsif (!ref $_) {
+                # Key.
+                die "$0: invalid key '$_'!\n" if /\./;
+                $path[-1] = $_;
+            }
+        } else {
+            ++$path[-1];
+            if (!ref $_) {
+                # Leaf.
+                my $ctx = join '.', @path;
+                $pot{$ctx} = $_;
+            }
+        }
+    };
+
+    walk {
+        wanted => $wanted,
+        preprocess => $preprocess,
+        postprocess => $postprocess,
+    }, $data;
+
+    return \%pot;
+}
+
+package Index;
+
+use strict;
+
+use overload '""' => sub { '[' . ${$_[0]} . ']' };
+
+sub new {
+    my ($class) = @_;
+            
+    my $self = -1;
+
+    bless \$self, $class;
 }
 
 1;
