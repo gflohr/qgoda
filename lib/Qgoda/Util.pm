@@ -610,9 +610,15 @@ sub flatten2hash {
         my $reftype = reftype $_ || '';
 
         if ('HASH' eq $reftype) {
+            if (!keys %$_) {
+                $flat{join '.', @path} = $_;
+            }
             push @types, 'h';
             push @path, '';
         } elsif ('ARRAY' eq $reftype) {
+            if (!@$_) {
+                $flat{join '.', @path} = $_;
+            }
             push @types, 'a';
             push @path, -1;
         } else {
@@ -622,7 +628,6 @@ sub flatten2hash {
         if ('HASH' eq $Data::Walk::type) {
             if (defined $Data::Walk::key) {
                 # Value.
-                
                 if (!ref $_) {
                     $flat{join '.', @path} = $_;
                 }
