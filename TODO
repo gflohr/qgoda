@@ -1,5 +1,8 @@
+- q.link() should not die but warn only, or make it configurable
+- q.link() and friends should accept a hash
 - generalize the HTML cleaner into a plug-in interface!
 - passing the command in the constructor is brain-damaged!
+- also watch "_plugins"!
 - dependency URI is missing
 - why gets moose included? anyevent::filesys::notify ...
 - Try to unfold arguments to virtual methods.  If that does not work,

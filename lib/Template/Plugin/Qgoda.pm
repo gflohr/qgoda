@@ -255,6 +255,23 @@ sub link {
     return $set->[0]->{permalink};
 }
 
+sub xref {
+    my ($self, $variable, @filters) = @_;
+
+    my $set = $self->list(@filters);
+    if (@$set == 0) {
+        my $json = encode_json(\@filters);
+        $json =~ s{.(.*).}{$1};
+        warn "broken xref($json)\n";
+    } if (@$set > 1) {
+        my $json = encode_json(\@filters);
+        $json =~ s{.(.*).}{$1};
+        warn "ambiguous xref($json)\n"; 
+    }
+    
+    return $set->[0]->{$variable};
+}
+
 sub llink {
     my ($self, $lingua, @filters) = @_;
 
@@ -311,7 +328,7 @@ sub try {
     return $retval;
 }
 
-# If requested, this could be extended so that a ORing of filters can also
+# If requested, this could be extended so that ORing of filters can also
 # be implemented.
 sub __extractAnd {
     my ($self, $set, $filters) = @_;
