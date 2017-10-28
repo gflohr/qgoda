@@ -34,6 +34,8 @@ my $hash = {
             array => [23, 4, 89],
         },
     },
+    empty_hash => {},
+    empty_array => [],
 };
 
 is_deeply flatten2hash($hash), {
@@ -44,6 +46,8 @@ is_deeply flatten2hash($hash), {
     'deeply.nested.array.0' => 23,
     'deeply.nested.array.1' => 4,
     'deeply.nested.array.2' => 89,
+    'empty_hash' => {},
+    'empty_array' => [],
 };
 
 my $array = [the => $hash];
@@ -56,4 +60,6 @@ is_deeply flatten2hash($array), {
     '1.deeply.nested.array.0' => 23,
     '1.deeply.nested.array.1' => 4,
     '1.deeply.nested.array.2' => 89,
+    '1.empty_hash' => {},
+    '1.empty_array' => [],
 };
