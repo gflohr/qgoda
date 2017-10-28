@@ -1,3 +1,4 @@
+- generalize the HTML cleaner into a plug-in interface!
 - passing the command in the constructor is brain-damaged!
 - dependency URI is missing
 - why gets moose included? anyevent::filesys::notify ...

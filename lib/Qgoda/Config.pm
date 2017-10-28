@@ -140,6 +140,8 @@ sub default {
     	'case-sensitive' => 0,
     	view => 'default.html',
         latency => 0.5,
+        exclude => [],
+        exclude_watch => [],
     	directories => {
     		views => '_views',
             includes => '_includes'
