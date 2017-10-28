@@ -594,88 +594,57 @@ sub flatten2hash {
     my ($data) = @_;
 
     my @path;
-    my %pot;
+    my @types;
+    my %flat;
 
-use Data::Dumper;
-    # The preprocess function for Data::Walk.
-    my $preprocess = sub {
-        warn 'in';
-        my (@items) = @_;
-    
-        if ('HASH' eq $Data::Walk::type) {
-            my %items = @items;
-            undef @items;
-            # Sort by key.
-            foreach my $key (sort keys %items) {
-                push @items, $key, $items{$key};
-            }
-        } else {
-        }
-
-        # Add a path slot.  If it is a hash, it gets overwritten, otherwise
-        # incremented.
-        push @path, -1;
-    
-        return @items;
-    };
-    
     my $postprocess = sub {
-        warn 'out';
         # Remove the last path component.
         pop @path;
+        pop @types;
     };
     
     # The wanted function for Data::Walk.
     my $wanted = sub {
-        #warn 'item';
-        if ('bazoo' eq $_) {
-            $DB::single = 1;
+        ++$path[-1] if 'a' eq $types[-1];
+
+        my $reftype = reftype $_ || '';
+
+        if ('HASH' eq $reftype) {
+            push @types, 'h';
+            push @path, '';
+        } elsif ('ARRAY' eq $reftype) {
+            push @types, 'a';
+            push @path, -1;
+        } else {
+            $reftype = '';
         }
+
         if ('HASH' eq $Data::Walk::type) {
             if (defined $Data::Walk::key) {
                 # Value.
+                
                 if (!ref $_) {
-                    my $msgstr = $_;
-                    my $ctx = join '.', @path;
-                    $pot{$ctx} = $msgstr;
-                    #pop @path;
+                    $flat{join '.', @path} = $_;
                 }
             } elsif (!ref $_) {
                 # Key.
-                die "$0: invalid key '$_'!\n" if /\./;
-                $path[-1] = $_;
+                if (/\./) {
+                    $path[-1] = 'INVALID';
+                } else {
+                    $path[-1] = $_;
+                }
             }
-        } else {
-            ++$path[-1];
-            if (!ref $_) {
-                # Leaf.
-                my $ctx = join '.', @path;
-                $pot{$ctx} = $_;
-            }
+        } elsif (!$reftype) {
+            $flat{join '.', @path} = $_;
         }
     };
 
     walk {
         wanted => $wanted,
-        preprocess => $preprocess,
         postprocess => $postprocess,
     }, $data;
 
-    return \%pot;
-}
-
-package Index;
-
-use strict;
-
-use overload '""' => sub { '[' . ${$_[0]} . ']' };
-
-sub new {
-    my ($class) = @_;
-            
-    my $self = -1;
-
-    bless \$self, $class;
+    return \%flat;
 }
 
 1;
