@@ -50,63 +50,7 @@ sub new {
                            . "proceeding with defaults.");
     }
 
-    # Default configuration.
-    my $config = {
-    	title => __"A New Qgoda Powered Site",
-    	type => 'page',
-    	srcdir => '.',
-    	location => '/{directory}/{basename}/{index}{suffix}',
-    	permalink => '{significant-path}',
-    	index => 'index',
-    	'case-sensitive' => 0,
-    	view => 'default.html',
-        latency => 0.5,
-    	directories => {
-    		views => '_views',
-            includes => '_includes'
-    	},
-    	processors => {
-            chains => {
-                markdown => {
-                	modules => [qw(TT2 Markdown)],
-                	suffix => 'html',
-                	wrapper => 'html'
-                },
-                html => {
-                	modules => 'TT2',
-                },
-            },
-            triggers => {
-                md => 'markdown',
-                mdown => 'markdown',
-                mkdn => 'markdown',
-                mdwn => 'markdown',
-                mkd => 'markdown',
-                html => 'html',
-                htm => 'html',
-            },
-            options => {
-                Markdown => [],
-                TT2 => {}
-            },
-    	},
-    	taxonomies => {
-    		type => undef,
-    		lingua => undef,
-    		name => undef,
-    		tags => {
-    			simweight => 2,
-    		},
-    		categories => {
-    			simweight => 3,
-    		},
-    	},
-    	po => {
-            xgettext => {
-            	tt2 => [qw(_views _includes)],
-            }
-    	},
-    };
+    my $config = $class->default;
     
     if (!empty $filename) {
         $logger->info(__x("reading configuration from '{filename}'",
@@ -182,6 +126,66 @@ sub new {
     );
 
     return $self;
+}
+
+sub default {
+    # Default configuration.
+    return {
+    	title => __"A New Qgoda Powered Site",
+    	type => 'page',
+    	srcdir => '.',
+    	location => '/{directory}/{basename}/{index}{suffix}',
+    	permalink => '{significant-path}',
+    	index => 'index',
+    	'case-sensitive' => 0,
+    	view => 'default.html',
+        latency => 0.5,
+    	directories => {
+    		views => '_views',
+            includes => '_includes'
+    	},
+    	processors => {
+            chains => {
+                markdown => {
+                	modules => [qw(TT2 Markdown)],
+                	suffix => 'html',
+                	wrapper => 'html'
+                },
+                html => {
+                	modules => 'TT2',
+                },
+            },
+            triggers => {
+                md => 'markdown',
+                mdown => 'markdown',
+                mkdn => 'markdown',
+                mdwn => 'markdown',
+                mkd => 'markdown',
+                html => 'html',
+                htm => 'html',
+            },
+            options => {
+                Markdown => [],
+                TT2 => {}
+            },
+    	},
+    	taxonomies => {
+    		type => undef,
+    		lingua => undef,
+    		name => undef,
+    		tags => {
+    			simweight => 2,
+    		},
+    		categories => {
+    			simweight => 3,
+    		},
+    	},
+    	po => {
+            xgettext => {
+            	tt2 => [qw(_views _includes)],
+            }
+    	},
+    };
 }
 
 # Consistency check.
