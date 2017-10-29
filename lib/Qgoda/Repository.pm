@@ -20,9 +20,13 @@ package Qgoda::Repository;
 
 use strict;
 
+use Locale::TextDomain qw(com.cantanea.qgoda);
+
 use File::Spec;
 use File::HomeDir;
+use File::Temp;
 
+use Qgoda;
 use Qgoda::Util qw(read_file write_file);
 
 use URI;
@@ -47,6 +51,8 @@ sub new {
         $uri = 'file://' . $home . '/' . $uri;
         $uri =~ s{\\}{/}g;
         $uri = URI->new($uri);
+    } elsif (File::Spec->file_name_is_absolute($uri)) {
+        $uri = URI->new('file://' . $uri);
     }
     
     if (undef eq $uri->scheme) {
@@ -108,6 +114,27 @@ sub new {
 sub type { shift->{__type} }
 sub source { shift->{__source} }
 sub uri { shift->{__uri} }
+
+sub fetch {
+    my ($self) = @_;
+
+    my $logger = Qgoda->new->logger;
+$logger->{__debug} = 1;
+
+    my $fetcher_class = 'Qgoda::Repository::Fetcher::' . $self->{__type};
+    my $fetcher_module = $fetcher_class;
+    $fetcher_module =~ s{::}{/}g;
+    $fetcher_module .= '.pm';
+    require $fetcher_module;
+
+    my $tmp = File::Temp->newdir;
+    $logger->debug(__x("Created temporary directory '{dir}'",
+                       dir => $tmp));
+    
+    my $fetcher = $fetcher_class->new;
+    my $dir = $fetcher->fetch($self->{__uri}, $tmp->dirname);
+
+}
 
 package URI::git;
 
