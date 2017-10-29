@@ -20,6 +20,9 @@ package Qgoda::Repository;
 
 use strict;
 
+use File::Spec;
+use File::HomeDir;
+
 use Qgoda::Util qw(read_file write_file);
 
 use URI;
@@ -27,21 +30,70 @@ use URI;
 sub new {
 	my ($class, $uri) = @_;
 
+    $uri = URI->new($uri);
+
+    if ($uri =~ m{^\.\.?\\/}) {
+        $uri = 'file://' . File::Spec->rel2abs($uri);
+        $uri =~ s{\\}{/}g;
+        $uri = URI->new($uri);
+    } elsif ($uri =~ s{^~([^/\\]*)}{}) {
+        my $user = $1;
+        my $home;
+        if (length $user) {
+            $home = File::HomeDir->user_home($user);
+        } else {
+            $home = File::HomeDir->my_home;
+        }
+        $uri = 'file://' . $home . '/' . $uri;
+        $uri =~ s{\\}{/}g;
+        $uri = URI->new($uri);
+    }
+    
+    if (undef eq $uri->scheme) {
+        my $file = "$uri";
+
+        if (File::Spec->file_name_is_absolute($file)) {
+            $uri = URI->new($file, 'file');
+        } else {
+            if (!-e $file && $file =~ m{/}) {
+                $uri = URI->new('git://github.com/' . $file);
+            } else {
+                $uri = URI::file->new_abs($file);
+            }
+        }
+    }
+
     my $self = {
-        __uri => URI->new($uri)
+        __uri => $uri
     };
 
-    my $protocol = $self->{__uri}->scheme;
+    my $protocol = $uri->scheme;
     my %known = (
         'git' => 'Git',
-        'git+ssh' => 'Git',
         'git+ssh' => 'Git',
         'git+http' => 'Git',
         'git+https' => 'Git',
         'git+file' => 'Git',
+        'file' => 'File'
     );
 
-    $self->{__type} = $known{$protocol};
+    $self->{__type} = $known{$protocol} || 'LWP';
+
+    # If there is a git directory at the location, use git.
+    if ('File' eq $self->{__type}) {
+        my $path = $self->{__uri}->file;
+        my $gitdir = File::Spec->catfile($path, '.git');
+        if (-e $gitdir) {
+            $self->{__uri} = URI->new($path, 'file');
+            $self->{__type} = 'Git';
+        }
+    } elsif ('Git' eq $self->{__type}) {
+        my $scheme = $self->{__uri}->scheme;
+        if ($scheme =~ /\+(.*)/) {
+            $self->{__uri}->scheme($1);
+        }
+    }
+
     if ($self->{__type}) {
         if ('Git' eq $self->{__type}) {
             if ('github.com' eq $self->{__uri}->host) {
@@ -49,11 +101,13 @@ sub new {
             }
         }
     }
+
     bless $self, $class;
 }
 
 sub type { shift->{__type} }
 sub source { shift->{__source} }
+sub uri { shift->{__uri} }
 
 package URI::git;
 

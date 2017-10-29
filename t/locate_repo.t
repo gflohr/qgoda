@@ -24,25 +24,34 @@ use Qgoda::Repository;
 
 my %repositories = (
     'git://github.com/gflohr/qgoda-site' => {
-            type => 'Git',
-            source => 'Github',
+        type => 'Git',
+        source => 'Github',
      },
     'git+ssh://example.com/foo/bar' => {
-            type => 'Git',
-            source => undef,
+        type => 'Git',
+        source => undef,
      },
     'git+http://github.com/gflohr/qgoda-site' => {
-            type => 'Git',
-            source => 'Github',
+        type => 'Git',
+        source => 'Github',
      },
     'git+https://github.com/gflohr/qgoda-site' => {
-            type => 'Git',
-            source => 'Github',
-     },
-     'git+file:///var/git/qgoda/fancy.git' => {
-            type => 'Git',
-            source => undef
-     },
+        type => 'Git',
+        source => 'Github',
+    },
+    'git+file:///var/git/qgoda/fancy.git' => {
+        type => 'Git',
+    },
+    'http://git.example.com/foo/bar.tar.gz' => {
+        type => 'LWP',
+    },
+    'file:///path/to/directory' => {
+        type => 'File',
+    },
+    'gflohr/qgoda-site' => {
+        type => 'Git',
+        source => 'Github',
+    }
 );
 
 my @ids = sort keys %repositories;
