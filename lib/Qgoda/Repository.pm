@@ -127,8 +127,10 @@ $logger->{__debug} = 1;
     $fetcher_module .= '.pm';
     require $fetcher_module;
 
+    $logger->info(__x("fetching '{uri}'", uri => $self->{__uri}));
+
     my $tmp = File::Temp->newdir;
-    $logger->debug(__x("Created temporary directory '{dir}'",
+    $logger->debug(__x("created temporary directory '{dir}'",
                        dir => $tmp));
     
     my $fetcher = $fetcher_class->new;

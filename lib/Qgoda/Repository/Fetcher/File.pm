@@ -23,6 +23,7 @@ use strict;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Copy::Recursive qw(dircopy);
 use File::Spec;
+use Archive::Extract;
 
 use Qgoda;
 
@@ -42,9 +43,38 @@ sub fetch {
         }
 
         return $destination;
-    } else {
-        $logger->fatal("cannot uncompress ...");
+    };
+
+    my $ae = Archive::Extract->new(archive => $path);
+    $ae->extract(to => $destination)
+        or $logger->fatal(__x("error extracing '{archive}' to"
+                              ." '{destination}': {error}"),
+                              archive => $path, 
+                              destination => $destination,
+                              error => $ae->error);
+    
+    opendir my $dh, $destination 
+        or $logger->fatal(__x("error reading directory '{directory}': {error}",
+                              directory => $destination,
+                              error => $ae->error));
+        
+    my @contents = sort File::Spec->no_upwards(readdir $dh)
+        or $logger->fatal(__x("archive '{archive} is empty",
+                              archive => $path));
+
+    $logger->warning(__x("archive '{archive}' has ambiguous content,"
+                         . " trying first entry '{first}''",
+                         archive => $path, first => $contents[0]));
+
+    my $first = File::Spec->catfile($destination, $contents[0]);
+    if (-d $contents[0]) {
+        # Properly packaged, return the directory.
+        return $contents[0];
     }
+
+    # Archive does not unpack into a single directory.  Let's assume that
+    # the directory level is simply missing.
+    return $destination;
 }
 
 1;
