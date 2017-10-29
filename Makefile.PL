@@ -44,6 +44,7 @@ WriteMakefile (
     AUTHOR              => 'Guido Flohr <guido.flohr@cantanea.com>',
     PREREQ_PM => {
         'Archive::Extract' => 0,
+        'File::HomeDir' => 0,
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'AnyEvent' => '7.12',
