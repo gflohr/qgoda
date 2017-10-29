@@ -23,3 +23,4 @@ t/interpolate.t
 t/js_unescape.t
 t/strip_suffix.t
 TODO
+share/_config.yaml

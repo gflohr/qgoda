@@ -20,8 +20,11 @@ package Qgoda::Init;
 
 use strict;
 
+use Qgoda::Util qw(read_file write_file);
+
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
+use JSON '2.90';
 
 sub new {
 	my ($class) = @_;
@@ -29,7 +32,8 @@ sub new {
     my $q = Qgoda->new;
     my $self = {
         __logger => $q->logger,
-        __force => $q->getOption('force')
+        __force => $q->getOption('force'),
+        __config => $q->config,
     };
 
     bless $self, $class;
@@ -38,10 +42,10 @@ sub new {
 sub init {
 	my ($self) = @_;
 	
-	my $q = Qgoda->new;
-	my $logger = $q->logger;
-    my $config = $q->config;
+	my $logger = $self->{__logger};
+    my $config = $self->{__config};
 
+    # FIXME! Write _config.yaml on the fly, resp. update it.
     my $config_filename = File::Spec->catfile($config->{srcdir}, '_config.yaml');
     my $config_data = $self->__trim($self->__config);
     $self->__write($config_filename, $config_data);
@@ -110,6 +114,41 @@ sub command(@) {
     return $self;
 }
 
+sub updatePackageJSON {
+    my ($self, $variable, $value) = @_;
+
+    my $logger = $self->{__logger};
+
+    my $json = JSON->new;
+    my $json_data = read_file 'package.json'
+        or $self->{__logger}->fatal(__x("Unable to read '{filename}': {error})",
+                                        filename => 'package.json',
+                                        error => $!));
+
+    my $package = eval { $json->decode($json_data) };
+    $logger->fatal($@) if $@;
+
+    if (defined $value) {
+        $logger->info(__x("Updating variable '{variable}' in 'package.json'.",
+                          variable => $variable));
+        $package->{$variable} = $value;
+    } else {
+        $logger->info(__x("Deleting variable '{variable}' in 'package.json'.",
+                          variable => $variable));
+        delete $package->{variable};
+    }
+
+    $json->pretty(1);
+    $json_data = $json->encode($package);
+
+    write_file 'package.json', $json_data
+        or $self->{__logger}->fatal(__x("Unable to write '{filename}': {error})",
+                                        filename => 'package.json',
+                                        error => $!));
+    
+    return $self;
+}
+
 sub __node {
     my ($self) = @_;
 
@@ -127,6 +166,7 @@ sub __node {
     my @deps = (
         # Development web server.
         'browser-sync',
+        'ajv',
 
         # Bundling.
         'webpack',
@@ -142,6 +182,32 @@ sub __node {
         @cmd = ('npm', 'install', '--save-dev', $dep);
         $self->command(@cmd);
     }
+
+    my $config = $self->{__config};
+    my $webpack_config_filename = File::Spec->catfile($config->{srcdir}, 
+                                                      'webpack.config.js');
+    my $webpack_config = $self->__webpackConfig;
+    $self->__write($webpack_config_filename, $webpack_config);
+
+    # PostCSS configuration.
+    $self->updatePackageJSON(postcss => {
+        parser => 'postcss-scss',
+        plugins => {
+            cssnano => {},
+            'postcss-cssnext' => {},
+        }
+    });
+
+    # Scripts.
+    $self->updatePackageJSON(scripts => {
+        start => 'webpack --progress --colors --watch & '
+                 . 'browser-sync start --port 5000 --server __site'
+                 . '--files _timestamp',
+        prestart => 'npm install',
+        build => 'webpack --progress --colors',
+        prebuild => 'npm install',
+        test => 'echo "Error: no test specified"; exit 1'
+    });
 
     return $self;
 }
@@ -200,15 +266,15 @@ sub __trim {
     return $content;
 }
 
-sub __package {
-    return <<'EOF';
-@package.json@
-EOF
-}
-
 sub __config {
     return <<'EOF';
 @_config.yaml@
+EOF
+}
+
+sub __webpackConfig {
+    return <<'EOF';
+@webpack.config.js@
 EOF
 }
 

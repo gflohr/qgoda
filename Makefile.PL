@@ -18,6 +18,9 @@
 
 use 5.7.3;
 use ExtUtils::MakeMaker;
+use File::ShareDir::Install;
+
+install_share 'share';
 
 push @extra, 'META_MERGE' => {
         resources => {
@@ -40,6 +43,7 @@ WriteMakefile (
     ABSTRACT            => 'Qgoda static site generator',
     AUTHOR              => 'Guido Flohr <guido.flohr@cantanea.com>',
     PREREQ_PM => {
+        'Archive::Extract' => 0,
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'AnyEvent' => '7.12',
@@ -66,22 +70,21 @@ WriteMakefile (
     @extra
 );
 
-sub MY::postamble {
+package MY;
+
+use File::ShareDir::Install;
+
+sub postamble {
+    my ($self) = @_;
+
+    my @post = File::ShareDir::Install::postamble($self);
+
     if (-e 'maintainer.mk') {
         open my $fh, '<maintainer.mk'
             or die "Cannot open 'maintainer.mk': $!\n";
         local $/;
-        return <$fh>;
-    } else {
-        return '';
+        push @post, <$fh>;
     }
-   	q ( 
-all :: ReleaseNotes lib/Qgoda/Init.pm
-
-ReleaseNotes: NEWS
-	cat NEWS >$@
-
-lib/Qgoda/Init.pm: lib/Qgoda/Init.pm.in
-	 perl -pe 's/\@(.*)\@/`cat data\/$1`/gxe' lib/Qgoda/Init.pm.in >$@
-         );
+    
+    return join "\n", @post;
 }
