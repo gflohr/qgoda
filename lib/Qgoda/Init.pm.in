@@ -24,8 +24,15 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 use File::Spec;
 
 sub new {
-	my $self = '';
-	bless \$self, shift;
+	my ($class) = @_;
+
+    my $q = Qgoda->new;
+    my $self = {
+        __logger => $q->logger,
+        __force => $q->getOption('force')
+    };
+
+    bless $self, $class;
 }
 
 sub init {
@@ -38,10 +45,6 @@ sub init {
     my $config_filename = File::Spec->catfile($config->{srcdir}, '_config.yaml');
     my $config_data = $self->__trim($self->__config);
     $self->__write($config_filename, $config_data);
-    
-    my $package_filename = File::Spec->catfile($config->{srcdir}, 'package.json');
-    my $package = $self->__trim($self->__package);
-    $self->__write($package_filename, $package);
     
     my $view_dir = $config->{directories}->{views};
     $self->__mkdir($view_dir);
@@ -76,7 +79,71 @@ sub init {
     my $head_filename = File::Spec->catfile($view_dir, 'partials', 'head.html');
     $self->__write($head_filename, $self->__trim($self->__partialsHead));
 
+    $self->__node;
+
 	return $self;
+}
+
+sub command(@) {
+    my ($self, @args) = @_;
+
+    my @pretty;
+    foreach my $arg (@args) {
+        my $pretty = $arg;
+        $pretty =~ s{(["\\])}{\\$1}g;
+        $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
+        push @pretty, $pretty;
+    }
+
+    my $q = Qgoda->new;
+    my $logger = $q->logger;
+
+    my $pretty = join ' ', @pretty;
+    $logger->info(__x("Running '{command}':", command => $pretty));
+
+    if (0 != system @args) {
+        $logger->error(__x("Running '{command}' failed: {error}", 
+                       command => $pretty, error => $!));
+        return;
+    }
+
+    return $self;
+}
+
+sub __node {
+    my ($self) = @_;
+
+    my $q = Qgoda->new;
+    my $logger = $q->logger;
+    
+    my @cmd = ('npm', 'init', '--yes');
+    push @cmd, '--force' if $self->{__force};
+
+    if (!$self->command(@cmd)) {
+        $logger->error(__"Cannot setup asset processing.");
+        return;
+    }
+
+    my @deps = (
+        # Development web server.
+        'browser-sync',
+
+        # Bundling.
+        'webpack',
+
+        # Bootstrap and Dependencies.  This is just an example.
+        'bootstrap',
+        'jquery',
+        'popper',
+        'tether',
+    );
+
+    foreach my $dep (@deps) {
+        @cmd = ('npm', 'install', '--save-dev', $dep);
+        $self->command(@cmd);
+    }
+
+    return $self;
 }
 
 sub __mkdir {
@@ -104,7 +171,7 @@ sub __write {
     my $logger = $q->logger;
     my $config = $q->config;
     
-    if (-e $filename) {
+    if (-e $filename && !$self->{__force}) {
         $logger->warning(__x("Not overwriting '{filename}'!",
                              filename => $filename));
         return $self;

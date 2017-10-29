@@ -278,6 +278,12 @@ sub llink {
     return $self->link([lingua => $lingua], @filters);
 }
 
+sub lxref {
+    my ($self, $variable, $lingua, @filters) = @_;
+
+    return $self->xref($variable, [lingua => $lingua], @filters);
+}
+
 sub linkPost {
     my ($self, @filters) = @_;
     

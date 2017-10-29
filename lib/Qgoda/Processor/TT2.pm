@@ -44,6 +44,7 @@ sub new {
     $self->{__tt} = Template->new({
         INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
+        RECURSION => 1,
     }) or die Template->error;
 
 	return $self;
@@ -64,34 +65,6 @@ sub process {
 
     return $cooked;
 }
-
-# Reminder for a future xgettext for TT.
-#$Template::Parser::DEBUG = 1;
-#my %options = (
-#    INTERPOLATE => 1,
-#    DEBUG => Template::Constants::DEBUG_DIRS(),
-#);
-#my $vars = { world => 'Guido' };
-#my $tt = Template->new({
-#    %options,
-#    PARSER => Qgoda::Processor::Template::XGettext->new(\%options),
-#});
-#$tt->process('junk.tt', $vars) or die $tt->error;
-#
-#package Qgoda::Processor::Template::XGettext;
-#
-#use base qw(Template::Parser);
-#
-#sub split_text {
-#    my ($self, $text) = @_;
-#
-#    my $retval = $self->SUPER::split_text($text) or return;
-#
-#    use Data::Dump;
-#    warn Data::Dump::dump($retval);
-#
-#    return $retval;
-#}
 
 1;
 

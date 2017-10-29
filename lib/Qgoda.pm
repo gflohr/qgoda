@@ -336,6 +336,12 @@ sub getProcessors {
     return $self->__getProcessors(@$names);
 }
 
+sub getProcessor {
+    my ($self, $name) = @_;
+
+    return $self->{__processors}->{$name};
+}
+
 # FIXME! This should instantiate scanner plug-ins and use them instead.
 sub __scan {
 	my ($self, $site) = @_;

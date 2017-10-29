@@ -1,3 +1,4 @@
+- rename exclude_watch to exclude-watch
 - q.link() should not die but warn only, or make it configurable
 - q.link() and friends should accept a hash
 - generalize the HTML cleaner into a plug-in interface!
