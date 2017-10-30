@@ -135,7 +135,6 @@ sub fetch {
     my ($self) = @_;
 
     my $logger = Qgoda->new->logger;
-$logger->{__debug} = 1;
 
     my $fetcher_class = 'Qgoda::Repository::Fetcher::' . $self->{__type};
     my $fetcher_module = $fetcher_class;
@@ -152,6 +151,8 @@ $logger->{__debug} = 1;
     my $fetcher = $fetcher_class->new;
     my $dir = $fetcher->fetch($self->{__uri}, $tmp->dirname);
 
+    # Return the object as well, so that it doesn't go out of scope here.
+    return ($dir, $tmp);
 }
 
 package URI::git;

@@ -28,7 +28,8 @@ use Qgoda;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
 my %options = (
-    output_format => 'JSON'
+    output_format => 'JSON',
+    force => [],
 );
 Getopt::Long::Configure('bundling');
 GetOptions (
@@ -39,10 +40,13 @@ GetOptions (
             'V|version' => \$options{version},
             'from-system=s' => \$options{from_system},
             'n|nochange|dry-run' => \$options{nochange},
-            'f|force' => \$options{force},
+            'f|force:i' => $options{force},
             'output-directory=s' => \$options{output_directory},
             'output-format=s' => \$options{output_format}
 	    ) or exit 1;
+
+# Count, how many times '--force' was given.
+$options{force} = scalar @{$options{force}};
 
 display_usage if $options{help};
 display_version if $options{version};
@@ -50,7 +54,6 @@ display_version if $options{version};
 autoflush STDOUT, 1;
 autoflush STDERR, 1;
 
-usage_error __"Too many commands." if @ARGV > 1;
 usage_error __"No command given." if !@ARGV;
 
 my $command = shift @ARGV;
@@ -75,6 +78,8 @@ if ('watch' eq $command) {
 	usage_error __x("Unknown command '{command}'.", command => $command);
 }
 
+$options{args} = [@ARGV];
+$options{'no-config'} = 1 if 'init' eq $command;
 Qgoda->new($command, %options)->$method;
 
 sub display_usage {
@@ -100,7 +105,12 @@ Informative output:
   -V, --version               output version information and exit
 
 Options for command 'init':
-  -f, --force                 overwrite existing files
+  [REPOSITORY]                repository to download from, defaults to
+                              https://github.com/gflohr/qgoda-default
+  -f, --force                 overwrite existing files; use twice if you
+                              also want to override precious files 
+                              (that is usually content that you may have
+                              changed)
 
 Options for command 'dump':
       --output-format=FORMAT  dump output in FORMAT, either JSON (default),

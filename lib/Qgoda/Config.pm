@@ -36,7 +36,8 @@ sub new {
     my ($class, %args) = @_;
 
     require Qgoda;
-    my $logger = Qgoda->new->logger('config');
+    my $q = Qgoda->new;
+    my $logger = $q->logger('config');
     
     my $filename;
     if (!empty $args{filename}) {
@@ -45,7 +46,7 @@ sub new {
         $filename = '_config.yaml';
     } elsif (-e '_config.yml') {
         $filename = '_config.yml';
-    } else {
+    } elsif (!$q->getOption('no-config')) {
         $logger->warning(__"config file '_config.yaml' not found, "
                            . "proceeding with defaults.");
     }
@@ -60,6 +61,7 @@ sub new {
         	$logger->fatal(__x("error reading file '{filename}': {error}",
         	                   filename => $filename, error => $!));
         }
+
         my $local = eval { YAML::XS::Load($yaml) };
         $logger->fatal(yaml_error $filename, $@) if $@;
 
@@ -146,6 +148,7 @@ sub default {
     		views => '_views',
             includes => '_includes'
     	},
+        helpers => {},
     	processors => {
             chains => {
                 markdown => {
@@ -228,6 +231,20 @@ sub checkConfig {
     }
     die __x("'{variable}' must be a dictionary", variable => 'processors.options')
         unless $self->__isHash($config->{processors}->{options});
+    die __x("'{variable}' must be a dictionary", variable => 'helpers')
+        if exists $self->{helpers} && !$self->__isHash($self->{helpers});
+    foreach my $helper (keys %{$config->{helpers}}) {
+        my $arguments = $config->{helpers}->{$helper};
+        if (empty $arguments) {
+            $arguments = [] if empty $arguments;
+        } elsif (ref $arguments) {
+            die __x("'{variable}' must be a list", variable => "helpers.$helper")
+                if !$self->__isArray($arguments);
+        } else {
+            $arguments = [$arguments];
+        }
+        $config->{helpers}->{$helper} = $arguments;
+    }
     die __x("'{variable}' must be a list", variable => 'exclude')
         if exists $self->{exclude} && !$self->__isArray($self->{exclude});
     die __x("'{variable}' must be a list", variable => 'exclude_watch')

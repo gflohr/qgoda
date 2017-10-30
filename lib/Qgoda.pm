@@ -30,7 +30,11 @@ use File::Find;
 use Scalar::Util qw(reftype);
 use AnyEvent;
 use AnyEvent::Loop;
+use AnyEvent::Filesys::Notify;
+use AnyEvent::Handle;
 use File::Basename qw(fileparse);
+use IPC::Open3 qw(open3);
+use POSIX qw(:sys_wait_h);
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -151,18 +155,20 @@ sub watch {
 
     my $logger = $self->{__logger};
 
-    eval { require AnyEvent::Filesys::Notify };
-    if ($@) {
-    	$logger->error($@);
-    	$logger->fatal(__("You have to install AnyEvent::Filesys::Notify"
-    	                  . " in order to use the watch functionality"));
-    }
+    #eval { require AnyEvent::Filesys::Notify };
+    #if ($@) {
+    #	$logger->error($@);
+    #	$logger->fatal(__("You have to install AnyEvent::Filesys::Notify"
+    #	                  . " in order to use the watch functionality"));
+    #}
     
     eval {
     	# An initial build failure is fatal.
     	$self->build;
     	
     	my $config = $self->{__config};
+        
+        $self->__startHelpers($config->{helpers});
     	
         $logger->debug(__x("waiting for changes in '{dir}'", 
                            dir => $config->{srcdir}));
@@ -178,6 +184,104 @@ sub watch {
     };
     
     $logger->fatal($@) if $@;
+}
+
+sub __startHelpers {
+    my ($self, $helpers) = @_;
+
+    $self->{__helpers} = {};
+
+    foreach my $helper (sort keys %{$helpers || {}}) {
+        $self->__startHelper($helper, $helpers->{$helper});
+    }
+
+    return $self;
+}
+
+sub __startHelper {
+    my ($self, $helper, $args) = @_;
+
+    $args ||= [];
+    $args = [$helper] if !@$args;
+    my $logger = $self->logger;
+
+    my $safe_helper = $helper;
+    $safe_helper =~ s/[^a-z0-9]+/_/;
+
+    my $log_prefix = "[helper][$helper]";
+
+    my $exec = $ENV{"QGODA_HELPER_$safe_helper"};
+    if (!empty $exec) {
+        if ($>) {
+            $logger->fatal($log_prefix
+                           . __x("Environment variable '{variable}' ignored"
+                               . " when running as root",
+                               variable => "QGODA_HELPER_$helper"));
+        }
+        $args->[0] = $exec;
+    }
+
+    my @pretty;
+    foreach my $word (@$args) {
+        if ($word =~ s/([\\\"])/\\$1/g) {
+            $word = qq{"$word"};
+        }
+        push @pretty, $word;
+    }
+
+    my $pretty = join ' ', @pretty;
+
+    $logger->info($log_prefix . __x("starting helper: {helper}", $pretty));
+
+    my ($cout, $cerr);
+
+    my $pid = open3 undef, $cout, $cerr, @$args
+        or $logger->fatal($log_prefix . __x("failure starting helper: {error}", 
+                                            error => $!));
+
+    $self->{__helpers}->{$pid} = {
+        name => $helper,
+        rbuf => '',
+    };
+
+    my $child_out = AnyEvent::Handle->new(
+        fh => $cout,
+        on_error => sub {
+            my ($handle, $fatal, $msg) = @_;
+
+            my $method = $fatal ? 'error' : 'warning';
+            $logger->$method($log_prefix . $msg);
+        },
+        on_read => sub {
+            my ($handle) = @_;
+
+            $handle->{rbuf} =~ s/(.*)//;
+            $self->{__helpers}->{$pid}->{rbuf} .= $1;
+            while ($self->{__helpers}->{$pid}->{rbuf} =~ s/(.*?)\n//) {
+                $logger->info($log_prefix . $1);
+            }
+        },
+    );
+    my $child_err = AnyEvent::Handle->new(
+        fh => $cerr,
+        on_error => sub {
+            my ($handle, $fatal, $msg) = @_;
+
+            my $method = $fatal ? 'error' : 'warning';
+            $logger->$method($log_prefix . $msg);
+        },
+        on_read => sub {
+            my ($handle) = @_;
+
+            $handle->{rbuf} =~ s/(.*)//;
+            $self->{__helpers}->{$pid}->{rbuf} .= $1;
+            while ($self->{__helpers}->{$pid}->{rbuf} =~ s/(.*?)\n//) {
+                $logger->info($log_prefix . $1);
+            }
+        },
+    );
+
+    return $self;
 }
 
 sub logger {
@@ -566,6 +670,14 @@ sub getOption {
 	return if !exists $self->{__options}->{$name};
 	
 	return $self->{__options}->{$name};
+}
+
+sub _reload {
+    my ($self) = @_;
+
+    $self->{__config} = Qgoda::Config->new;
+
+    return $self;
 }
 
 1;

@@ -76,7 +76,7 @@ sub __makeMessage {
     my $pre = join '',
               map { "[$_]" }
               grep { $_ } $timestamp, $reqid, $client, $type, $prefix;
-    $pre .= ' ';
+    $pre .= ' ' unless $msgs[0] =~ /^\[/;;
     
     my @chomped = map { $pre . $_ } 
                   grep { $_ ne '' }
@@ -119,6 +119,28 @@ sub warning {
     return if $self->{__quiet};
 
     $self->__logFunc (warning => @msgs);
+
+    return 1;
+}
+
+sub safeWarning {
+    my ($self, @msgs) = @_;
+
+    # Print them even in quite mode.
+
+    # And now escape them for logging in vim style.
+    foreach my $msg (@msgs) {
+        chomp $msg;
+        $msg =~ s{([\x00-\x1f^])}{
+            if ('^' eq $1) {
+                '^^';
+            } else {
+                '^' . chr (ord($1) + ord('@'));
+            }
+        }gexs;
+    }
+
+    $self->__logFunc(warning => @msgs);
 
     return 1;
 }
