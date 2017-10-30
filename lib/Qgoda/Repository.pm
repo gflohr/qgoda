@@ -36,6 +36,7 @@ sub new {
 
     $uri = URI->new($uri);
 
+    # This is a mess!  Re-write it from scratch ...
     if ($uri =~ m{^\.\.?\\/}) {
         $uri = 'file://' . File::Spec->rel2abs($uri);
         $uri =~ s{\\}{/}g;
@@ -61,7 +62,11 @@ sub new {
         if (File::Spec->file_name_is_absolute($file)) {
             $uri = URI->new($file, 'file');
         } else {
-            if (!-e $file && $file =~ m{/}) {
+            if ($file =~ /^[_a-zA-Z][_a-zA-Z0-9]*\@/) {
+                # Replace the first colon with a slash.
+                $uri =~ s{:}{/};
+                $uri = URI->new('git+ssh://' . $uri);
+            } elsif (!-e $file && $file =~ m{/}) {
                 $uri = URI->new('git://github.com/' . $file);
             } else {
                 $uri = URI::file->new_abs($file);
