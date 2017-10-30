@@ -45,6 +45,14 @@ sub fetch {
         return $destination;
     };
 
+    return $self->_extractArchive($path, $destination);
+}
+
+sub _extractArchive {
+    my ($self, $path, $destination) = @_;
+
+    my $logger = Qgoda->new->logger;
+    
     my $ae = Archive::Extract->new(archive => $path);
     $ae->extract(to => $destination)
         or $logger->fatal(__x("error extracing '{archive}' to"
@@ -64,7 +72,8 @@ sub fetch {
 
     $logger->warning(__x("archive '{archive}' has ambiguous content,"
                          . " trying first entry '{first}''",
-                         archive => $path, first => $contents[0]));
+                         archive => $path, first => $contents[0]))
+        if @contents > 1;
 
     my $first = File::Spec->catfile($destination, $contents[0]);
     if (-d $contents[0]) {

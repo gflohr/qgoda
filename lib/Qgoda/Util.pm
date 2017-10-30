@@ -35,7 +35,8 @@ use vars qw(@EXPORT_OK);
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
                 slugify html_escape unmarkup globstar trim 
-                match_ignore_patterns fnstarmatch flatten2hash);
+                match_ignore_patterns fnstarmatch flatten2hash
+                is_archive archive_extender);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -650,6 +651,32 @@ sub flatten2hash {
     }, $data;
 
     return \%flat;
+}
+
+# Should better be called looks_like_archive.
+my @archive_types = (
+            'tar',
+            'tar.gz', 'tgz',
+            'zip',
+            'tar.bz2', 'tbz',
+            'tar.xz', 'txz'
+);
+my $archive_re = join '|', map { quotemeta } @archive_types;
+
+sub is_archive($) {
+    my ($path) = @_;
+
+    return if $path !~ /\.(?:$archive_re)$/i;
+
+    return 1;
+}
+
+sub archive_extender($) {
+    my ($path) = @_;
+
+    return if $path !~ /(\.(?:$archive_re))/i;
+
+    return lc $1;
 }
 
 1;

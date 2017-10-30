@@ -27,7 +27,7 @@ use File::HomeDir;
 use File::Temp;
 
 use Qgoda;
-use Qgoda::Util qw(read_file write_file);
+use Qgoda::Util qw(read_file write_file is_archive);
 
 use URI;
 
@@ -67,7 +67,7 @@ sub new {
                 $uri = URI::file->new_abs($file);
             }
         }
-    }
+    } 
 
     my $self = {
         __uri => $uri
@@ -97,6 +97,17 @@ sub new {
         my $scheme = $self->{__uri}->scheme;
         if ($scheme =~ /\+(.*)/) {
             $self->{__uri}->scheme($1);
+        }
+    }
+    
+    # If an http/https URI does no look like an archive, assume that it is
+    # also a git URI.
+    if ('http' eq $uri->scheme || 'https' eq $uri->scheme) {
+        # These are file name extenders likely to contain an archive.
+        if (!is_archive $uri->path) {
+            $self->{__type} = 'Git';
+            $self->{__source} = 'Github'
+                if 'github.com' eq $self->{__uri}->host;
         }
     }
 
