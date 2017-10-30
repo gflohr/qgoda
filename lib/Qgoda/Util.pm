@@ -194,7 +194,7 @@ sub interpolate($$) {
     }
 
     my $result = '';
-    while ($string =~ s/^([^{]*){//) {
+    while ($string =~ s/^([^\{]*)\{//) {
         $result .= $1;
         
         my ($remainder, @tokens) = tokenize $string, $type;
