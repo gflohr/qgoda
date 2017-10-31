@@ -33,6 +33,7 @@ use AnyEvent::Loop;
 use AnyEvent::Filesys::Notify;
 use AnyEvent::Handle;
 use File::Basename qw(fileparse);
+use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use POSIX qw(:sys_wait_h);
 
@@ -231,9 +232,11 @@ sub __startHelper {
 
     my $pretty = join ' ', @pretty;
 
-    $logger->info($log_prefix . __x("starting helper: {helper}", $pretty));
+    $logger->info($log_prefix . __x("starting helper: {helper}", 
+                                    helper => $pretty));
 
-    my ($cout, $cerr);
+    my $cout = gensym;
+    my $cerr = gensym;
 
     my $pid = open3 undef, $cout, $cerr, @$args
         or $logger->fatal($log_prefix . __x("failure starting helper: {error}", 
@@ -241,10 +244,9 @@ sub __startHelper {
 
     $self->{__helpers}->{$pid} = {
         name => $helper,
-        rbuf => '',
     };
 
-    my $child_out = AnyEvent::Handle->new(
+    $self->{__helpers}->{$pid}->{ahout} = AnyEvent::Handle->new(
         fh => $cout,
         on_error => sub {
             my ($handle, $fatal, $msg) = @_;
@@ -255,14 +257,13 @@ sub __startHelper {
         on_read => sub {
             my ($handle) = @_;
 
-            $handle->{rbuf} =~ s/(.*)//;
-            $self->{__helpers}->{$pid}->{rbuf} .= $1;
-            while ($self->{__helpers}->{$pid}->{rbuf} =~ s/(.*?)\n//) {
+            while ($handle->{rbuf} =~ s{(.*?)\n}{}) {
                 $logger->info($log_prefix . $1);
             }
         },
     );
-    my $child_err = AnyEvent::Handle->new(
+
+    $self->{__helpers}->{$pid}->{aherr} = AnyEvent::Handle->new(
         fh => $cerr,
         on_error => sub {
             my ($handle, $fatal, $msg) = @_;
@@ -273,10 +274,8 @@ sub __startHelper {
         on_read => sub {
             my ($handle) = @_;
 
-            $handle->{rbuf} =~ s/(.*)//;
-            $self->{__helpers}->{$pid}->{rbuf} .= $1;
-            while ($self->{__helpers}->{$pid}->{rbuf} =~ s/(.*?)\n//) {
-                $logger->info($log_prefix . $1);
+            while ($handle->{rbuf} =~ s{(.*?)\n}{}) {
+                $logger->warning($log_prefix . $1);
             }
         },
     );
