@@ -1,9 +1,10 @@
-- rename exclude_watch to exclude-watch
+- [% asset.date.ISODate %] must return 2011-10-05T14:48:00.000Z
+- add support for variables {reldir} and {relpath} for location expansion.
+  rationale: should be able copy _assets/images/* to /assets/images
 - q.link() should not die but warn only, or make it configurable
 - q.link() and friends should accept a hash
 - generalize the HTML cleaner into a plug-in interface!
 - passing the command in the constructor is brain-damaged!
-- also watch "_plugins"!
 - dependency URI is missing
 - why gets moose included? anyevent::filesys::notify ...
 - Try to unfold arguments to virtual methods.  If that does not work,
@@ -12,19 +13,11 @@
   like in the ImgSrcset plugin.
 - Template function that removes all markup.  This is needed for the
   <title> attribute that does not allow markup.
-- Important! /index.html must end up as /index.html not as /index/index.html
 - concept for creation of automatic list pages
 - rename outdir to sitedir
-- refactor convertor to processor
-- check for a YAML implementation before using Qgoda.
-- processors should not directly depend on 3rd party modules, in particular:
-  * Markdown
-  * TT2
-- Check what goes to stdout and what to stderr
 - consistency check for external plugin data
 - informative verbose output, when compiling plugins
 - Aria builder plug-in for aria enhancements
-- Ctrl-C no longer works
 - Better location in TT error messages
 - Error for list filters that are not taxonomies, or rather do not require
   configuration of taxonomies.
