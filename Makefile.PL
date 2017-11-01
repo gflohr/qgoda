@@ -18,9 +18,6 @@
 
 use 5.7.3;
 use ExtUtils::MakeMaker;
-use File::ShareDir::Install;
-
-install_share 'share';
 
 push @extra, 'META_MERGE' => {
         resources => {
@@ -45,6 +42,7 @@ WriteMakefile (
     PREREQ_PM => {
         'Archive::Extract' => 0,
         'File::HomeDir' => 0,
+        'File::Globstar::ListMatch' => 0,
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'Git' => 0,
@@ -63,7 +61,7 @@ WriteMakefile (
         'File::Copy::Recursive' => '0.38',
         'Hook::LexWrap' => '0.25',
         'Data::Walk' => '2.0',
-        'overload' => '0',
+        'IPC::Signal' => 0,
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
@@ -78,8 +76,6 @@ use File::ShareDir::Install;
 
 sub postamble {
     my ($self) = @_;
-
-    my @post = File::ShareDir::Install::postamble($self);
 
     if (-e 'maintainer.mk') {
         open my $fh, '<maintainer.mk'
