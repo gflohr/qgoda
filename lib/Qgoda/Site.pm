@@ -119,6 +119,113 @@ sub getChain {
 	return $chain;
 }
 
+# FIXME! Prefilter the list for simple taxonomy filters.
+sub searchAssets {
+    my ($self, @_filters) = @_;
+
+    # Preprocess the filters.
+    my $visualize = sub {
+        my ($index) = @_;
+
+        $_filters[$index] = ">>>$_filters[$index]<<<";
+        join ', ', @_filters;
+    };
+
+    my @filters;
+    my %operators = (
+        eq   => sub { my ($l, $r) = @_;
+		     warn "$l eq $r?\n";
+		     $_[0] eq $_[1] 
+		},
+        ne   => sub { $_[0] ne $_[1] },
+        ge   => sub { $_[0] ge $_[1] },
+        gt   => sub { $_[0] gt $_[1] },
+        le   => sub { $_[0] le $_[1] },
+        lt   => sub { $_[0] lt $_[1] },
+        '==' => sub { $_[0] == $_[1] },
+        '!=' => sub { $_[0] != $_[1] },
+        '>=' => sub { $_[0] >= $_[1] },
+        '>'  => sub { $_[0] >  $_[1] },
+        '<=' => sub { $_[0] <= $_[1] },
+        '<'  => sub { $_[0] <  $_[1] },
+        '=~' => sub { $_[0] =~ $_[1] },
+        '!~' => sub { $_[0] !~ $_[1] },
+        '&'  => sub { $_[0] &  $_[1] },
+        '|'  => sub { $_[0] |  $_[1] },
+        '^'  => sub { $_[0] ^  $_[1] },
+    );
+
+    for (my $i = 0; $i < @_filters; ++$i) {
+        my ($key, $value, $op);
+
+        $key = $_filters[$i];
+
+        if (ref $key) {
+            if ('HASH' eq reftype $key) {
+                my @keys = keys %$key;
+                if (@keys != 1) {
+                    die __x("invalid filter (only one hash key allowed): {filter}\n",
+                            filter => $visualize->($i));
+                }
+                $value = $key->{$keys[0]};
+                $key = $keys[0];
+                $op = 'eq';
+            } elsif ('ARRAY' eq reftype $key) {
+                if (@$key > 2) {
+                    ($key, $op, $value) = @$key;
+                } else {
+                    ($key, $value) = @$key;
+                }
+                $value = '' if !defined $value;
+                $op = 'eq' if !defined $op;
+            } else {
+                # Stringify.
+                $key = "$key";
+                --$i;
+            }
+        } else {
+            if ($i == $#_filters) {
+                die __x("invalid filter (missing last value): {filter}\n",
+                         filter => $visualize->($i));                
+            }
+            $op = 'eq';
+            $value = $_filters[++$i];
+        }
+
+        push @filters, [$op, $key, $value];
+    }
+
+    foreach my $filter (@filters) {
+        my ($op, $key, $value) = @$filter;
+        my $sub = $operators{$op} || $operators{eq};
+
+        if ('=~' eq $op || '!~' eq $op) {
+            $value = eval { qr/$value/ };
+            die __x("invalid regular expression in filter: {error}",
+                    error => $@);
+        }
+        $filter->[0] = $sub;
+        $filter->[2] = $value;
+    }
+
+	my @found = values %{$self->{assets}};
+
+	{
+        no warnings;
+
+		foreach my $filter (@filters) {
+			@found = grep {
+                my $asset = $_;
+                my ($sub, $key, $value) = @$filter;
+
+				$sub->($asset->{$key}, $value);
+			} @found;
+		}
+	}
+
+    return \@found;
+}
+
 sub addTaxonomy {
     my ($self, $taxonomy, $asset, $value) = @_;
 

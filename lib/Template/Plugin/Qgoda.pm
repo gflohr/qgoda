@@ -28,6 +28,8 @@ use Cwd;
 use URI;
 use Scalar::Util qw(reftype);
 use JSON qw(encode_json);
+use Date::Parse qw(str2time);
+use POSIX qw(strftime);
 
 use Qgoda;
 use Qgoda::Util qw(merge_data empty);
@@ -67,7 +69,7 @@ sub new {
         
         return @values;
     };
-    
+
     sub compare_array {
         my $arr1 = $a->[1];
         my $arr2 = $b->[1];
@@ -121,11 +123,28 @@ sub new {
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
     $context->define_vmethod(scalar => slugify => \&Qgoda::Util::slugify);
-    $context->define_vmethod(scalar => escape => \&Qgoda::Util::html_escape);
     $context->define_vmethod(scalar => unmarkup => \&Qgoda::Util::unmarkup);
     
-	my $self = '';
-	bless \$self, $class;
+	my $self = {
+        __context => $context
+    };
+	bless $self, $class;
+}
+
+sub __getContext {
+    shift->{__context};
+}
+
+sub __getStash {
+    shift->{__context}->stash;
+}
+
+sub __getAsset {
+    shift->{__context}->stash->{asset};
+}
+
+sub __getConfig {
+    shift->{__context}->stash->{config};
 }
 
 sub bust_cache {
@@ -149,21 +168,26 @@ sub bust_cache {
     }
 }
 
-# TT2 distinguishes between hash and list arguments ...
-sub __unwrapHash {
-    my ($self, %hash) = @_;
+sub args {
+    my $self = shift @_;
 
-    foreach my $key (keys %hash) {
-        if (ref $key && 'HASH' eq ref $key && !defined $hash{$key}) {
-            my $subhash = $key;
-            foreach my $subkey (keys %hash) {
-                $hash{$subkey} = $subhash->{$subkey};
-            }
-            last;
-        }
+    my (@args) = $self->__unwrapArgs(@_);
+
+    use Data::Dump;
+    my $dump = Qgoda::Util::html_escape(Data::Dump::dump(\@args));
+    return "<pre>$dump</pre>";
+}
+
+# TT2 distinguishes between hash and list arguments ...
+sub __unwrapArgs {
+    my ($self, @args) = @_;
+
+    if (@args && ref $args[-1] && 'HASH' eq ref $args[-1]) {
+        my $ref = pop @args;
+        push @args, %$ref;       
     }
 
-    return %hash;
+    return @args;
 }
 
 sub include {
@@ -188,7 +212,7 @@ sub __include {
     }
 
     my $relpath = File::Spec->abs2rel($path, $srcdir);
-    my $asset = Qgoda::Asset->new($path, $relpath);
+    my $asset = Qgoda::Asset->new($path, $relpath, $q->config->{defaults});
 
     my $site = $q->getSite;
     my $analyzers = $q->getAnalyzers;
@@ -220,22 +244,40 @@ sub __include {
 }
 
 sub list {
-	my ($self, @filters) = @_;
+    my $self = shift @_;
+    my @filters = $self->__unwrapArgs(@_);
 
-        foreach my $filter (@filters) {
-            die __"List filter must be an array reference.\n"  
-                if !ref $filter || 'ARRAY' ne reftype $filter;
+    foreach my $filter (@filters) {
+        if (ref $filter) {
+            use Data::Dumper;
+            die "List filter must not be a ref:\n" . Dumper \@filters;
         }
+    }
 
 	my $site = Qgoda->new->getSite;
+    return $site->searchAssets(@filters);
+}
 
-	return $self->__extractAnd([grep {!$_->{raw}} $site->getAssets], \@filters);
+sub llist {
+    my ($self, @filters) = @_;
+
+    my $lingua = $self->__getAsset->{lingua};
+
+    return $self->list(lingua => $lingua, @filters);
 }
 
 sub listPosts {
     my ($self, @filters) = @_;
 
-    return $self->list([type => 'post'], @filters);
+    return $self->list(type => 'post', @filters);
+}
+
+sub llistPosts {
+    my ($self, @filters) = @_;
+
+    my $lingua = $self->__getAsset->{lingua};
+
+    return $self->listPosts(lingua => $lingua, @filters);
 }
 
 sub link {
@@ -245,11 +287,12 @@ sub link {
     if (@$set == 0) {
         my $json = encode_json(\@filters);
         $json =~ s{.(.*).}{$1};
-        die "broken link($json)\n";
+        warn "broken link($json)\n";
+        return '';
     } if (@$set > 1) {
         my $json = encode_json(\@filters);
         $json =~ s{.(.*).}{$1};
-        die "ambiguous link($json)\n"; 
+        warn "ambiguous link($json)\n"; 
     }
     
     return $set->[0]->{permalink};
@@ -273,15 +316,29 @@ sub xref {
 }
 
 sub llink {
-    my ($self, $lingua, @filters) = @_;
+    my ($self, @filters) = @_;
 
-    return $self->link([lingua => $lingua], @filters);
+    if ($filters[0] && $filters[0] =~ /^[a-z]{2}(?:-[a-z]{2})?$/) {
+        require Carp;
+        Carp::croak("llink determines language on its own");
+    }
+
+    my $lingua = $self->__getAsset->{lingua};
+
+    return $self->link(lingua => $lingua, @filters);
 }
 
 sub lxref {
-    my ($self, $variable, $lingua, @filters) = @_;
+    my ($self, $variable, @filters) = @_;
 
-    return $self->xref($variable, [lingua => $lingua], @filters);
+    if ($filters[0] && $filters[0] =~ /^[a-z]{2}(?:-[a-z]{2})?$/) {
+        require Carp;
+        Carp::croak("lxref determines language on its own");
+    }
+
+    my $lingua = $self->__getAsset->{lingua};
+    
+    return $self->xref($variable, lingua => $lingua, @filters);
 }
 
 sub linkPost {
@@ -298,9 +355,17 @@ sub linkPost {
 }
 
 sub llinkPost {
-    my ($self, $lingua, @filters) = @_;
+    my ($self, @filters) = @_;
 
-    return $self->linkPost([lingua => $lingua], @filters);
+    if ($filters[0] && $filters[0] =~ /^[a-z]{2}(?:-[a-z]{2})?$/) {
+        require Carp;
+        Carp::croak("llinkPost determines language on its own");
+    }
+
+    my $asset = $self->__getAsset;
+    my $lingua = $asset->{lingua};
+
+    return $self->linkPost(lingua => $lingua, @filters);
 }
 
 sub writeAsset {
@@ -320,41 +385,20 @@ sub writeAsset {
     return '';
 }
 
-sub try {
-    my ($self, $method, @args) = @_;
+sub strftime {
+    my ($self, $format, $date) = @_;
 
-    my $retval;
-    eval {
-        $retval = $self->$method(@args);
-    };
-    if ($@) {
-        warn $@;
-    }
+    my $time = str2time $date;
+    $time = $date if !defined $time;
 
-    return $retval;
+    $format = '%c' if empty $format;
+
+    return POSIX::strftime($format, localtime $time);
 }
 
-# If requested, this could be extended so that ORing of filters can also
-# be implemented.
-sub __extractAnd {
-    my ($self, $set, $filters) = @_;
-
-    my @set = @$set;
-    my $site = Qgoda->new->getSite;
-    foreach my $filter (@$filters) {
-    	@set = ();
-    	die __"filter items must be array references"
-            if !ref $filter || 'ARRAY' ne reftype $filter;
-        my ($taxonomy, $value) = @$filter;
-        my $lookup = $site->getAssetsInTaxonomy($taxonomy, $value);
-        foreach my $asset (@$set) {
-        	push @set, $asset if exists $lookup->{$asset->getRelpath};
-        }
-        return [] if !@set;
-        $set = [@set];
-    }
-    
-    return \@set;
+sub try {
+    require Carp;
+    Carp::croak("q.try is now invalid");
 }
 
 1;
