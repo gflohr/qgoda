@@ -20,15 +20,37 @@ package Qgoda::Asset;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Qgoda::Util qw(merge_data);
 
 sub new {
-    my ($class, $path, $relpath) = @_;
+    my ($class, $path, $relpath, $defaults) = @_;
 
-    bless {
-        path => $path,
-        relpath => $relpath,
-    }, $class;
+	if (!$defaults) {
+		require Carp;
+		Carp::croak("Qgoda::Asset now needs defaults");
+	}
+	
+    my @partials = ($relpath);
+	my $current = $relpath;
+	# The 'x' is needed by the Visual Studio Code syntax highlighter ...
+	while ($current =~ s{/[^/]+$}{}x) {
+		push @partials, $current;
+	}
+	push @partials, '/';
+
+	my $self = {};
+
+	foreach my $partial (@partials) {
+		if (exists $defaults->{$partial}) {
+			merge_data $self, $defaults->{$partial};
+		}
+	}
+
+	# Overwrite these two keys unconditionally.
+	$self->{path} = $path;
+	$self->{relpath} = $relpath;
+
+    bless $self, $class;
 }
 
 sub getPath {

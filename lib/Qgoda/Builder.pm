@@ -21,6 +21,8 @@ package Qgoda::Builder;
 use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
+use POSIX qw(setlocale);
+use Locale::Util qw(web_set_locale);
 use File::Spec;
 
 use Qgoda::Util qw(empty read_file read_body write_file);
@@ -40,6 +42,7 @@ sub build {
     my $qgoda = Qgoda->new;
     my $errors = 0;
     ASSET: foreach my $asset ($site->getAssets) {
+        my $saved_locale = setlocale(POSIX::LC_ALL());
     	eval {
                 local $SIG{__WARN__} = sub {
                     my ($msg) = @_;
@@ -58,6 +61,7 @@ sub build {
     		my $path = $asset->getPath;
        	    $logger->error("$path: $@");
     	}
+        setlocale(POSIX::LC_ALL(), $saved_locale);
     }   
     
     if ($errors) {

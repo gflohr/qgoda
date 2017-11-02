@@ -64,7 +64,6 @@ sub analyzeAsset {
                           path => $path, err => $!);
     my $front_matter = front_matter $path;
 
-    # FIXME! Fill $meta with defaults!
     my $meta = {};
     if (!empty $front_matter) {
         $meta = eval { YAML::Load($front_matter) };
@@ -76,41 +75,16 @@ sub analyzeAsset {
         $meta->{raw} = 1;
     }
     
-    # FIXME! Merge the front matter into the meta information preserving
-    # the immutable properties.
     foreach my $key (keys %$meta) {
         next if 'path' eq $key;
         next if 'relpath' eq $key;
         $asset->{$key} = $meta->{$key};
     }
     
-    $self->__fillDefaults($asset, $site);
-    
     $self->__fillMeta($asset, $site) if !$asset->{raw};
     $self->__fillTaxonomies($asset, $site) if !$included && !$asset->{raw};
      
 	return $self;
-}
-
-sub __fillDefaults {
-    my ($self, $asset, $site) = @_;
-    
-    my $logger = $self->{__logger};
-    my $config = $self->{__config};
-
-    my $defaults = $config->{defaults};
-    my $relpath = '/' . $asset->getRelpath;
-    while ($defaults && length $relpath) {
-        if (exists $defaults->{$relpath}) {
-        	merge_data $asset, $defaults->{$relpath};
-        }
-        $relpath =~ s{/[^/]+$}{};
-    }
-
-    if (exists $defaults->{'/'}) {
-    	merge_data $asset, $defaults->{'/'};
-    }    
-    return $self;
 }
 
 sub __fillMeta {

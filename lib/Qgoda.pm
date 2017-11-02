@@ -35,6 +35,8 @@ use AnyEvent::Handle;
 use File::Basename qw(fileparse);
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
+use IPC::Signal;
+use Sys::Sigaction qw(set_sig_handler);
 use POSIX qw(:sys_wait_h);
 
 use Qgoda::Logger;
@@ -458,13 +460,14 @@ sub __scan {
 	# Scan the source directory.
     $logger->debug(__x("scanning source directory '{srcdir}'", 
                        srcdir => $config->{srcdir}));
+    my $defaults = $config->{defaults} || {};
 	File::Find::find({
 		wanted => sub {
 		    if (-f $_) {
 			    my $path = Cwd::abs_path($_);
 			    if (!$config->ignorePath($path)) {
 			    	my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
-			    	my $asset = Qgoda::Asset->new($path, $relpath);
+			    	my $asset = Qgoda::Asset->new($path, $relpath, $defaults);
 			    	$site->addAsset($asset);
 			    }
 		    }
