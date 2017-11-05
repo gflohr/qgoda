@@ -249,14 +249,8 @@ sub checkConfig {
         if exists $self->{exclude} && !$self->__isArray($self->{exclude});
     die __x("'{variable}' must be a list", variable => 'exclude_watch')
         if exists $self->{exclude_watch} && !$self->__isArray($self->{exclude_watch});
-    die __x("'{variable}' must be a dictionary", variable => 'defaults')
-        if exists $self->{defaults} && !$self->__isHash($config->{defaults});
-    
-    if (exists $self->{defaults}) {
-    	my $cursor = delete $self->{defaults};
-    	$self->{defaults} = {};
-    	$self->__copyDefaults($self->{defaults}, $cursor);
-    }
+    die __x("'{variable}' must be a list", variable => 'defaults')
+        if exists $self->{defaults} && !$self->__isArray($config->{defaults});
     
     die __x("'{variable}' must be a dictionary", variable => 'taxonomies')
         if exists $self->{taxonomies} && !$self->__isHash($config->{taxonomies});
@@ -287,6 +281,10 @@ sub checkConfig {
     	
     }
 
+    # Has to be done after everything was read. We need the value of 
+    # case-sensitive.
+    $self->{defaults} = $self->__compileDefaults($self->{defaults});
+    
     return $self;
 }
 
@@ -340,37 +338,34 @@ sub __isNumber {
 	return $self;
 }
 
-sub __copyDefaults {
-    my ($self, $config, $cursor, $base) = @_;
+sub __compileDefaults {
+    my ($self, $rules) = @_;
 
-    $base = '' if !defined $base;
+    my @defaults;
+    foreach my $rule (@$rules) {
+        my $pattern = $rule->{files};
+        $pattern = '*' if empty $pattern;
 
-    while (my ($dir, $rec) = each %$cursor) {
-        next if !defined $dir;
-        $dir =~ s{^/+}{};
-        $dir =~ s{/+$}{};
-        $dir =~ s{//+}{/}g;
+        if (ref $pattern) {
+            if (!$self->__isArray($pattern)) {
+                die __"'defaults.files' must be a scalar or a list";
+            }            
+        } else {
+            $pattern = [$pattern];
+        }
 
-        my $path = $base . '/' . $dir;
-        if (exists $rec->{values}) {
-            if (!$self->__isHash($rec->{values})) {
-                die __x("defaults: values for '{path}' must be hash",
-                        path => $path);
-            }
-
-            $config->{$path} ||= {};
-            while (my ($key, $value) = each %{$rec->{values}}) {
-                $config->{$path}->{$key} = $value;
+        $pattern = File::Globstar::ListMatch->new($pattern, 
+                                                  $self->{'case-insensitive'});
+        if (exists $rule->{values}) {
+            if (!$self->__isHash($rule->{values})) {
+                die __"defaults.values must be a hash";
             }
         }
-        if (exists $rec->{subdirs}) {
-            if (!ref $rec->{subdirs} || 'HASH' ne ref $rec->{subdirs}) {
-                die __x("defaults: subdirs for '{path}' must be hash",
-                        path => $path);
-            }
-            $self->__copyDefaults($config, $rec->{subdirs}, $path);
-        }
+
+        push @defaults, [$pattern, $rule->{values} || {}];
     }
+
+    return \@defaults;
 }
 
 1;

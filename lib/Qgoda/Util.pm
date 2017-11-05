@@ -35,8 +35,7 @@ use vars qw(@EXPORT_OK);
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
                 slugify html_escape unmarkup globstar trim 
-                match_ignore_patterns fnstarmatch flatten2hash
-                is_archive archive_extender);
+                flatten2hash is_archive archive_extender collect_defaults);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -510,87 +509,6 @@ sub trim($) {
 	return $string;
 }
 
-sub fnstarmatch($$;$) {
-    my ($pattern, $string, $is_directory) = @_;
-
-    # Translate the pattern into a regular expression.
-    my $directory_match = $pattern =~ s{/+$}{};
-    
-    $pattern =~ s
-                {
-                    (.*?)               # Anything, followed by ...
-                    (  
-                       \\.              # escaped character
-                    |                   # or
-                       \A\*\*(?=/)      # leading **/
-                    |                   # or
-                       /\*\*(?=/|\z)    # /**/ or /** at end of string
-                    |                   # or
-                       \.               # a dot
-                    |                   # or
-                       \*               # an asterisk
-                    |
-                    )?
-                }{
-                    my $translated = quotemeta $1;
-                    if ('\\' eq substr $2, 0, 1) {
-                        $translated .= quotemeta substr $2, 1, 1;
-                    } elsif ('**' eq $2) {
-                        $translated .= '.*';
-                    } elsif ('/**' eq $2) {
-                        $translated .= '/.*';
-                    } elsif ('.' eq $2) {
-                        $translated .= '\\.';
-                    } elsif ('*' eq $2) {
-                        $translated .= '[^/]*';
-                    } elsif (length $2) {
-                        die $2; 
-                    }
-                    $translated;
-                }gsex;
-
-    $string =~ /^$pattern$/ or return;
-
-    return if $directory_match && !$is_directory;
-
-    return 1;
-}
-
-sub match_ignore_patterns($$;$) {
-    my ($patterns, $path, $is_directory) = @_;
-
-    # Strip-off trailing slashes.
-    $path =~ s{/+$}{};
-
-    # Strip-off leading path.
-    my $filename = $path;
-    $filename =~ s{.*/}{};
-
-    # Undefined means undecided, 0 means not ignore, everything
-    # else means ignore.
-    my $ignored;
-
-    foreach (@$patterns) {
-        # We have to modify the pattern.  Therefore we need a copy.
-        my $pattern = $_;
-
-        my $negated = $pattern =~ s{^![ \t\r\n]*}{};
-
-        # Top-level match?
-        my $what = ('/' eq substr $pattern, 0, 1) ? $path : $filename;
-
-        if (defined $ignored && $negated) {
-            $ignored = 0 if fnstarmatch $pattern, $what, $is_directory;
-        } elsif (!$ignored && !$negated) {
-            $ignored = 1 if fnstarmatch $pattern, $what, $is_directory;
-        }
-    }
-
-    return 1 if $ignored;
-
-    return;
-}
-
 sub flatten2hash {
     my ($data) = @_;
 
@@ -677,6 +595,19 @@ sub archive_extender($) {
     return if $path !~ /(\.(?:$archive_re))/i;
 
     return lc $1;
+}
+
+sub collect_defaults($$) {
+    my ($path, $rules) = @_;
+
+    my $vars = {};
+    foreach my $rule (@$rules) {
+        my ($matcher, $values) = @$rule;
+        
+        merge_data $vars, $values if $matcher->matchInclude($path);
+    }
+
+    return $vars;
 }
 
 1;

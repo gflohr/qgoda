@@ -1,4 +1,4 @@
-#! /bin/false
+#! /usr/bin/env perl # -*- perl -*-
 
 # Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
 # all rights reserved.
@@ -16,51 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Asset;
-
 use strict;
 
-use Qgoda::Util qw(merge_data);
+use Test::More;
 
-sub new {
-    my ($class, $path, $relpath, $defaults) = @_;
+use Qgoda::Util qw(collect_defaults);
 
-	if (!$defaults) {
-		require Carp;
-		Carp::croak("Qgoda::Asset now needs defaults");
-	}
+my ($path, $rules, $path, $expect, $got);
 
-	my $self = $defaults;
+$rules = [];
+$expect = {};
+$path = 'index.md';
+$got = collect_defaults $path, $rules;
+is_deeply $got, $expect, 'empty input';
 
-	# Overwrite these two keys unconditionally.
-	$self->{path} = $path;
-	$self->{relpath} = $relpath;
-
-    bless $self, $class;
-}
-
-sub getPath {
-	shift->{path};
-}
-
-sub getRelpath {
-	shift->{relpath};
-}
-
-sub getOrigin {
-	my ($self) = @_;
-	
-	if (exists $self->{origin}) {
-		return $self->{origin};
-	} else {
-		return $self->getPath;
-	}
-}
-
-sub dump {
-	my ($self) = @_;
-
-	%{$self};
-}
-
-1;
+done_testing();
