@@ -36,7 +36,6 @@ use File::Basename qw(fileparse);
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use IPC::Signal;
-use Sys::Sigaction qw(set_sig_handler);
 use POSIX qw(:sys_wait_h);
 
 use Qgoda::Logger;
