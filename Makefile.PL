@@ -58,6 +58,8 @@ WriteMakefile (
         # The pure Perl YAML has problems parsing comments and is not
         # sufficient.
         'YAML::LibYAML' => '0.63',
+        # But it _is_ needed for pretty printing the output.
+        'YAML' => 0,
         'File::Copy::Recursive' => '0.38',
         'Hook::LexWrap' => '0.25',
         'Data::Walk' => '2.0',
