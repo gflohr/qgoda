@@ -44,7 +44,8 @@ use Qgoda::Site;
 use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
-use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file);
+use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
+                   collect_defaults);
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
@@ -459,13 +460,14 @@ sub __scan {
 	# Scan the source directory.
     $logger->debug(__x("scanning source directory '{srcdir}'", 
                        srcdir => $config->{srcdir}));
-    my $defaults = $config->{defaults} || {};
 	File::Find::find({
 		wanted => sub {
 		    if (-f $_) {
 			    my $path = Cwd::abs_path($_);
 			    if (!$config->ignorePath($path)) {
 			    	my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
+                    my $defaults = collect_defaults $relpath,
+                                                    $config->{defaults};
 			    	my $asset = Qgoda::Asset->new($path, $relpath, $defaults);
 			    	$site->addAsset($asset);
 			    }

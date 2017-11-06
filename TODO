@@ -1,3 +1,4 @@
+- excerpt didn't work on the qgoda-default site
 - use Template::Stash for evaluating locations
 - [% asset.date.ISODate %] must return 2011-10-05T14:48:00.000Z
 - add support for variables {reldir} and {relpath} for location expansion.

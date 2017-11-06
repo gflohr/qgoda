@@ -19,15 +19,76 @@
 use strict;
 
 use Test::More;
+use File::Globstar::ListMatch;
 
+use Qgoda;
+use Qgoda::Config;
 use Qgoda::Util qw(collect_defaults);
+
+my $q = Qgoda->new;
 
 my ($path, $rules, $path, $expect, $got);
 
-$rules = [];
+sub compile_rules($);
+
+$rules = compile_rules [];
 $expect = {};
-$path = 'index.md';
+$path = 'about-qgoda/index.md';
 $got = collect_defaults $path, $rules;
 is_deeply $got, $expect, 'empty input';
 
+$rules = compile_rules [
+    {
+        files => 'index.md',
+        values => {
+            type => 'post',
+            view => 'post.html',
+        }
+    },
+    {
+        files => 'index.html',
+        values => {
+            type => 'page',
+        }
+    }
+];
+$expect = {
+    type => 'post',
+    view => 'post.html',
+};
+$path = 'about-qgoda/index.md';
+$got = collect_defaults $path, $rules;
+is_deeply $got, $expect, 'empty input';
+
+# Check that we are getting a deep copy of the default values.
+my $original_rules = [
+    {
+        files => 'index.md',
+        values => {
+            type => 'post',
+            view => 'post.html',
+            deeply => {
+                nested => 'original'
+            }
+        }
+    },
+];
+$rules = compile_rules $original_rules;
+$original_rules->[0]->{values}->{deeply}->{nested} => 'gotcha';
+$expect = {
+    type => 'post',
+    view => 'post.html',
+    deeply => {
+        nested => 'original'
+    }
+};
+$got = collect_defaults $path, $rules;
+is_deeply $got, $expect, 'deep copy';
+
 done_testing();
+
+sub compile_rules($) {
+    my $defaults = shift;
+
+    $q->config->__compileDefaults($defaults);
+}

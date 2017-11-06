@@ -46,6 +46,7 @@ sub build {
     	eval {
                 local $SIG{__WARN__} = sub {
                     my ($msg) = @_;
+                    $DB::single = 1;
                     $logger->warning("$asset->{path}: $msg");
                 };
 	    	$logger->debug(__x("building asset '/{relpath}'",

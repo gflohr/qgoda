@@ -32,7 +32,7 @@ use Date::Parse qw(str2time);
 use POSIX qw(strftime);
 
 use Qgoda;
-use Qgoda::Util qw(merge_data empty);
+use Qgoda::Util qw(collect_defaults merge_data empty);
 use Qgoda::Builder;
 
 sub new {
@@ -212,7 +212,8 @@ sub __include {
     }
 
     my $relpath = File::Spec->abs2rel($path, $srcdir);
-    my $asset = Qgoda::Asset->new($path, $relpath, $q->config->{defaults});
+    my $defauts = collect_defaults $relpath, $q->config->{defaults};
+    my $asset = Qgoda::Asset->new($path, $relpath, $relpath);
 
     my $site = $q->getSite;
     my $analyzers = $q->getAnalyzers;

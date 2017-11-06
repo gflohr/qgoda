@@ -133,10 +133,7 @@ sub searchAssets {
 
     my @filters;
     my %operators = (
-        eq   => sub { my ($l, $r) = @_;
-		     warn "$l eq $r?\n";
-		     $_[0] eq $_[1] 
-		},
+        eq   => sub { $_[0] eq $_[1] },
         ne   => sub { $_[0] ne $_[1] },
         ge   => sub { $_[0] ge $_[1] },
         gt   => sub { $_[0] gt $_[1] },
