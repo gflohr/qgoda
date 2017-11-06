@@ -21,30 +21,33 @@ package Qgoda::Processor;
 use strict;
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
+use Scalar::Util qw(blessed);
 
 sub new {
-	bless {}, shift;
+    bless {}, shift;
 }
 
 sub process {
-	my ($self, $content, $asset, $site) = @_;
-	
-	die __x("Processor class '{class}' does not implement the method process().\n",
-	        class => ref $self);
+    my ($self, $content, $asset, $site) = @_;
+    
+    die __x("Processor class '{class}' does not implement the method process().\n",
+            class => ref $self);
 }
 
 sub excerpt {
-	my ($self, $content, $asset, $site) = @_;
-	
-	require HTML::TreeBuilder;
-	my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
+    my ($self, $content, $asset, $site) = @_;
+    
+    require HTML::TreeBuilder;
+    my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
                                   ignore_ignorable_whitespace => 1);
-	$tree->parse($content);
-	my @paragraphs = $tree->find('p', 'div');
+    $tree->parse($content);
+    my @paragraphs = $tree->find('p', 'div');
     foreach my $paragraph (@paragraphs) {
     my @children = $paragraph->content_list;
     foreach my $child (@children) {
-        next if $child->isa('HTML::Element');
+        # On recent Perls "next if $child->isa()" would be sufficient.
+        # On older Perls it is not.
+        next if ref $child && blessed $child && $child->isa('HTML::Element');
         $child =~ s/^[ \t\r\n]+//;
         $child =~ s/[ \t\r\n]+$//;
         return $child;
@@ -52,7 +55,7 @@ sub excerpt {
     
     return '';
 }
-	
+    
 }
 
 1;
