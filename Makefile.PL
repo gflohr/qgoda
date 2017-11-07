@@ -52,7 +52,7 @@ WriteMakefile (
         'JSON' => '2.90',
         'HTML::TreeBuilder' => '5.03',
         'Text::Unidecode' => '1.27',
-        'Text::Markdown' => '1.000031',
+        'Text::Markdown::Hoedown' => '1.02',
         'Template' => '2.26',
         'Template::Plugin::Gettext' => '0.1',
         # The pure Perl YAML has problems parsing comments and is not

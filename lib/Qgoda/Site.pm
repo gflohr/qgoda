@@ -20,6 +20,7 @@ package Qgoda::Site;
 
 use strict;
 
+use Qgoda::Util qw(canonical);
 use Qgoda::Artefact;
 
 sub new {
@@ -30,6 +31,7 @@ sub new {
         assets => {},
         artefacts => {},
         taxonomies => {},
+        __filter_cache => {},
     };
     
     bless $self, $class;
@@ -122,6 +124,10 @@ sub getChain {
 # FIXME! Prefilter the list for simple taxonomy filters.
 sub searchAssets {
     my ($self, @_filters) = @_;
+
+    my $canonical = canonical \@_filters;
+    return $self->{__filter_cache}->{$canonical}
+        if exists $self->{__filter_cache}->{$canonical};
 
     # Preprocess the filters.
     my $visualize = sub {
@@ -220,7 +226,7 @@ sub searchAssets {
 		}
 	}
 
-    return \@found;
+    return $self->{__filter_cache}->{$canonical} = \@found;
 }
 
 sub addTaxonomy {

@@ -28,6 +28,7 @@ use Scalar::Util qw(reftype looks_like_number);
 use Encode qw(_utf8_on);
 use File::Find ();
 use Data::Walk 2.00;
+use Storable qw(freeze);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -35,7 +36,8 @@ use vars qw(@EXPORT_OK);
                 expand_perl_format read_body merge_data interpolate
                 normalize_path strip_suffix perl_identifier perl_class
                 slugify html_escape unmarkup globstar trim 
-                flatten2hash is_archive archive_extender collect_defaults);
+                flatten2hash is_archive archive_extender collect_defaults
+                canonical);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -608,6 +610,14 @@ sub collect_defaults($$) {
     }
 
     return $vars;
+}
+
+sub canonical {
+    my ($obj) = @_;
+
+    local $Storable::canonical = 1;
+
+    return freeze $obj;
 }
 
 1;
