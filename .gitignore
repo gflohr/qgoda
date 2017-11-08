@@ -1,5 +1,11 @@
+# Eclipse
 /.project
 /.includepath
+
+# Visual Studio Code
+/.vscode
+
+# Generated files
 /ReleaseNotes
 /LiquidParser.output
 /MYMETA.json
