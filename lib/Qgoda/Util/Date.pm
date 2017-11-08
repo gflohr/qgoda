@@ -36,6 +36,14 @@ sub new {
     bless \$date, $class;
 }
 
+sub newFromEpoch {
+    my ($class, $epoch) = @_;
+
+    my $self = $epoch;
+    
+    bless \$self, $class;
+}
+
 sub epoch {
     my ($self) = @_;
 
