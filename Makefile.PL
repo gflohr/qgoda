@@ -42,7 +42,7 @@ WriteMakefile (
     PREREQ_PM => {
         'Archive::Extract' => 0,
         'File::HomeDir' => 0,
-        'File::Globstar' => '0.2.1',
+        'File::Globstar' => '0.3',
         'Date::Parse' => '2.30',
         'Locale::TextDomain' => '1.24',
         'Git' => 0,
