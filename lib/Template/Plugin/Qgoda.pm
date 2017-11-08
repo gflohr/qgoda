@@ -212,8 +212,7 @@ sub __include {
     }
 
     my $relpath = File::Spec->abs2rel($path, $srcdir);
-    my $defauts = collect_defaults $relpath, $q->config->{defaults};
-    my $asset = Qgoda::Asset->new($path, $relpath, $relpath);
+    my $asset = Qgoda::Asset->new($path, $relpath);
 
     my $site = $q->getSite;
     my $analyzers = $q->getAnalyzers;

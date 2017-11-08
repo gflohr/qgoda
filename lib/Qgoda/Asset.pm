@@ -23,14 +23,9 @@ use strict;
 use Qgoda::Util qw(merge_data);
 
 sub new {
-    my ($class, $path, $relpath, $defaults) = @_;
+    my ($class, $path, $relpath) = @_;
 
-	if (!$defaults) {
-		require Carp;
-		Carp::croak("Qgoda::Asset now needs defaults");
-	}
-
-	my $self = $defaults;
+	my $self = {};
 
 	# Overwrite these two keys unconditionally.
 	$self->{path} = $path;

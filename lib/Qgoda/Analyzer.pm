@@ -26,8 +26,9 @@ use YAML;
 use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
-use Qgoda::Util qw(empty yaml_error front_matter lowercase
+use Qgoda::Util qw(empty yaml_error front_matter lowercase collect_defaults
                    normalize_path strip_suffix merge_data slugify);
+use Qgoda::Util::Date;
 
 sub new {
     my ($class) = @_;
@@ -62,24 +63,26 @@ sub analyzeAsset {
                        path => $path));
     stat $path or die __x("error reading '{path}': {err}",
                           path => $path, err => $!);
-    my $front_matter = front_matter $path;
+    my $config = Qgoda->new->config;
+    my $meta = collect_defaults $asset->getRelpath, $config->{defaults};
 
-    my $meta = {};
+    my $front_matter = front_matter $path;
+    my $front_matter_data;
     if (!empty $front_matter) {
-        $meta = eval { YAML::Load($front_matter) };
+        $front_matter_data = eval { YAML::Load($front_matter) };
         if ($@) {
             $logger->error(yaml_error $path, $@);
-            next;
+            return;
         }
     } else {
-        $meta->{raw} = 1;
+        $front_matter_data->{raw} = 1;
     }
-    
-    foreach my $key (keys %$meta) {
-        next if 'path' eq $key;
-        next if 'relpath' eq $key;
-        $asset->{$key} = $meta->{$key};
-    }
+    merge_data $meta, $front_matter_data;
+
+    delete $meta->{path};
+    delete $meta->{relpath};
+
+    merge_data $asset, $meta;
     
     $self->__fillMeta($asset, $site) if !$asset->{raw};
     $self->__fillTaxonomies($asset, $site) if !$included && !$asset->{raw};
@@ -115,30 +118,7 @@ sub __fillMeta {
         }
     }
  
-    my ($seconds, $minutes, $hour, $mday, $month, $year, $wday, $yday, $isdst)
-        = localtime $date;
-    $asset->{date} = {
-    	epoch => $date,
-        sec => (sprintf '%02u', $seconds),
-        isec => (sprintf '%u', $seconds),
-        min => (sprintf '%02u', $minutes),
-        imin => (sprintf '%u', $minutes),
-        hour => (sprintf '%02u', $hour),
-        ihour => (sprintf '%u', $hour),
-        hour12 => (sprintf '%02u', $hour % 12 || 12),
-        ihour12 => (sprintf '%u', $hour % 12 || 12),
-        ampm => ($hour < 12 ? 'a. m.' : 'p. m.'),
-        mday => (sprintf '%02u', $mday),
-        imday => (sprintf '%u', $mday),
-        day => (sprintf '%02u', $mday),
-        iday => (sprintf '%u', $mday),
-        month => (sprintf '%02u', $month + 1),
-        imonth => (sprintf '%u', $month + 1),
-        year => (sprintf '%02u', $year + 1900),
-        wday => $wday,
-        yday => $yday,
-        isdst => $isdst,
-    };
+    $asset->{date} = Qgoda::Util::Date->newFromEpoch($date);
 
     $self->__fillPathInformation($asset, $site);
 

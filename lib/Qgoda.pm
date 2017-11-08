@@ -466,9 +466,7 @@ sub __scan {
 			    my $path = Cwd::abs_path($_);
 			    if (!$config->ignorePath($path)) {
 			    	my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
-                    my $defaults = collect_defaults $relpath,
-                                                    $config->{defaults};
-			    	my $asset = Qgoda::Asset->new($path, $relpath, $defaults);
+			    	my $asset = Qgoda::Asset->new($path, $relpath);
 			    	$site->addAsset($asset);
 			    }
 		    }
