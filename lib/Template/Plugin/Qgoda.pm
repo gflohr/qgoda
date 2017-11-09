@@ -30,6 +30,7 @@ use Scalar::Util qw(reftype);
 use JSON qw(encode_json);
 use Date::Parse qw(str2time);
 use POSIX qw(strftime);
+use File::Basename;
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty);
@@ -166,16 +167,6 @@ sub bust_cache {
     } else {
     	return "$uri?$stat[9]"
     }
-}
-
-sub args {
-    my $self = shift @_;
-
-    my (@args) = $self->__unwrapArgs(@_);
-
-    use Data::Dump;
-    my $dump = Qgoda::Util::html_escape(Data::Dump::dump(\@args));
-    return "<pre>$dump</pre>";
 }
 
 # TT2 distinguishes between hash and list arguments ...
@@ -399,6 +390,64 @@ sub strftime {
 sub try {
     require Carp;
     Carp::croak("q.try is now invalid");
+}
+
+sub pagination {
+    my ($self, @args) = @_;
+
+    my %data = $self->__unwrapArgs(@args);
+
+    use integer;
+
+    my $start = $data{start} || 0;
+    my $total = $data{total} || return {};
+    my $per_page = $data{per_page} || 10;
+    my $page0 = $start / $per_page;
+    my $previous_page = $page0 ? $page0 : undef;
+    my $next_page = $start + $per_page < $total ? $page0 + 2 : undef;
+    my $stem = $data{stem};
+    my $extender = $data{extender};
+    my $total_pages = 1 + $total / $per_page;
+
+    if (empty $stem || empty $extender) {
+        my $asset = $self->__getAsset;
+        my $location = $asset->{location};
+        my $basename = basename $location;
+
+        $basename =~ m{(.*?)(\..+)?$};
+        $stem = $1 if empty $stem;
+        $extender = $2 if empty $extender;
+    }
+
+    # FIXME! Not flexible enough.  We cannot put pages into a subdirectory.
+    my @links;
+    for (my $i = 1; $i <= $total_pages; ++$i) {
+        my $link = $stem;
+        $link .= "-$i" if $i > 1;
+        $link .= $extender;
+        push @links, $link;
+    }
+
+    my @tabindexes = (0) x $#links;
+    $tabindexes[$page0] = -1;
+    $tabindexes[0] = -1 if !defined $previous_page;
+    
+    my $result = {
+        start => $start,
+        page0 => $page0,
+        page => $page0 + 1,
+        per_page => $per_page,
+        total_pages => 1 + $total / $per_page,
+        previous_page => $previous_page,
+        next_page => $next_page,
+        links => \@links,
+        tabindices => \@tabindexes,
+        tabindexes => \@tabindexes,
+    };
+    use Data::Dumper;
+    warn Dumper $result;
+
+    return $result;
 }
 
 1;
