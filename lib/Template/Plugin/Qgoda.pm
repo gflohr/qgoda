@@ -182,15 +182,17 @@ sub __unwrapArgs {
 }
 
 sub include {
-	my ($self, $path, $overlay, %extra) = @_;
+	my ($self, $path, $overlay, @args) = @_;
 
-	my $asset = $self->__include($path, $overlay, %extra);
+	my $asset = $self->__include($path, $overlay, @args);
 	
 	return $asset->{content};
 }
 
 sub __include {
-	my ($self, $_path, $overlay, %extra) = @_;
+	my ($self, @args) = @_;
+    
+    my ($_path, $overlay, %extra) = $self->__unwrapArgs(@args);
 
     require Qgoda;
     my $q = Qgoda->new;
@@ -360,9 +362,9 @@ sub llinkPost {
 }
 
 sub writeAsset {
-	my ($self, $path, $overlay, %extra) = @_;
+	my ($self, $path, $overlay, @args) = @_;
 
-    my $asset = $self->__include($path, $overlay, %extra);
+    my $asset = $self->__include($path, $overlay, @args);
     
     my $q = Qgoda->new;
     my $logger = $q->logger('template');
@@ -374,6 +376,29 @@ sub writeAsset {
                        location => $asset->{location}));
     
     return '';
+}
+
+sub clone {
+    my ($self, @args) = @_;
+
+    my @extra = $self->__unwrapArgs(@args);
+    die __"odd number of arguments for clone()\n" if @extra & 1;
+    my %extra = @extra;
+    die __"the argument 'location' is mandatory for clone()\n" 
+        if empty $extra{location};
+
+    my $asset = $self->__getAsset;
+    my $parent = $asset->{parent} ? $asset->{parent} : {
+        location => $asset->{location},
+    };
+
+    my %forced = (
+        relpath => $asset->getRelpath,
+        path => $asset->getPath,
+        parent => $parent,
+    );
+
+    return $self->writeAsset($asset->getRelpath, $asset, @extra, %forced);
 }
 
 sub strftime {
@@ -403,25 +428,36 @@ sub pagination {
     my $total = $data{total} || return {};
     my $per_page = $data{per_page} || 10;
     my $page0 = $start / $per_page;
+    my $page = $page0 + 1;
     my $previous_page = $page0 ? $page0 : undef;
     my $next_page = $start + $per_page < $total ? $page0 + 2 : undef;
     my $stem = $data{stem};
     my $extender = $data{extender};
     my $total_pages = 1 + $total / $per_page;
 
-    if (empty $stem || empty $extender) {
-        my $asset = $self->__getAsset;
-        my $location = $asset->{location};
-        my $basename = basename $location;
+    my $asset = $self->__getAsset;
+    my $location;
+    if ($asset->{parent}) {
+        $location = $asset->{parent}->{location};
+    } else {
+        $location = $asset->{location};
+    }
+    my $basename = basename $location;
 
-        $basename =~ m{(.*?)(\..+)?$};
-        $stem = $1 if empty $stem;
-        $extender = $2 if empty $extender;
+    $basename =~ m{(.*?)(\..+)?$};
+    $stem = $1 if empty $stem;
+    $extender = $2 if empty $extender;
+    
+    my ($next_start, $next_location);
+    if ($page < $total_pages) {
+        $next_start = $start + $per_page;
+        $next_location = dirname $location;
+        $next_location .= "${stem}-" . ($page + 1) . $extender;
     }
 
     # FIXME! Not flexible enough.  We cannot put pages into a subdirectory.
     my @links;
-    for (my $i = 1; $i <= $total_pages; ++$i) {
+    for (my $i = 1; $i < $total_pages; ++$i) {
         my $link = $stem;
         $link .= "-$i" if $i > 1;
         $link .= $extender;
@@ -432,10 +468,10 @@ sub pagination {
     $tabindexes[$page0] = -1;
     $tabindexes[0] = -1 if !defined $previous_page;
     
-    my $result = {
+    return {
         start => $start,
         page0 => $page0,
-        page => $page0 + 1,
+        page => $page,
         per_page => $per_page,
         total_pages => 1 + $total / $per_page,
         previous_page => $previous_page,
@@ -443,11 +479,9 @@ sub pagination {
         links => \@links,
         tabindices => \@tabindexes,
         tabindexes => \@tabindexes,
+        next_start => $next_start,
+        next_location => $next_location,
     };
-    use Data::Dumper;
-    warn Dumper $result;
-
-    return $result;
 }
 
 1;
