@@ -170,7 +170,7 @@ sub default {
                 htm => 'html',
             },
             options => {
-                Markdown => [],
+                Markdown => {},
                 TT2 => {}
             },
     	},
