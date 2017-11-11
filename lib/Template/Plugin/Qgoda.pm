@@ -502,7 +502,7 @@ sub pagination {
 
     # FIXME! Not flexible enough.  We cannot put pages into a subdirectory.
     my @links;
-    for (my $i = 1; $i < $total_pages; ++$i) {
+    for (my $i = 1; $i <= $total_pages; ++$i) {
         my $link = $stem;
         $link .= "-$i" if $i > 1;
         $link .= $extender;
