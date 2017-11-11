@@ -169,31 +169,22 @@ sub bust_cache {
     }
 }
 
-# TT2 distinguishes between hash and list arguments ...
-sub __unwrapArgs {
-    my ($self, @args) = @_;
-
-    if (@args && ref $args[-1] && 'HASH' eq ref $args[-1]) {
-        my $ref = pop @args;
-        push @args, %$ref;       
-    }
-
-    return @args;
-}
-
 sub include {
-	my ($self, $path, $overlay, @args) = @_;
+	my ($self, $path, $overlay, $extra) = @_;
 
-	my $asset = $self->__include($path, $overlay, @args);
+    die "usage: include(PATH, OVERLAY, KEY = VALUE, ...\n"
+        if empty $path || empty $overlay;
+    $overlay = $self->__sanitizeHashref($overlay, 'include');
+    $extra = $self->__sanitizeHashref($extra, 'include', 1);
+    
+	my $asset = $self->__include($path, $overlay, $extra);
 	
 	return $asset->{content};
 }
 
 sub __include {
-	my ($self, @args) = @_;
+	my ($self, $_path, $overlay, $extra) = @_;
     
-    my ($_path, $overlay, %extra) = $self->__unwrapArgs(@args);
-
     require Qgoda;
     my $q = Qgoda->new;
     my $srcdir = $q->config->{srcdir};
@@ -224,9 +215,7 @@ sub __include {
         merge_data $asset, \%overlay;
     }
 
-    foreach my $key (keys %extra) {
-        $asset->{$key} = $extra{$key};
-    }
+    merge_data $asset, $extra;
     
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
@@ -236,54 +225,111 @@ sub __include {
 	return $asset;
 }
 
-sub list {
-    my $self = shift @_;
-    my @filters = $self->__unwrapArgs(@_);
+sub __sanitizeFilters {
+    my ($self, $filters) = @_;
 
-    foreach my $filter (@filters) {
-        if (ref $filter) {
-            use Data::Dumper;
-            die "List filter must not be a ref:\n" . Dumper \@filters;
+    return {} if empty $filters;
+    if (!ref $filters) {
+        die __x("invalid filters '{filters}' (used named arguments)\n",
+                filters => $filters);
+    }
+
+    my $reftype = reftype $filters;
+    if ('ARRAY' eq $reftype) {
+        my $json = encode_json($filters);
+        $json =~ s{.(.*).}{$1};
+        die __x("invalid filters '{filters}' (use named arguments)\n",
+                 filters => $json);
+    } elsif ('HASH' ne $reftype) {
+        die __x("invalid filters '{filters}' (use named arguments)\n",
+                 filters => $filters);
+    }
+
+    return $filters;
+}
+
+sub __sanitizeHashref {
+    my ($self, $hashref, $method, $optional) = @_;
+
+    if (empty $hashref) {
+        if ($optional) {
+            return {};
+        } else {
+            die __x("named arguments for '{method}()' are mandatory\n",
+                    method => $method);
         }
     }
 
+    if (!ref $hashref) {
+        die __x("method '{method}' requires named arguments, not '{args}'",
+                method => $method, args => $hashref);
+    }
+
+    my $reftype = reftype $hashref;
+    if ('ARRAY' eq $reftype) {
+        my $json = encode_json($hashref);
+        $json =~ s{.(.*).}{$1};
+        die __x("invalid arguments '{args}' for method '{method}()'"
+                . " (use named arguments)\n",
+                 args => $json, method => $method);
+    } elsif ('HASH' ne $reftype) {
+        die __x("invalid arguments '{args}' for method '{method}()'"
+                . " (use named arguments)\n",
+                 args => $hashref, method => $method);
+    }
+
+    return $hashref;
+}
+
+sub list {
+    my ($self, $filters) = @_;
+
+    $filters = $self->__sanitizeFilters($filters);
+
 	my $site = Qgoda->new->getSite;
-    return $site->searchAssets(@filters);
+    return $site->searchAssets(%$filters);
 }
 
 sub llist {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
 
-    my $lingua = $self->__getAsset->{lingua};
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
 
-    return $self->list(lingua => $lingua, @filters);
+    return $self->list($filters);
 }
 
 sub listPosts {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
 
-    return $self->list(type => 'post', @filters);
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{type} = 'post';
+
+    return $self->list($filters);
 }
 
 sub llistPosts {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
 
-    my $lingua = $self->__getAsset->{lingua};
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
 
-    return $self->listPosts(lingua => $lingua, @filters);
+    return $self->listPosts($filters);
 }
 
 sub link {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
     
-    my $set = $self->list(@filters);
+    $filters = $self->__sanitizeFilters($filters);
+
+    my $set = $self->list($filters);
     if (@$set == 0) {
-        my $json = encode_json(\@filters);
+        my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
         warn "broken link($json)\n";
         return '';
     } if (@$set > 1) {
-        my $json = encode_json(\@filters);
+        my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
         warn "ambiguous link($json)\n"; 
     }
@@ -292,15 +338,17 @@ sub link {
 }
 
 sub xref {
-    my ($self, $variable, @filters) = @_;
+    my ($self, $variable, $filters) = @_;
 
-    my $set = $self->list(@filters);
+    $filters = $self->__sanitizeFilters($filters);
+
+    my $set = $self->list($filters);
     if (@$set == 0) {
-        my $json = encode_json(\@filters);
+        my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
         warn "broken xref($json)\n";
     } if (@$set > 1) {
-        my $json = encode_json(\@filters);
+        my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
         warn "ambiguous xref($json)\n"; 
     }
@@ -309,62 +357,61 @@ sub xref {
 }
 
 sub llink {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
 
-    if ($filters[0] && $filters[0] =~ /^[a-z]{2}(?:-[a-z]{2})?$/) {
-        require Carp;
-        Carp::croak("llink determines language on its own");
-    }
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
 
-    my $lingua = $self->__getAsset->{lingua};
-
-    return $self->link(lingua => $lingua, @filters);
+    return $self->link($filters);
 }
 
 sub lxref {
-    my ($self, $variable, @filters) = @_;
+    my ($self, $variable, $filters) = @_;
 
-    if ($filters[0] && $filters[0] =~ /^[a-z]{2}(?:-[a-z]{2})?$/) {
-        require Carp;
-        Carp::croak("lxref determines language on its own");
-    }
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
 
-    my $lingua = $self->__getAsset->{lingua};
-    
-    return $self->xref($variable, lingua => $lingua, @filters);
+    return $self->xref($variable, $filters);
 }
 
 sub linkPost {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
     
-    my $set = $self->list([type => 'post'], @filters);
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{type} = 'post';
+
+    my $set = $self->list($filters);
     if (@$set == 0) {
-        die "broken linkPost()\n";
+        my $json = encode_json($filters);
+        $json =~ s{.(.*).}{$1};
+        die "broken linkPost($json)\n";
     } if (@$set > 1) {
-        die "ambiguous linkPost()\n"; 
+        my $json = encode_json($filters);
+        $json =~ s{.(.*).}{$1};
+        die "ambiguous linkPost($json)\n"; 
     }
     
     return $set->[0]->{permalink};
 }
 
 sub llinkPost {
-    my ($self, @filters) = @_;
+    my ($self, $filters) = @_;
 
-    if ($filters[0] && $filters[0] =~ /^[a-z]{2}(?:-[a-z]{2})?$/) {
-        require Carp;
-        Carp::croak("llinkPost determines language on its own");
-    }
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
 
-    my $asset = $self->__getAsset;
-    my $lingua = $asset->{lingua};
-
-    return $self->linkPost(lingua => $lingua, @filters);
+    return $self->linkPost($filters);
 }
 
 sub writeAsset {
-	my ($self, $path, $overlay, @args) = @_;
+	my ($self, $path, $overlay, $extra) = @_;
 
-    my $asset = $self->__include($path, $overlay, @args);
+    die "usage: writeAsset(PATH, OVERLAY, KEY = VALUE, ...\n"
+        if empty $path || empty $overlay;
+    $overlay = $self->__sanitizeHashref($overlay, 'include');
+    $extra = $self->__sanitizeHashref($extra, 'include', 1);
+
+    my $asset = $self->__include($path, $overlay, $extra);
     
     my $q = Qgoda->new;
     my $logger = $q->logger('template');
@@ -379,32 +426,22 @@ sub writeAsset {
 }
 
 sub clone {
-    my ($self, @args) = @_;
+    my ($self, $extra) = @_;
 
-    my @extra = $self->__unwrapArgs(@args);
-    die __"odd number of arguments for clone()\n" if @extra & 1;
-    my %extra = @extra;
+    $extra = $self->__sanitizeHashref($extra, 'clone', 1);    
     die __"the argument 'location' is mandatory for clone()\n" 
-        if empty $extra{location};
+        if empty $extra->{location};
 
     my $asset = $self->__getAsset;
     my $parent = $asset->{parent} ? $asset->{parent} : {
         location => $asset->{location},
     };
 
-    my %forced = (
-        relpath => $asset->getRelpath,
-        path => $asset->getPath,
-        parent => $parent,
-    );
-
-    # Do NOT pass a hash variable as the last argument.  If $parent happens
-    # to be the last value in the list, the magic from __unwrapArgs will
-    # unwrap it.
-    return $self->writeAsset($asset->getRelpath, $asset, @extra,
-                             parent => $parent,
-                             relpath => $asset->getRelpath, 
-                             path => $asset->getPath);
+    # Force these values.
+    $extra->{replath} = $asset->getRelpath;
+    $extra->{path} = $asset->getPath;
+    $extra->{parent} = $parent;
+    return $self->writeAsset($asset->getRelpath, $asset, $extra);
 }
 
 sub strftime {
@@ -424,21 +461,25 @@ sub try {
 }
 
 sub pagination {
-    my ($self, @args) = @_;
+    my ($self, $data) = @_;
 
-    my %data = $self->__unwrapArgs(@args);
-
+    $data = $self->__sanitizeHashref($data, 'pagination', 1);
+    die __"argument '{total}' is mandatory for pagination()\n"
+        if empty $data->{total};
+    die __"argument '{total}' cannot be zero pagination()\n"
+        if !$data->{total};
+    
     use integer;
 
-    my $start = $data{start} || 0;
-    my $total = $data{total} || return {};
-    my $per_page = $data{per_page} || 10;
+    my $start = $data->{start} || 0;
+    my $total = $data->{total} || return {};
+    my $per_page = $data->{per_page} || 10;
     my $page0 = $start / $per_page;
     my $page = $page0 + 1;
     my $previous_page = $page0 ? $page0 : undef;
     my $next_page = $start + $per_page < $total ? $page0 + 2 : undef;
-    my $stem = $data{stem};
-    my $extender = $data{extender};
+    my $stem = $data->{stem};
+    my $extender = $data->{extender};
     my $total_pages = 1 + $total / $per_page;
 
     my $asset = $self->__getAsset;
