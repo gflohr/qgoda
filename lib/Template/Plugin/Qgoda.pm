@@ -476,8 +476,6 @@ sub pagination {
     my $per_page = $data->{per_page} || 10;
     my $page0 = $start / $per_page;
     my $page = $page0 + 1;
-    my $previous_page = $page0 ? $page0 : undef;
-    my $next_page = $start + $per_page < $total ? $page0 + 2 : undef;
     my $stem = $data->{stem};
     my $extender = $data->{extender};
     my $total_pages = 1 + $total / $per_page;
@@ -510,6 +508,11 @@ sub pagination {
         $link .= $extender;
         push @links, $link;
     }
+    my $previous_page = $page0 ? $page0 : undef;
+    my $next_page = $start + $per_page < $total ? $page0 + 2 : undef;
+
+    $previous_page = $links[$previous_page - 1] if defined $previous_page;
+    $next_page = $links[$next_page - 1] if defined $next_page;
 
     my @tabindexes = (0) x $#links;
     $tabindexes[$page0] = -1;
@@ -521,8 +524,8 @@ sub pagination {
         page => $page,
         per_page => $per_page,
         total_pages => 1 + $total / $per_page,
-        previous_page => $previous_page,
-        next_page => $next_page,
+        previous_link => $previous_page,
+        next_link => $next_page,
         links => \@links,
         tabindices => \@tabindexes,
         tabindexes => \@tabindexes,
