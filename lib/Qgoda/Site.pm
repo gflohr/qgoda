@@ -126,7 +126,7 @@ sub searchAssets {
     my ($self, @_filters) = @_;
 
     my $canonical = canonical \@_filters;
-    return $self->{__filter_cache}->{$canonical}
+    return [@{$self->{__filter_cache}->{$canonical}}]
         if exists $self->{__filter_cache}->{$canonical};
 
     # Preprocess the filters.
