@@ -20,6 +20,10 @@ package Qgoda::Site;
 
 use strict;
 
+# FIXME! This is only needed for debugging the filter cache.  Remove it,
+# once the filter cache is stable.
+use MIME::Base64 qw(encode_base64);
+
 use Qgoda::Util qw(canonical);
 use Qgoda::Artefact;
 
@@ -123,9 +127,15 @@ sub getChain {
 
 # FIXME! Prefilter the list for simple taxonomy filters.
 sub searchAssets {
-    my ($self, @_filters) = @_;
+    my ($self, %filters) = @_;
 
-    my $canonical = canonical \@_filters;
+    # Sort the filters, so that we can canonicalize them.
+    my @_filters;
+    foreach my $key (sort keys %filters) {
+        push @_filters, $key, $filters{$key};
+    }
+
+    my $canonical = encode_base64 canonical \@_filters;
     return [@{$self->{__filter_cache}->{$canonical}}]
         if exists $self->{__filter_cache}->{$canonical};
 
@@ -158,6 +168,8 @@ sub searchAssets {
         '^'  => sub { $_[0] ^  $_[1] },
     );
 
+    # FIXME! Simplyfy this! We always expect a key, the value is either a
+    # scalar or an array ref, containg the operator and the value.
     for (my $i = 0; $i < @_filters; ++$i) {
         my ($key, $value, $op);
 
