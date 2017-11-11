@@ -398,7 +398,13 @@ sub clone {
         parent => $parent,
     );
 
-    return $self->writeAsset($asset->getRelpath, $asset, @extra, %forced);
+    # Do NOT pass a hash variable as the last argument.  If $parent happens
+    # to be the last value in the list, the magic from __unwrapArgs will
+    # unwrap it.
+    return $self->writeAsset($asset->getRelpath, $asset, @extra,
+                             parent => $parent,
+                             relpath => $asset->getRelpath, 
+                             path => $asset->getPath);
 }
 
 sub strftime {
@@ -468,7 +474,7 @@ sub pagination {
     $tabindexes[$page0] = -1;
     $tabindexes[0] = -1 if !defined $previous_page;
     
-    return {
+    my $retval = {
         start => $start,
         page0 => $page0,
         page => $page,
@@ -482,6 +488,8 @@ sub pagination {
         next_start => $next_start,
         next_location => $next_location,
     };
+
+    return $retval;
 }
 
 1;
