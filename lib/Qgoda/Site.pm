@@ -23,6 +23,8 @@ use strict;
 # FIXME! This is only needed for debugging the filter cache.  Remove it,
 # once the filter cache is stable.
 use MIME::Base64 qw(encode_base64);
+use List::Util qw(pairs);
+use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(canonical);
 use Qgoda::Artefact;
@@ -155,62 +157,41 @@ sub searchAssets {
 
     my @filters;
     my %operators = (
-        eq   => sub { $_[0] eq $_[1] },
-        ne   => sub { $_[0] ne $_[1] },
-        ge   => sub { $_[0] ge $_[1] },
-        gt   => sub { $_[0] gt $_[1] },
-        le   => sub { $_[0] le $_[1] },
-        lt   => sub { $_[0] lt $_[1] },
-        '==' => sub { $_[0] == $_[1] },
-        '!=' => sub { $_[0] != $_[1] },
-        '>=' => sub { $_[0] >= $_[1] },
-        '>'  => sub { $_[0] >  $_[1] },
-        '<=' => sub { $_[0] <= $_[1] },
-        '<'  => sub { $_[0] <  $_[1] },
-        '=~' => sub { $_[0] =~ $_[1] },
-        '!~' => sub { $_[0] !~ $_[1] },
-        '&'  => sub { $_[0] &  $_[1] },
-        '|'  => sub { $_[0] |  $_[1] },
-        '^'  => sub { $_[0] ^  $_[1] },
+        eq    => sub { $_[0] eq $_[1] },
+        ne    => sub { $_[0] ne $_[1] },
+        ge    => sub { warn "'$_[0]' ge '$_[1]'?\n"; $_[0] ge $_[1] },
+        gt    => sub { $_[0] gt $_[1] },
+        le    => sub { $_[0] le $_[1] },
+        lt    => sub { $_[0] lt $_[1] },
+        ieq   => sub { (lc $_[0]) eq (lc $_[1]) },
+        ine   => sub { (lc $_[0]) ne (lc $_[1]) },
+        ige   => sub { (lc $_[0]) ge (lc $_[1]) },
+        igt   => sub { (lc $_[0]) gt (lc $_[1]) },
+        ile   => sub { (lc $_[0]) le (lc $_[1]) },
+        ilt   => sub { (lc $_[0]) lt (lc $_[1]) },
+        '=='  => sub { $_[0] == $_[1] },
+        '!='  => sub { $_[0] != $_[1] },
+        '>='  => sub { $_[0] >= $_[1] },
+        '>'   => sub { $_[0] >  $_[1] },
+        '<='  => sub { $_[0] <= $_[1] },
+        '<'   => sub { $_[0] <  $_[1] },
+        '=~'  => sub { $_[0] =~ $_[1] },
+        '!~'  => sub { $_[0] !~ $_[1] },
+        '&'   => sub { $_[0] &  $_[1] },
+        '|'   => sub { $_[0] |  $_[1] },
+        '^'   => sub { $_[0] ^  $_[1] },
     );
 
     # FIXME! Simplyfy this! We always expect a key, the value is either a
     # scalar or an array ref, containg the operator and the value.
-    for (my $i = 0; $i < @_filters; ++$i) {
-        my ($key, $value, $op);
+    $DB::single = 1;
+    foreach my $kv (pairs @_filters) {
+        my ($key, $value, $op) = @$kv;
 
-        $key = $_filters[$i];
-
-        if (ref $key) {
-            if ('HASH' eq reftype $key) {
-                my @keys = keys %$key;
-                if (@keys != 1) {
-                    die __x("invalid filter (only one hash key allowed): {filter}\n",
-                            filter => $visualize->($i));
-                }
-                $value = $key->{$keys[0]};
-                $key = $keys[0];
-                $op = 'eq';
-            } elsif ('ARRAY' eq reftype $key) {
-                if (@$key > 2) {
-                    ($key, $op, $value) = @$key;
-                } else {
-                    ($key, $value) = @$key;
-                }
-                $value = '' if !defined $value;
-                $op = 'eq' if !defined $op;
-            } else {
-                # Stringify.
-                $key = "$key";
-                --$i;
-            }
+        if (ref $value && 'ARRAY' eq reftype $value) {
+            ($op, $value) = @$value;
         } else {
-            if ($i == $#_filters) {
-                die __x("invalid filter (missing last value): {filter}\n",
-                         filter => $visualize->($i));                
-            }
             $op = 'eq';
-            $value = $_filters[++$i];
         }
 
         push @filters, [$op, $key, $value];
