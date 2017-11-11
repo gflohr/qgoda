@@ -184,7 +184,6 @@ sub searchAssets {
 
     # FIXME! Simplyfy this! We always expect a key, the value is either a
     # scalar or an array ref, containg the operator and the value.
-    $DB::single = 1;
     foreach my $kv (pairs @_filters) {
         my ($key, $value, $op) = @$kv;
 
