@@ -136,8 +136,14 @@ sub searchAssets {
     }
 
     my $canonical = encode_base64 canonical \@_filters;
-    return [@{$self->{__filter_cache}->{$canonical}}]
-        if exists $self->{__filter_cache}->{$canonical};
+    if (exists $self->{__filter_cache}->{$canonical}) {
+        my @copy;
+        foreach my $path (@{$self->{__filter_cache}->{$canonical}}) {
+            push @copy, $self->{assets}->{$path}
+                if $self->{assets}->{$path};
+        }
+        return \@copy;
+    }
 
     # Preprocess the filters.
     my $visualize = sub {
@@ -238,7 +244,13 @@ sub searchAssets {
 		}
 	}
 
-    return $self->{__filter_cache}->{$canonical} = \@found;
+    my @paths;
+    foreach my $found (@found) {
+        push @paths, $found->{path};
+    }
+    $self->{__filter_cache}->{$canonical} = \@paths;
+
+    return \@found;
 }
 
 sub addTaxonomy {
