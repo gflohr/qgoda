@@ -1,5 +1,5 @@
+- allow disabling markdown sections
 - do we need q.include()?
-- do we need the wrapper?
 - excerpt didn't work on the qgoda-default site
 - use Template::Stash for evaluating locations
 - [% asset.date.ISODate %] must return 2011-10-05T14:48:00.000Z
