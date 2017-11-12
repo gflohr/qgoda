@@ -45,7 +45,7 @@ use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
 use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
-                   collect_defaults);
+                   collect_defaults purify);
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
@@ -121,13 +121,16 @@ sub dumpAssets {
 
     $self->build(1);
 
-    return map { {$_->dump} } $self->getSite->getAssets;
+    map { purify { $_->dump } } $self->getSite->getAssets;
 }
 
 sub dump {
     my ($self) = @_;
 
     my $data = [$self->dumpAssets];
+
+    # Stringify all blessed references.
+    my $wanted = {};
 
     my $format = $self->{__options}->{output_format};
     $format = 'JSON' if empty $format;

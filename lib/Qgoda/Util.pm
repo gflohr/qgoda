@@ -37,7 +37,7 @@ use vars qw(@EXPORT_OK);
                 normalize_path strip_suffix perl_identifier perl_class
                 slugify html_escape unmarkup globstar trim 
                 flatten2hash is_archive archive_extender collect_defaults
-                canonical);
+                canonical purify);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -618,6 +618,55 @@ sub canonical {
     local $Storable::canonical = 1;
 
     return freeze $obj;
+}
+
+sub purify {
+    my ($data) = @_;
+
+    my $type = reftype $data;
+    die "only hashes and arrays supported" 
+        if ($type ne 'HASH' && $type ne 'ARRAY');
+    my @stack = ([$type, []]);
+
+    my $preprocess = sub {
+        if ('HASH' eq $Data::Walk::type) {
+             push @stack, [HASH => []];
+        } else {
+             push @stack, [ARRAY => []];
+        }
+
+        return @_;
+    };
+
+    my $postprocess = sub {
+        my $item = pop @stack;
+        my ($type, $store) = @$item;
+        if ('HASH' eq $type) {
+            $store = {@$store};
+        }
+        my $current = $stack[-1]->[1];
+        push @$current, $store;
+    };
+
+    my $wanted = sub {
+        if (ref $_) {
+            my $reftype = reftype $_;
+            if ('HASH' eq $reftype || 'ARRAY' eq $reftype) {
+                return;
+            }
+        }
+        
+        my $store = $stack[-1]->[1];
+        push @$store, "$_"; 
+    };
+
+    walk { wanted => $wanted, preprocess => $preprocess,
+           postprocess => $postprocess }, $data;
+
+    my $item = pop @stack;
+    $type = $item->[0];
+
+    return $item->[1]->[0];
 }
 
 1;
