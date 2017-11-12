@@ -25,7 +25,7 @@ use POSIX qw(strftime);
 use Locale::TextDomain qw('com.cantanea.qgoda');
 
 use overload
-    '""' => 'toString';
+    '""' => 'ISOString';
 
 sub new {
     my ($class, $date) = @_;
@@ -48,10 +48,6 @@ sub epoch {
     my ($self) = @_;
 
     return $$self;
-}
-
-sub toString {
-    return 'a stringified date';
 }
 
 sub year {
