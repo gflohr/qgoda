@@ -38,7 +38,7 @@ sub new {
     require Qgoda;
     my $qgoda = Qgoda->new;
     my $srcdir = $qgoda->config->{srcdir};
-    my $viewdir = $qgoda->config->{directories}->{views};
+    my $viewdir = $qgoda->config->{paths}->{views};
     
     # FIXME! Merge options with those from the configuration!
     $self->{__tt} = Template->new({

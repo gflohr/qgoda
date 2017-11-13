@@ -75,6 +75,35 @@ sub new {
         $config = merge_data $config, $local if $local;
     }
 
+    if (-e '_localconfig.yaml') {
+        $filename = '_localconfig.yaml';
+    } elsif (-e '_localconfig.yml') {
+        $filename = '_localconfig.yml';
+    } else {
+        undef $filename;
+    }
+    if (!empty $filename) {
+        $logger->info(__x("reading local configuration from '{filename}'",
+                          filename => $filename));
+        my $yaml = read_file $filename;
+        if (!defined $yaml) {
+        	$logger->fatal(__x("error reading file '{filename}': {error}",
+        	                   filename => $filename, error => $!));
+        }
+
+        my $local = eval { YAML::XS::Load($yaml) };
+        $logger->fatal(yaml_error $filename, $@) if $@;
+
+        foreach my $key (grep { /^__q_/ } keys %{$local || {}}) {
+            $logger->fatal(__x("illegal configuration variable '{var}':"
+                               . " names starting with '__q_' are reserved"
+                               . " for internal purposes.",
+                               var => $key));
+        }
+
+        $config = merge_data $config, $local if $local;
+    }
+
     my $self = bless $config, $class;
 
     eval { $self->checkConfig($self) };
@@ -83,6 +112,14 @@ sub new {
                            filename => $filename, error => $@));
     }
     
+    if (-e '_localconfig.yaml') {
+        $filename = 'localconfig.yaml';
+    } elsif (-e 'localconfig.yml') {
+        $filename = 'localconfig.yml';
+    } else {
+        undef $filename;
+    }
+
     # Fill in defaults and consistency checks.
     $config->{outdir} = File::Spec->catpath($config->{srcdir}, '_site')
         if empty $config->{outdir};
@@ -100,10 +137,10 @@ sub new {
         '.*',
     );
 
-    my $viewdir = File::Spec->abs2rel($self->{directories}->{views});
+    my $viewdir = File::Spec->abs2rel($self->{paths}->{views});
     push @exclude_watch, '!' . quotestar $viewdir
         if $viewdir !~ m{^\.\./};
-    my $includedir = File::Spec->abs2rel($self->{directories}->{includes});
+    my $includedir = File::Spec->abs2rel($self->{paths}->{includes});
     push @exclude_watch, '!' . quotestar $includedir
         if $includedir !~ m{^\.\./};
 
@@ -144,7 +181,7 @@ sub default {
         latency => 0.5,
         exclude => [],
         exclude_watch => [],
-    	directories => {
+    	paths => {
     		views => '_views',
             includes => '_includes'
     	},

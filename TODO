@@ -1,3 +1,6 @@
+- do templates need access to "site"? Probably not.
+- make all paths configurable!
+- content is missing in dumps ;)
 - allow disabling markdown sections
 - do we need q.include()?
 - excerpt didn't work on the qgoda-default site
