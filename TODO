@@ -1,3 +1,6 @@
+- pre-process command line options: try to find the command before they are
+  passed to Getopt::Long.  Also pass a cleaned argument vector to the
+  methods.
 - do templates need access to "site"? Probably not.
 - make all paths configurable!
 - content is missing in dumps ;)
