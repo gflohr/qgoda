@@ -72,7 +72,18 @@ WriteMakefile (
     @extra
 );
 
+package ExtUtils::MakeMaker;
+
+sub install {
+    my (@args) = @_;
+
+    use Data::Dumper;
+    die Dumper \@args;
+}
+
 package MY;
+
+use IO::Handle;
 
 sub postamble {
     my ($self) = @_;
@@ -85,4 +96,76 @@ sub postamble {
     }
     
     return join "\n", @post;
+}
+
+sub install {
+    my ($self) = @_;
+
+    my $unwrap = sub {
+        my ($string, $force) = @_;
+
+        return $string if $string !~ /^"(.*)"$/;
+        my $inner = $1;
+        if ($force || $inner !~ s/([\\"].)/\\$1/g) {
+            return $inner;
+        }
+
+        return qq{"$innner"};
+    };
+
+    unless ($ENV{QGODA_NO_INSTALL_CHECK}) {
+        my $installdirs = $self->{INSTALLDIRS};
+        my $script_location;
+        my $varname;
+        if ('perl' eq $installdirs) {
+            $varname = 'INSTALLSCRIPT';
+        } elsif ('vendor' eq $installdirs) {
+            $varname = 'INSTALLVENDORSCRIPT';
+        } else {
+            $varname = 'INSTALLSITESCRIPT';
+        }
+
+        my $script_location = $self->{$varname};
+
+        require List::Util;
+        require File::Spec;
+
+        if (!List::Util::first(sub {
+               $_ eq $script_location
+            }, File::Spec->path)) {
+            require File::Basename;
+            my $bindir = File::Basename::dirname($unwrap->($self->{PERL}, 1));
+            my $cmd = join ' ',
+                      map { $unwrap->($_) }
+                      $self->{PERL}, 'Makefile.PL', $self->{PERL_MM_OPT},
+                      "$varname=$bindir";
+
+            my $msg = '*' x 75 . <<EOF;
+***
+*** Warning! The qgoda executable will be installed in the directory
+***
+***    $script_location
+***
+*** which is not in your search PATH for executables and will not be
+*** found from the command-line.  The easiest way to fix this is to
+*** re-run the command like this:
+***
+***    $cmd
+***
+*** You can also install the package as usual, and try
+*** the command  "perldoc Qgoda::Installation" for
+*** more options to fix the problem.
+EOF
+            autoflush STDERR, 1;
+
+            warn $msg;
+            foreach (1 .. 5) {
+                print STDERR '*' x 15;
+                sleep 1;
+            }
+            print STDERR "\n";
+        }
+    }
+
+    return $self->SUPER::install(@_);
 }
