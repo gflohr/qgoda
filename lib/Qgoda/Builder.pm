@@ -130,8 +130,8 @@ sub processAsset {
 	
     my $content = $self->readAssetContent($asset, $site);
     $asset->{content} = $content;
-    my $processors = $qgoda->getProcessors($asset, $site);
-    foreach my $processor (@$processors) {
+    my @processors = $qgoda->getProcessors($asset);
+    foreach my $processor (@processors) {
         my $short_name = ref $processor;
         $short_name =~ s/^Qgoda::Processor:://;
         $logger->debug(__x("processing with {processor}",
@@ -140,13 +140,13 @@ sub processAsset {
                                                 $asset, $site);
     }
     
-    if (@$processors && !exists $asset->{excerpt}) {
-    	$asset->{excerpt} = $processors->[-1]->excerpt($asset->{content},
-    	                                               $asset, $site);
+    if (@processors && !exists $asset->{excerpt}) {
+    	$asset->{excerpt} = $processors[-1]->excerpt($asset->{content},
+    	                                             $asset, $site);
     }
     
-    $processors = $qgoda->getWrapperProcessors($asset, $site);
-    return $self if !@$processors;
+    @processors = $qgoda->getWrapperProcessors($asset);
+    return $self if !@processors;
     
     my $view = $asset->{view};
     die __"no view specified.\n" if empty $view;
@@ -158,7 +158,7 @@ sub processAsset {
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
         if !defined $content;
-    foreach my $processor (@$processors) {
+    foreach my $processor (@processors) {
     	my $short_name = ref $processor;
     	$short_name =~ s/^Qgoda::Processor:://;
         $logger->debug(__x("wrapping with {processor}",

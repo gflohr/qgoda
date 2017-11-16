@@ -1,4 +1,4 @@
-#! /usr/bin/env perl
+#! /bin/false
 
 # Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
 # all rights reserved.
@@ -16,8 +16,35 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+package Qgoda::Processor::Markdown;
+
 use strict;
 
-use Qgoda::CLI;
+use base qw(Qgoda::Processor);
 
-Qgoda::CLI->new->dispatch;
+use Text::Markdown::Hoedown qw(markdown);
+
+sub new {
+    my ($class, %options) = @_;
+    
+    my $self = $class->SUPER::new(%options);
+    $self->{__options} = \%options;
+    
+    return $self;
+}
+
+sub process {
+    my ($self, $content, $asset) = @_;
+
+    my %options = (
+        extensions => 0x7fff_ffff
+    );
+
+    return markdown $content, %options;
+}
+
+1;
+
+=head1 NAME
+
+Qgoda::Processor::Markdown - Qgoda Processor For Markdown

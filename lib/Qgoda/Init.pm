@@ -30,14 +30,13 @@ use Qgoda::Util qw(read_file write_file yaml_error perl_class);
 use Qgoda::Repository;
 
 sub new {
-	my ($class) = @_;
+	my ($class, $args, %options) = @_;
 
     my $q = Qgoda->new;
-    my $args = $q->getOption('args');
     my $uri = @$args ? $args->[0] : 'http://github.com/gflohr/qgoda-default';
     my $self = {
         __logger => $q->logger,
-        __force => $q->getOption('force'),
+        __force => $ptions{force},
         __config => $q->config,
         __uri => $uri,
     };

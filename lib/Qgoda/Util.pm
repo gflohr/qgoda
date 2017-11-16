@@ -34,7 +34,8 @@ use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
-                normalize_path strip_suffix perl_identifier perl_class
+                normalize_path strip_suffix 
+                perl_identifier perl_class class2module
                 slugify html_escape unmarkup globstar trim 
                 flatten2hash is_archive archive_extender collect_defaults
                 canonical purify);
@@ -438,6 +439,14 @@ sub perl_class($) {
     my ($name) = @_;
     
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
+}
+
+sub class2module($) {
+    my ($class) = @_;
+
+    $class =~ s{(?:::|')}{/}g;
+    
+    return $class . '.pm';
 }
 
 sub slugify($;$) {

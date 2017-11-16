@@ -23,7 +23,7 @@ use strict;
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
-$VERSION = '0.1.1';
+$VERSION = '0.1.0';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
@@ -45,7 +45,7 @@ use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
 use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
-                   collect_defaults purify);
+                   collect_defaults purify perl_class class2module);
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
@@ -53,29 +53,27 @@ my $qgoda;
 sub new {
     return $qgoda if $qgoda;
 
-    my ($class, $command, %options) = @_;
+    my ($class, $options, $params) = @_;
+
+    $options ||= {};
+    $params ||= {};
 
     my $self = $qgoda = bless {}, $class;
 
-    $self->{__options} = { %options };
-    $self->{__logger} = $self->logger;
+    $self->{__options} = { %$options };
+    my $logger = $self->{__logger} = $self->logger;
 
-    if ($command ne 'migrate') {
-        my $logger = $self->{__logger};
-        $logger->info(__"initializing");
-    
-        $self->{__config} = Qgoda::Config->new;
-        $self->{__analyzers} = [Qgoda::Analyzer->new];
-        $self->{__builders} = [Qgoda::Builder->new];
-        $self->{__processors} = {};
-        $self->{__load_plugins} = 1;
-    }
+    $self->{__config} = Qgoda::Config->new unless $params->{no_config};
+    $self->{__analyzers} = [Qgoda::Analyzer->new];
+    $self->{__builders} = [Qgoda::Builder->new];
+    $self->{__processors} = {};
+    $self->{__load_plugins} = 1;
 
     return $qgoda;
 }
 
 sub build {
-    my ($self, $dry_run) = @_;
+    my ($self, %options) = @_;
 
     delete $self->{__load_plugins} && load_plugins $qgoda;
 
@@ -95,7 +93,7 @@ sub build {
     
     $self->__analyze($site);
     $self->__locate($site);
-    return $self if $dry_run;
+    return $self if $options{dry_run};
 
     $self->__build($site);
     
@@ -121,6 +119,7 @@ sub dumpAssets {
 
     $self->build(1);
 
+    # Stringify all blessed references.
     map { purify { $_->dump } } $self->getSite->getAssets;
 }
 
@@ -128,9 +127,6 @@ sub dump {
     my ($self) = @_;
 
     my $data = [$self->dumpAssets];
-
-    # Stringify all blessed references.
-    my $wanted = {};
 
     my $format = $self->{__options}->{output_format};
     $format = 'JSON' if empty $format;
@@ -361,15 +357,15 @@ sub migrate {
 }
 
 sub init {
-	my ($self) = @_;
+	my ($self, $args, %options) = @_;
 	
     require Qgoda::Init;
-    Qgoda::Init->new->init;
+    Qgoda::Init->new->init($args, %options);
 
 	return $self;
 }
 
-sub __getProcessors {
+sub _getProcessors {
 	my ($self, @names) = @_;
 	
 	my $processors = $self->config->{processors};
@@ -383,8 +379,11 @@ sub __getProcessors {
             next;
         }       
 
-        my $module_name = $class_name . '.pm';
-        $module_name =~ s{::|'}{/}g;
+        $self->logger->fatal(__x("invalid processor name '{processor}'",
+                                 processor => $module))
+            if !perl_class $class_name;
+
+        my $module_name = class2module $class_name;
         
         require $module_name;
         my $options = $processors->{options}->{$module};
@@ -406,11 +405,11 @@ sub __getProcessors {
         push @processors, $processor;
     }
     
-    return \@processors;
+    return @processors;
 }
 
 sub getWrapperProcessors {
-	my ($self, $asset, $site) = @_;
+	my ($self, $asset) = @_;
 
     my $processors = $self->config->{processors};
     my $chain_name = $asset->{wrapper};
@@ -428,11 +427,11 @@ sub getWrapperProcessors {
     my $chain = $processors->{chains}->{$chain_name} or return [];
     my $names = $chain->{modules} or return [];
     
-    return $self->__getProcessors(@$names);
+    return $self->_getProcessors(@$names);
 }
 
 sub getProcessors {
-	my ($self, $asset, $site) = @_;
+	my ($self, $asset) = @_;
 	
     my $chain_name = $asset->{chain};
     return [] if !defined $chain_name;
@@ -441,7 +440,7 @@ sub getProcessors {
 
     my $names = $chain->{modules} or return [];
     
-    return $self->__getProcessors(@$names);
+    return $self->_getProcessors(@$names);
 }
 
 sub getProcessor {

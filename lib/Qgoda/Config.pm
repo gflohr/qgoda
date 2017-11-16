@@ -46,6 +46,8 @@ sub new {
         $filename = '_config.yaml';
     } elsif (-e '_config.yml') {
         $filename = '_config.yml';
+    } elsif (-e '_config.json') {
+        $filename = '_config.json';
     } elsif (!$q->getOption('no-config')) {
         $logger->warning(__"config file '_config.yaml' not found, "
                            . "proceeding with defaults.");
@@ -79,6 +81,8 @@ sub new {
         $filename = '_localconfig.yaml';
     } elsif (-e '_localconfig.yml') {
         $filename = '_localconfig.yml';
+    } elsif (-e '_localconfig.json') {
+        $filename = '_localconfig.json';
     } else {
         undef $filename;
     }
