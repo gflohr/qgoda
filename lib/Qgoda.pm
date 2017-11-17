@@ -417,15 +417,15 @@ sub getWrapperProcessors {
     if (!defined $chain_name) {
         # Indirection.
   	    $chain_name = $asset->{chain};
-	    return [] if !defined $chain_name;
-        my $chain = $processors->{chains}->{$chain_name} or return [];
+	    return if !defined $chain_name;
+        my $chain = $processors->{chains}->{$chain_name} or return;
     
         $chain_name = $chain->{wrapper};
     }
-    return [] if !defined $chain_name;
+    return if !defined $chain_name;
     
-    my $chain = $processors->{chains}->{$chain_name} or return [];
-    my $names = $chain->{modules} or return [];
+    my $chain = $processors->{chains}->{$chain_name} or return;
+    my $names = $chain->{modules} or return;
     
     return $self->_getProcessors(@$names);
 }
@@ -434,11 +434,11 @@ sub getProcessors {
 	my ($self, $asset) = @_;
 	
     my $chain_name = $asset->{chain};
-    return [] if !defined $chain_name;
+    return if !defined $chain_name;
     my $processors = $self->config->{processors};
-    my $chain = $processors->{chains}->{$chain_name} or return [];
+    my $chain = $processors->{chains}->{$chain_name} or return;
 
-    my $names = $chain->{modules} or return [];
+    my $names = $chain->{modules} or return;
     
     return $self->_getProcessors(@$names);
 }
