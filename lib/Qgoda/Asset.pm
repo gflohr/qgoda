@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -25,37 +25,37 @@ use Qgoda::Util qw(merge_data);
 sub new {
     my ($class, $path, $relpath) = @_;
 
-	my $self = {};
+    my $self = {};
 
-	# Overwrite these two keys unconditionally.
-	$self->{path} = $path;
-	$self->{relpath} = $relpath;
+    # Overwrite these two keys unconditionally.
+    $self->{path} = $path;
+    $self->{relpath} = $relpath;
 
     bless $self, $class;
 }
 
 sub getPath {
-	shift->{path};
+    shift->{path};
 }
 
 sub getRelpath {
-	shift->{relpath};
+    shift->{relpath};
 }
 
 sub getOrigin {
-	my ($self) = @_;
-	
-	if (exists $self->{origin}) {
-		return $self->{origin};
-	} else {
-		return $self->getPath;
-	}
+    my ($self) = @_;
+
+    if (exists $self->{origin}) {
+        return $self->{origin};
+    } else {
+        return $self->getPath;
+    }
 }
 
 sub dump {
-	my ($self) = @_;
+    my ($self) = @_;
 
-	%{$self};
+    %{$self};
 }
 
 1;

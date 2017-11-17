@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -34,8 +34,9 @@ use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
                 expand_perl_format read_body merge_data interpolate
-                normalize_path strip_suffix perl_identifier perl_class
-                slugify html_escape unmarkup globstar trim 
+                normalize_path strip_suffix
+                perl_identifier perl_class class2module
+                slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
                 canonical purify);
 
@@ -58,7 +59,7 @@ sub read_file($) {
 
     my $fh = IO::File->new;
     $fh->open("< $filename") or return;
-    
+
     local $/;
     my $data = <$fh>;
     $fh->close;
@@ -67,36 +68,36 @@ sub read_file($) {
 }
 
 sub front_matter($) {
-	my ($filename) = @_;
-	
+    my ($filename) = @_;
+
     my $fh = IO::File->new;
     $fh->open("< $filename") or return;
-    
+
     my $first_line = <$fh>;
     return if empty $first_line;
     return if $first_line !~ /---[ \t]*\n$/o;
-    
+
     my $front_matter = '';
     while (1) {
         my $line = <$fh>;
-    	return if !defined $line;
-    	return $front_matter if $line =~ /---[ \t]*\n$/o;
-    	$front_matter .= $line;
+        return if !defined $line;
+        return $front_matter if $line =~ /---[ \t]*\n$/o;
+        $front_matter .= $line;
     }
-    
+
     return;
 }
 
 sub read_body($) {
     my ($filename) = @_;
-    
+
     my $fh = IO::File->new;
     $fh->open("< $filename") or return;
-    
+
     my $first_line = <$fh>;
     return if empty $first_line;
     return if $first_line !~ /---[ \t]*\n$/o;
-    
+
     while (1) {
         my $line = <$fh>;
         return if !defined $line;
@@ -104,7 +105,7 @@ sub read_body($) {
     }
 
     local $/;
-    
+
     return <$fh>;
 }
 
@@ -116,10 +117,10 @@ sub write_file($$) {
 
     my $fh = IO::File->new;
     $fh->open("> $path") or return;
-    
+
     $fh->print($data) or return;
     $fh->close or return;
-    
+
     return 1;
 }
 
@@ -132,55 +133,55 @@ sub yaml_error {
 }
 
 sub lowercase($) {
-	my ($str) = @_;
-	
-	return lc $str;
+    my ($str) = @_;
+
+    return lc $str;
 }
 
 sub merge_data {
-	my ($data, $overlay) = @_;
-	
-	# Return $overlay if it is of a different type than $data.
-	sub equal_ref {
-		my ($x, $y) = @_;
-		
-		return if !ref $x;
-		return if !ref $y;
-		
-		my $ref_x = reftype $x;
-		my $ref_y = reftype $y;
-		
-		return $ref_x = $ref_y;
-	}
+    my ($data, $overlay) = @_;
 
-	return $overlay if !equal_ref $overlay, $data;
+    # Return $overlay if it is of a different type than $data.
+    sub equal_ref {
+        my ($x, $y) = @_;
+
+        return if !ref $x;
+        return if !ref $y;
+
+        my $ref_x = reftype $x;
+        my $ref_y = reftype $y;
+
+        return $ref_x = $ref_y;
+    }
+
+    return $overlay if !equal_ref $overlay, $data;
     return $overlay if 'ARRAY' eq reftype $overlay;
-    
+
     my $merger;
     $merger = sub {
-    	my ($d, $o) = @_;
-    	
-    	foreach my $key (keys %$d) {
-    		if (exists $o->{$key}) {
-    			if (!equal_ref $d->{$key}, $o->{$key}) {
-    				$d->{$key} = $o->{$key};
-    			} elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
-    				$merger->($d->{$key}, $o->{$key});
-    			} else {
-    				$d->{$key} = $o->{$key};
-    			}
-    		}
-    	}
-    	foreach my $key (keys %$o) {
-    		if (!exists $d->{$key}) {
-    			$d->{$key} = $o->{$key};
-    		}
-    	}
+        my ($d, $o) = @_;
+
+        foreach my $key (keys %$d) {
+            if (exists $o->{$key}) {
+                if (!equal_ref $d->{$key}, $o->{$key}) {
+                    $d->{$key} = $o->{$key};
+                } elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
+                    $merger->($d->{$key}, $o->{$key});
+                } else {
+                    $d->{$key} = $o->{$key};
+                }
+            }
+        }
+        foreach my $key (keys %$o) {
+            if (!exists $d->{$key}) {
+                $d->{$key} = $o->{$key};
+            }
+        }
     };
-	
-	$merger->($data, $overlay);
-		
-	return $data;
+
+    $merger->($data, $overlay);
+
+    return $data;
 }
 
 sub interpolate($$) {
@@ -197,9 +198,9 @@ sub interpolate($$) {
     my $result = '';
     while ($string =~ s/^([^\{]*)\{//) {
         $result .= $1;
-        
+
         my ($remainder, @tokens) = tokenize $string, $type;
-        
+
         # Syntax errors can be handled in different ways.
         # You can handle it gracefully and either leave
         # everything uninterpolated, or you could replace the
@@ -216,28 +217,28 @@ sub interpolate($$) {
 }
 
 sub normalize_path($;$) {
-	my ($dir, $trailing_slash) = @_;
-	
-	$dir =~ s{[\\/]+}{/}g;
-	$dir =~ s{/$}{} unless $trailing_slash;
-	
-	return $dir;
+    my ($dir, $trailing_slash) = @_;
+
+    $dir =~ s{[\\/]+}{/}g;
+    $dir =~ s{/$}{} unless $trailing_slash;
+
+    return $dir;
 }
 
 sub strip_suffix($) {
-	my ($filename) = @_;
-	
-	my @parts = split /\./, $filename;
-	my @suffixes;
-	
-	while (@parts > 1) {
-		last if $parts[-1] =~ /[^a-zA-Z0-9]/;
-		unshift @suffixes, pop @parts
-	}
-	
-	my $basename = join '.', @parts;
-	
-	return $basename, grep { /./ } @suffixes;
+    my ($filename) = @_;
+
+    my @parts = split /\./, $filename;
+    my @suffixes;
+
+    while (@parts > 1) {
+        last if $parts[-1] =~ /[^a-zA-Z0-9]/;
+        unshift @suffixes, pop @parts
+    }
+
+    my $basename = join '.', @parts;
+
+    return $basename, grep { /./ } @suffixes;
 }
 
 ##############################################################################
@@ -248,7 +249,7 @@ sub tokenize($$) {
     my ($string, $type) = @_;
 
     my @tokens;
-    
+
     my $depth = 0;
     while (1) {
         $string =~ s/^[ \t\r\n]+//;
@@ -295,7 +296,7 @@ sub tokenize($$) {
                 return $string;
             }
         } else {
-            # The last token was a quoted string (because all other 
+            # The last token was a quoted string (because all other
             # possibilities are handled above.  The only legal token after
             # a quoted string is the closing bracket.
             return $string unless $string =~ s/^]//;
@@ -311,7 +312,7 @@ sub tokenize($$) {
     # string.
     #
     # We also must repair the type for "variables" that look like numbers
-    # and are enclosed in angle brackets.  Only in this case they are 
+    # and are enclosed in angle brackets.  Only in this case they are
     # treated like numbers.  And numbers are the same as quoted strings
     # for our purposes.
     # If they are exactly between two brackets they are numbers, otherwise
@@ -352,7 +353,7 @@ sub evaluate($$) {
             return $cursor;
         } elsif ('.' eq $toktype) {
             $token = shift @$tokens;
-            $cursor = lookup $cursor, $token->[1]; 
+            $cursor = lookup $cursor, $token->[1];
         } elsif ('v' eq $toktype) {
             $cursor = lookup $cursor, $value;
         } elsif ('q' eq $toktype) {
@@ -394,7 +395,7 @@ sub js_unescape($) {
         '"' => '"',
         '\\' => '\\',
     );
-    
+
     $string =~ s/
                 \\
                   (
@@ -424,24 +425,32 @@ sub js_unescape($) {
                     }
                 }
                 /xegs;
-    
+
     return $string;
 }
 
 sub perl_identifier($) {
     my ($name) = @_;
-    
+
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
 }
 
 sub perl_class($) {
     my ($name) = @_;
-    
+
     return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
 }
 
+sub class2module($) {
+    my ($class) = @_;
+
+    $class =~ s{(?:::|')}{/}g;
+
+    return $class . '.pm';
+}
+
 sub slugify($;$) {
-	my ($string, $locale) = @_;
+    my ($string, $locale) = @_;
 
     return '' if !defined $string;
 
@@ -456,59 +465,59 @@ sub slugify($;$) {
     $slug =~ s/[\x00-\x2c\x2f\x3a-\x5e\x60\x7b-\x7f]/-/g;
     $slug =~ s/--+/-/g;
 
-    return $slug;	
+    return $slug;
 }
 
 sub html_escape($) {
-	my ($string) = @_;
-	
-	return '' if !defined $string;
-	
-	my %escapes = (
+    my ($string) = @_;
+
+    return '' if !defined $string;
+
+    my %escapes = (
         '"' => '&#34;',
         "&" => '&#38;',
         "'" => '&#39;',
         "<" => '&#60;',
         ">" => '&#62;',
-	);
-	
-	$string =~ s/(["&'<>])/$escapes{$1}/gs;
-	
-	return $string;
+    );
+
+    $string =~ s/(["&'<>])/$escapes{$1}/gs;
+
+    return $string;
 }
 
 sub unmarkup($) {
-	my ($string) = @_;
-	
-	return '' if !defined $string;
-	
-	require HTML::Parser;
-	
-	my $escaped = '';
-	my $text_handler = sub {
-		my ($string) = @_;
-		
-		$escaped .= $string;
-		
-	};
-	
-	my $parser = HTML::Parser->new(api_version => 3,
-	                               text_h => [$text_handler, 'text'],
-	                               marked_sections => 1);
-    	
-	$parser->parse($string);
-	$parser->eof;
-	
-	return $escaped;
+    my ($string) = @_;
+
+    return '' if !defined $string;
+
+    require HTML::Parser;
+
+    my $escaped = '';
+    my $text_handler = sub {
+        my ($string) = @_;
+
+        $escaped .= $string;
+
+    };
+
+    my $parser = HTML::Parser->new(api_version => 3,
+                                   text_h => [$text_handler, 'text'],
+                                   marked_sections => 1);
+
+    $parser->parse($string);
+    $parser->eof;
+
+    return $escaped;
 }
 
 sub trim($) {
-	my ($string) = @_;
-	
+    my ($string) = @_;
+
     $string =~ s{^[ \x09-\x0d]+}{};
     $string =~ s{[ \x09-\x0d]+$}{};
-	
-	return $string;
+
+    return $string;
 }
 
 sub flatten2hash {
@@ -523,7 +532,7 @@ sub flatten2hash {
         pop @path;
         pop @types;
     };
-    
+
     # The wanted function for Data::Walk.
     my $wanted = sub {
         ++$path[-1] if 'a' eq $types[-1];
@@ -605,7 +614,7 @@ sub collect_defaults($$) {
     my $vars = {};
     foreach my $rule (@$rules) {
         my ($matcher, $values) = @$rule;
-        
+
         merge_data $vars, $values if $matcher->matchInclude($path);
     }
 
@@ -624,7 +633,7 @@ sub purify {
     my ($data) = @_;
 
     my $type = reftype $data;
-    die "only hashes and arrays supported" 
+    die "only hashes and arrays supported"
         if ($type ne 'HASH' && $type ne 'ARRAY');
     my @stack = ([$type, []]);
 
@@ -655,9 +664,9 @@ sub purify {
                 return;
             }
         }
-        
+
         my $store = $stack[-1]->[1];
-        push @$store, "$_"; 
+        push @$store, "$_";
     };
 
     walk { wanted => $wanted, preprocess => $preprocess,

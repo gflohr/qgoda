@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -28,42 +28,42 @@ use Qgoda;
 use base qw(Qgoda::Plugger);
 
 sub new {
-	my ($class, $data) = @_;
-	
-	my $self = bless $data, $class;
-	
-	return $self;
+    my ($class, $data) = @_;
+
+    my $self = bless $data, $class;
+
+    return $self;
 }
 
 sub language {
-	my ($self) = @_;
-	
-	my $language = ref $self;
-	$language =~ s/^Qgoda::Plugger::Inline:://;
-	
-	return $language;
+    my ($self) = @_;
+
+    my $language = ref $self;
+    $language =~ s/^Qgoda::Plugger::Inline:://;
+
+    return $language;
 }
 
 sub compile {
-	my ($self) = @_;
-	
-	my $language = $self->language;
-	
-	my %config;
-	
-	if ($ENV{"QGODA_DEBUG_$language"}) {
-		$config{print_version} = 1;
+    my ($self) = @_;
+
+    my $language = $self->language;
+
+    my %config;
+
+    if ($ENV{"QGODA_DEBUG_$language"}) {
+        $config{print_version} = 1;
         $config{print_info} = 1;
-	}
+    }
 
     my $namespace = $self->{plugin_loader}->namespace($self);
     require Data::Dumper;
     my $args = Data::Dumper::Dumper([$self->{main}, %config]);
     $args =~ s{.*?= \[}{};
     $args =~ s{\];.*?$}{};
-    
+
     return sub {
-    	eval <<EOF;
+        eval <<EOF;
 package $namespace;
 
 Inline->bind($language => $args);

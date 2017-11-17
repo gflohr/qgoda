@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -33,12 +33,12 @@ sub fetch {
     my ($self, $uri, $destination) = @_;
 
     my $logger = Qgoda->new->logger;
-    
+
     my $path = $uri->file;
     if (-d $path) {
         if (!dircopy $path, $destination) {
             $logger->fatal(__x("error copying '{src}' to '{dest}': {error}",
-                               src => $path, dest => $destination, 
+                               src => $path, dest => $destination,
                                error => $!));
         }
 
@@ -52,20 +52,20 @@ sub _extractArchive {
     my ($self, $path, $destination) = @_;
 
     my $logger = Qgoda->new->logger;
-    
+
     my $ae = Archive::Extract->new(archive => $path);
     $ae->extract(to => $destination)
         or $logger->fatal(__x("error extracing '{archive}' to"
                               ." '{destination}': {error}"),
-                              archive => $path, 
+                              archive => $path,
                               destination => $destination,
                               error => $ae->error);
-    
-    opendir my $dh, $destination 
+
+    opendir my $dh, $destination
         or $logger->fatal(__x("error reading directory '{directory}': {error}",
                               directory => $destination,
                               error => $ae->error));
-        
+
     my @contents = sort File::Spec->no_upwards(readdir $dh)
         or $logger->fatal(__x("archive '{archive} is empty",
                               archive => $path));

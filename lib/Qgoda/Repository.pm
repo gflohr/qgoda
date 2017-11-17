@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ use Qgoda::Util qw(read_file write_file is_archive);
 use URI;
 
 sub new {
-	my ($class, $uri) = @_;
+    my ($class, $uri) = @_;
 
     $uri = URI->new($uri);
 
@@ -55,7 +55,7 @@ sub new {
     } elsif (File::Spec->file_name_is_absolute($uri)) {
         $uri = URI->new('file://' . $uri);
     }
-    
+
     if (undef eq $uri->scheme) {
         my $file = "$uri";
 
@@ -72,7 +72,7 @@ sub new {
                 $uri = URI::file->new_abs($file);
             }
         }
-    } 
+    }
 
     my $self = {
         __uri => $uri
@@ -104,7 +104,7 @@ sub new {
             $self->{__uri}->scheme($1);
         }
     }
-    
+
     # If an http/https URI does no look like an archive, assume that it is
     # also a git URI.
     if ('http' eq $uri->scheme || 'https' eq $uri->scheme) {
@@ -147,7 +147,7 @@ sub fetch {
     my $tmp = File::Temp->newdir;
     $logger->debug(__x("created temporary directory '{dir}'",
                        dir => $tmp));
-    
+
     my $fetcher = $fetcher_class->new;
     my $dir = $fetcher->fetch($self->{__uri}, $tmp->dirname);
 

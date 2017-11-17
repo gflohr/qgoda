@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -31,26 +31,26 @@ use Qgoda;
 use Qgoda::Util qw(write_file);
 
 sub new {
-	my ($class) = @_;
-	
-	bless {}, $class;
+    my ($class) = @_;
+
+    bless {}, $class;
 }
 
 sub logger {
-	my ($self) = @_;
-	
-	my $prefix = ref $self;
+    my ($self) = @_;
+
+    my $prefix = ref $self;
     $prefix =~ s{^Qgoda::Migrator::}{Migrator::};
-    
+
     return Qgoda->new->logger($prefix);
 }
 
 sub createOutputDirectory {
     my ($self) = @_;
-    
+
     my $logger = $self->logger;
     my $out_dir = $self->outputDirectory;
-    
+
     if (-e $out_dir) {
         $logger->info(__x("Removing output directory '{directory}'.",
                           directory => $out_dir));
@@ -60,7 +60,7 @@ sub createOutputDirectory {
                                       . " '{directory}': {error}!"));
         }
     }
-    
+
     $logger->info(__x("Creating output directory '{directory}'.",
                       directory => $out_dir));
     if (!$self->dryRun) {
@@ -68,128 +68,128 @@ sub createOutputDirectory {
             or $logger->fatal(__x("Cannot create directory:"
                                   . " '{directory}': {error}!"));
     }
-    
+
     return $self;
 }
 
 sub dryRun {
-	Qgoda->new->getOption('nochange');
+    Qgoda->new->getOption('nochange');
 }
 
 sub outputDirectory {
-	shift->{_out_dir};
+    shift->{_out_dir};
 }
 
 sub writeConfig {
-	my ($self, $config) = @_;
-	
-	my $logger = $self->logger;
-	
-	my $out_dir = $self->outputDirectory;
-	my $filename = File::Spec->catfile($out_dir, '_config.yaml');
-	
-	$logger->debug(__x("Writing configuration file '{filename}'.",
-	                   filename => $filename));
-	
-	my $yaml = YAML::XS::Dump($config);
-	if (!$self->dryRun) {
-	    write_file $filename, $yaml 
-	        or die __x("Error writing '{filename}': {error}.",
-	                   filename => $filename, error => $!);
-	}
-	
-	return $self;
+    my ($self, $config) = @_;
+
+    my $logger = $self->logger;
+
+    my $out_dir = $self->outputDirectory;
+    my $filename = File::Spec->catfile($out_dir, '_config.yaml');
+
+    $logger->debug(__x("Writing configuration file '{filename}'.",
+                       filename => $filename));
+
+    my $yaml = YAML::XS::Dump($config);
+    if (!$self->dryRun) {
+        write_file $filename, $yaml
+            or die __x("Error writing '{filename}': {error}.",
+                       filename => $filename, error => $!);
+    }
+
+    return $self;
 }
 
 sub logError {
-	my ($self, $msg) = @_;
-	
-	$self->logger->error($msg);
-	++$self->{_err_count};
-	
-	# This allows the construct $self->logError or return;
-	return;
+    my ($self, $msg) = @_;
+
+    $self->logger->error($msg);
+    ++$self->{_err_count};
+
+    # This allows the construct $self->logError or return;
+    return;
 }
 
 sub createDirectory {
-	my ($self, $directory) = @_;
+    my ($self, $directory) = @_;
 
     return $self if -e $directory;
-    
+
     my $logger = $self->logger;
     $logger->debug(__x("Creating directory '{directory}'.",
                        directory => $directory));
-    
+
     return $self if $self->dryRun;
-    
-    make_path $directory 
+
+    make_path $directory
         or return $self->logError(__x("Error creating directory '{directory}': {error}!",
                                       directory => $directory, error => $!));
-    
+
     return $self;
 }
 
 sub createFile {
-	my ($self, $path, $data) = @_;
-	
-	my ($volume, $directory, $filename) = File::Spec->splitpath($path);
-	$self->createDirectory(File::Spec->catpath($volume, $directory));
-	
-	write_file $path, $data
-		or $self->logError(__x("Error creating file '{file}': {error}!",
-		                       file => $path, error => $!));
-		                       
-	return $self;
+    my ($self, $path, $data) = @_;
+
+    my ($volume, $directory, $filename) = File::Spec->splitpath($path);
+    $self->createDirectory(File::Spec->catpath($volume, $directory));
+
+    write_file $path, $data
+        or $self->logError(__x("Error creating file '{file}': {error}!",
+                               file => $path, error => $!));
+
+    return $self;
 }
 
 sub markFileDone {
-	my ($self, @files) = @_;
-	
-	$self->{_files_done} ||= {};
-	
-	foreach my $file (@files) {
-		$self->{_files_done}->{$file} = 1;
-	}
-	
-	return $self;
+    my ($self, @files) = @_;
+
+    $self->{_files_done} ||= {};
+
+    foreach my $file (@files) {
+        $self->{_files_done}->{$file} = 1;
+    }
+
+    return $self;
 }
 
 sub copyUndone {
-	my ($self, $fcopy) = @_;
-	
-	my $logger = $self->logger;
-	$logger->info(__"Copying all other files as is.");
-	
-	$self->{_files_done}->{$self->{_out_dir}} = 1;
-	
-	opendir my $dh, $self->{_src_dir}
-	    or return $self->logError(__x("Error opening directory '{directory}':"
-	                                  . " {error}!\n"));
-	my @files = grep {
-		!$self->{_files_done}->{$_};
-	} grep {
-		$_ ne '.';
-	} grep {
-		$_ ne '..';
-	} readdir $dh;
-	
-	$fcopy ||= sub { return $_[-1] };
-	
-	my $lexical_wrapper = wrap 'File::Copy::Recursive::fcopy', post => $fcopy;
-	
-	foreach my $file (@files) {
-		$logger->debug(__x("Copying '{file}'.",
-		                    file => $file));
-		 my $dest = File::Spec->catfile($self->{_out_dir}, $file);
-	     rcopy $file, $dest
-	         or $self->logError(__x("Error copying '{file}' to '{dest}':"
-	                                . " {error}!\n", 
-	                                file => $file, 
-	                                dest => $dest,
-	                                error => $!));
-	}
-	
-	return $self;
+    my ($self, $fcopy) = @_;
+
+    my $logger = $self->logger;
+    $logger->info(__"Copying all other files as is.");
+
+    $self->{_files_done}->{$self->{_out_dir}} = 1;
+
+    opendir my $dh, $self->{_src_dir}
+        or return $self->logError(__x("Error opening directory '{directory}':"
+                                      . " {error}!\n"));
+    my @files = grep {
+        !$self->{_files_done}->{$_};
+    } grep {
+        $_ ne '.';
+    } grep {
+        $_ ne '..';
+    } readdir $dh;
+
+    $fcopy ||= sub { return $_[-1] };
+
+    my $lexical_wrapper = wrap 'File::Copy::Recursive::fcopy', post => $fcopy;
+
+    foreach my $file (@files) {
+        $logger->debug(__x("Copying '{file}'.",
+                            file => $file));
+         my $dest = File::Spec->catfile($self->{_out_dir}, $file);
+         rcopy $file, $dest
+             or $self->logError(__x("Error copying '{file}' to '{dest}':"
+                                    . " {error}!\n",
+                                    file => $file,
+                                    dest => $dest,
+                                    error => $!));
+    }
+
+    return $self;
 }
 
 1;

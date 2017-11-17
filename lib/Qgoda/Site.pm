@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -33,23 +33,23 @@ sub new {
     my ($class, $config) = @_;
 
     my $self = {
-    	config => $config,
+        config => $config,
         assets => {},
         artefacts => {},
         taxonomies => {},
         __filter_cache => {},
     };
-    
+
     bless $self, $class;
 }
 
 sub addAsset {
-	my ($self, $asset) = @_;
-	
-	my $path = $asset->getPath;
-	$self->{assets}->{$path} = $asset;
-	
-	return $self;
+    my ($self, $asset) = @_;
+
+    my $path = $asset->getPath;
+    $self->{assets}->{$path} = $asset;
+
+    return $self;
 }
 
 sub getAssets {
@@ -57,74 +57,74 @@ sub getAssets {
 }
 
 sub addArtefact {
-	my ($self, $path, $origin) = @_;
-	
-	my $artefact = Qgoda::Artefact->new($path, $origin);
+    my ($self, $path, $origin) = @_;
+
+    my $artefact = Qgoda::Artefact->new($path, $origin);
     $self->{artefacts}->{$path} = $artefact;
-    
+
     return $self;
 }
 
 sub getArtefact {
     my ($self, $name) = @_;
-    
+
     return if !exists $self->{artefacts}->{$name};
-    
+
     return $self->{artefacts}->{$name};
 }
 
 sub getArtefacts {
-	values %{shift->{artefacts}};
+    values %{shift->{artefacts}};
 }
 
 # Only works for top-level keys!
 sub getMetaValue {
-	my ($self, $key, $asset) = @_;
-	
-	if (exists $asset->{$key}) {
-		return $asset->{$key};
-	}
-	
-	my $config = $self->{config};
-	if (exists $config->{$key}) {
-		return $config->{$key};
-	}
-	
-	return;
+    my ($self, $key, $asset) = @_;
+
+    if (exists $asset->{$key}) {
+        return $asset->{$key};
+    }
+
+    my $config = $self->{config};
+    if (exists $config->{$key}) {
+        return $config->{$key};
+    }
+
+    return;
 }
 
 sub getTrigger {
-	my ($self, @suffixes) = @_;
-	
-	my $triggers = $self->{config}->{processors}->{triggers};
-	for (my $i = $#suffixes; $i >= 0; --$i) {
-		return $suffixes[$i] 
-		    if exists $triggers->{$suffixes[$i]};
-	}
-	
-	return;
+    my ($self, @suffixes) = @_;
+
+    my $triggers = $self->{config}->{processors}->{triggers};
+    for (my $i = $#suffixes; $i >= 0; --$i) {
+        return $suffixes[$i]
+            if exists $triggers->{$suffixes[$i]};
+    }
+
+    return;
 }
 
 sub getChainByTrigger {
-	my ($self, $trigger) = @_;
-	
-	my $config = $self->{config}->{processors};
-	my $name = $config->{triggers}->{$trigger};
-	return if !defined $name;
-	my $chain = $config->{chains}->{$name} || return;
-    
+    my ($self, $trigger) = @_;
+
+    my $config = $self->{config}->{processors};
+    my $name = $config->{triggers}->{$trigger};
+    return if !defined $name;
+    my $chain = $config->{chains}->{$name} || return;
+
     return wantarray ? ($chain, $name) : $chain;
 }
 
 sub getChain {
-	my ($self, $asset) = @_;
-	
-	my $suffixes = $asset->{suffixes} or return;
-	my $trigger = $self->getTrigger(@$suffixes);
-	return unless defined $trigger;
-	my $chain = $self->getChainByTrigger($trigger) or return;
-	
-	return $chain;
+    my ($self, $asset) = @_;
+
+    my $suffixes = $asset->{suffixes} or return;
+    my $trigger = $self->getTrigger(@$suffixes);
+    return unless defined $trigger;
+    my $chain = $self->getChainByTrigger($trigger) or return;
+
+    return $chain;
 }
 
 # FIXME! Prefilter the list for simple taxonomy filters.
@@ -209,20 +209,20 @@ sub searchAssets {
         $filter->[2] = $value;
     }
 
-	my @found = values %{$self->{assets}};
+    my @found = values %{$self->{assets}};
 
-	{
+    {
         no warnings;
 
-		foreach my $filter (@filters) {
-			@found = grep {
+        foreach my $filter (@filters) {
+            @found = grep {
                 my $asset = $_;
                 my ($sub, $key, $value) = @$filter;
 
-				$sub->($asset->{$key}, $value);
-			} @found;
-		}
-	}
+                $sub->($asset->{$key}, $value);
+            } @found;
+        }
+    }
 
     my @paths;
     foreach my $found (@found) {
@@ -238,25 +238,25 @@ sub addTaxonomy {
 
     $self->{__taxonomies}->{$taxonomy} ||= {};
     $self->{__taxonomies}->{$taxonomy}->{$value} ||= {};
-    
+
     $self->{__taxonomies}->{$taxonomy}->{$value}->{$asset->getRelpath} = $asset;
-    
-    return $self;    
+
+    return $self;
 }
 
 sub getAssetsInTaxonomy {
     my ($self, $taxonomy, $value) = @_;
-    
+
     return {} if !exists $self->{__taxonomies};
     return {} if !exists $self->{__taxonomies}->{$taxonomy};
-    
+
     return $self->{__taxonomies}->{$taxonomy}->{$value} || {}
 }
 
 sub getTaxonomyValues {
-	my ($self, $taxonomy) = @_;
-	
-	return [] if !exists $self->{__taxonomies};
+    my ($self, $taxonomy) = @_;
+
+    return [] if !exists $self->{__taxonomies};
     return [] if !exists $self->{__taxonomies}->{$taxonomy};
 
     return [keys %{$self->{__taxonomies}->{$taxonomy}}];

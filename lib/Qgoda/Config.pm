@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ sub new {
     require Qgoda;
     my $q = Qgoda->new;
     my $logger = $q->logger('config');
-    
+
     my $filename;
     if (!empty $args{filename}) {
         $filename = $args{filename};
@@ -46,20 +46,22 @@ sub new {
         $filename = '_config.yaml';
     } elsif (-e '_config.yml') {
         $filename = '_config.yml';
+    } elsif (-e '_config.json') {
+        $filename = '_config.json';
     } elsif (!$q->getOption('no-config')) {
         $logger->warning(__"config file '_config.yaml' not found, "
                            . "proceeding with defaults.");
     }
 
     my $config = $class->default;
-    
+
     if (!empty $filename) {
         $logger->info(__x("reading configuration from '{filename}'",
                           filename => $filename));
         my $yaml = read_file $filename;
         if (!defined $yaml) {
-        	$logger->fatal(__x("error reading file '{filename}': {error}",
-        	                   filename => $filename, error => $!));
+            $logger->fatal(__x("error reading file '{filename}': {error}",
+                               filename => $filename, error => $!));
         }
 
         my $local = eval { YAML::XS::Load($yaml) };
@@ -79,6 +81,8 @@ sub new {
         $filename = '_localconfig.yaml';
     } elsif (-e '_localconfig.yml') {
         $filename = '_localconfig.yml';
+    } elsif (-e '_localconfig.json') {
+        $filename = '_localconfig.json';
     } else {
         undef $filename;
     }
@@ -87,8 +91,8 @@ sub new {
                           filename => $filename));
         my $yaml = read_file $filename;
         if (!defined $yaml) {
-        	$logger->fatal(__x("error reading file '{filename}': {error}",
-        	                   filename => $filename, error => $!));
+            $logger->fatal(__x("error reading file '{filename}': {error}",
+                               filename => $filename, error => $!));
         }
 
         my $local = eval { YAML::XS::Load($yaml) };
@@ -111,7 +115,7 @@ sub new {
         $logger->fatal(__x("{filename}: {error}",
                            filename => $filename, error => $@));
     }
-    
+
     if (-e '_localconfig.yaml') {
         $filename = 'localconfig.yaml';
     } elsif (-e 'localconfig.yml') {
@@ -146,7 +150,7 @@ sub new {
 
     my @config_exclude = @{$config->{exclude} || []};
     my @config_exclude_watch = @{$config->{exclude_watch} || $config->{exclude} || []};
-    
+
     push @exclude, @config_exclude;
     push @exclude_watch, @config_exclude_watch;
 
@@ -170,31 +174,31 @@ sub new {
 sub default {
     # Default configuration.
     return {
-    	title => __"A New Qgoda Powered Site",
-    	type => 'page',
-    	srcdir => '.',
-    	location => '/{directory}/{basename}/{index}{suffix}',
-    	permalink => '{significant-path}',
-    	index => 'index',
-    	'case-sensitive' => 0,
-    	view => 'default.html',
+        title => __"A New Qgoda Powered Site",
+        type => 'page',
+        srcdir => '.',
+        location => '/{directory}/{basename}/{index}{suffix}',
+        permalink => '{significant-path}',
+        index => 'index',
+        'case-sensitive' => 0,
+        view => 'default.html',
         latency => 0.5,
         exclude => [],
         exclude_watch => [],
-    	paths => {
-    		views => '_views',
+        paths => {
+            views => '_views',
             includes => '_includes'
-    	},
+        },
         helpers => {},
-    	processors => {
+        processors => {
             chains => {
                 markdown => {
-                	modules => [qw(TT2 Markdown)],
-                	suffix => 'html',
-                	wrapper => 'html'
+                    modules => [qw(TT2 Markdown)],
+                    suffix => 'html',
+                    wrapper => 'html'
                 },
                 html => {
-                	modules => 'TT2',
+                    modules => 'TT2',
                 },
             },
             triggers => {
@@ -210,34 +214,34 @@ sub default {
                 Markdown => {},
                 TT2 => {}
             },
-    	},
-    	taxonomies => {
-    		type => undef,
-    		lingua => undef,
-    		name => undef,
-    		tags => {
-    			simweight => 2,
-    		},
-    		categories => {
-    			simweight => 3,
-    		},
-    	},
-    	po => {
+        },
+        taxonomies => {
+            type => undef,
+            lingua => undef,
+            name => undef,
+            tags => {
+                simweight => 2,
+            },
+            categories => {
+                simweight => 3,
+            },
+        },
+        po => {
             xgettext => {
-            	tt2 => [qw(_views _includes)],
+                tt2 => [qw(_views _includes)],
             }
-    	},
+        },
     };
 }
 
 # Consistency check.
 sub checkConfig {
-	my ($self, $config) = @_;
-	
-	die __"invalid format (not a hash)\n"
-	    unless ($self->__isHash($config));
-	die __x("'{variable}' must be a dictionary", variable => 'processors')
-	    unless $self->__isHash($config->{processors});
+    my ($self, $config) = @_;
+
+    die __"invalid format (not a hash)\n"
+        unless ($self->__isHash($config));
+    die __x("'{variable}' must be a dictionary", variable => 'processors')
+        unless $self->__isHash($config->{processors});
     die __x("'{variable}' must be a dictionary", variable => 'processors.chains')
         unless $self->__isHash($config->{processors}->{chains});
     foreach my $chain (keys %{$config->{processors}->{chains}}) {
@@ -261,7 +265,7 @@ sub checkConfig {
     die __x("'{variable}' must be a dictionary", variable => 'processors.triggers')
         unless $self->__isHash($config->{processors}->{triggers});
     foreach my $suffix (keys %{$config->{processors}->{triggers}}) {
-    	my $chain = $config->{processors}->{triggers}->{$suffix};
+        my $chain = $config->{processors}->{triggers}->{$suffix};
         die __x("processor chain suffix '{suffix}' references undefined chain '{chain}'",
                 suffix => $suffix, chain => $chain)
             unless exists $config->{processors}->{chains}->{$chain};
@@ -288,51 +292,51 @@ sub checkConfig {
         if exists $self->{exclude_watch} && !$self->__isArray($self->{exclude_watch});
     die __x("'{variable}' must be a list", variable => 'defaults')
         if exists $self->{defaults} && !$self->__isArray($config->{defaults});
-    
+
     die __x("'{variable}' must be a dictionary", variable => 'taxonomies')
         if exists $self->{taxonomies} && !$self->__isHash($config->{taxonomies});
     foreach my $taxonomy (keys %{$config->{taxonomies}}) {
-    	my $record = $config->{taxonomies}->{$taxonomy};
-    	if (defined $record) {
-            die __x("'{variable}' must be a dictionary", 
+        my $record = $config->{taxonomies}->{$taxonomy};
+        if (defined $record) {
+            die __x("'{variable}' must be a dictionary",
                     variable => "taxonomies.$taxonomy")
                 unless $self->__isHash($config->{taxonomies}->{$taxonomy});
-    		my $simweight = $record->{simweight};
-    		if (defined $simweight) {
-    			die __x("'{variable}' must be a number greater than or equal to zero",
-    			        variable => "taxonomies.$taxonomy.simweight")
-    			    unless $self->__isNumber($simweight) && $simweight >= 0;
-    		}
-    	}
+            my $simweight = $record->{simweight};
+            if (defined $simweight) {
+                die __x("'{variable}' must be a number greater than or equal to zero",
+                        variable => "taxonomies.$taxonomy.simweight")
+                    unless $self->__isNumber($simweight) && $simweight >= 0;
+            }
+        }
     }
-    
+
     die __x("'{variable}' must be a single value", variable => 'type')
         if ref $config->{type};
 
     die __x("'{variable}' must be a dictionary", variable => 'po')
         if exists $self->{po} && !$self->__isHash($config->{po});
     die __x("'{variable}' must be a dictionary", variable => 'po.xgettext')
-        if exists $self->{po}->{xgettext} 
+        if exists $self->{po}->{xgettext}
         && !$self->__isHash($config->{po}->{xgettext});
     foreach my $xgettext (keys %{$config->{po}->{xgettext} || {}}) {
-    	
+
     }
 
-    # Has to be done after everything was read. We need the value of 
+    # Has to be done after everything was read. We need the value of
     # case-sensitive.
     $self->{defaults} = $self->__compileDefaults($self->{defaults});
-    
+
     return $self;
 }
 
 sub ignorePath {
     my ($self, $path, $watch) = @_;
-    
-    # We only care about regular files and directories.  Symbolic links are 
+
+    # We only care about regular files and directories.  Symbolic links are
     # excluded on purpose.  If, however, the file is deleted, we have to
     # do the normal checks.
     if (-e $path && (!-f $path && !-d $path)) {
-    	return $self;
+        return $self;
     }
 
     # Do not ignore the top-level directory.  This check is needed because
@@ -345,34 +349,34 @@ sub ignorePath {
         return $self if $self->{__q_exclude_watch}->match($relpath);
     } else {
         return $self if $self->{__q_exclude}->match($relpath);
-    } 
+    }
     return;
 }
 
 sub __isHash {
     my ($self, $what) = @_;
-    
+
     return unless $what && ref $what && 'HASH' eq reftype $what;
-    
+
     return $self;
 }
 
 sub __isArray {
     my ($self, $what) = @_;
-    
+
     return unless $what && ref $what && 'ARRAY' eq reftype $what;
-    
+
     return $self;
 }
 
 sub __isNumber {
-	my ($self, $what) = @_;
-	
-	return unless defined $what;
-	
-	return $self if looks_like_number $what;
-	
-	return $self;
+    my ($self, $what) = @_;
+
+    return unless defined $what;
+
+    return $self if looks_like_number $what;
+
+    return $self;
 }
 
 sub __compileDefaults {
@@ -386,12 +390,12 @@ sub __compileDefaults {
         if (ref $pattern) {
             if (!$self->__isArray($pattern)) {
                 die __"'defaults.files' must be a scalar or a list";
-            }            
+            }
         } else {
             $pattern = [$pattern];
         }
 
-        $pattern = File::Globstar::ListMatch->new($pattern, 
+        $pattern = File::Globstar::ListMatch->new($pattern,
                                                   $self->{'case-insensitive'});
         if (exists $rule->{values}) {
             if (!$self->__isHash($rule->{values})) {

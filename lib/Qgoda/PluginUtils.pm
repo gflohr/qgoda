@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -44,78 +44,78 @@ my %types = (
 );
 
 sub load_plugins {
-	my ($q) = @_;
-	
+    my ($q) = @_;
+
     my $logger = $q->logger('plugin-loader');
-    
+
     $logger->info(__("initializing plug-ins."));
-    
+
     my $config = $q->config;
-    my $modules_dir = File::Spec->catfile($config->{srcdir}, 'node_modules');    
+    my $modules_dir = File::Spec->catfile($config->{srcdir}, 'node_modules');
     my %plugins = map {
-    	$_ => {
-    		package_dir => File::Spec->catfile($modules_dir, $_),
-    		package_json => File::Spec->catfile($modules_dir, $_, 
-    		                                    'package.json'),
-    	}
+        $_ => {
+            package_dir => File::Spec->catfile($modules_dir, $_),
+            package_json => File::Spec->catfile($modules_dir, $_,
+                                                'package.json'),
+        }
     } @{$config->{plugins} || []};
     foreach my $name (keys %plugins) {
-    	$logger->info(__x("plugin {name} found in configuration.",
-    	                  name => $name));
+        $logger->info(__x("plugin {name} found in configuration.",
+                          name => $name));
     }
 
     my $plugin_dir = File::Spec->catfile($config->{srcdir}, '_plugins');
     search_local_plugins(\%plugins, $plugin_dir, $logger);
-    
+
     while (my ($name, $plugin) = each %plugins) {
-    	eval {
-    	    init_plugin $name, $plugin, $logger;
-    	};
-    	if ($@) {
-    		$logger->fatal(__x("plugin '{name}': {error}",
-    		                   name => $name, error => $@));
-    	}
+        eval {
+            init_plugin $name, $plugin, $logger;
+        };
+        if ($@) {
+            $logger->fatal(__x("plugin '{name}': {error}",
+                               name => $name, error => $@));
+        }
     }
 
     return 1;
 }
 
 sub search_local_plugins($$$) {
-	my ($plugins, $plugin_dir, $logger) = @_;
+    my ($plugins, $plugin_dir, $logger) = @_;
 
     return 1 if !-e $plugin_dir;
-    	
-	local *DIR;
-	opendir DIR, $plugin_dir
-	     or $logger->fatal(__x("cannot open directory '{dir}': {error}!"));
-	 
-	my @subdirs = grep {!/^[._]/} readdir DIR;
-	foreach my $name (@subdirs) {
+
+    local *DIR;
+    opendir DIR, $plugin_dir
+         or $logger->fatal(__x("cannot open directory '{dir}': {error}!"));
+
+    my @subdirs = grep {!/^[._]/} readdir DIR;
+    foreach my $name (@subdirs) {
         $logger->info(__x("plugin {name} found in plugin directory.",
                           name => $name));
         my $package_dir = File::Spec->catfile($plugin_dir, $name);
         $plugins->{$name} = {
-        	package_dir => $package_dir,
-        	package_json => File::Spec->catfile($package_dir, 'package.json'),
+            package_dir => $package_dir,
+            package_json => File::Spec->catfile($package_dir, 'package.json'),
         };
-	}
-	
-	return 1;
+    }
+
+    return 1;
 }
 
 sub init_plugin($$$) {
-	my ($name, $plugin, $logger) = @_;
+    my ($name, $plugin, $logger) = @_;
 
     $logger->debug(__x('initializing plugin {name}.', name => $name));
-    
+
     my $package_json = $plugin->{package_json};
     my $json = read_file $package_json;
     $logger->fatal(__x('error reading plugin package file {file}: {error}!',
                        file => $package_json, error => $!))
         if !defined $json;
-	
-	my $data = decode_json $json;
-	my $plugin_data = $data->{qgoda};
+
+    my $data = decode_json $json;
+    my $plugin_data = $data->{qgoda};
     $logger->fatal(__x("{file}: plugin definition (key 'qgoda') missing!",
                        file => $package_json))
         if !defined $plugin_data;
@@ -125,11 +125,11 @@ sub init_plugin($$$) {
     $plugin_data->{main} ||= $data->{main};
     $logger->fatal(__x("{file}: 'qgoda.main' or 'main' must point to main source file!",
                        file => $package_json))
-        if (empty $plugin_data->{main} 
+        if (empty $plugin_data->{main}
             || ref $plugin_data->{main});
-    $plugin_data->{main} = File::Spec->catfile($plugin->{package_dir}, 
+    $plugin_data->{main} = File::Spec->catfile($plugin->{package_dir},
                                                $plugin_data->{main});
-	
+
     my $language = $plugin_data->{language};
     $logger->fatal(__x("{file}: language (qgoda.language) missing!",
                        file => $package_json))
@@ -140,11 +140,11 @@ sub init_plugin($$$) {
     $logger->fatal(__x("{file}: unsupported language '{language}'!",
                        file => $package_json, language => $language))
         if empty $language;
-        
+
     my $plugger_module = $plugger_class;
     $plugger_module =~ s{::}{/}g;
     $plugger_module .= '.pm';
-    
+
     require $plugger_module;
     $plugin_data->{plugger} = $plugger_class->new($plugin_data);
 
@@ -160,16 +160,16 @@ sub init_plugin($$$) {
     $logger->fatal(__x("{file}: unsupported plugin type '{type}'!",
                        file => $package_json, type => $type))
         if empty $type;
-        
+
     my $factory_module = $factory_class;
     $factory_module =~ s{::}{/}g;
     $factory_module .= '.pm';
-    
+
     require $factory_module;
     my $plugin_loader = $factory_class->new;
     $plugin_data->{plugin_loader} = $plugin_loader;
-    
+
     $plugin_loader->addPlugin($plugin_data);
-    
-	return 1;
+
+    return 1;
 }

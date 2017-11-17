@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -47,10 +47,10 @@ sub fetch {
                        uri => $$uri,
                        error => $response->status_line))
         if $response->is_error;
-    
+
     my $fh = File::Temp->new(SUFFIX => archive_extender $uri->path);
     my $path = $fh->filename;
-    
+
     # Leave errors to the extractor.
     print $fh $response->decoded_content;
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env perl # -*- perl -*-
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -27,5 +27,5 @@ my $data = {
 
 is interpolate("verbatim", $data), "verbatim", "verbatim";
 is interpolate("The answer is {answer}.", $data), "The answer is 42.", "simple";
-is interpolate("The answer is {answer} because it's always {answer}.", $data), 
+is interpolate("The answer is {answer} because it's always {answer}.", $data),
     "The answer is 42 because it's always 42.", "multiple";

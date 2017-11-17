@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -28,15 +28,15 @@ sub new {
 }
 
 sub process {
-    my ($self, $content, $asset, $site) = @_;
-    
+    my ($self, $content, $asset) = @_;
+
     die __x("Processor class '{class}' does not implement the method process().\n",
             class => ref $self);
 }
 
 sub excerpt {
-    my ($self, $content, $asset, $site) = @_;
-    
+    my ($self, $content, $asset) = @_;
+
     require HTML::TreeBuilder;
     my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
                                   ignore_ignorable_whitespace => 1);
@@ -52,10 +52,10 @@ sub excerpt {
         $child =~ s/[ \t\r\n]+$//;
         return $child;
     }
-    
+
     return '';
 }
-    
+
 }
 
 1;

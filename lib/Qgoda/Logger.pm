@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -41,49 +41,49 @@ sub new {
 
 sub __logFunc {
     my ($self, $type, @msg) = @_;
-    
+
     my $msg = $self->__makeMessage($type, @msg);
 
     $self->{__log_fh}->print($msg);
-    
+
     return 1;
 }
 
 sub __makeMessage {
     my ($self, $type, @msgs) = @_;
-    
+
     my $prefix = $self->{__prefix};
     $prefix = '' unless $prefix;
-    
+
     my ($whole, $trailing) = split(/[^0-9]/, scalar gettimeofday());
     $trailing ||= '';
     $trailing .= length($trailing) < 5
                ? '0' x (5 - length($trailing))
                : '';
-    
+
     my $timefmt = "\%a \%b \%d \%H:\%M:\%S.$trailing \%Y";
 
     my $saved_locale = setlocale LC_TIME;
     setlocale LC_TIME, 'POSIX';
     my $timestamp = strftime $timefmt, localtime;
     setlocale LC_TIME, $saved_locale;
-    
+
     my $client = $self->{__client} || '';
     $client = "client $client" if $client;
-    
+
     my $reqid = $self->{__reqid} || '';
-    
+
     my $pre = join '',
               map { "[$_]" }
               grep { $_ } $timestamp, $reqid, $client, $type, $prefix;
     $pre .= ' ' unless $msgs[0] =~ /^\[/;;
-    
-    my @chomped = map { $pre . $_ } 
+
+    my @chomped = map { $pre . $_ }
                   grep { $_ ne '' }
                   map { $self->__trim($_) } @msgs;
 
     my $msg = join "\n", @chomped, '';
-    
+
     return $msg;
 }
 
@@ -92,7 +92,7 @@ sub info {
     return if $self->{__quiet};
 
     $self->__logFunc(info => @msgs);
-    
+
     return 1;
 }
 
@@ -162,9 +162,9 @@ sub __trim {
 
 sub client {
     my ($self, $client) = @_;
-    
+
     $self->{__client} = $client if defined $client;
-    
+
     return $self->{__client};
 }
 

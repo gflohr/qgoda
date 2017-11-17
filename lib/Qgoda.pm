@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,7 @@ use strict;
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
-$VERSION = '0.1.1';
+$VERSION = '0.1.0';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use File::Find;
@@ -45,7 +45,7 @@ use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
 use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
-                   collect_defaults purify);
+                   collect_defaults purify perl_class class2module);
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
@@ -53,52 +53,50 @@ my $qgoda;
 sub new {
     return $qgoda if $qgoda;
 
-    my ($class, $command, %options) = @_;
+    my ($class, $options, $params) = @_;
+
+    $options ||= {};
+    $params ||= {};
 
     my $self = $qgoda = bless {}, $class;
 
-    $self->{__options} = { %options };
-    $self->{__logger} = $self->logger;
+    $self->{__options} = { %$options };
+    my $logger = $self->{__logger} = $self->logger;
 
-    if ($command ne 'migrate') {
-        my $logger = $self->{__logger};
-        $logger->info(__"initializing");
-    
-        $self->{__config} = Qgoda::Config->new;
-        $self->{__analyzers} = [Qgoda::Analyzer->new];
-        $self->{__builders} = [Qgoda::Builder->new];
-        $self->{__processors} = {};
-        $self->{__load_plugins} = 1;
-    }
+    $self->{__config} = Qgoda::Config->new unless $params->{no_config};
+    $self->{__analyzers} = [Qgoda::Analyzer->new];
+    $self->{__builders} = [Qgoda::Builder->new];
+    $self->{__processors} = {};
+    $self->{__load_plugins} = 1;
 
     return $qgoda;
 }
 
 sub build {
-    my ($self, $dry_run) = @_;
+    my ($self, %options) = @_;
 
     delete $self->{__load_plugins} && load_plugins $qgoda;
 
     my $logger = $self->{__logger};
     my $config = $self->{__config};
-    
+
     $logger->info(__"start building site");
-    
-    chdir $self->{__config}->{srcdir} 
+
+    chdir $self->{__config}->{srcdir}
         or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
                               dir => $config->{srcdir},
                               error => $!));
     my $site = $self->{__site} = Qgoda::Site->new($config);
 
-    $self->{__outfiles} = [];    
+    $self->{__outfiles} = [];
     $self->__scan($site);
-    
+
     $self->__analyze($site);
     $self->__locate($site);
-    return $self if $dry_run;
+    return $self if $options{dry_run};
 
     $self->__build($site);
-    
+
     $self->__prune($site);
 
     my $timestamp_file = File::Spec->catfile($config->{srcdir}, '_timestamp');
@@ -106,14 +104,14 @@ sub build {
             $logger->error(__x("cannot write '{file}': {error}!",
                            file => $timestamp_file, error => $!));
     }
-    
+
     my $num_artefacts = $site->getArtefacts;
     $logger->info(__nx("finished building site with one artefact",
                        "finished building site with {num} artefacts",
                        $num_artefacts,
                        num => $num_artefacts));
 
-    return $self; 
+    return $self;
 }
 
 sub dumpAssets {
@@ -121,6 +119,7 @@ sub dumpAssets {
 
     $self->build(1);
 
+    # Stringify all blessed references.
     map { purify { $_->dump } } $self->getSite->getAssets;
 }
 
@@ -128,9 +127,6 @@ sub dump {
     my ($self) = @_;
 
     my $data = [$self->dumpAssets];
-
-    # Stringify all blessed references.
-    my $wanted = {};
 
     my $format = $self->{__options}->{output_format};
     $format = 'JSON' if empty $format;
@@ -163,20 +159,20 @@ sub watch {
 
     #eval { require AnyEvent::Filesys::Notify };
     #if ($@) {
-    #	$logger->error($@);
-    #	$logger->fatal(__("You have to install AnyEvent::Filesys::Notify"
-    #	                  . " in order to use the watch functionality"));
+    #    $logger->error($@);
+    #    $logger->fatal(__("You have to install AnyEvent::Filesys::Notify"
+    #                      . " in order to use the watch functionality"));
     #}
-    
+
     eval {
-    	# An initial build failure is fatal.
-    	$self->build;
-    	
-    	my $config = $self->{__config};
-        
+        # An initial build failure is fatal.
+        $self->build;
+
+        my $config = $self->{__config};
+
         $self->__startHelpers($config->{helpers});
-    	
-        $logger->debug(__x("waiting for changes in '{dir}'", 
+
+        $logger->debug(__x("waiting for changes in '{dir}'",
                            dir => $config->{srcdir}));
         AnyEvent::Filesys::Notify->new(
             dirs => [$config->{srcdir}],
@@ -185,10 +181,10 @@ sub watch {
             cb => sub { $self->__onFilesysChange(@_) },
             filter => sub { $self->__filesysChangeFilter(@_) },
         );
-        
+
         AnyEvent::Loop::run;
     };
-    
+
     $logger->fatal($@) if $@;
 }
 
@@ -237,14 +233,14 @@ sub __startHelper {
 
     my $pretty = join ' ', @pretty;
 
-    $logger->info($log_prefix . __x("starting helper: {helper}", 
+    $logger->info($log_prefix . __x("starting helper: {helper}",
                                     helper => $pretty));
 
     my $cout = gensym;
     my $cerr = gensym;
 
     my $pid = open3 undef, $cout, $cerr, @$args
-        or $logger->fatal($log_prefix . __x("failure starting helper: {error}", 
+        or $logger->fatal($log_prefix . __x("failure starting helper: {error}",
                                             error => $!));
 
     $self->{__helpers}->{$pid} = {
@@ -304,88 +300,91 @@ sub logger {
 }
 
 sub config {
-	shift->{__config};
+    shift->{__config};
 }
 
 sub dumpConfig {
-	my ($self) = @_;
-	
-	# Make a shallow copy so that we unbless the reference.
-	my %config = %{$self->config};
+    my ($self) = @_;
+
+    # Make a shallow copy so that we unbless the reference.
+    my %config = %{$self->config};
     foreach my $key (grep { /^__q_/ } keys %config) {
         delete $config{$key};
     }
 
-	require YAML::XS;
-	print YAML::XS::Dump(\%config);
-	
-	return $self;
+    require YAML::XS;
+    print YAML::XS::Dump(\%config);
+
+    return $self;
 }
 
 sub migrate {
-	my ($self) = @_;
-	
-	my $from = $self->getOption('from_system');
-	die __"The option '--from-system' is mandatory!\n" if empty $from;
+    my ($self) = @_;
+
+    my $from = $self->getOption('from_system');
+    die __"The option '--from-system' is mandatory!\n" if empty $from;
 
     # Check for valid module names.  Yes, you can use an apostrophe as the
     # separator in Perl but not allowing it here is at our discretion.
     die __x("Invalid source system name '{software}'", software => $from)
         unless $from =~ /^[a-z][a-z0-9_]+(?:(?:::|-)[a-z][a-z0-9_]+)*$/i;
-    
+
     my $module_name = 'Qgoda::Migrator::'  . $from;
     $module_name =~ s/-/::/g;
     $module_name = lc $module_name;
     $module_name = ucfirst $module_name;
     $module_name =~ s/::(.)/'::' . ucfirst $1/ge;
-    
+
     my $class_name = $module_name;
     $module_name =~ s{::}{/}g;
     $module_name .= '.pm';
-    
+
     eval {require $module_name};
     if ($@) {
-    	my $error = $@;
-    	my $message = __x("Unsupported source system '{software}'!\nTry the"
-    	                  . " additional option '--verbose' for more"
-    	                  . " information!\n",
-    	                  software => $from);
-    	$message .= $@ if $self->getOption('verbose');
-    	die $message;
+        my $error = $@;
+        my $message = __x("Unsupported source system '{software}'!\nTry the"
+                          . " additional option '--verbose' for more"
+                          . " information!\n",
+                          software => $from);
+        $message .= $@ if $self->getOption('verbose');
+        die $message;
     }
-    
+
     my $migrator = $class_name->new;
     $migrator->migrate;
-    
+
     return $self;
 }
 
 sub init {
-	my ($self) = @_;
-	
-    require Qgoda::Init;
-    Qgoda::Init->new->init;
+    my ($self, $args, %options) = @_;
 
-	return $self;
+    require Qgoda::Init;
+    Qgoda::Init->new->init($args, %options);
+
+    return $self;
 }
 
-sub __getProcessors {
-	my ($self, @names) = @_;
-	
-	my $processors = $self->config->{processors};
-	
-	my @processors;
+sub _getProcessors {
+    my ($self, @names) = @_;
+
+    my $processors = $self->config->{processors};
+
+    my @processors;
     foreach my $module (@names) {
         my $class_name = 'Qgoda::Processor::' . $module;
 
         if ($self->{__processors}->{$class_name}) {
             push @processors, $self->{__processors}->{$class_name};
             next;
-        }       
+        }
 
-        my $module_name = $class_name . '.pm';
-        $module_name =~ s{::|'}{/}g;
-        
+        $self->logger->fatal(__x("invalid processor name '{processor}'",
+                                 processor => $module))
+            if !perl_class $class_name;
+
+        my $module_name = class2module $class_name;
+
         require $module_name;
         my $options = $processors->{options}->{$module};
         my @options;
@@ -400,48 +399,48 @@ sub __getProcessors {
                 @options = $options;
             }
         }
-        
+
         my $processor = $class_name->new(@options);
         $self->{__processors}->{$class_name} = $processor;
         push @processors, $processor;
     }
-    
-    return \@processors;
+
+    return @processors;
 }
 
 sub getWrapperProcessors {
-	my ($self, $asset, $site) = @_;
+    my ($self, $asset) = @_;
 
     my $processors = $self->config->{processors};
     my $chain_name = $asset->{wrapper};
-    
+
     if (!defined $chain_name) {
         # Indirection.
-  	    $chain_name = $asset->{chain};
-	    return [] if !defined $chain_name;
-        my $chain = $processors->{chains}->{$chain_name} or return [];
-    
+          $chain_name = $asset->{chain};
+        return if !defined $chain_name;
+        my $chain = $processors->{chains}->{$chain_name} or return;
+
         $chain_name = $chain->{wrapper};
     }
-    return [] if !defined $chain_name;
-    
-    my $chain = $processors->{chains}->{$chain_name} or return [];
-    my $names = $chain->{modules} or return [];
-    
-    return $self->__getProcessors(@$names);
+    return if !defined $chain_name;
+
+    my $chain = $processors->{chains}->{$chain_name} or return;
+    my $names = $chain->{modules} or return;
+
+    return $self->_getProcessors(@$names);
 }
 
 sub getProcessors {
-	my ($self, $asset, $site) = @_;
-	
-    my $chain_name = $asset->{chain};
-    return [] if !defined $chain_name;
-    my $processors = $self->config->{processors};
-    my $chain = $processors->{chains}->{$chain_name} or return [];
+    my ($self, $asset) = @_;
 
-    my $names = $chain->{modules} or return [];
-    
-    return $self->__getProcessors(@$names);
+    my $chain_name = $asset->{chain};
+    return if !defined $chain_name;
+    my $processors = $self->config->{processors};
+    my $chain = $processors->{chains}->{$chain_name} or return;
+
+    my $names = $chain->{modules} or return;
+
+    return $self->_getProcessors(@$names);
 }
 
 sub getProcessor {
@@ -452,114 +451,114 @@ sub getProcessor {
 
 # FIXME! This should instantiate scanner plug-ins and use them instead.
 sub __scan {
-	my ($self, $site) = @_;
-	
-	my $logger = $self->{__logger};
-	my $config = $self->{__config};
-	
-	my $outdir = $config->{outdir};
-	my $srcdir = $config->{srcdir};
-	
-	# Scan the source directory.
-    $logger->debug(__x("scanning source directory '{srcdir}'", 
+    my ($self, $site) = @_;
+
+    my $logger = $self->{__logger};
+    my $config = $self->{__config};
+
+    my $outdir = $config->{outdir};
+    my $srcdir = $config->{srcdir};
+
+    # Scan the source directory.
+    $logger->debug(__x("scanning source directory '{srcdir}'",
                        srcdir => $config->{srcdir}));
-	File::Find::find({
-		wanted => sub {
-		    if (-f $_) {
-			    my $path = Cwd::abs_path($_);
-			    if (!$config->ignorePath($path)) {
-			    	my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
-			    	my $asset = Qgoda::Asset->new($path, $relpath);
-			    	$site->addAsset($asset);
-			    }
-		    }
-		},
-		preprocess => sub {
-			# Prevent descending into ignored directories.
-			my $path = Cwd::abs_path($File::Find::dir);
-			if ($config->ignorePath($path)) {
-				return;
-			} else {
-				return @_;
-			}
-		}
-	}, $config->{srcdir});
-	
+    File::Find::find({
+        wanted => sub {
+            if (-f $_) {
+                my $path = Cwd::abs_path($_);
+                if (!$config->ignorePath($path)) {
+                    my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
+                    my $asset = Qgoda::Asset->new($path, $relpath);
+                    $site->addAsset($asset);
+                }
+            }
+        },
+        preprocess => sub {
+            # Prevent descending into ignored directories.
+            my $path = Cwd::abs_path($File::Find::dir);
+            if ($config->ignorePath($path)) {
+                return;
+            } else {
+                return @_;
+            }
+        }
+    }, $config->{srcdir});
+
     # And the output directory.
     my @outfiles;
     $self->{__outfiles} = \@outfiles;
-    $logger->debug(__x("scanning output directory '{outdir}'", 
+    $logger->debug(__x("scanning output directory '{outdir}'",
                        outdir => $config->{outdir}));
     File::Find::find(sub {
-    	if ($_ ne '.' && $_ ne '..') {
+        if ($_ ne '.' && $_ ne '..') {
             push @outfiles, Cwd::abs_path($_);
-    	}
+        }
     }, $config->{outdir});
-    
-	return $self;
+
+    return $self;
 }
 
 sub __analyze {
-	my ($self, $site) = @_;
-	
+    my ($self, $site) = @_;
+
     foreach my $analyzer (@{$self->{__analyzers}}) {
-    	$analyzer->analyze($site);
+        $analyzer->analyze($site);
     }
-    
+
     return $self;
 }
 
 sub __build {
-	my ($self, $site) = @_;
-	
-	foreach my $builder (@{$self->{__builders}}) {
-		$builder->build($site);
-	}
-	
-	return $self;
+    my ($self, $site) = @_;
+
+    foreach my $builder (@{$self->{__builders}}) {
+        $builder->build($site);
+    }
+
+    return $self;
 }
 
 # FIXME! This should instantiate plug-ins and use them instead.
 sub __prune {
-	my ($self, $site) = @_;
-	
-	# Sort the output files by length first.  That ensures that we do a 
-	# depth first clean-up.
-	my @outfiles = sort {
-	   length($b) <=> length($a)
-	} @{$self->{__outfiles}};
-	
-	my $logger = $self->{__logger};
-	my %directories;
-	
-	foreach my $outfile (@outfiles) {
-		if ($directories{$outfile} || $site->getArtefact($outfile)) {
-			# Mark the containing directory as generated.
-			my ($volume, $directory, $filename) = File::Spec->splitpath($outfile);
-			my $container = File::Spec->catpath($volume, $directory, '');
-			$container =~ s{/$}{};
-			$directories{$container} = 1;
-		} elsif (-d $outfile) {
-			$logger->debug(__x("pruning directory '{directory}'",
-			                   directory => $outfile));
-			$logger->error(__x("cannot remove directory '{directory}': {error}",
-			                   directory => $outfile, error => $!))
-			    if !rmdir $outfile;
-		} else {
+    my ($self, $site) = @_;
+
+    # Sort the output files by length first.  That ensures that we do a
+    # depth first clean-up.
+    my @outfiles = sort {
+       length($b) <=> length($a)
+    } @{$self->{__outfiles}};
+
+    my $logger = $self->{__logger};
+    my %directories;
+
+    foreach my $outfile (@outfiles) {
+        if ($directories{$outfile} || $site->getArtefact($outfile)) {
+            # Mark the containing directory as generated.
+            my ($volume, $directory, $filename) = File::Spec->splitpath($outfile);
+            my $container = File::Spec->catpath($volume, $directory, '');
+            $container =~ s{/$}{};
+            $directories{$container} = 1;
+        } elsif (-d $outfile) {
+            $logger->debug(__x("pruning directory '{directory}'",
+                               directory => $outfile));
+            $logger->error(__x("cannot remove directory '{directory}': {error}",
+                               directory => $outfile, error => $!))
+                if !rmdir $outfile;
+        } else {
             $logger->debug(__x("pruning file '{file}'",
                                file => $outfile));
             $logger->error(__x("cannot remove file '{filename}': {error}",
                                filename => $outfile, error => $!))
                 if !unlink $outfile;
-		}
-	}
-	
-	return $self;
+        }
+    }
+
+    return $self;
 }
 
 sub __filesysChangeFilter {
-	my ($self, $filename) = @_;
-	
+    my ($self, $filename) = @_;
+
     my $config = $self->{__config};
 
     if ($config->ignorePath($filename, 1)) {
@@ -568,18 +567,18 @@ sub __filesysChangeFilter {
                            filename => $filename));
         return;
     }
-    
+
     return $self;
 }
 
 sub __onFilesysChange {
-	my ($self, @events) = @_;
-    
+    my ($self, @events) = @_;
+
     my @files;
-              
+
     my $logger = $self->{__logger};
     my $config = $self->{__config};
-      
+
     foreach my $event (@events) {
         $logger->debug(__x("file '{filename}' has changed",
                            filename => $event->{path}));
@@ -592,57 +591,57 @@ sub __onFilesysChange {
 
     eval { $self->build };
     $logger->error($@) if $@;
-    
-	return $self;
+
+    return $self;
 }
 
 sub getAnalyzers {
     my ($self) = @_;
-    
+
     return $self->{__analyzers};
 }
 
 sub getBuilders {
     my ($self) = @_;
-    
+
     return $self->{__builders};
 }
 
 sub getSite {
     my ($self) = @_;
-    
+
     return $self->{__site};
 }
 
 sub __locate {
-	my ($self, $site) = @_;
-	
+    my ($self, $site) = @_;
+
     foreach my $asset ($site->getAssets) {
-    	$self->locateAsset($asset, $site);
+        $self->locateAsset($asset, $site);
     }
-	
-	return $self;
+
+    return $self;
 }
 
 sub locateAsset {
-	my ($self, $asset, $site) = @_;
-	
+    my ($self, $asset, $site) = @_;
+
     my $logger = $self->logger;
-    
+
     $logger->debug(__x("locating asset '/{relpath}'",
                        relpath => $asset->getRelpath));
-        
+
     my $location = $asset->{raw} ? '/' . $asset->getRelpath
                    : $self->expandLink($asset, $site, $asset->{location});
     $logger->debug(__x("location '{location}'",
                        location => $location));
     $asset->{location} = $location;
-    
+
     my ($significant, $directory) = fileparse $location;
     ($significant) = strip_suffix $significant;
     if ($significant eq $asset->{index}) {
         $asset->{'significant-path'} = $directory;
-        $asset->{'significant-path'} .= '/' 
+        $asset->{'significant-path'} .= '/'
             unless '/' eq substr $directory, -1, 1;
     } else {
         $asset->{'significant-path'} = $location;
@@ -651,8 +650,8 @@ sub locateAsset {
     $logger->debug(__x("permalink '{permalink}'",
                        permalink => $permalink));
     $asset->{permalink} = $permalink;
-	
-	return $self;
+
+    return $self;
 }
 
 sub expandLink {
@@ -663,17 +662,17 @@ sub expandLink {
 }
 
 sub debugging {
-	my ($self) = @_;
-	
-	return $self->{__options}->{__verbose};
+    my ($self) = @_;
+
+    return $self->{__options}->{__verbose};
 }
 
 sub getOption {
-	my ($self, $name) = @_;
-	
-	return if !exists $self->{__options}->{$name};
-	
-	return $self->{__options}->{$name};
+    my ($self, $name) = @_;
+
+    return if !exists $self->{__options}->{$name};
+
+    return $self->{__options}->{$name};
 }
 
 sub _reload {

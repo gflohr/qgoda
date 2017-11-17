@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,7 @@ sub convert {
 
     $options{tt2_start} ||= '[%';
     $options{tt2_end} ||= '%]';
-    
+
     $self->{__options} = \%options;
     $self->{__logger} = $logger;
     $self->{__output} = '';
@@ -42,91 +42,91 @@ sub convert {
     my $state = 'INITIAL';
     my $last_token = __"beginning of file";
     my $whitespace = sub {
-    	while ($input =~ s/^[ \x09-\x0d]*\n//) {
-    		++$lineno;
-    	}
-    	$input =~ s/^[ \x09-\x0d]*//;
-    	return if empty $input;
-    	
-    	return 1;
+        while ($input =~ s/^[ \x09-\x0d]*\n//) {
+            ++$lineno;
+        }
+        $input =~ s/^[ \x09-\x0d]*//;
+        return if empty $input;
+
+        return 1;
     };
-    
+
     my $next_char = sub {
-    	$input =~ s/(.)//;
-    	return CDATA => $1;
+        $input =~ s/(.)//;
+        return CDATA => $1;
     };
-    
+
     # Re-quote a double-quoted string.
     my $drequote = sub {
         my ($string) = @_;
-        
+
         $string =~ s/\\/\\\\/g;
-        
+
         return qq{"$string"};
     };
-    
+
     # Re-quote a single-quoted string;
     my $srequote = sub {
         my ($string) = @_;
-        
+
         $string =~ s/\\/\\\\/g;
-        
+
         return qq{'$string'};
     };
-    
+
     my $lexer = sub {
         return '', undef if empty $input;
 
         if ('INITIAL' eq $state) {
             $input =~ s/([^\n\{]*)//;
             return CDATA => $1 if !empty $1;
-        
+
             if ($input =~ s/^\n//) {
                 ++$lineno;
                 return CDATA => "\n";
             } elsif ($input =~ s/^\{\{//) {
-            	$state = 'OBJECT';
+                $state = 'OBJECT';
                 return SO => '{{';
             } elsif ($input =~ s/^\{\%//) {
-            	$state = 'TAG';
+                $state = 'TAG';
                 return ST => '{%';
             } else {
                 return $next_char->();
             }
         } elsif ('TAG' eq $state) {
-        	$whitespace->() or return '', undef;
+            $whitespace->() or return '', undef;
 
-        	if ($input =~ s/^([-a-zA-Z0-9_]+)//) {
-        		$state = 'IN-TAG';
-        	    return DIRECTIVE => $1;
-        	} else {
-        		return $next_char->();
-        	}
+            if ($input =~ s/^([-a-zA-Z0-9_]+)//) {
+                $state = 'IN-TAG';
+                return DIRECTIVE => $1;
+            } else {
+                return $next_char->();
+            }
         } elsif ('IN-TAG' eq $state) {
-        	$whitespace->() or return '', undef;
-        	
-        	if ($input =~ s/^"(.*?)"//) {
-        		return DQUOTE => $drequote->($1);
-        	} elsif ($input =~ s/^'(.*?)'//) {
-        		return SQUOTE => $srequote->($1);
-        	} else {
-        		return $next_char->();
-        	}
+            $whitespace->() or return '', undef;
+
+            if ($input =~ s/^"(.*?)"//) {
+                return DQUOTE => $drequote->($1);
+            } elsif ($input =~ s/^'(.*?)'//) {
+                return SQUOTE => $srequote->($1);
+            } else {
+                return $next_char->();
+            }
         } else {
-        	die "unhandled state $state";
+            die "unhandled state $state";
         }
     };
-    
+
     my $lexer_wrapper = sub {
-    	my ($token, $content) = $lexer->();
-    	$last_token = $content;
-    	
-    	return $token, $content;
+        my ($token, $content) = $lexer->();
+        $last_token = $content;
+
+        return $token, $content;
     };
-    
+
     my $error = sub {
-    	$state = 0;
-    	
+        $state = 0;
+
         my $location = $last_token;
         $self->logger->error(__x("{filename}:{lineno}: Syntax error at or"
                                  . " near '{location}'!",
@@ -142,31 +142,31 @@ sub convert {
 }
 
 sub addOutput {
-	my ($self, $chunk) = @_;
-	
-	$self->{__output} .= $chunk;
-	
-	return $self;
+    my ($self, $chunk) = @_;
+
+    $self->{__output} .= $chunk;
+
+    return $self;
 }
 
-sub startTag { 
+sub startTag {
     my ($self) = @_;
-    
+
     return $self->{__options}->{tt2_start};
 }
 
-sub endTag { 
+sub endTag {
     my ($self) = @_;
-    
+
     return $self->{__options}->{tt2_end};
 }
 
 sub addPlugin {
-	my ($self, $plugin) = @_;
-	
-	$self->{__plugins}->{$plugin} = 1;
-	
-	return $self;
+    my ($self, $plugin) = @_;
+
+    $self->{__plugins}->{$plugin} = 1;
+
+    return $self;
 }
 
 sub parse {
@@ -178,14 +178,14 @@ sub parse {
 
     my $lineno = 1;
     my $state = 0;
-    
+
     my $lexer = sub {
         return '', undef if empty $input;
 
         if ($state == 0) {
             $input =~ s/([^\n\{]*)//;
             return CDATA => $1 if !empty $1;
-        
+
             if ("\n" eq $1) {
                 ++$lineno;
                 return CDATA => "\n";

@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -30,14 +30,13 @@ use Qgoda::Util qw(read_file write_file yaml_error perl_class);
 use Qgoda::Repository;
 
 sub new {
-	my ($class) = @_;
+    my ($class, $args, %options) = @_;
 
     my $q = Qgoda->new;
-    my $args = $q->getOption('args');
     my $uri = @$args ? $args->[0] : 'http://github.com/gflohr/qgoda-default';
     my $self = {
         __logger => $q->logger,
-        __force => $q->getOption('force'),
+        __force => $ptions{force},
         __config => $q->config,
         __uri => $uri,
     };
@@ -46,9 +45,9 @@ sub new {
 }
 
 sub init {
-	my ($self) = @_;
-	
-	my $logger = $self->{__logger};
+    my ($self) = @_;
+
+    my $logger = $self->{__logger};
     my $config = $self->{__config};
 
     my $repo = Qgoda::Repository->new($self->{__uri});
@@ -57,7 +56,7 @@ sub init {
     my $init_yaml = File::Spec->catfile($dir, '_init.yaml');
     $init_yaml = File::Spec->catfile($dir, '_init.yml')
         if !-e $init_yaml;
-    
+
     my $init = $self->__readInitYAML($init_yaml);
     $init->{_srcdir} = $dir;
 
@@ -94,7 +93,7 @@ sub init {
         $logger->warning('-' x 30);
         foreach my $helper (@helpers) {
             my $args = $config->{helpers}->{$helper};
-            $args = [$args] unless ref $args && 'ARRAY' eq reftype $args; 
+            $args = [$args] unless ref $args && 'ARRAY' eq reftype $args;
             my @pretty;
             foreach my $arg (@$args) {
                 if ($arg =~ s{[\\\"]}{\\$1}) {
@@ -151,7 +150,7 @@ sub command(@) {
     $logger->info(__x("Running '{command}':", command => $pretty));
 
     if (0 != system @args) {
-        $logger->error(__x("Running '{command}' failed: {error}", 
+        $logger->error(__x("Running '{command}' failed: {error}",
                        command => $pretty, error => $!));
         return;
     }
@@ -161,55 +160,55 @@ sub command(@) {
 
 sub __mkdir {
     my ($self, $directory) = @_;
-    
+
     return $self if -e $directory;
-    
+
     my $q = Qgoda->new;
     my $logger = $q->logger;
-    
-    $logger->info(__x("Creating directory '{directory}.", 
+
+    $logger->info(__x("Creating directory '{directory}.",
                       directory => $directory));
 
     mkdir $directory
         or $logger->fatal(__x("Error creating directory '{dir}': {error}!",
                               dir => $directory, error => $!));
-    
+
     return $self;
 }
 
 sub __write {
     my ($self, $filename, $content) = @_;
-    
+
     my $q = Qgoda->new;
     my $logger = $q->logger;
     my $config = $q->config;
-    
+
     if (-e $filename && !$self->{__force}) {
         $logger->warning(__x("Not overwriting '{filename}'!",
                              filename => $filename));
         return $self;
     }
-    
+
     $content =~ s/\@([^\@]+)\@/$config->{$1}/g;
-    
+
     $logger->info(__x("Initializing '{filename}'.", filename => $filename));
-    
-    open my $fh, ">$filename" 
+
+    open my $fh, ">$filename"
         or $logger->fatal(__x("Cannot write '{filename}': {error}!\n",
                               filename => $filename, error => $!));
     print $fh $content;
-    close $fh 
+    close $fh
         or $logger->fatal(__x("Cannot write '{filename}': {error}!\n",
                               filename => $filename, error => $!));
-    
+
     return $self;
 }
 
 sub __trim {
     my ($self, $content) = @_;
-    
+
     $content =~ s/\n+$/\n/;
-    
+
     return $content;
 }
 

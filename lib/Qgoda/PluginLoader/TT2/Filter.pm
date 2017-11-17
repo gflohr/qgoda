@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ my $singleton;
 
 sub new {
     my ($class) = @_;
-    
+
     return $singleton if $singleton;
 
     $singleton = {
@@ -40,29 +40,29 @@ sub new {
 }
 
 sub namespace {
-	my ($self, $plugin_data) = @_;
+    my ($self, $plugin_data) = @_;
 
-    die __x("Field 'qgoda.module' missing in package.json.\n", 
+    die __x("Field 'qgoda.module' missing in package.json.\n",
             name => $plugin_data->{module})
         if !exists $plugin_data->{module};
     die __x("Invalid module name '{name}'.\n", name => $plugin_data->{module})
         if !perl_class $plugin_data->{module};
-	
-	return 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
+
+    return 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
 }
 
 sub addPlugin {
     my ($self, $plugin_data) = @_;
 
     my $class_name = $self->namespace($plugin_data);
-        
+
     my $module_name = $class_name;
     $module_name =~ s{(?:::|\')}{/}g;
     $module_name .= '.pm';
 
     $self->{__modules}->{$module_name} = $plugin_data;
 
-    die __"Field 'qgoda.entry' missing in package.json.\n" 
+    die __"Field 'qgoda.entry' missing in package.json.\n"
         if !exists $plugin_data->{entry};
     my $entry = $plugin_data->{entry};
     die __x("Invalid entry point '{entry}'.\n", entry => $entry)
@@ -75,24 +75,24 @@ sub addPlugin {
 
         $self->{_DYNAMIC} = 1;
         $self->install_filter($plugin_data->{entry});
-        
+
         $plugin_data->{plugger}->compile->();
 
         return $self;
     };
-    
+
     eval <<EOF;
     package $class_name;
-    
+
     sub filter {
-    	my (\$self, \$text, \$config, \$args) = \@_;
-    	
-    	return $plugin_data->{entry}(\$self, \$text, \$config, \$args);
+        my (\$self, \$text, \$config, \$args) = \@_;
+
+        return $plugin_data->{entry}(\$self, \$text, \$config, \$args);
     }
 EOF
-    
+
     @{"${class_name}::ISA"} = 'Template::Plugin::Filter';
-    
+
     return $self;
 }
 

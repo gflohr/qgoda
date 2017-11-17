@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -22,25 +22,21 @@ use strict;
 
 use base qw(Qgoda::Processor);
 
-use Text::Markdown::Hoedown qw(markdown);
+use Text::Markdown qw(markdown);
 
 sub new {
     my ($class, %options) = @_;
-    
+
     my $self = $class->SUPER::new(%options);
     $self->{__options} = \%options;
-    
+
     return $self;
 }
 
 sub process {
     my ($self, $content, $asset, $site) = @_;
 
-    my %options = (
-        extensions => 0x7fff_ffff
-    );
-
-    return markdown $content, %options;
+    return markdown $content;
 }
 
 1;

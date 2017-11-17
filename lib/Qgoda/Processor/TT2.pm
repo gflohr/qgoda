@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -30,16 +30,16 @@ use base qw(Qgoda::Processor);
 my %instances;
 
 sub new {
-	my ($class, %options) = @_;
-	
-	my $self = bless {}, $class;
-	$self->{__options} = \%options;
+    my ($class, %options) = @_;
+
+    my $self = bless {}, $class;
+    $self->{__options} = \%options;
 
     require Qgoda;
     my $qgoda = Qgoda->new;
     my $srcdir = $qgoda->config->{srcdir};
     my $viewdir = $qgoda->config->{paths}->{views};
-    
+
     # FIXME! Merge options with those from the configuration!
     $self->{__tt} = Template->new({
         INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
@@ -47,11 +47,11 @@ sub new {
         RECURSION => 1,
     }) or die Template->error;
 
-	return $self;
+    return $self;
 }
 
 sub process {
-	my ($self, $content, $asset, $site) = @_;
+    my ($self, $content, $asset, $site) = @_;
 
     my $vars = {
         asset => $asset,

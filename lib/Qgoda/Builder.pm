@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -28,45 +28,45 @@ use File::Spec;
 use Qgoda::Util qw(empty read_file read_body write_file);
 
 sub new {
-	my $self = '';
-	bless \$self, shift;
+    my $self = '';
+    bless \$self, shift;
 }
 
 sub build {
-	my ($self, $site) = @_;
-	
+    my ($self, $site) = @_;
+
     my $logger = $self->logger;
     $logger->debug(__"start building posts");
     my $config = $site->{config};
-    
+
     my $qgoda = Qgoda->new;
     my $errors = 0;
     ASSET: foreach my $asset ($site->getAssets) {
         my $saved_locale = setlocale(POSIX::LC_ALL());
-    	eval {
+        eval {
                 local $SIG{__WARN__} = sub {
                     my ($msg) = @_;
                     $logger->warning("$asset->{path}: $msg");
                 };
-	    	$logger->debug(__x("building asset '/{relpath}'",
-	    	                   relpath => $asset->getRelpath));
-	        $self->processAsset($asset, $site);
-	
-	        $self->saveArtefact($asset, $site, $asset->{location});
+            $logger->debug(__x("building asset '/{relpath}'",
+                               relpath => $asset->getRelpath));
+            $self->processAsset($asset, $site);
+
+            $self->saveArtefact($asset, $site, $asset->{location});
             $logger->debug(__x("successfully built '{location}'",
                                location => $asset->{location}));
-    	};
-    	if ($@) {
-    		++$errors;
-    		my $path = $asset->getPath;
-       	    $logger->error("$path: $@");
-    	}
+        };
+        if ($@) {
+            ++$errors;
+            my $path = $asset->getPath;
+               $logger->error("$path: $@");
+        }
         setlocale(POSIX::LC_ALL(), $saved_locale);
-    }   
-    
+    }
+
     if ($errors) {
-    	$logger->error(">>>>>>>>>>>>>>>>>>>");
-        $logger->error(__nx("one artefact has not been built because of errors (see above)", 
+        $logger->error(">>>>>>>>>>>>>>>>>>>");
+        $logger->error(__nx("one artefact has not been built because of errors (see above)",
                             "{num} artefacts have not been built because of errors (see above)",
                             $errors, num => $errors)) if $errors;
         $logger->error(">>>>>>>>>>>>>>>>>>>");
@@ -75,63 +75,63 @@ sub build {
 }
 
 sub logger {
-	my ($self) = @_;
-	
+    my ($self) = @_;
+
     require Qgoda;
-    my $logger = Qgoda->new->logger('builder');    
+    my $logger = Qgoda->new->logger('builder');
 }
 
 sub readAssetContent {
-	my ($self, $asset, $site) = @_;
-	
-	if ($asset->{raw}) {
-		return read_file($asset->getPath);
-	} else {
-		return read_body($asset->getPath);
-	}
+    my ($self, $asset, $site) = @_;
+
+    if ($asset->{raw}) {
+        return read_file($asset->getPath);
+    } else {
+        return read_body($asset->getPath);
+    }
 }
 
 sub saveArtefact {
-	my ($self, $asset, $site, $permalink) = @_;
-	
+    my ($self, $asset, $site, $permalink) = @_;
+
     require Qgoda;
     my $config = Qgoda->new->config;
     $permalink = '/' . $asset->getRelpath if empty $permalink;
     my $path = File::Spec->catdir($config->{outdir}, $permalink);
-    
+
     my $existing = $site->getArtefact($path);
     if ($existing) {
-    	my $origin = $existing->getAsset;
-    	my $logger = $self->logger;
+        my $origin = $existing->getAsset;
+        my $logger = $self->logger;
         $logger->warning(__x("Overwriting artefact at '{outpath}', "
                              . "origin: {origin}",
                              outpath => $path,
                              origin => $origin ? $origin->getOrigin : __"[unknown origin]"));
     }
-    
+
     unless (write_file $path, $asset->{content}) {
-    	my $logger = $self->logger;
-    	$logger->error(__x("error writing '{filename}': {error}",
-    	                   filename => $path, error => $!));
-    	return;
+        my $logger = $self->logger;
+        $logger->error(__x("error writing '{filename}': {error}",
+                           filename => $path, error => $!));
+        return;
     }
-    
+
     $site->addArtefact($path, $asset);
 }
 
 sub processAsset {
-	my ($self, $asset, $site) = @_;
-	
-	my $qgoda = Qgoda->new;
-	my $logger = $self->logger;
-	
-	$logger->debug(__x("processing asset '/{relpath}'",
+    my ($self, $asset, $site) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $self->logger;
+
+    $logger->debug(__x("processing asset '/{relpath}'",
                        relpath => $asset->getRelpath));
-	
+
     my $content = $self->readAssetContent($asset, $site);
     $asset->{content} = $content;
-    my $processors = $qgoda->getProcessors($asset, $site);
-    foreach my $processor (@$processors) {
+    my @processors = $qgoda->getProcessors($asset);
+    foreach my $processor (@processors) {
         my $short_name = ref $processor;
         $short_name =~ s/^Qgoda::Processor:://;
         $logger->debug(__x("processing with {processor}",
@@ -139,18 +139,18 @@ sub processAsset {
         $asset->{content} = $processor->process($asset->{content},
                                                 $asset, $site);
     }
-    
-    if (@$processors && !exists $asset->{excerpt}) {
-    	$asset->{excerpt} = $processors->[-1]->excerpt($asset->{content},
-    	                                               $asset, $site);
+
+    if (@processors && !exists $asset->{excerpt}) {
+        $asset->{excerpt} = $processors[-1]->excerpt($asset->{content},
+                                                     $asset, $site);
     }
-    
-    $processors = $qgoda->getWrapperProcessors($asset, $site);
-    return $self if !@$processors;
-    
+
+    @processors = $qgoda->getWrapperProcessors($asset);
+    return $self if !@processors;
+
     my $view = $asset->{view};
     die __"no view specified.\n" if empty $view;
-    
+
     my $srcdir = $qgoda->config->{srcdir};
     my $view_dir = $qgoda->config->{paths}->{views};
     my $view_file = File::Spec->join($srcdir, $view_dir, $view);
@@ -158,16 +158,16 @@ sub processAsset {
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
         if !defined $content;
-    foreach my $processor (@$processors) {
-    	my $short_name = ref $processor;
-    	$short_name =~ s/^Qgoda::Processor:://;
+    foreach my $processor (@processors) {
+        my $short_name = ref $processor;
+        $short_name =~ s/^Qgoda::Processor:://;
         $logger->debug(__x("wrapping with {processor}",
                            processor => $short_name));
-        $content = $processor->process($content, $asset, $site);    	
+        $content = $processor->process($content, $asset, $site);
     }
 
     $asset->{content} = $content;
-    
+
     return $self;
 }
 

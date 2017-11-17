@@ -1,6 +1,6 @@
 #! /usr/bin/env perl # -*- perl -*-
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ my $assets = {
             const => 'constant',
             date => {
                 month => '02',
-                imonth => 2, 
+                imonth => 2,
             },
         },
         {
@@ -45,7 +45,7 @@ my $assets = {
             const => 'constant',
             date => {
                 month => '03',
-                imonth => 3, 
+                imonth => 3,
             },
         },
         {

@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -56,7 +56,7 @@ sub run {
             if ($force > 1) {
                 $logger->info(__"option '--force' given twice, will overwrite precious files");
             } else {
-                $logger->info(__"but will preserve precious files, give '--force' twice to overwrite");                
+                $logger->info(__"but will preserve precious files, give '--force' twice to overwrite");
             }
         }
     } else {
@@ -70,7 +70,7 @@ sub run {
         my (@names) = @_;
         my $relpath = File::Spec->abs2rel($File::Find::dir, $config->{_srcdir});
 
-        # Do not use File::Spec->catfile! Ignore patterns uses slashes only.        
+        # Do not use File::Spec->catfile! Ignore patterns uses slashes only.
         return grep { !$exclude->match("$relpath/$_") } @names;
     };
 
@@ -92,18 +92,18 @@ sub run {
 
             return; # Done.
         }
-            
+
         if (-e $relpath) {
             if (!$force) {
                 $logger->info(__x("not overwriting '{file}' without '--force'",
                                 file => $relpath));
                 return; # Done.
             }
-                
+
             if ($precious && $precious->matchInclude($relpath)) {
                 $logger->info(__x("not overwriting precious '{file}' without '--force --force'",
                                   file => $relpath));
-                return; # Done.                  
+                return; # Done.
             }
         }
 

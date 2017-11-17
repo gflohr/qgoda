@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -37,66 +37,66 @@ use Qgoda::Util qw(collect_defaults merge_data empty);
 use Qgoda::Builder;
 
 sub new {
-	my ($class, $context) = @_;
-	
-	return $class if ref $class;
+    my ($class, $context) = @_;
+
+    return $class if ref $class;
 
     my $get_values = sub {
         my ($assets, @fields) = @_;
-        
+
         my $stash = $context->stash->clone;
-        
+
         # Find a random variable name.
         my $name = 'a';
         while (1) {
-        	last if empty $stash->get($name);
-        	++$name;
+            last if empty $stash->get($name);
+            ++$name;
         }
-        
+
         my @values;
         my $i = 0;
         foreach my $asset (@$assets) {
-        	my @subvalues;
-        	push @values, [$i++, \@subvalues];
-        	
-        	# The variable name 'asset' is therefore not available.
-        	$stash->set($name => $asset);
-        	foreach my $field (@fields) {
-        		push @subvalues, $stash->get("$name.$field");
-        	}
+            my @subvalues;
+            push @values, [$i++, \@subvalues];
+
+            # The variable name 'asset' is therefore not available.
+            $stash->set($name => $asset);
+            foreach my $field (@fields) {
+                push @subvalues, $stash->get("$name.$field");
+            }
         }
-        
+
         $stash->declone;
-        
+
         return @values;
     };
 
     sub compare_array {
         my $arr1 = $a->[1];
         my $arr2 = $b->[1];
-        
+
         for (my $i = 0; $i < @$arr1; ++$i) {
             my ($val1, $val2) = ($arr1->[$i], $arr2->[$i]);
-            
+
             return $val1 cmp $val2 if $val1 cmp $val2;
         }
-        
+
         return 0;
     }
-    
+
     sub ncompare_array {
         my $arr1 = $a->[1];
         my $arr2 = $b->[1];
-        
+
         for (my $i = 0; $i < @$arr1; ++$i) {
             my ($val1, $val2) = ($arr1->[$i], $arr2->[$i]);
-            
+
             return $val1 <=> $val2 if $val1 <=> $val2;
         }
-        
+
         return 0;
     }
-    
+
     my $sort_by = sub {
         my ($assets, $field) = @_;
 
@@ -105,7 +105,7 @@ sub new {
             map { $assets->[$_->[0]] }
             sort compare_array $get_values->($assets, $field)
         ];
-                
+
         return [sort { $a->{$field} cmp $b->{$field} } @$assets];
     };
 
@@ -117,7 +117,7 @@ sub new {
             map { $assets->[$_->[0]] }
             sort ncompare_array $get_values->($assets, $field)
         ];
-                
+
         return [sort { $a->{$field} cmp $b->{$field} } @$assets];
     };
 
@@ -125,11 +125,11 @@ sub new {
     $context->define_vmethod(list => nsortBy => $nsort_by);
     $context->define_vmethod(scalar => slugify => \&Qgoda::Util::slugify);
     $context->define_vmethod(scalar => unmarkup => \&Qgoda::Util::unmarkup);
-    
-	my $self = {
+
+    my $self = {
         __context => $context
     };
-	bless $self, $class;
+    bless $self, $class;
 }
 
 sub __getContext {
@@ -149,50 +149,50 @@ sub __getConfig {
 }
 
 sub bust_cache {
-	my ($self, $uri) = @_;
+    my ($self, $uri) = @_;
 
     return $uri if $uri !~ m{^/};
 
     my($scheme, $authority, $path, $query, $fragment) =
         $uri =~ m|(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?|o;
     return if !defined $path;
-       
+
     require Qgoda;
     my $srcdir = Qgoda->new->config->{srcdir};
     my $fullpath = File::Spec->canonpath(File::Spec->catfile($srcdir, $path));
-    
+
     my @stat = stat $fullpath or return $uri;
     if (defined $query) {
-    	return "$uri&$stat[9]"
+        return "$uri&$stat[9]"
     } else {
-    	return "$uri?$stat[9]"
+        return "$uri?$stat[9]"
     }
 }
 
 sub include {
-	my ($self, $path, $overlay, $extra) = @_;
+    my ($self, $path, $overlay, $extra) = @_;
 
     die "usage: include(PATH, OVERLAY, KEY = VALUE, ...\n"
         if empty $path || empty $overlay;
     $overlay = $self->__sanitizeHashref($overlay, 'include');
     $extra = $self->__sanitizeHashref($extra, 'include', 1);
-    
-	my $asset = $self->__include($path, $overlay, $extra);
-	
-	return $asset->{content};
+
+    my $asset = $self->__include($path, $overlay, $extra);
+
+    return $asset->{content};
 }
 
 sub __include {
-	my ($self, $_path, $overlay, $extra) = @_;
-    
+    my ($self, $_path, $overlay, $extra) = @_;
+
     require Qgoda;
     my $q = Qgoda->new;
     my $srcdir = $q->config->{srcdir};
-    
+
     my $path = Cwd::abs_path($_path);
     if (!defined $path) {
-    	die __x("error including '{path}': {error}.\n",
-    	        path => $_path, error => $!);
+        die __x("error including '{path}': {error}.\n",
+                path => $_path, error => $!);
     }
 
     my $relpath = File::Spec->abs2rel($path, $srcdir);
@@ -203,9 +203,9 @@ sub __include {
     foreach my $analyzer (@{$analyzers}) {
         $analyzer->analyzeAsset($asset, $site, 1);
     }
-    
+
     $q->locateAsset($asset, $site);
-    
+
     if ($overlay) {
         my %overlay = %$overlay;
         delete $overlay{path};
@@ -216,13 +216,13 @@ sub __include {
     }
 
     merge_data $asset, $extra;
-    
+
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
-    	$builder->processAsset($asset, $site);
+        $builder->processAsset($asset, $site);
     }
-    
-	return $asset;
+
+    return $asset;
 }
 
 sub __sanitizeFilters {
@@ -286,7 +286,7 @@ sub list {
 
     $filters = $self->__sanitizeFilters($filters);
 
-	my $site = Qgoda->new->getSite;
+    my $site = Qgoda->new->getSite;
     return $site->searchAssets(%$filters);
 }
 
@@ -319,7 +319,7 @@ sub llistPosts {
 
 sub link {
     my ($self, $filters) = @_;
-    
+
     $filters = $self->__sanitizeFilters($filters);
 
     my $set = $self->list($filters);
@@ -331,9 +331,9 @@ sub link {
     } if (@$set > 1) {
         my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
-        warn "ambiguous link($json)\n"; 
+        warn "ambiguous link($json)\n";
     }
-    
+
     return $set->[0]->{permalink};
 }
 
@@ -350,9 +350,9 @@ sub xref {
     } if (@$set > 1) {
         my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
-        warn "ambiguous xref($json)\n"; 
+        warn "ambiguous xref($json)\n";
     }
-    
+
     return $set->[0]->{$variable};
 }
 
@@ -376,7 +376,7 @@ sub lxref {
 
 sub linkPost {
     my ($self, $filters) = @_;
-    
+
     $filters = $self->__sanitizeFilters($filters);
     $filters->{type} = 'post';
 
@@ -388,9 +388,9 @@ sub linkPost {
     } if (@$set > 1) {
         my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
-        die "ambiguous linkPost($json)\n"; 
+        die "ambiguous linkPost($json)\n";
     }
-    
+
     return $set->[0]->{permalink};
 }
 
@@ -404,7 +404,7 @@ sub llinkPost {
 }
 
 sub writeAsset {
-	my ($self, $path, $overlay, $extra) = @_;
+    my ($self, $path, $overlay, $extra) = @_;
 
     die "usage: writeAsset(PATH, OVERLAY, KEY = VALUE, ...\n"
         if empty $path || empty $overlay;
@@ -412,7 +412,7 @@ sub writeAsset {
     $extra = $self->__sanitizeHashref($extra, 'include', 1);
 
     my $asset = $self->__include($path, $overlay, $extra);
-    
+
     my $q = Qgoda->new;
     my $logger = $q->logger('template');
     my $builder = Qgoda::Builder->new;
@@ -421,15 +421,15 @@ sub writeAsset {
     $builder->saveArtefact($asset, $site, $asset->{location});
     $logger->debug(__x("successfully built '{location}'",
                        location => $asset->{location}));
-    
+
     return '';
 }
 
 sub clone {
     my ($self, $extra) = @_;
 
-    $extra = $self->__sanitizeHashref($extra, 'clone', 1);    
-    die __"the argument 'location' is mandatory for clone()\n" 
+    $extra = $self->__sanitizeHashref($extra, 'clone', 1);
+    die __"the argument 'location' is mandatory for clone()\n"
         if empty $extra->{location};
 
     my $asset = $self->__getAsset;
@@ -468,7 +468,7 @@ sub pagination {
         if empty $data->{total};
     die __"argument '{total}' cannot be zero pagination()\n"
         if !$data->{total};
-    
+
     use integer;
 
     my $start = $data->{start} || 0;
@@ -492,7 +492,7 @@ sub pagination {
     $basename =~ m{(.*?)(\..+)?$};
     $stem = $1 if empty $stem;
     $extender = $2 if empty $extender;
-    
+
     my ($next_start, $next_location);
     if ($page < $total_pages) {
         $next_start = $start + $per_page;
@@ -517,7 +517,7 @@ sub pagination {
     my @tabindexes = (0) x $#links;
     $tabindexes[$page0] = -1;
     $tabindexes[0] = -1 if !defined $previous_page;
-    
+
     my $retval = {
         start => $start,
         page0 => $page0,

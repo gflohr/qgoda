@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -35,14 +35,14 @@ sub fetch {
 
     $logger->debug(__x("cloning repository '{repository}'",
                        repository => $uri));
-    
+
     # This will die in case of an error.
     Git::command('clone', '--depth', '1', $uri, $destination);
-    
+
     my $gitdir = File::Spec->catfile($destination, '.git');
     $logger->debug(__x("deleting '{directory}'",
                        directory => $gitdir));
-    
+
     rmtree $gitdir, { error => \my $err };
     if (@$err) {
         for my $diag (@$err) {

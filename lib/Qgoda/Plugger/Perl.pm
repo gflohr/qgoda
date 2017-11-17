@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -27,21 +27,21 @@ use Qgoda;
 use base qw(Qgoda::Plugger);
 
 sub new {
-	my ($class, $data) = @_;
-	
-	my $self = bless $data, $class;
-	
-	require $data->{main};
-	
-	return $self;
+    my ($class, $data) = @_;
+
+    my $self = bless $data, $class;
+
+    require $data->{main};
+
+    return $self;
 }
 
 sub language {
-	return 'Perl';
+    return 'Perl';
 }
 
 sub native {
-	return 1;
+    return 1;
 }
 
 1;

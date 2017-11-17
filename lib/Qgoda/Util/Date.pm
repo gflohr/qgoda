@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ sub newFromEpoch {
     my ($class, $epoch) = @_;
 
     my $self = $epoch;
-    
+
     bless \$self, $class;
 }
 
@@ -59,49 +59,49 @@ sub year {
 sub month {
     my ($self) = @_;
 
-    return sprintf '%02u', 1 + (localtime $$self)[4]    
+    return sprintf '%02u', 1 + (localtime $$self)[4]
 }
 
 sub imonth {
     my ($self) = @_;
 
-    return 1 + (localtime $$self)[4]    
+    return 1 + (localtime $$self)[4]
 }
 
 sub mday {
     my ($self) = @_;
 
-    return sprintf '%02u', (localtime $$self)[3]    
+    return sprintf '%02u', (localtime $$self)[3]
 }
 
 sub imday {
     my ($self) = @_;
 
-    return (localtime $$self)[3]    
+    return (localtime $$self)[3]
 }
 
 sub day {
     my ($self) = @_;
 
-    return sprintf '%02u', (localtime $$self)[3]    
+    return sprintf '%02u', (localtime $$self)[3]
 }
 
 sub iday {
     my ($self) = @_;
 
-    return (localtime $$self)[3]    
+    return (localtime $$self)[3]
 }
 
 sub hour {
     my ($self) = @_;
 
-    return sprintf '%02u', (localtime $$self)[2]    
+    return sprintf '%02u', (localtime $$self)[2]
 }
 
 sub ihour {
     my ($self) = @_;
 
-    return (localtime $$self)[2]    
+    return (localtime $$self)[2]
 }
 
 sub hour12 {
@@ -126,7 +126,7 @@ sub dst {
     my ($self) = @_;
 
     # TRANSLATORS: This stands for "Daylight Savings Time".
-    return (localtime $$self)[8] ? __"DST" : '';    
+    return (localtime $$self)[8] ? __"DST" : '';
 }
 
 sub wdayname {
@@ -157,7 +157,7 @@ sub ISOString {
     my ($self) = @_;
 
     my @then = gmtime $$self;
-    
+
     return sprintf '%04u-%02u-%02uT%02u:%02u:%02u.000Z',
         $then[5] + 1900, $then[4] + 1, $then[3],
         $then[2], $then[1], $then[0]

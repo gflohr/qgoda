@@ -1,6 +1,6 @@
 #! /bin/false
 
-# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>, 
+# Copyright (C) 2016 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -38,28 +38,28 @@ sub new {
     my $config = Qgoda->new->config;
 
     bless {
-    	__logger => $logger,
-    	__config => $config,
+        __logger => $logger,
+        __config => $config,
     }, $class;
 }
 
 sub analyze {
-	my ($self, $site, $included) = @_;
-	
-	foreach my $asset ($site->getAssets) {
-		$self->analyzeAsset($asset, $site, $included);
-	}
-	
-	return $self;
+    my ($self, $site, $included) = @_;
+
+    foreach my $asset ($site->getAssets) {
+        $self->analyzeAsset($asset, $site, $included);
+    }
+
+    return $self;
 }
 
 sub analyzeAsset {
-	my ($self, $asset, $site, $included) = @_;
-	
+    my ($self, $asset, $site, $included) = @_;
+
     my $logger = $self->{__logger};
 
     my $path = $asset->getPath;
-    $logger->debug(__x("analyzing asset '{path}'", 
+    $logger->debug(__x("analyzing asset '{path}'",
                        path => $path));
     stat $path or die __x("error reading '{path}': {err}",
                           path => $path, err => $!);
@@ -83,41 +83,41 @@ sub analyzeAsset {
     delete $meta->{relpath};
 
     merge_data $asset, $meta;
-    
+
     $self->__fillMeta($asset, $site) if !$asset->{raw};
     $self->__fillTaxonomies($asset, $site) if !$included && !$asset->{raw};
-     
-	return $self;
+
+    return $self;
 }
 
 sub __fillMeta {
-	my ($self, $asset, $site) = @_;
-	
-	my $logger = $self->{__logger};
-	my $config = $self->{__config};
-	
+    my ($self, $asset, $site) = @_;
+
+    my $logger = $self->{__logger};
+    my $config = $self->{__config};
+
     my $date = $asset->{date};
     if (defined $date) {
-    	if ($date !~ /^-?[1-9][0-9]*$/) {
-    		$date = str2time $date;
-    		if (!defined $date) {
-    			$logger->error(__x("{filename}: cannot parse date '{date}'",
-    			                   date => $asset->{date}));
-    		}
-    	}
+        if ($date !~ /^-?[1-9][0-9]*$/) {
+            $date = str2time $date;
+            if (!defined $date) {
+                $logger->error(__x("{filename}: cannot parse date '{date}'",
+                                   date => $asset->{date}));
+            }
+        }
     }
- 
+
     if (!defined $date) {
-    	my @stat = stat $asset->getPath;
+        my @stat = stat $asset->getPath;
         if (!@stat) {
             $logger->error(__x("cannot stat '{filename}': {error}",
                                filename => $asset->getPath, error => $!));
             $date = time;
         } else {
-        	$date = $stat[9];
+            $date = $stat[9];
         }
     }
- 
+
     $asset->{date} = Qgoda::Util::Date->newFromEpoch($date);
 
     $self->__fillPathInformation($asset, $site);
@@ -133,65 +133,65 @@ sub __fillMeta {
 
 sub __fillTaxonomies {
     my ($self, $asset, $site) = @_;
-    
+
     my $logger = $self->{__logger};
     my $config = $self->{__config};
-    
+
     my $taxonomies = $config->{taxonomies};
     foreach my $t (keys %$taxonomies) {
-    	next if !exists $asset->{$t};
-    	my @values;
-    	if (ref $asset->{$t} && 'ARRAY' eq reftype $asset->{$t}) {
-    		@values = @{$asset->{$t}};
-    	} else {
-    		@values = $asset->{$t};
-    	}
-    	
-    	foreach my $value (@values) {
-    		$site->addTaxonomy($t, $asset, $value);
-    	}
+        next if !exists $asset->{$t};
+        my @values;
+        if (ref $asset->{$t} && 'ARRAY' eq reftype $asset->{$t}) {
+            @values = @{$asset->{$t}};
+        } else {
+            @values = $asset->{$t};
+        }
+
+        foreach my $value (@values) {
+            $site->addTaxonomy($t, $asset, $value);
+        }
     }
-    
+
     return $self;
 }
 
 sub __slug {
-	my ($self, $asset) = @_;
-	
-	return slugify $asset->{title};
+    my ($self, $asset) = @_;
+
+    return slugify $asset->{title};
 }
 
 sub __fillPathInformation {
-	my ($self, $asset, $site) = @_;
-	
-	my $relpath = $asset->getRelpath;
-	my ($filename, $directory) = fileparse $relpath;
-	
-	$asset->{filename} = $filename;
-	
+    my ($self, $asset, $site) = @_;
+
+    my $relpath = $asset->getRelpath;
+    my ($filename, $directory) = fileparse $relpath;
+
+    $asset->{filename} = $filename;
+
     $directory = normalize_path $directory;
     $directory = '' if '.' eq $directory;
     $asset->{directory} = $directory;
-    
+
     my ($basename, @suffixes) = strip_suffix $filename;
     $asset->{basename} = $basename;
-    
+
     if (empty $asset->{chain}) {
-	    my $trigger = $site->getTrigger(@suffixes);
-	    if (!empty $trigger) {
-	        my ($chain, $name) = $site->getChainByTrigger($trigger);
-	        $asset->{chain} = $name if $chain;
-	        if ($chain && exists $chain->{suffix}) {
-	            for (my $i = $#suffixes; $i >= 0; --$i) {
-	                if ($suffixes[$i] eq $trigger) {
-	                    $suffixes[$i] = $chain->{suffix};
-	                    last;
-	                }
-	            }
-	        }
-	    }
+        my $trigger = $site->getTrigger(@suffixes);
+        if (!empty $trigger) {
+            my ($chain, $name) = $site->getChainByTrigger($trigger);
+            $asset->{chain} = $name if $chain;
+            if ($chain && exists $chain->{suffix}) {
+                for (my $i = $#suffixes; $i >= 0; --$i) {
+                    if ($suffixes[$i] eq $trigger) {
+                        $suffixes[$i] = $chain->{suffix};
+                        last;
+                    }
+                }
+            }
+        }
     }
-    
+
     $asset->{suffixes} = \@suffixes;
     if (@suffixes) {
         $asset->{suffix} = '.' . join '.', @suffixes;
@@ -200,8 +200,8 @@ sub __fillPathInformation {
     $asset->{location} = $site->getMetaValue(location => $asset);
     $asset->{permalink} = $site->getMetaValue(permalink => $asset);
     $asset->{index} = $site->getMetaValue(index => $asset);
-    
-	return $self;
+
+    return $self;
 }
 
 1;

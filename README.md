@@ -14,24 +14,24 @@ Important: This is not the current state but what will be implemented next!
 
 Please note that determining the output location for assets differs
 significantly from other systems for example Jekyll.  Whereas in Jekyll you
-normally set the permalink of an asset, in Qgoda you normally set the 
+normally set the permalink of an asset, in Qgoda you normally set the
 output path and the permalink is computed from the path.  The result is
 very similar but maybe more flexible.
 
 By default, an assets location is simply preserved.  That means if you have an
 asset `{srcdir}/assets/images/logo.jpeg` it will be copied to
-`{sitedir}/assets/images/logo.jpeg`. 
+`{sitedir}/assets/images/logo.jpeg`.
 
 ### Path Translation
 
 Processed assets are subject to path translation.  Their relative path to
 the site directory is by default modified.  With the default configuration
-the asset `{srcdir}/pages/en/about-qgoda.htm` would end up as 
+the asset `{srcdir}/pages/en/about-qgoda.htm` would end up as
 `{sitedir}/pages/en/about-qgoda/index.htm` and the markdown input file
 `{srcdir}/posts/en/version-0.2-released.md` would end up as
 `{sitedir}/posts/en/version-0.2-released/index.html`.
 
-For the gory details of the process, let's take the input location 
+For the gory details of the process, let's take the input location
 `{srcdir}/posts/en/version-0.2-released.md` as an example.
 
 The starting point is the relative path to the source directory
@@ -46,7 +46,7 @@ The starting point is the relative path to the source directory
   <dd>The suffix or filename extension.</dd>
 </dl>
 
-By default the output location of a document in Qgoda relative to the 
+By default the output location of a document in Qgoda relative to the
 configured site directory is
 `{directory}/{basename}/{index}.{suffix}`.  The variable `index`
 has the default value "index" which is no coincidence but the default value
@@ -77,26 +77,26 @@ The suffix `md` triggers the processor chain `markdown`.  This chain
 has configured an output suffix `html`.  The translated filename of the
 output file is therefore not `index.md` but `index.html`.
 
-The processor chain `html` does *not* define an output suffix.  The suffix is 
+The processor chain `html` does *not* define an output suffix.  The suffix is
 therefore left untouched.
 
 ### Multiple Suffixes
 
-A filename can have multiple suffixes, for example 
+A filename can have multiple suffixes, for example
 `what-is-qgoda.md.utf8.fr`.  This is useful for content negotiation as
 implemented in the popular Apache web server.  When doing suffix translation,
 Qgoda translates the rightmost suffix.  The example filename would therefore
-be translated into `what-is-qgoda/index.md.utf8.fr`. 
+be translated into `what-is-qgoda/index.md.utf8.fr`.
 
-It is also important to note that all suffixes are considered for processor 
+It is also important to note that all suffixes are considered for processor
 chain selection.  The rightmost suffix "wins".  If you have a filename
 `example.html.md` the markdown processor chain will be selected because
 `md` is right of `html`.
 
 ### Gory Details of Suffix Parsing
 
-You may have noticed in one the above example the filename 
-`version-0.2-released.md` which gets translated into 
+You may have noticed in one the above example the filename
+`version-0.2-released.md` which gets translated into
 `version-0.2-released/index.md`.  Obviously only `md` is considered a suffix
 and `2-released` is not.
 
@@ -113,7 +113,7 @@ because the suffix extraction had already stopped.
 
 ### Permalinks
 
-Permalinks are computed from the output location.  By default, they are 
+Permalinks are computed from the output location.  By default, they are
 simply the relative path to the site directory.  If the filename portion
 of the output location matches the configured index string (normally
 "index") followed by one or more suffixes the filename is stripped off.
@@ -131,7 +131,7 @@ You can interpolate all kinds of asset variables into the configured string
 by placing them inside {curly} braces.  For example the default configuration
 for the variable `location` is `/{directory}/{basename}/{config.index}.{suffix}`.
 
-The following variables are meaningful for location and permalink 
+The following variables are meaningful for location and permalink
 customization:
 
 <dl>
@@ -140,7 +140,7 @@ customization:
   <dt>relpath</dt>
   <dd>The relative path of the asset, without a leading slash.</dd>
   <dt>directory</dt>
-  <dd>The directory portion of "path" without a leading or trailing slash.  
+  <dd>The directory portion of "path" without a leading or trailing slash.
       This will be the empty string for assets in the top-level source
       directory.</dd>
   <dt>filename</dt>
