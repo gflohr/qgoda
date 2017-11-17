@@ -34,7 +34,7 @@ sub _getOptionSpecs {}
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
 
-    Qgoda->new($global_options)->build(%options);
+    Qgoda->new($global_options)->watch(%options);
 
     return $self;
 }
