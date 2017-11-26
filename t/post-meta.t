@@ -19,9 +19,9 @@
 use strict;
 
 use Qgoda::Processor;
-use Test::More tests => 2;
+use Test::More tests => 3;
 
-my ($html, $text, $excerpt);
+my ($html, $text, %postmeta);
 
 my $processor = Qgoda::Processor->new;
 
@@ -31,12 +31,27 @@ $html = <<EOF;
 <p>$text</p>
 <footer>ouch</footer>
 EOF
-is $processor->excerpt($html), $text;
+%postmeta = $processor->postMeta($html);
+is $postmeta{excerpt}, $text;
 
 $text = '  Find   me!   ';
 $html = <<EOF;
 <h1>Headline</h1>
 <p>$text</p>
+<ul class="links">
+<li><a href="http://www.qgoda.net/">external</a></li>
+<li><a href="/path/to/other/">other</a></li>
+<li><a href=":colon:">colon</a></li>
+<li><a href="%3acolon:">is</a></li>
+<li><a href="%3acolon%3a">escaped</a></li>
+<li><a href="/path/to/other/">other</a></li>
+</ul>
 <footer>ouch</footer>
 EOF
-is $processor->excerpt($html), 'Find me!';
+%postmeta = $processor->postMeta($html);
+is $postmeta{excerpt}, 'Find me!';
+is_deeply $postmeta{links}, {
+    'http://www.qgoda.net/' => 1,
+    '/path/to/other/' => 2,
+    ':colon:' => 3,
+};

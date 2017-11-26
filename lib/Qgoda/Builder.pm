@@ -140,9 +140,11 @@ sub processAsset {
                                                 $asset, $site);
     }
 
-    if (@processors && !exists $asset->{excerpt}) {
-        $asset->{excerpt} = $processors[-1]->excerpt($asset->{content},
-                                                     $asset, $site);
+    if (@processors) {
+        my %postmeta = $processors[-1]->postMeta($asset->{content}, $asset,
+                                                 $site);
+        $asset->{excerpt} = $postmeta{excerpt} if empty $asset->{excerpt};
+        $asset->{links} ||= $postmeta{links};
     }
 
     @processors = $qgoda->getWrapperProcessors($asset);
