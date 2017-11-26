@@ -41,16 +41,40 @@ sub build {
 
     my $qgoda = Qgoda->new;
     my $errors = 0;
+
+    # 1st pass, usually Markdown.
     ASSET: foreach my $asset ($site->getAssets) {
         my $saved_locale = setlocale(POSIX::LC_ALL());
         eval {
-                local $SIG{__WARN__} = sub {
-                    my ($msg) = @_;
-                    $logger->warning("$asset->{path}: $msg");
-                };
-            $logger->debug(__x("building asset '/{relpath}'",
+            local $SIG{__WARN__} = sub {
+                my ($msg) = @_;
+                $logger->warning("$asset->{path}: $msg");
+            };
+
+            $logger->debug(__x("processing asset '/{relpath}'",
                                relpath => $asset->getRelpath));
             $self->processAsset($asset, $site);
+        };
+        if ($@) {
+            ++$errors;
+            my $path = $asset->getPath;
+            $logger->error("$path: $@");
+        }
+        setlocale(POSIX::LC_ALL(), $saved_locale);
+    }
+
+    # 2nd pass, usually HTML.
+    ASSET: foreach my $asset ($site->getAssets) {
+        my $saved_locale = setlocale(POSIX::LC_ALL());
+        eval {
+            local $SIG{__WARN__} = sub {
+                my ($msg) = @_;
+                $logger->warning("$asset->{path}: $msg");
+            };
+
+            $logger->debug(__x("wrapping asset '/{relpath}'",
+                               relpath => $asset->getRelpath));
+            $self->wrapAsset($asset, $site);
 
             $self->saveArtefact($asset, $site, $asset->{location});
             $logger->debug(__x("successfully built '{location}'",
@@ -71,6 +95,7 @@ sub build {
                             $errors, num => $errors)) if $errors;
         $logger->error(">>>>>>>>>>>>>>>>>>>");
     }
+
     return $self;
 }
 
@@ -147,16 +172,26 @@ sub processAsset {
         $asset->{links} ||= $postmeta{links};
     }
 
-    @processors = $qgoda->getWrapperProcessors($asset);
+    return $self;
+}
+
+sub wrapAsset {
+    my ($self, $asset, $site) = @_;
+
+    my $qgoda = Qgoda->new;
+
+    my @processors = $qgoda->getWrapperProcessors($asset);
     return $self if !@processors;
 
     my $view = $asset->{view};
     die __"no view specified.\n" if empty $view;
 
+    my $logger = $self->logger;
+    
     my $srcdir = $qgoda->config->{srcdir};
     my $view_dir = $qgoda->config->{paths}->{views};
     my $view_file = File::Spec->join($srcdir, $view_dir, $view);
-    $content = read_file $view_file;
+    my $content = read_file $view_file;
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
         if !defined $content;

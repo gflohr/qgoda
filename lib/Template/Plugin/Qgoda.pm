@@ -220,6 +220,7 @@ sub __include {
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
         $builder->processAsset($asset, $site);
+        $builder->wrapAsset($asset, $site);
     }
 
     return $asset;
