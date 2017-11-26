@@ -216,15 +216,8 @@ sub default {
             },
         },
         taxonomies => {
-            type => undef,
-            lingua => undef,
-            name => undef,
-            tags => {
-                simweight => 2,
-            },
-            categories => {
-                simweight => 3,
-            },
+            tags => 2,
+            categories => 3,
         },
         po => {
             xgettext => {
@@ -296,18 +289,8 @@ sub checkConfig {
     die __x("'{variable}' must be a dictionary", variable => 'taxonomies')
         if exists $self->{taxonomies} && !$self->__isHash($config->{taxonomies});
     foreach my $taxonomy (keys %{$config->{taxonomies}}) {
-        my $record = $config->{taxonomies}->{$taxonomy};
-        if (defined $record) {
-            die __x("'{variable}' must be a dictionary",
-                    variable => "taxonomies.$taxonomy")
-                unless $self->__isHash($config->{taxonomies}->{$taxonomy});
-            my $simweight = $record->{simweight};
-            if (defined $simweight) {
-                die __x("'{variable}' must be a number greater than or equal to zero",
-                        variable => "taxonomies.$taxonomy.simweight")
-                    unless $self->__isNumber($simweight) && $simweight >= 0;
-            }
-        }
+        $config->{taxonomies}->{$taxonomy} = 1
+            if !defined $config->{taxonomies}->{$taxonomy};
     }
 
     die __x("'{variable}' must be a single value", variable => 'type')

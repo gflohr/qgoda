@@ -36,7 +36,6 @@ sub new {
         config => $config,
         assets => {},
         artefacts => {},
-        taxonomies => {},
         __filter_cache => {},
     };
 
@@ -127,7 +126,6 @@ sub getChain {
     return $chain;
 }
 
-# FIXME! Prefilter the list for simple taxonomy filters.
 sub searchAssets {
     my ($self, %filters) = @_;
 
@@ -233,47 +231,40 @@ sub searchAssets {
     return \@found;
 }
 
-sub addTaxonomy {
-    my ($self, $taxonomy, $asset, $value) = @_;
-
-    $self->{__taxonomies}->{$taxonomy} ||= {};
-    $self->{__taxonomies}->{$taxonomy}->{$value} ||= {};
-
-    $self->{__taxonomies}->{$taxonomy}->{$value}->{$asset->getRelpath} = $asset;
-
-    return $self;
-}
-
-sub getAssetsInTaxonomy {
-    my ($self, $taxonomy, $value) = @_;
-
-    return {} if !exists $self->{__taxonomies};
-    return {} if !exists $self->{__taxonomies}->{$taxonomy};
-
-    return $self->{__taxonomies}->{$taxonomy}->{$value} || {}
-}
-
-sub getTaxonomyValues {
-    my ($self, $taxonomy) = @_;
-
-    return [] if !exists $self->{__taxonomies};
-    return [] if !exists $self->{__taxonomies}->{$taxonomy};
-
-    return [keys %{$self->{__taxonomies}->{$taxonomy}}];
-}
-
 sub computeRelations {
     my ($self) = @_;
 
     # First pass. Get permalinks.
     my %locations;
     my %permalinks;
+    my $taxonomies = Qgoda->new->config->{taxonomies};
+    my %taxonomies;
+    my %links;
+
     foreach my $asset (values %{$self->{assets}}) {
+        my $permalink = $asset->{permalink};
         $locations{$asset->{location}} = $asset;
-        $permalinks{$asset->{permalink}} = $asset;
+        $permalinks{$permalink} = $asset;
+
+        foreach my $link (keys %{$asset->{links}}) {
+            $links{$link}->{$permalink} = $asset;
+        }
+
+        foreach my $key (keys %$taxonomies) {
+            next if !exists $asset->{$key};
+            my @values = $asset->{$key};
+            @values = @{$values[0]}
+                if ref $values[0] && 'ARRAY' eq reftype $values[0];
+            foreach my $value (@values) {
+                $taxonomies{$key}->{$value}->{$permalink} = $asset;
+            }
+        }
     }
 
-    # Second pass.  Add values for links.
+    my %related;
+
+    # Second pass.  Add values for links between assets.
+    my $link_score = 5;  # FIXME! Should be configurable!
     foreach my $permalink (keys %permalinks) {
         my $asset = $permalinks{$permalink};
         my $links = $asset->{links};
@@ -286,10 +277,34 @@ sub computeRelations {
             }
 
             if ($target && $target != $asset) {
-                ++$target->{related}->{$asset->{permalink}};
-                ++$asset->{related}->{$target->{permalink}};
+                $related{$permalink}->{$target->{permalink}} += $link_score;
+                $related{$target->{permalink}}->{$permalink} += $link_score;
             }
         }
+    }
+
+    my $common_link_score = 1; # FIXME! Should be configurable.
+    foreach my $link (keys %links) {
+        my @group = keys %{$links{$link}};
+        foreach my $from (@group) {
+            foreach my $to (@group) {
+                $related{$from}->{$to} += $common_link_score;
+            }
+        }
+    }
+
+    foreach my $permalink (keys %related) {
+        my $peers = $related{$permalink};
+
+        # Delete relation with itself.
+        delete $peers->{$permalink};
+
+        # Sort by relevance and replace score with asset-score pair.
+        my @related = 
+            map { [$permalinks{$_}, $peers->{$_}] }
+            sort { $peers->{$a} <=> $peers->{$b} } keys %{$peers};
+        
+        $permalinks{$permalink}->{related} = \@related;
     }
 
     return $self
