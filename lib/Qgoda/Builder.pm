@@ -63,6 +63,8 @@ sub build {
         setlocale(POSIX::LC_ALL(), $saved_locale);
     }
 
+    $site->computeRelations;
+
     # 2nd pass, usually HTML.
     ASSET: foreach my $asset ($site->getAssets) {
         my $saved_locale = setlocale(POSIX::LC_ALL());

@@ -199,6 +199,12 @@ sub __fillPathInformation {
 
     $asset->{location} = $site->getMetaValue(location => $asset);
     $asset->{permalink} = $site->getMetaValue(permalink => $asset);
+
+    if (Qgoda->new->config->{'case-sensitive'}) {
+        $asset->{location} = lc $asset->{location};
+        $asset->{permalink} = lc $asset->{permalink};
+    }
+
     $asset->{index} = $site->getMetaValue(index => $asset);
 
     return $self;

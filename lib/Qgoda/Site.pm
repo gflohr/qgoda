@@ -262,4 +262,37 @@ sub getTaxonomyValues {
     return [keys %{$self->{__taxonomies}->{$taxonomy}}];
 }
 
+sub computeRelations {
+    my ($self) = @_;
+
+    # First pass. Get permalinks.
+    my %locations;
+    my %permalinks;
+    foreach my $asset (values %{$self->{assets}}) {
+        $locations{$asset->{location}} = $asset;
+        $permalinks{$asset->{permalink}} = $asset;
+    }
+
+    # Second pass.  Add values for links.
+    foreach my $permalink (keys %permalinks) {
+        my $asset = $permalinks{$permalink};
+        my $links = $asset->{links};
+        foreach my $link (keys %$links) {
+            my $target;
+            if (exists $permalinks{$link}) {
+                $target = $permalinks{$link}
+            } elsif (exists $locations{$link}) {
+                $target = $locations{$link};
+            }
+
+            if ($target && $target != $asset) {
+                ++$target->{related}->{$asset->{permalink}};
+                ++$asset->{related}->{$target->{permalink}};
+            }
+        }
+    }
+
+    return $self
+}
+
 1;

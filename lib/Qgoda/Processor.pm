@@ -25,6 +25,7 @@ use Scalar::Util qw(blessed);
 use URI;
 use URI::Escape qw(uri_unescape);
 
+use Qgoda;
 use Qgoda::Util qw(empty);
 
 sub new {
@@ -40,6 +41,8 @@ sub process {
 
 sub postMeta {
     my ($self, $content, $asset) = @_;
+
+    my $case_sensitive = Qgoda->new->config->{'case-senstive'};
 
     require HTML::TreeBuilder;
     my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
@@ -66,10 +69,20 @@ sub postMeta {
     # Collect links.
     my %links;
     foreach my $record (@{$tree->extract_links}) {
-        my $link = eval {
-            URI->new(uri_unescape $record->[0])->canonical;
+        my $href = uri_unescape $record->[0];
+        eval {
+            my $canonical = URI->new($href)->canonical;
+            $href = $canonical;
         };
-        ++$links{$link} if !empty $link;
+        if (!empty $href) {
+            if ('/' eq substr $href, 0, 1) {
+                $href = lc $href if !$case_sensitive;
+            }
+            
+            # This will also count links to itself but they will be filtered
+            # out by Qgoda::Site->computeRelated().
+            ++$links{$href};
+        }
     }
 
     return excerpt => $excerpt, links => \%links;
