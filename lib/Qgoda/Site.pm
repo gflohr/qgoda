@@ -23,7 +23,7 @@ use strict;
 # FIXME! This is only needed for debugging the filter cache.  Remove it,
 # once the filter cache is stable.
 use MIME::Base64 qw(encode_base64);
-use List::Util qw(pairs);
+use List::Util qw(pairs any);
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(canonical);
@@ -178,6 +178,29 @@ sub searchAssets {
         '&'   => sub { $_[0] &  $_[1] },
         '|'   => sub { $_[0] |  $_[1] },
         '^'   => sub { $_[0] ^  $_[1] },
+        'contains' => sub {
+            my @haystack;
+            if (ref $_[0] && 'ARRAY' eq reftype $_[0]) {
+                @haystack = @{$_[0]};
+            } elsif (ref $_[0] && 'HASH' eq reftype $_[0]) {
+                @haystack = keys %{$_[0]};
+            } else {
+                @haystack = ($_[0]);
+            }
+            any { $_[1] eq $_ } @haystack;
+        },
+        'icontains' => sub {
+            my @haystack;
+            if (ref $_[0] && 'ARRAY' eq reftype $_[0]) {
+                @haystack = @{$_[0]};
+            } elsif (ref $_[0] && 'HASH' eq reftype $_[0]) {
+                @haystack = keys %{$_[0]};
+            } else {
+                @haystack = ($_[0]);
+            }
+            my $needle = lc $_[1];
+            any { $needle eq lc $_ } @haystack;
+        },
     );
 
     # FIXME! Simplyfy this! We always expect a key, the value is either a
@@ -308,6 +331,27 @@ sub computeRelations {
     }
 
     return $self
+}
+
+sub getTaxonomyValues {
+    my ($self, $taxonomy, %filters) = @_;
+
+    my $assets = $self->searchAssets(%filters);
+    my %values;
+    foreach my $asset (@$assets) {
+        next if !exists $asset->{$taxonomy};
+
+        my $value = $asset->{$taxonomy};
+        if (ref $value && 'ARRAY' eq reftype $value) {
+            map { $values{$_} = 1 } @$value;
+        } elsif (ref $value && 'HASH' eq reftype $value) {
+            map { $values{$_} = 1 } keys %$value;
+        } else {
+            $values{$value} = 1;
+        }
+    }
+
+    return keys %values;
 }
 
 1;

@@ -537,4 +537,29 @@ sub pagination {
     return $retval;
 }
 
+sub taxonomyValues {
+    my ($self, $taxonomy, $filters) = @_;
+
+    my $filters = $self->__sanitizeFilters($filters);
+    my $site = Qgoda->new->getSite;
+
+    my @values = $site->getTaxonomyValues($taxonomy, %$filters);
+
+    return [sort @values];
+}
+
+sub ltaxonomyValues {
+    my ($self, $taxonomy, $filters) = @_;
+
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
+
+    return $self->taxonomyValues($taxonomy, $filters);
+}
+
+sub sprintf {
+    my ($self, $fmt, @args) = @_;
+
+    return sprintf $fmt, @args;
+}
 1;
