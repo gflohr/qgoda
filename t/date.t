@@ -26,7 +26,7 @@ my $refdate = 1512072552;
 
 sub refdate;
 
-my $date;
+my ($date, $result);
 
 $date = refdate;
 eval { ++$date };
@@ -51,6 +51,12 @@ eval { $date-- };
 ok !$@, $@;
 is $date->epoch, $refdate - 1, 'post-decrement';
 isa_ok $date, 'Qgoda::Util::Date', 'post-decrement reference';
+
+$date = refdate;
+eval { $result = !$date };
+ok !$@, $@;
+is $result, !$refdate, 'logical not';
+isa_ok $date, 'Qgoda::Util::Date', 'logical not reference';
 
 done_testing();
 
