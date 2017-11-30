@@ -25,7 +25,11 @@ use POSIX qw(strftime);
 use Locale::TextDomain qw('com.cantanea.qgoda');
 
 use overload
-    '""' => 'ISOString';
+    '""' => 'ISOString',
+    '+' => 'plus';
+#    'eq' => 'equals';
+#    'cmp' => 'cmpDate',
+#    '==' => 'nequals';
 
 sub new {
     my ($class, $date) = @_;
@@ -162,4 +166,34 @@ sub ISOString {
         $then[5] + 1900, $then[4] + 1, $then[3],
         $then[2], $then[1], $then[0]
 }
+
+sub plus {
+    my ($self, $other, $swap) = @_;
+
+    $$self += $other;
+
+    $swap ? $$self : $self;
+}
+
+sub cmpDate {
+    my ($self, $other, $swap) = @_;
+
+    my $result = $self->ISOString cmp $other;
+    $result = -$result if $swap;
+
+    return $result;
+}
+
+sub equals {
+    my ($self, $other) = @_;
+
+    return "$self" eq "$other";
+}
+
+sub nequals {
+    my ($self, $other) = @_;
+
+    return $$self == $other;
+}
+
 1;
