@@ -26,7 +26,8 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 
 use overload
     '""' => 'ISOString',
-    '+' => 'plus';
+    '+' => 'plus',
+    '-' => 'minus';
 #    'eq' => 'equals';
 #    'cmp' => 'cmpDate',
 #    '==' => 'nequals';
@@ -173,6 +174,18 @@ sub plus {
     $$self += $other;
 
     $swap ? $$self : $self;
+}
+
+sub minus {
+    my ($self, $other, $swap) = @_;
+
+    if ($swap) {
+        return $other - $$self;
+    }
+
+    my $ref = ref $self;
+    $$self -= $other;
+    bless $self, $ref;
 }
 
 sub cmpDate {

@@ -32,11 +32,25 @@ $date = refdate;
 eval { ++$date };
 ok !$@, $@;
 is $date->epoch, $refdate + 1, 'pre-increment';
+isa_ok $date, 'Qgoda::Util::Date', 'pre-increment reference';
 
 $date = refdate;
 eval { $date++ };
 ok !$@, $@;
 is $date->epoch, $refdate + 1, 'post-increment';
+isa_ok $date, 'Qgoda::Util::Date', 'post-increment reference';
+
+$date = refdate;
+eval { --$date };
+ok !$@, $@;
+is $date->epoch, $refdate - 1, 'pre-decrement';
+isa_ok $date, 'Qgoda::Util::Date', 'pre-decrement reference';
+
+$date = refdate;
+eval { $date-- };
+ok !$@, $@;
+is $date->epoch, $refdate - 1, 'post-decrement';
+isa_ok $date, 'Qgoda::Util::Date', 'post-decrement reference';
 
 done_testing();
 
