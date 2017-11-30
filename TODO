@@ -1,3 +1,7 @@
+- Markdown files have to end with an extra newline, otherwise the excerpt
+  is not found
+- when merging configuration data into defaults, a wrong type will throw
+  an exception (example: "helpers" is now a hash reference, not a list).
 - pre-process command line options: try to find the command before they are
   passed to Getopt::Long.  Also pass a cleaned argument vector to the
   methods.
