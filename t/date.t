@@ -58,6 +58,12 @@ ok !$@, $@;
 is $result, !$refdate, 'logical not';
 isa_ok $date, 'Qgoda::Util::Date', 'logical not reference';
 
+$date = refdate;
+eval { $result = ~$date };
+ok !$@, $@;
+is $result, ~$refdate, 'bitwise not';
+isa_ok $date, 'Qgoda::Util::Date', 'bitwise not reference';
+
 done_testing();
 
 sub refdate {

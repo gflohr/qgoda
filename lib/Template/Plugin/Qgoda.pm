@@ -29,9 +29,10 @@ use URI;
 use Scalar::Util qw(reftype);
 use JSON qw(encode_json decode_json);
 use Date::Parse qw(str2time);
-use POSIX qw(strftime);
+use POSIX qw(strftime setlocale LC_ALL );
 use File::Basename;
 use List::Util qw(pairmap);
+use Locale::Util qw(web_set_locale);
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file);
@@ -479,14 +480,25 @@ sub clone {
 }
 
 sub strftime {
-    my ($self, $format, $date) = @_;
+    my ($self, $format, $date, $lingua) = @_;
 
     my $time = str2time $date;
     $time = $date if !defined $time;
 
     $format = '%c' if empty $format;
 
-    return POSIX::strftime($format, localtime $time);
+    my $saved_locale;    
+    if (!empty $lingua) {
+        $saved_locale = POSIX::setlocale(LC_ALL);
+        web_set_locale($lingua, 'utf-8') if $lingua;
+    }
+
+    my $date = POSIX::strftime($format, localtime $time);
+
+    POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
+
+    Encode::_utf8_off($date);
+    return $date;
 }
 
 sub try {

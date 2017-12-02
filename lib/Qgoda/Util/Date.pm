@@ -27,10 +27,11 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 use overload
     '""' => 'ISOString',
     '+' => 'plus',
-    '-' => 'minus';
-#    'eq' => 'equals';
-#    'cmp' => 'cmpDate',
-#    '==' => 'nequals';
+    '-' => 'minus',
+    '~' => 'bitwiseNot',
+    'eq' => 'equals',
+    'cmp' => 'cmpDate',
+    '==' => 'nequals';
 
 sub new {
     my ($class, $date) = @_;
@@ -185,6 +186,15 @@ sub minus {
 
     my $ref = ref $self;
     $$self -= $other;
+    bless $self, $ref;
+}
+
+sub bitwiseNot {
+    my ($self) = @_;
+
+    my $ref = ref $self;
+    my $result = ~$$self;
+
     bless $self, $ref;
 }
 

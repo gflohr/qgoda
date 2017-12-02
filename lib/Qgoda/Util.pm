@@ -38,7 +38,7 @@ use vars qw(@EXPORT_OK);
                 perl_identifier perl_class class2module
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
-                canonical purify);
+                canonical purify clear_utf8_flag);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -58,7 +58,7 @@ sub read_file($) {
     my ($filename) = @_;
 
     my $fh = IO::File->new;
-    $fh->open("< $filename") or return;
+    open $fh, "<", $filename or return;
 
     local $/;
     my $data = <$fh>;
@@ -71,7 +71,7 @@ sub front_matter($) {
     my ($filename) = @_;
 
     my $fh = IO::File->new;
-    $fh->open("< $filename") or return;
+    open $fh, "<", $filename or return;
 
     my $first_line = <$fh>;
     return if empty $first_line;
@@ -92,7 +92,7 @@ sub read_body($) {
     my ($filename) = @_;
 
     my $fh = IO::File->new;
-    $fh->open("< $filename") or return;
+    open $fh, "<", $filename or return;
 
     my $first_line = <$fh>;
     return if empty $first_line;
@@ -116,7 +116,7 @@ sub write_file($$) {
     make_path $directory unless -e $directory;
 
     my $fh = IO::File->new;
-    $fh->open("> $path") or return;
+    open $fh, ">", $path or return;
 
     $fh->print($data) or return;
     $fh->close or return;
@@ -676,6 +676,43 @@ sub purify {
     $type = $item->[0];
 
     return $item->[1]->[0];
+}
+
+# Clean data polluted with Perl's "utf8" flag.
+sub clear_utf8_flag {
+    my ($data) = @_;
+
+    my $wanted = sub {
+        if (ref $_) {
+            my $obj = $_;
+            if ('HASH' eq reftype $obj) {
+                foreach my $key (keys %$obj) {
+                    if (Encode::is_utf8($key)) {
+                        my $value = delete $obj->{$key};
+                        Encode::_utf8_off($key);
+                        $obj->{$key} = $value;
+                    }
+
+                    my $value = $obj->{$key};
+                    if (defined $value && !ref $value
+                        && Encode::is_utf8($value)) {
+                        Encode::_utf8_off($obj->{$key});
+                    }
+                }
+            } elsif ('ARRAY' eq reftype $obj) {
+                foreach my $item (@$obj) {
+                    if (defined $item && !ref $item
+                        && Encode::is_utf8($item)) {
+                        Encode::_utf8_off($item);
+                    }
+                }
+            }
+        }
+    };
+
+    walk $wanted, $data;
+
+    return $data;
 }
 
 1;

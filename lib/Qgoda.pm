@@ -26,6 +26,7 @@ use vars qw(@EXPORT $VERSION);
 $VERSION = '0.1.0';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::Messages;
 use File::Find;
 use Scalar::Util qw(reftype);
 use AnyEvent;
@@ -53,6 +54,7 @@ my $qgoda;
 sub new {
     return $qgoda if $qgoda;
 
+    Locale::Messages->select_package('gettext_pp');
     my ($class, $options, $params) = @_;
 
     $options ||= {};
