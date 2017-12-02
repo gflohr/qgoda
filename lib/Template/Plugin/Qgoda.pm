@@ -27,13 +27,14 @@ use File::Spec;
 use Cwd;
 use URI;
 use Scalar::Util qw(reftype);
-use JSON qw(encode_json);
+use JSON qw(encode_json decode_json);
 use Date::Parse qw(str2time);
 use POSIX qw(strftime);
 use File::Basename;
+use List::Util qw(pairmap);
 
 use Qgoda;
-use Qgoda::Util qw(collect_defaults merge_data empty);
+use Qgoda::Util qw(collect_defaults merge_data empty read_file);
 use Qgoda::Builder;
 
 sub new {
@@ -121,10 +122,42 @@ sub new {
         return [sort { $a->{$field} cmp $b->{$field} } @$assets];
     };
 
+    my $kebap_snake = sub {
+        return {
+            pairmap {
+                $a =~ s/-/_/g;
+                $a, $b;
+            } %{$_[0]}
+        };
+    };
+
+    my $kebap_camel = sub {
+        return {
+            pairmap {
+                $a =~ s/-(.)/uc $1/ge;
+                $a =~ s/-$/_/;
+                $a, $b;
+            } %{$_[0]}
+        };
+    };
+
+    my %escapes = ('"' => 'quot', '&' => 'amp');
+    my $quote_values = sub {
+        return { 
+            pairmap {
+                $b =~ s/(["&])/&$escapes{$1};/og;
+                $a, qq{"$b"}
+            } %{$_[0]}
+        };
+    };
+
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
     $context->define_vmethod(scalar => slugify => \&Qgoda::Util::slugify);
     $context->define_vmethod(scalar => unmarkup => \&Qgoda::Util::unmarkup);
+    $context->define_vmethod(hash => kebapSnake => $kebap_snake);
+    $context->define_vmethod(hash => kebapCamel => $kebap_camel);
+    $context->define_vmethod(hash => quoteValues => $quote_values);
 
     my $self = {
         __context => $context
@@ -562,4 +595,28 @@ sub sprintf {
 
     return sprintf $fmt, @args;
 }
+
+sub loadJSON {
+    my ($self, $filename) = @_;
+
+    die __x("loadJSON('{filenname}'): absolute paths are not allowed!\n",
+            filename => $filename)
+        if File::Spec->file_name_is_absolute($filename);
+
+    my $absolute = File::Spec->rel2abs($filename, Qgoda->new->config->{srcdir});
+    my ($volume, $directories, undef) = File::Spec->splitpath($absolute);
+    my @directories = File::Spec->splitdir($absolute);
+    map { 
+        $_ eq File::Spec->updir and
+            die __x("'{filenname}'): '{updir}' is not allowed!\n",
+                    filename => $filename, updir => File::Spec->updir);
+    } File::Spec->splitdir($absolute);
+
+    my $json = read_file $filename or return;
+    my $data = eval { decode_json $json };
+    return if !defined $data;
+
+    return $data;
+}
+
 1;
