@@ -23,7 +23,7 @@ use strict;
 use Template;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
-use Qgoda::Util qw(empty);
+use Qgoda::Util qw(empty clear_utf8_flag);
 
 use base qw(Qgoda::Processor);
 
@@ -45,6 +45,10 @@ sub new {
         INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
         RECURSION => 1,
+        # CP 1252 aka Windows-1252 defines all 8 bit characters.  We (ab)use it
+        # for "binary" so that TT2 does not mess with character data.  Using
+        # "utf-8" for ENCODING is a recipe for trouble.
+        ENCODING => 'CP 1252'
     }) or die Template->error;
 
     return $self;
@@ -58,6 +62,8 @@ sub process {
         site => $site,
         config => $site->{config},
     };
+
+    clear_utf8_flag $vars;
 
     my $cooked;
     $self->{__tt}->process(\$content, $vars, \$cooked)

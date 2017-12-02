@@ -26,11 +26,10 @@ use Locale::TextDomain qw('com.cantanea.qgoda');
 
 use overload
     '""' => 'ISOString',
-    '+' => 'plus',
-    '-' => 'minus';
-#    'eq' => 'equals';
-#    'cmp' => 'cmpDate',
-#    '==' => 'nequals';
+    'eq' => 'equals',
+    'cmp' => 'cmpDate',
+    '==' => 'nequals',
+    '<=>' => 'ncmpDate';
 
 sub new {
     my ($class, $date) = @_;
@@ -168,30 +167,19 @@ sub ISOString {
         $then[2], $then[1], $then[0]
 }
 
-sub plus {
-    my ($self, $other, $swap) = @_;
-
-    $$self += $other;
-
-    $swap ? $$self : $self;
-}
-
-sub minus {
-    my ($self, $other, $swap) = @_;
-
-    if ($swap) {
-        return $other - $$self;
-    }
-
-    my $ref = ref $self;
-    $$self -= $other;
-    bless $self, $ref;
-}
-
 sub cmpDate {
     my ($self, $other, $swap) = @_;
 
     my $result = $self->ISOString cmp $other;
+    $result = -$result if $swap;
+
+    return $result;
+}
+
+sub ncmpDate {
+    my ($self, $other, $swap) = @_;
+
+    my $result = $self->epoch <=> $other;
     $result = -$result if $swap;
 
     return $result;
