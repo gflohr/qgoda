@@ -102,25 +102,17 @@ sub new {
     my $sort_by = sub {
         my ($assets, $field) = @_;
 
-        # Schwartzian transform.
-        return [
-            map { $assets->[$_->[0]] }
-            sort compare_array $get_values->($assets, $field)
-        ];
-
-        return [sort { $a->{$field} cmp $b->{$field} } @$assets];
+        my @sorted = map { $assets->[$_->[0]] }
+                     sort compare_array $get_values->{$assets, $field};
+        return \@sorted;
     };
 
     my $nsort_by = sub {
         my ($assets, $field) = @_;
 
-        # Schwartzian transform.
-        return [
-            map { $assets->[$_->[0]] }
-            sort ncompare_array $get_values->($assets, $field)
-        ];
-
-        return [sort { $a->{$field} cmp $b->{$field} } @$assets];
+        my @sorted = map { $assets->[$_->[0]] }
+                     sort ncompare_array $get_values->{$assets, $field};
+        return \@sorted;
     };
 
     my $kebap_snake = sub {
