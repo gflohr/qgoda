@@ -136,11 +136,29 @@ sub saveArtefact {
                              origin => $origin ? $origin->getOrigin : __"[unknown origin]"));
     }
 
-    unless (write_file $path, $asset->{content}) {
-        my $logger = $self->logger;
-        $logger->error(__x("error writing '{filename}': {error}",
-                           filename => $path, error => $!));
-        return;
+    my $write_file = 1;
+    if ($config->{compare_output}) {
+        my @stat = stat $path;
+        if (@stat) {
+            if ($stat[7] == length $asset->{content}) {
+                my $old = read_file $path;
+                if (defined $old || $old eq $asset->{content}) {
+                    undef $write_file;
+                    $self->logger->debug(__x("Skipping unchanged file"
+                                             . " '{output}'", output => $path));
+                }
+            }
+        }
+    }
+
+    if ($write_file) {
+        $site->addModified($path, $asset);
+        unless (write_file $path, $asset->{content}) {
+            my $logger = $self->logger;
+            $logger->error(__x("error writing '{filename}': {error}",
+                               filename => $path, error => $!));
+            return;
+        }
     }
 
     $site->addArtefact($path, $asset);
