@@ -68,7 +68,7 @@ sub analyzeAsset {
 
     my $front_matter = front_matter $path;
     my $front_matter_data;
-    if (!empty $front_matter) {
+    if (defined $front_matter) {
         $front_matter_data = eval { YAML::Load($front_matter) };
         if ($@) {
             $logger->error(yaml_error $path, $@);
