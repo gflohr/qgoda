@@ -37,6 +37,7 @@ sub new {
         assets => {},
         artefacts => {},
         __filter_cache => {},
+        __modified => {},
     };
 
     bless $self, $class;
@@ -74,6 +75,18 @@ sub getArtefact {
 
 sub getArtefacts {
     values %{shift->{artefacts}};
+}
+
+sub addModified {
+    my ($self, $path, $asset) = @_;
+
+    $self->{__modified}->{$path} = $asset;
+
+    return $self;
+}
+
+sub getModified {
+    shift->{__modified};
 }
 
 # Only works for top-level keys!

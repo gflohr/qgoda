@@ -99,12 +99,18 @@ sub build {
 
     $self->__build($site);
 
-    $self->__prune($site);
+    my $deleted = $self->__prune($site);
 
-    my $timestamp_file = File::Spec->catfile($config->{srcdir}, '_timestamp');
-    if (!write_file($timestamp_file, sprintf "%d\n", time)) {
-            $logger->error(__x("cannot write '{file}': {error}!",
-                           file => $timestamp_file, error => $!));
+    my $site = $self->getSite;
+    my $modified = scalar keys %{$site->getModified};
+    
+    if ($modified + $deleted) {
+        my $timestamp_file = File::Spec->catfile($config->{srcdir},
+                                                 '_timestamp');
+        if (!write_file($timestamp_file, sprintf "%d\n", time)) {
+                $logger->error(__x("cannot write '{file}': {error}!",
+                               file => $timestamp_file, error => $!));
+        }
     }
 
     my $num_artefacts = $site->getArtefacts;
@@ -112,6 +118,16 @@ sub build {
                        "finished building site with {num} artefacts",
                        $num_artefacts,
                        num => $num_artefacts));
+    $logger->info(__nx("one artefact was changed and has been re-written",
+                       "{num} artefacts were changed and have been re-written",
+                       $modified,
+                       num => $modified));
+    if ($deleted) {
+    $logger->info(__nx("one stale artefact has been deleted",
+                       "{num} stale artefacts have been deleted",
+                       $deleted,
+                       num => $deleted));
+    }
 
     return $self;
 }
@@ -533,6 +549,7 @@ sub __prune {
     my $logger = $self->{__logger};
     my %directories;
 
+    my $deleted = 0;
     foreach my $outfile (@outfiles) {
         if ($directories{$outfile} || $site->getArtefact($outfile)) {
             # Mark the containing directory as generated.
@@ -547,6 +564,7 @@ sub __prune {
                                directory => $outfile, error => $!))
                 if !rmdir $outfile;
         } else {
+            ++$deleted;
             $logger->debug(__x("pruning file '{file}'",
                                file => $outfile));
             $logger->error(__x("cannot remove file '{filename}': {error}",
@@ -555,7 +573,7 @@ sub __prune {
         }
     }
 
-    return $self;
+    return $deleted;
 }
 
 sub __filesysChangeFilter {
