@@ -103,7 +103,7 @@ sub new {
         my ($assets, $field) = @_;
 
         my @sorted = map { $assets->[$_->[0]] }
-                     sort compare_array $get_values->{$assets, $field};
+                     sort compare_array $get_values->($assets, $field);
         return \@sorted;
     };
 
@@ -111,7 +111,7 @@ sub new {
         my ($assets, $field) = @_;
 
         my @sorted = map { $assets->[$_->[0]] }
-                     sort ncompare_array $get_values->{$assets, $field};
+                     sort ncompare_array $get_values->($assets, $field);
         return \@sorted;
     };
 
