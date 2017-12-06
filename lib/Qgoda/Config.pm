@@ -189,6 +189,7 @@ sub default {
             views => '_views',
             includes => '_includes'
         },
+        compare_output => 1,
         helpers => {},
         processors => {
             chains => {
