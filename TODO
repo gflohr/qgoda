@@ -1,3 +1,4 @@
+- It must be possible to write relative links ... maybe as a global configuration option?
 - _timestamp should not be written if no file was written
 - Markdown files have to end with an extra newline, otherwise the excerpt
   is not found
