@@ -142,7 +142,7 @@ sub saveArtefact {
         if (@stat) {
             if ($stat[7] == length $asset->{content}) {
                 my $old = read_file $path;
-                if (defined $old || $old eq $asset->{content}) {
+                if (defined $old && $old eq $asset->{content}) {
                     undef $write_file;
                     $self->logger->debug(__x("Skipping unchanged file"
                                              . " '{output}'", output => $path));
