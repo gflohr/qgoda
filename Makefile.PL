@@ -152,9 +152,8 @@ sub install {
 ***
 ***    $cmd
 ***
-*** You can also install the package as usual, and try
-*** the command  "perldoc Qgoda::Installation" for
-*** more options to fix the problem.
+*** You can also install the package as usual, and read
+*** http://www.qgoda.net/en/docs/installation.md for more options.
 EOF
             autoflush STDERR, 1;
 
