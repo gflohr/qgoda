@@ -22,6 +22,7 @@ use strict;
 
 use POSIX qw (setlocale LC_TIME strftime);
 use Time::HiRes qw(gettimeofday);
+use Term::ANSIColor qw(colored);
 
 sub new {
     my ($class, %args) = @_;
@@ -78,7 +79,21 @@ sub __makeMessage {
               grep { $_ } $timestamp, $reqid, $client, $type, $prefix;
     $pre .= ' ' unless $msgs[0] =~ /^\[/;;
 
-    my @chomped = map { $pre . $_ }
+    my $colored = sub { $_[0] };
+
+    if (-t STDOUT) {
+        my %colors = (
+            error => 'bold bright_red',
+            warning => 'red',
+            info => 'blue',
+            fatal => 'bold red',
+        );
+        if (exists $colors{$type}) {
+            $colored = sub { colored([$colors{$type}], $_[0]) };
+        }
+    }
+
+    my @chomped = map { $pre . $colored->($_) }
                   grep { $_ ne '' }
                   map { $self->__trim($_) } @msgs;
 
