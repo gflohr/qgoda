@@ -33,9 +33,10 @@ use POSIX qw(strftime setlocale LC_ALL );
 use File::Basename;
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
+use URI::Escape qw(uri_escape_utf8);
 
 use Qgoda;
-use Qgoda::Util qw(collect_defaults merge_data empty read_file);
+use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape);
 use Qgoda::Builder;
 
 sub new {
@@ -399,6 +400,24 @@ sub lxref {
     $filters->{lingua} = $self->__getAsset->{lingua};
 
     return $self->xref($variable, $filters);
+}
+
+sub anchor {
+    my ($self, $filters) = @_;
+
+    my $href = uri_escape_utf8 $self->link($filters);
+    my $title = html_escape $self->xref(title => $filters);
+
+    return qq{<a href="$href">$title</a>};
+}
+
+sub lanchor {
+    my ($self, $filters) = @_;
+
+    my $href = uri_escape_utf8 $self->llink($filters);
+    my $title = html_escape $self->lxref(title => $filters);
+
+    return qq{<a href="$href">$title</a>};
 }
 
 sub linkPost {
