@@ -16,13 +16,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::XGettext;
+package Qgoda::Locale::XGettext;
 
 use strict;
 
-use Qgoda;
 use Locale::TextDomain qw(com.cantanea.qgoda);
 
-use base qw(Locale::XGettext::TT2;
+use Qgoda;
+use Qgoda::Util qw(read_file);
 
+use base qw(Locale::XGettext);
+
+sub readFile {
+    my ($self, $filename) = @_;
+
+    my $content = read_file $filename
+        or die __x("cannot read '{filename}': {error}.\n",
+                   filename => $filename, error => $!);
+    
+    return $self;
+}
 1;
