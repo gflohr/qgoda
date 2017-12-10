@@ -75,6 +75,7 @@ sub front_matter($) {
     my $fh = IO::File->new;
     open $fh, "<", $filename or return;
 
+    undef $!;
     my $first_line = <$fh>;
     return if empty $first_line;
     return if $first_line !~ /---[ \t]*\n$/o;
@@ -96,6 +97,7 @@ sub read_body($) {
     my $fh = IO::File->new;
     open $fh, "<", $filename or return;
 
+    undef $!;
     my $first_line = <$fh>;
     return if empty $first_line;
     return if $first_line !~ /---[ \t]*\n$/o;
