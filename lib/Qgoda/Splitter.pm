@@ -45,7 +45,7 @@ sub new {
 
     my @first =  grep { !empty } split /
                 (
-                <!--QGODA_XGETTEXT-->(?:.*?)<!--\/QGODA_XGETTEXT-->
+                <!--QGODA-XGETTEXT-->(?:.*?)<!--\/QGODA-XGETTEXT-->
                 |
                 [ \011-\015]*
                 \n
@@ -70,7 +70,7 @@ sub new {
 
     foreach my $chunk (@chunks) {
         if ($chunk =~ /[^ \011-\015]+$/) {
-            if ($chunk =~ /^<!--QGODA_XGETTEXT-->(.*?)<!--\/QGODA_XGETTEXT-->$/s) {
+            if ($chunk =~ /^<!--QGODA-XGETTEXT-->(.*?)<!--\/QGODA-XGETTEXT-->$/s) {
                 my $string = $1;
                 $chunk = bless \$string, 'b';
             } else {
@@ -98,6 +98,25 @@ sub chunks {
     my ($self) = @_;
 
     map { $$_ } grep { 's' ne ref } @{$self->{__chunks}};
+}
+
+sub reassemble {
+    my ($self, $callback) = @_;
+
+    my $output = '';
+    foreach my $chunk (@{$self->{__chunks}}) {
+        if ('s' eq ref $chunk) {
+            $output .= $$chunk;
+        } elsif ('b' eq ref $chunk) {
+            $output .= "<!--QGODA-XGETTEXT-->"
+                . $callback->($$chunk)
+                . "<!--/QGODA-XGETTEXT-->";
+        } else {
+            $output .= $callback->($$chunk);
+        }
+    }
+
+    return $output;
 }
 
 1;

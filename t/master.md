@@ -7,7 +7,7 @@ Multiple lines
 in one
 paragraph.
 
-<!--QGODA_XGETTEXT-->
+<!--QGODA-XGETTEXT-->
 Block
 
 with
@@ -15,7 +15,7 @@ with
 embedded
 
 new lines.
-<!--/QGODA_XGETTEXT-->
+<!--/QGODA-XGETTEXT-->
 
 
 
