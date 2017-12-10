@@ -125,7 +125,9 @@ The following commands are currently supported:
   config                      dump the current configuration and exit
   init                        initialize a new qgoda site
   dump                        dump the site structure as JSON (implies --quiet)
-  markdown                    process markdown
+  markdown                    process Markdown
+  xgettext                    extract translatable strings from Markdown
+                              files
 
 Operation mode:
   -q, --quiet                 quiet mode
@@ -195,32 +197,3 @@ Written by Guido Flohr (http://www.guido-flohr.net/).
 }
 
 1;
-
-__END__
-
-my $command = shift @ARGV;
-my $method;
-if ('watch' eq $command) {
-    $method = 'watch';
-} elsif ('build' eq $command) {
-    $method = 'build';
-} elsif ('config' eq $command) {
-    delete $options{verbose};
-    $options{quiet} = 1;
-    $method = 'dumpConfig';
-} elsif ('dump' eq $command) {
-    $options{log_stderr} = 1;
-    $options{quiet} = 1 if !$options{verbose};
-    $method = 'dump';
-} elsif ('migrate' eq $command) {
-    $method = 'migrate';
-} elsif ('init' eq $command) {
-    $method = 'init';
-} else {
-    usage_error __x("Unknown command '{command}'.", command => $command);
-}
-
-$options{args} = [@ARGV];
-$options{'no-config'} = 1 if 'init' eq $command;
-Qgoda->new($command, %options)->$method;
-
