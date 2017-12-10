@@ -34,6 +34,7 @@ sub new {
         die __x("error reading front matter from '{filename}': {error}\n",
                 filename => $path. error => $error);    
     }
+    my $meta = YAML::XS::Load($front_matter);
 
     my $body = read_body $path;
     if (!defined $front_matter) {
@@ -41,12 +42,14 @@ sub new {
         die __x("error reading body from '{filename}': {error}\n",
                 filename => $path. error => $error);    
     }
-    my $meta = YAML::XS::Load($front_matter);
 
     bless {
         __meta => $meta,
-        __body => $body
     }, $class;
+}
+
+sub meta {
+    shift->{__meta};
 }
 
 1;
