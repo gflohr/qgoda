@@ -708,9 +708,16 @@ sub __writePOTFile {
     my ($self, $site) = @_;
 
     my %masters = $site->getMasters;
+    my $podir = $self->config->{paths}->{po};
 
-    use Data::Dumper;
-    warn Dumper \%masters;
+    my @potfiles = sort 
+        map { File::Spec->abs2rel($_, $podir) } 
+        grep { !empty } keys %masters;
+
+    my $potfiles = File::Spec->catfile($podir, 'MDPOTFILES');
+    write_file $potfiles, join "\n", @potfiles, ''
+        or $self->logger->fatal(__x("cannot write '{filename}': {error}",
+                                    filename => $potfiles, error => $!));
 
     return $self;
 }

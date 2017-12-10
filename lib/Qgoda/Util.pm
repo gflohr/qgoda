@@ -46,8 +46,10 @@ sub evaluate($$);
 sub lookup($$);
 sub _globstar($;$);
 
-sub empty($) {
+sub empty(;$) {
     my ($what) = @_;
+
+    $what = $_ if !@_;
 
     return if defined $what && length $what;
 
