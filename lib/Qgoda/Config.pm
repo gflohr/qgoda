@@ -226,6 +226,7 @@ sub default {
                 tt2 => [qw(_views _includes)],
             }
         },
+        front_matter_placeholder => "[% '' %]\n",
     };
 }
 

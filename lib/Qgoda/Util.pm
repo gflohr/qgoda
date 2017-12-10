@@ -92,7 +92,7 @@ sub front_matter($) {
 }
 
 sub read_body($) {
-    my ($filename) = @_;
+    my ($filename, $placeholder) = @_;
 
     my $fh = IO::File->new;
     open $fh, "<", $filename or return;
@@ -102,6 +102,7 @@ sub read_body($) {
     return if empty $first_line;
     return if $first_line !~ /---[ \t]*\n$/o;
 
+    my $front_matter = '';
     while (1) {
         my $line = <$fh>;
         return if !defined $line;

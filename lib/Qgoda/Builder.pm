@@ -114,7 +114,8 @@ sub readAssetContent {
     if ($asset->{raw}) {
         return read_file($asset->getPath);
     } else {
-        return read_body($asset->getPath);
+        my $placeholder = Qgoda->new->config->{front_matter_placeholder};
+        return read_body($asset->getPath), $placeholder;
     }
 }
 

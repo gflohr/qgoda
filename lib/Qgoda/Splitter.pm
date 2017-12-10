@@ -50,7 +50,7 @@ sub new {
         }
     }
     
-    my $body = read_body $path;
+    my $body = read_body $path, '';
     if (!defined $body) {
         my $error = $! ? $! : __"no body found";
         die __x("error reading body from '{filename}': {error}\n",
@@ -82,25 +82,38 @@ sub new {
         }
     }
 
+    my $lineno = 3 + $front_matter =~ y/\n/\n/;
+    my @entries;
     foreach my $chunk (@chunks) {
         if ($chunk =~ /[^ \011-\015]+$/) {
             if ($chunk =~ /^<!--QGODA-XGETTEXT-->(.*?)<!--\/QGODA-XGETTEXT-->$/s) {
-                my $string = $1;
-                $chunk = bless \$string, 'b';
+                push @entries, {
+                    text => $1,
+                    lineno => $lineno,
+                    type => 'block',
+                }
             } else {
-                my $string = $chunk;
-                $chunk = bless \$string, 't';
+                push @entries, {
+                    text => $chunk,
+                    lineno => $lineno,
+                    type => 'paragraph',
+                }
             }
         } else {
-            my $string = $chunk;
-            $chunk = bless \$string, 's';
+                push @entries, {
+                    text => $chunk,
+                    lineno => $lineno,
+                    type => 'whitespace',
+                }
         }
+
+        $lineno += $chunk =~ y/\n/\n/;
     }
 
     bless {
         __meta => $meta,
         __body => $body,
-        __chunks => \@chunks,
+        __entries => \@entries,
         __front_lines => \%front_lines
     }, $class;
 }
@@ -121,22 +134,22 @@ sub metaLineNumber {
 sub chunks {
     my ($self) = @_;
 
-    map { $$_ } grep { 's' ne ref } @{$self->{__chunks}};
+    map { $_->{text} } grep { 'whitespace' ne $_->{type} } @{$self->{__entries}};
 }
 
 sub reassemble {
     my ($self, $callback) = @_;
 
     my $output = '';
-    foreach my $chunk (@{$self->{__chunks}}) {
-        if ('s' eq ref $chunk) {
-            $output .= $$chunk;
-        } elsif ('b' eq ref $chunk) {
+    foreach my $entry (@{$self->{__entries}}) {
+        if ('whitespace' eq $entry->{type}) {
+            $output .= $entry->{text};
+        } elsif ('block' eq $entry->{type}) {
             $output .= "<!--QGODA-XGETTEXT-->"
-                . $callback->($$chunk)
+                . $callback->($entry->{text})
                 . "<!--/QGODA-XGETTEXT-->";
         } else {
-            $output .= $callback->($$chunk);
+            $output .= $callback->($entry->{text});
         }
     }
 
