@@ -187,7 +187,8 @@ sub default {
         exclude_watch => [],
         paths => {
             views => '_views',
-            includes => '_includes'
+            includes => '_includes',
+            po => '_po',
         },
         compare_output => 1,
         helpers => {},

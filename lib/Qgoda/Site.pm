@@ -26,7 +26,7 @@ use MIME::Base64 qw(encode_base64);
 use List::Util qw(pairs any);
 use Scalar::Util qw(reftype);
 
-use Qgoda::Util qw(canonical);
+use Qgoda::Util qw(canonical empty);
 use Qgoda::Artefact;
 
 sub new {
@@ -38,6 +38,7 @@ sub new {
         artefacts => {},
         __filter_cache => {},
         __modified => {},
+        __relpaths => {},
     };
 
     bless $self, $class;
@@ -48,6 +49,7 @@ sub addAsset {
 
     my $path = $asset->getPath;
     $self->{assets}->{$path} = $asset;
+    $self->{__relpaths}->{$asset->getRelpath} = $asset;
 
     return $self;
 }
@@ -365,6 +367,37 @@ sub getTaxonomyValues {
     }
 
     return keys %values;
+}
+
+sub getMasters {
+    my ($self) = @_;
+
+    my $logger = Qgoda->new->logger;
+    $logger->debug("collecting master documents");
+
+    my %masters;
+    foreach my $relpath (keys %{$self->{__relpaths}}) {
+        my $asset = $self->{__relpaths}->{$relpath};
+        next if empty $asset->{master};
+
+        my $master = $asset->{master};
+        # Allow relative path with or without leading slash.
+        $master =~ s{^/}{};
+
+        my $master_asset = $self->{__relpaths}->{$master};
+
+        # We collect missing master documents under the empty key so that
+        # we can later print proper error messages.
+        if (!defined $master_asset) {
+            $master = '';
+        } else {
+            $master = $master_asset->getRelpath;
+        }
+        $masters{$master} ||= [];
+        push @{$masters{$master}}, $relpath;
+    }
+
+    return %masters;
 }
 
 1;

@@ -95,6 +95,7 @@ sub build {
 
     $self->__analyze($site);
     $self->__locate($site);
+    $self->__writePOTFile($site);
     return $self if $options{dry_run};
 
     $self->__build($site);
@@ -699,6 +700,17 @@ sub _reload {
     my ($self) = @_;
 
     $self->{__config} = Qgoda::Config->new;
+
+    return $self;
+}
+
+sub __writePOTFile {
+    my ($self, $site) = @_;
+
+    my %masters = $site->getMasters;
+
+    use Data::Dumper;
+    warn Dumper \%masters;
 
     return $self;
 }
