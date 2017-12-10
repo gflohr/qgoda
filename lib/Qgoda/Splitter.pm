@@ -22,6 +22,7 @@ use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use YAML::XS;
+use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(empty front_matter read_body);
 
@@ -34,10 +35,23 @@ sub new {
         die __x("error reading front matter from '{filename}': {error}\n",
                 filename => $path. error => $error);    
     }
-    my $meta = YAML::XS::Load($front_matter);
 
+    my $meta = YAML::XS::Load($front_matter);
+    my %front_lines;
+    my $lineno = 1;
+    foreach my $line (split /\n/, $front_matter) {
+        ++$lineno;
+        my $data = eval { YAML::XS::Load($line) };
+        if (!$@ && $data && ref $data && 'HASH' eq reftype $data) {
+            my @keys = keys %$data;
+            foreach my $key (keys %$data) {
+                $front_lines{$key} = $lineno if exists $meta->{$key};
+            }
+        }
+    }
+    
     my $body = read_body $path;
-    if (!defined $front_matter) {
+    if (!defined $body) {
         my $error = $! ? $! : __"no body found";
         die __x("error reading body from '{filename}': {error}\n",
                 filename => $path. error => $error);    
@@ -87,11 +101,21 @@ sub new {
         __meta => $meta,
         __body => $body,
         __chunks => \@chunks,
+        __front_lines => \%front_lines
     }, $class;
 }
 
 sub meta {
     shift->{__meta};
+}
+
+sub metaLineNumber {
+    my ($self, $key) = @_;
+
+    return $self->{__front_lines}->{$key} 
+        if exists $self->{__front_lines}->{$key};
+
+    return;
 }
 
 sub chunks {
