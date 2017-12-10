@@ -23,7 +23,7 @@ use strict;
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use YAML::XS;
 
-use Qgoda::Util qw(front_matter read_body);
+use Qgoda::Util qw(empty front_matter read_body);
 
 sub new {
     my ($class, $path) = @_;
@@ -43,13 +43,61 @@ sub new {
                 filename => $path. error => $error);    
     }
 
+    my @first =  grep { !empty } split /
+                (
+                <!--QGODA_XGETTEXT-->(?:.*?)<!--\/QGODA_XGETTEXT-->
+                |
+                [ \011-\015]*
+                \n
+                [ \011-\015]*
+                \n
+                [ \011-\015]*
+                )
+                /sx, $body;
+
+    my @chunks;
+    foreach my $chunk (@first) {
+        if ($chunk =~ /^[ \011-\015]+$/) {
+            push @chunks, $chunk;
+        } else {
+            my $head = $1 if $chunk =~ s/^([ \011-\015]+)//;        
+            my $tail = $1 if $chunk =~ s/([ \011-\015]+)$//;
+            push @chunks, $head if !empty $head;
+            push @chunks, $chunk if !empty $chunk;
+            push @chunks, $tail if !empty $tail;
+        }
+    }
+
+    foreach my $chunk (@chunks) {
+        if ($chunk =~ /[^ \011-\015]+$/) {
+            if ($chunk =~ /^<!--QGODA_XGETTEXT-->(.*?)<!--\/QGODA_XGETTEXT-->$/s) {
+                my $string = $1;
+                $chunk = bless \$string, 'b';
+            } else {
+                my $string = $chunk;
+                $chunk = bless \$string, 't';
+            }
+        } else {
+            my $string = $chunk;
+            $chunk = bless \$string, 's';
+        }
+    }
+
     bless {
         __meta => $meta,
+        __body => $body,
+        __chunks => \@chunks,
     }, $class;
 }
 
 sub meta {
     shift->{__meta};
+}
+
+sub chunks {
+    my ($self) = @_;
+
+    map { $$_ } grep { 's' ne ref } @{$self->{__chunks}};
 }
 
 1;
