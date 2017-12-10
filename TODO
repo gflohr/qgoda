@@ -1,4 +1,5 @@
-- It must be possible to write relative links ... maybe as a global configuration option?
+- Use seconds since the epoch as stringified version of Qgoda::Util::Date
+- It must be possible to write relative links ... maybe as a global configuration option? Or have a function that rewrites links?
 - _timestamp should not be written if no file was written
 - Markdown files have to end with an extra newline, otherwise the excerpt
   is not found
