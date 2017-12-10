@@ -65,6 +65,7 @@ WriteMakefile (
         'Data::Walk' => '2.0',
         'IPC::Signal' => 0,
         'Term::ANSIColor' => '4.04',
+        'Locale::XGettext' => '0.3',
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},

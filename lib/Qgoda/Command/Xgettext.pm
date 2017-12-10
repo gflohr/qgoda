@@ -16,33 +16,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Locale::XGettext;
+package Qgoda::Command::Xgettext;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
-
 use Qgoda;
-use Qgoda::Util qw(read_file);
+use Qgoda::Locale::XGettext;
 
-use base qw(Locale::XGettext);
+use base 'Qgoda::Command';
 
-sub readFile {
-    my ($self, $filename) = @_;
+sub _run {
+    my ($self, $args, $global_options, %options) = @_;
 
-    my $content = read_file $filename
-        or die __x("cannot read '{filename}': {error}.\n",
-                   filename => $filename, error => $!);
-    
+    $global_options->{quiet} = 1;
+    delete $global_options->{verbose};
+    $global_options->{log_stderr} = 1;
+
     return $self;
 }
 
-sub programName {
-    $0 . ' xgettext';
-}
+sub _displayHelp {
+    my ($self) = @_;
 
-sub canFlags { return }
-sub canKeywords { return }
-sub canExtractAll { return }
+    Qgoda::Locale::XGettext->newFromArgv(['--help']);
+}
 
 1;

@@ -65,7 +65,7 @@ sub parseOptions {
     }
 
     # Exits.
-    $self->__displayHelp if $options{help};
+    $self->_displayHelp if $options{help};
 
     return %options;
 }
@@ -83,7 +83,7 @@ sub __usageError {
     return Qgoda::CLI->commandUsageError($cmd, @msg);
 }
 
-sub __displayHelp {
+sub _displayHelp {
     my ($self) = @_;
 
     my $module = class2module ref $self;
