@@ -131,10 +131,10 @@ sub metaLineNumber {
     return;
 }
 
-sub chunks {
+sub entries {
     my ($self) = @_;
 
-    map { $_->{text} } grep { 'whitespace' ne $_->{type} } @{$self->{__entries}};
+    grep { 'whitespace' ne $_->{type} } @{$self->{__entries}};
 }
 
 sub reassemble {
