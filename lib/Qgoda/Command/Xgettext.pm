@@ -25,12 +25,21 @@ use Qgoda::Locale::XGettext;
 
 use base 'Qgoda::Command';
 
-sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+sub run {
+    my ($self, $args, $global_options) = @_;
 
     $global_options->{quiet} = 1;
     delete $global_options->{verbose};
     $global_options->{log_stderr} = 1;
+
+    Qgoda::Locale::XGettext->newFromArgv($args)->run->output;
+
+    return $self;
+}
+
+sub _run {
+    my ($self, $args, $global_options, %options) = @_;
+
 
     return $self;
 }

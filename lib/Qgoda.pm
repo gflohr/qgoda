@@ -95,8 +95,10 @@ sub build {
 
     $self->__analyze($site);
     $self->__locate($site);
-    $self->__writePOTFile($site);
+
     return $self if $options{dry_run};
+
+    $self->__writePOTFile($site);
 
     $self->__build($site);
 

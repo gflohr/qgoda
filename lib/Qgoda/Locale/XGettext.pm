@@ -24,16 +24,46 @@ use Locale::TextDomain qw(com.cantanea.qgoda);
 
 use Qgoda;
 use Qgoda::Util qw(read_file);
+use Qgoda::CLI;
 
 use base qw(Locale::XGettext);
 
 sub readFile {
     my ($self, $filename) = @_;
 
-    my $content = read_file $filename
-        or die __x("cannot read '{filename}': {error}.\n",
-                   filename => $filename, error => $!);
-    
+    $self->{__qgoda_files} ||= [];
+    push @{$self->{__qgoda_files}}, $filename;
+
+    return $self;
+}
+
+sub extractFromNonFiles {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new({ 
+        quiet => 1,
+        verbose => 0,
+        log_stderr => 1,
+    });
+
+    $qgoda->build(dry_run => 1);
+
+    my %masters = $qgoda->getSite->getMasters;
+
+    foreach my $master (sort keys %masters) {
+        $self->__extractFromMaster($master, $masters{$master});
+    }
+
+    return $self;
+}
+
+sub __extractFromMaster {
+    my ($self, $relpath, $assets) = @_;
+
+    foreach my $asset (@$assets) {
+
+    }
+
     return $self;
 }
 
@@ -45,4 +75,18 @@ sub canFlags { return }
 sub canKeywords { return }
 sub canExtractAll { return }
 
+sub languageSpecificOptions {
+    return [
+        [
+            '--srcdir',
+            'srcdir',
+            '    --srcdir=SRCDIR',
+            __"the Qgoda top-level source directory (defaults to '..')",
+        ]
+    ];
+}
+
+sub versionInformation {
+    Qgoda::CLI->displayVersion;
+}
 1;
