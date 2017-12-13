@@ -17,6 +17,10 @@ embedded
 new lines.
 <!--/QGODA-XGETTEXT-->
 
-
+<!--QGODA-NO-XGETTEXT-->
+```perl
+my $qgoda = Qgoda->new;
+```
+<!--/QGODA-NO-XGETTEXT-->
 
 Empty lines above should be ignored.

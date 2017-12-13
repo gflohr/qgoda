@@ -61,6 +61,8 @@ sub new {
                 (
                 <!--QGODA-XGETTEXT-->(?:.*?)<!--\/QGODA-XGETTEXT-->
                 |
+                <!--QGODA-NO-XGETTEXT-->(?:.*?)<!--\/QGODA-NO-XGETTEXT-->
+                |
                 [ \011-\015]*
                 \n
                 [ \011-\015]*
@@ -91,6 +93,12 @@ sub new {
                     text => $1,
                     lineno => $lineno,
                     type => 'block',
+                }
+            } elsif ($chunk =~ /^<!--QGODA-NO-XGETTEXT-->(.*?)<!--\/QGODA-NO-XGETTEXT-->$/s) {
+                push @entries, {
+                    text => $1,
+                    lineno => $lineno,
+                    type => 'exclude',
                 }
             } else {
                 push @entries, {
@@ -134,7 +142,9 @@ sub metaLineNumber {
 sub entries {
     my ($self) = @_;
 
-    grep { 'whitespace' ne $_->{type} } @{$self->{__entries}};
+    grep { 'whitespace' ne $_->{type} } 
+    grep { 'exclude' ne $_->{type} } 
+    @{$self->{__entries}};
 }
 
 sub reassemble {
@@ -148,6 +158,10 @@ sub reassemble {
             $output .= "<!--QGODA-XGETTEXT-->"
                 . $callback->($entry->{text})
                 . "<!--/QGODA-XGETTEXT-->";
+        } elsif ('exclude' eq $entry->{type}) {
+            $output .= "<!--QGODA-NO-XGETTEXT-->"
+                . $callback->($entry->{text})
+                . "<!--/QGODA-NO-XGETTEXT-->";
         } else {
             $output .= $callback->($entry->{text});
         }
