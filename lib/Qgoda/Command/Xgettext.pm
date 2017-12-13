@@ -22,6 +22,7 @@ use strict;
 
 use Qgoda;
 use Qgoda::Locale::XGettext;
+use Qgoda::Util qw(empty);
 
 use base 'Qgoda::Command';
 
@@ -32,14 +33,12 @@ sub run {
     delete $global_options->{verbose};
     $global_options->{log_stderr} = 1;
 
-    Qgoda::Locale::XGettext->newFromArgv($args)->run->output;
+    my $xgettext = Qgoda::Locale::XGettext->newFromArgv($args);
 
-    return $self;
-}
+    my $srcdir = $xgettext->option('srcdir');
+    $xgettext->setOption(srcdir => '..') if empty $srcdir;
 
-sub _run {
-    my ($self, $args, $global_options, %options) = @_;
-
+    $xgettext->run->output;
 
     return $self;
 }

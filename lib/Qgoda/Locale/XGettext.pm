@@ -21,10 +21,14 @@ package Qgoda::Locale::XGettext;
 use strict;
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
+use Cwd qw(getcwd realpath);
+use Scalar::Util qw(reftype);
+use File::Spec;
 
 use Qgoda;
-use Qgoda::Util qw(read_file);
+use Qgoda::Util qw(read_file flatten2hash);
 use Qgoda::CLI;
+use Qgoda::Splitter;
 
 use base qw(Locale::XGettext);
 
@@ -40,6 +44,14 @@ sub readFile {
 sub extractFromNonFiles {
     my ($self) = @_;
 
+    my $podir = getcwd;
+    my $srcdir = $self->option('srcdir');
+
+    if (!chdir $srcdir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $srcdir, error => $!);
+    }
+
     my $qgoda = Qgoda->new({ 
         quiet => 1,
         verbose => 0,
@@ -48,20 +60,72 @@ sub extractFromNonFiles {
 
     $qgoda->build(dry_run => 1);
 
-    my %masters = $qgoda->getSite->getMasters;
+    my $site = $qgoda->getSite;
+    my %masters = $site->getMasters;
 
-    foreach my $master (sort keys %masters) {
-        $self->__extractFromMaster($master, $masters{$master});
+    if (!chdir $podir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $podir, error => $!);
+    }
+
+    my %master_paths;
+    foreach my $relpath (keys %masters) {
+        my $abs = realpath(File::Spec->rel2abs($relpath, $srcdir));
+        $master_paths{$abs} = $relpath;
+    }
+
+    foreach my $filename (@{$self->{__qgoda_files}}) {
+        my $abs = realpath(File::Spec->rel2abs($filename, $podir));
+        if (exists $master_paths{$abs}) {
+            my $relpath = $master_paths{$abs};
+            my $translations = $masters{$relpath};
+            $self->__extractFromMaster($filename, $relpath, $translations);
+        }
     }
 
     return $self;
 }
 
 sub __extractFromMaster {
-    my ($self, $relpath, $assets) = @_;
+    my ($self, $filename, $master, $translations) = @_;
 
-    foreach my $asset (@$assets) {
+    my %translate;
+    my $site = Qgoda->new->getSite;
+    foreach my $relpath (@$translations) {
+        my $asset = $site->getAssetByRelpath($relpath);
+        my $translate = $asset->{translate};
+        next if !defined $translate;
+        if (ref $translate && 'ARRAY' eq reftype $translate) {
+            map { $translate{$_} = 1 } @$translate;
+        } else {
+            $translate{$translate} = 1;
+        }
+    }
 
+    my $master_asset = $site->getAssetByRelpath($master);
+    my $splitter = Qgoda::Splitter->new($master_asset->getPath);
+
+    my $meta = $splitter->meta;
+    foreach my $key (sort {$splitter->metaLineNumber($a) 
+                           <=> $splitter->metaLineNumber($b) 
+                     } keys %translate) {
+        next if !exists $master_asset->{$key};
+        my $slice = { $key => $master_asset->{$key}};
+        my $flat = flatten2hash $slice;
+        foreach my $variable (keys %$flat) {
+            $self->addEntry(
+                msgid => $flat->{$variable},
+                msgctxt => $variable,
+                reference => $filename . ':' . $splitter->metaLineNumber($key),
+            );
+        }
+    }
+
+    foreach my $entry ($splitter->entries) {
+        $self->addEntry(
+            msgid => $entry->{text},
+            reference => $filename . ':' . $entry->{lineno},
+        );
     }
 
     return $self;
@@ -78,7 +142,7 @@ sub canExtractAll { return }
 sub languageSpecificOptions {
     return [
         [
-            '--srcdir',
+            '--srcdir=s',
             'srcdir',
             '    --srcdir=SRCDIR',
             __"the Qgoda top-level source directory (defaults to '..')",
@@ -89,4 +153,5 @@ sub languageSpecificOptions {
 sub versionInformation {
     Qgoda::CLI->displayVersion;
 }
+
 1;

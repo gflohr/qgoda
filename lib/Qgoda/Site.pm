@@ -400,4 +400,20 @@ sub getMasters {
     return %masters;
 }
 
+sub getAssetByPath {
+    my ($self, $path) = @_;
+
+    return if !exists $self->{assets}->{$path};
+
+    return $self->{assets}->{$path};
+}
+
+sub getAssetByRelpath {
+    my ($self, $relpath) = @_;
+
+    return if !exists $self->{__relpaths}->{$relpath};
+
+    return $self->{__relpaths}->{$relpath};
+}
+
 1;
