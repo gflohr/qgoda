@@ -54,7 +54,7 @@ WriteMakefile (
         'Text::Unidecode' => '1.27',
         'Text::Markdown::Hoedown' => '1.02',
         'Template' => '2.26',
-        'Template::Plugin::Gettext' => '0.1',
+        'Template::Plugin::Gettext' => '0.2',
         # The pure Perl YAML has problems parsing comments and is not
         # sufficient.
         'YAML::LibYAML' => '0.63',

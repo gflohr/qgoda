@@ -38,6 +38,8 @@ use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use IPC::Signal;
 use POSIX qw(:sys_wait_h);
+use Template::Plugin::Gettext 0.2;
+use List::Util qw(uniq);
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -98,9 +100,9 @@ sub build {
 
     return $self if $options{dry_run};
 
-    $self->__writePOTFile($site);
-
     $self->__build($site);
+
+    $self->__writePOTFile($site);
 
     my $deleted = $self->__prune($site);
 
@@ -710,13 +712,78 @@ sub __writePOTFile {
     my ($self, $site) = @_;
 
     my %masters = $site->getMasters;
-    my $podir = $self->config->{paths}->{po};
 
-    my @potfiles = sort 
+    my %textdomains = Template::Plugin::Gettext->textdomains;
+    
+    my $config = $self->config;
+    my $logger = $self->logger;
+    my $podir = $config->{paths}->{po};
+    my $viewdir = $config->{paths}->{views};
+
+    my @orphans = @{$masters{''} || []};
+    foreach my $orphan (@orphans) {
+        my $site = $self->getSite;
+        my $asset = $site->getAssetByRelpath($orphan);
+        my $master = $asset->{master};
+        $logger->error(__x("'{filename}': master document '{master}'"
+                            . " does not exists",
+                            filename => $orphan, master => $master));
+    }
+
+    if (empty $config->{po}->{textdomain}) {
+
+        my @mdfiles = uniq map { @$_ } values %masters;
+        foreach my $path (sort @mdfiles) {
+            $logger->warning(__x("'{filename}': 'master' found but"
+                                 . " configuration variable 'po.textdomain'"
+                                 . " not set",
+                                 filename => $path));
+        }
+
+        my @viewfiles  = uniq map { keys %$_ } values %textdomains;
+        foreach my $template (sort @viewfiles) {
+            $logger->warning(__x("{template}: 'Gettext' plug-in used but"
+                                 . " configuration variable 'po.textdomain'"
+                                 . " not set",
+                                 template => $template));
+        }
+        
+        return $self;
+    }
+
+    my @mdpotfiles = sort 
         map { File::Spec->abs2rel($_, $podir) } 
         grep { !empty } keys %masters;
 
-    my $potfiles = File::Spec->catfile($podir, 'MDPOTFILES');
+    if (@mdpotfiles) {
+        my $mdpotfiles = File::Spec->catfile($podir, 'MDPOTFILES');
+        write_file $mdpotfiles, join "\n", @mdpotfiles, ''
+            or $self->logger->fatal(__x("cannot write '{filename}': {error}",
+                                        filename => $mdpotfiles, error => $!));
+    }
+
+    my $textdomain = $config->{po}->{textdomain};
+    foreach my $other (keys %textdomains) {
+        next if $other eq $textdomain;
+        my @templates = sort keys %{$textdomains{$other}};
+        foreach my $template (@templates) {
+            $logger->warning(__x("{template}: Textdomain '{other}'"
+                                 . " in 'Gettext' plug-in invocation does not"
+                                 . " match '{textdomain}' from configuration"
+                                 . " variable 'po.textdomain'",
+                                 other => $other, textdomain => $textdomain,
+                                 template => File::Spec->catfile($viewdir,
+                                                                 $template)));
+        }
+    }
+
+    my @potfiles = map { keys %$_ } values %textdomains;
+    push @potfiles, 'MDPOTFILES' if @mdpotfiles;
+
+    @potfiles = map { File::Spec->abs2rel($_, $podir) } 
+                map { File::Spec->catfile($viewdir, $_) } sort @potfiles;
+
+    my $potfiles = File::Spec->catfile($podir, 'POTFILES');
     write_file $potfiles, join "\n", @potfiles, ''
         or $self->logger->fatal(__x("cannot write '{filename}': {error}",
                                     filename => $potfiles, error => $!));

@@ -222,9 +222,10 @@ sub default {
             categories => 3,
         },
         po => {
-            xgettext => {
-                tt2 => [qw(_views _includes)],
-            }
+            tt2 => [qw(_views _includes)],
+            from_code => 'utf-8',
+            copyright_holder => 'SET config.po.copyright_holder IN _config.yaml',
+            msgid_bugs_address => 'SET config.po.msgid_bugs_address IN _config.yaml',
         },
         front_matter_placeholder => "[% '' %]\n",
     };
