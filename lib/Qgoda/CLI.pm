@@ -128,6 +128,7 @@ The following commands are currently supported:
   markdown                    process Markdown
   xgettext                    extract translatable strings from Markdown
                               files
+  po                          various commands for processing translations
 
 Operation mode:
   -q, --quiet                 quiet mode
