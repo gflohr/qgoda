@@ -71,8 +71,9 @@ sub _run {
     }
     return $self if 'reset' eq $target;
 
+    return $self->__make($target) if !empty $config->{po}->{make};
+
     my $method = '__target' . ucfirst lc $target;
-    die $method;
 
     return $self;
 }
@@ -332,6 +333,61 @@ sub __comment {
     return $text;
 }
 
+sub __command {
+    my ($self, @args) = @_;
+
+    my @pretty;
+    foreach my $arg (@args) {
+        my $pretty = $arg;
+        $pretty =~ s{(["\\])}{\\$1}g;
+        $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
+        push @pretty, $pretty;
+    }
+
+    my $pretty = join ' ', @pretty;
+    my $logger = Qgoda->new->logger;
+
+    $logger->info(__x("execute: {cmd}", cmd => $pretty));;
+
+    system @args;
+}
+
+sub __fatalCommand {
+    my ($self, @args) = @_;
+
+    return $self if 0 == $self->__command(@args);
+
+    my $logger = Qgoda->new->logger;
+
+    if ($? == -1) {
+        $logger->fatal(__x("failed to execute: {error}", error => $!));;
+    } elsif ($? & 127) {
+        $logger->fatal(__x("died with signal {signo}", signo => $? & 127));
+    }
+
+    $logger->fatal(__x("error {number}", $? >> 8));
+}
+
+sub __make {
+    my ($self, $target) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $config = $qgoda->config;
+    my $logger = $qgoda->logger;
+
+    my $podir = $config->{paths}->{po};
+    if (!chdir $podir) {
+        $logger->fatal(__x("cannot change directory to '{directory}': {error}",
+                           directory => $podir, error => $!));
+    }
+
+    my $make = $config->{po}->{make};
+
+    $self->__fatalCommand($make, $target);
+
+    return $self;
+}
+
 1;
 
 =head1 NAME
@@ -565,20 +621,6 @@ state.
 =head1 OPTIONS
 
 =over 4
-
-=item --make
-
-Use the F<Makefile> instead of the pure Perl version F<po-make.pl> for
-generating files.
-
-The configuration variable C<po.make> must point to the C<make(1)> executable
-on your system:
-
-    po:
-      make: make
-
-Just "make" from your C<$PATH> is usually just fine, but sometime you will
-want to use C<gmake>, C<nmake>, C</opt/local/bin/make> or similar instead.
 
 =item -h, --help
 
