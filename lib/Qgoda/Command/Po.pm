@@ -60,7 +60,7 @@ sub _run {
 
     my @missing;
     if ('reset' eq $target) {
-        @missing = qw(Makefile PACKAGE PLFILES GitIgnore);
+        @missing = qw(Makefile PACKAGE PLFILES GitIgnore QgodaINC);
     } else {
         @missing = $self->__checkFiles;
     }
@@ -94,13 +94,16 @@ sub __checkFiles {
     push @missing, 'Makefile' if !-e $makefile;
 
     my $package = File::Spec->catfile($podir, 'PACKAGE');
-    push @missing, 'PACKAGE' if !-e $package;    
+    push @missing, 'PACKAGE' if !-e $package;
 
     my $plfiles = File::Spec->catfile($podir, 'PLFILES');
-    push @missing, 'PLFILES' if !-e $plfiles;    
+    push @missing, 'PLFILES' if !-e $plfiles;
 
-    my $plfiles = File::Spec->catfile($podir, '.gitignore');
-    push @missing, 'GitIgnore' if !-e $plfiles;    
+    my $git_ignore = File::Spec->catfile($podir, '.gitignore');
+    push @missing, 'GitIgnore' if !-e $git_ignore;
+
+    my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
+    push @missing, 'QgodaINC' if !-e $qgoda_inc;
 
     return @missing;
 }
@@ -279,6 +282,42 @@ EOF
     if (!write_file $gitignore, $ignore_list) {
         $logger->fatal(__x("error writing '{filename}': {error}",
                            filename => $gitignore,
+                           error => $!));
+    }
+
+    return $self;
+}
+
+sub __addMissingQgodaINC {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+
+    my $podir = $config->{paths}->{po};
+
+    my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
+    $logger->info(__x("creating '{filename}'", filename => $qgoda_inc));
+
+    my $include = <<'EOF';
+# Makefile snippet for Qgoda.  Extract all strings from Markdown files that
+# serve as the base for translated documents.
+
+MDPOTFILES = $(srcdir)/MDPOTFILES \
+        $(shell cat $(srcdir)/MDPOTFILES)
+
+$(srcdir)/markdown.pot: $(srcdir)/MDPOTFILES $(MDPOTFILES)
+	$(QGODA) xgettext --output=$(srcdir)/markdown.pox --from-code="utf-8" \
+		--add-comments=TRANSLATORS: --files-from=$(srcdir)/MDPOTFILES \
+		--copyright-holder='$(COPYRIGHT_HOLDER)' --force-po \
+		--msgid-bugs-address='$(MSGID_BUGS_ADDRESS)' && \
+	rm -f $@ && mv $(srcdir)/markdown.pox $@
+EOF
+
+    if (!write_file $qgoda_inc, $include) {
+        $logger->fatal(__x("error writing '{filename}': {error}",
+                           filename => $qgoda_inc,
                            error => $!));
     }
 
