@@ -50,7 +50,7 @@ sub _run {
 
     my @missing;
     if ('reset' eq $target) {
-        @missing = qw(Makefile PACKAGE PLFILES);
+        @missing = qw(Makefile PACKAGE PLFILES GitIgnore);
     } else {
         @missing = $self->__checkFiles;
     }
@@ -95,6 +95,9 @@ sub __checkFiles {
 
     my $plfiles = File::Spec->catfile($podir, 'PLFILES');
     push @missing, 'PLFILES' if !-e $plfiles;    
+
+    my $plfiles = File::Spec->catfile($podir, '.gitignore');
+    push @missing, 'GitIgnore' if !-e $plfiles;    
 
     return @missing;
 }
@@ -207,6 +210,8 @@ sub __addMissingMakefile {
 
     my $makefile = File::Spec->catfile($podir, 'Makefile');
     $logger->info(__x("creating '{filename}'", filename => $makefile));
+    $logger->info(__x("cloning git repository '{repo}'",
+                      repo => $seed_repo));
 
     my $tmp = File::Temp->newdir;
     $logger->debug(__x("created temporary directory '{dir}'",
@@ -245,6 +250,32 @@ EOF
     if (!write_file $plfiles, $header_comment) {
         $logger->fatal(__x("error writing '{filename}': {error}",
                            filename => $plfiles,
+                           error => $!));
+    }
+
+    return $self;
+}
+
+sub __addMissingGitIgnore {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+
+    my $podir = $config->{paths}->{po};
+
+    my $gitignore = File::Spec->catfile($podir, '.gitignore');
+    $logger->info(__x("creating '{filename}'", filename => $gitignore));
+
+    my $ignore_list = <<EOF;
+/*.gmo
+/*.mo
+EOF
+
+    if (!write_file $gitignore, $ignore_list) {
+        $logger->fatal(__x("error writing '{filename}': {error}",
+                           filename => $gitignore,
                            error => $!));
     }
 
