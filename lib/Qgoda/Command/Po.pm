@@ -20,16 +20,159 @@ package Qgoda::Command::Po;
 
 use strict;
 
+use File::Spec;
+use Locale::TextDomain qw(com.cantanea.qgoda);
+
 use Qgoda;
+use Qgoda::Util qw(empty write_file);
 
 use base 'Qgoda::Command';
+
+my $seed_repo = '/perl/Template-Plugin-Gettext-Seed';
 
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
 
-#    Qgoda->new($global_options)->init($args, %options);
+    my $qgoda = Qgoda->new($global_options);
+
+    my @missing = $self->__checkFiles;
+    foreach my $missing (@missing) {
+        my $method = '__addMissing' . $missing;
+        $self->$method;
+    }
 
     return $self;
+}
+
+sub __checkFiles {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+
+    my $config = $qgoda->config;
+    my $logger = $qgoda->logger;
+
+    my $podir = $config->{paths}->{po};
+
+    my $textdomain = $config->{po}->{textdomain};
+    $logger->fatal(__"configuration variable 'po.textdomain' not set")
+        if empty $textdomain;
+    my $linguas = $config->{linguas};
+    $logger->fatal(__"configuration variable 'linguas' not set or empty")
+        if empty $linguas || !@$linguas;
+
+    my @missing;
+
+    $logger->debug(__"checking for missing files in po directory");
+    my $makefile = File::Spec->catfile($podir, 'Makefile');
+    push @missing, 'Makefile' if !-e $makefile;
+
+    my $package = File::Spec->catfile($podir, 'PACKAGE');
+    push @missing, 'PACKAGE' if !-e $package;    
+
+    return @missing;
+}
+
+sub __addMissingPACKAGE {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+    my $po_config = $config->{po};
+
+    my $podir = $config->{paths}->{po};
+
+    my $package = File::Spec->catfile($podir, 'PACKAGE');
+    $logger->info(__x("creating '{filename}'", filename => $package));
+
+    my $header_comment = $self->__comment(__(<<EOF));
+Makefile snippet holding package-dependent information.  Please adhere
+to Makefile syntax!
+EOF
+
+    my $linguas_comment = $self->__comment(__(<<EOF));
+Space-separated list of language codes.  Omit the base language!
+EOF
+    chomp $linguas_comment;
+    my @linguas = @{$config->{linguas}};
+    shift @linguas;
+    my $linguas = join ' ', @linguas;    
+
+    my $textdomain_comment = $self->__comment(__(<<EOF));
+Textdomain of the site, for example reverse domain name.
+EOF
+    chomp $textdomain_comment;
+    my $textdomain = $po_config->{textdomain};
+
+    my $msgid_bugs_address_comment = $self->__comment(__(<<EOF));
+Where to send msgid bug reports?
+EOF
+    chomp $msgid_bugs_address_comment;
+    my $msgid_bugs_address = $po_config->{msgid_bugs_address};
+    $msgid_bugs_address = __"Please set MSGID_BUGS_ADDRESS in 'PACKAGE'"
+        if empty $msgid_bugs_address;
+    
+    my $copyright_holder_comment = $self->__comment(__(<<EOF));
+Initial copyright holder added to pot and po files.
+EOF
+    chomp $copyright_holder_comment;
+    my $copyright_holder = $po_config->{copyright_holder};
+    $copyright_holder = __"Please set COPYRIGHT_HOLDER in 'PACKAGE'"
+        if empty $copyright_holder;
+
+    my $override_comment = $self->__comment(__(<<EOF));
+Override these default values as needed.
+EOF
+    chomp $override_comment;
+
+    my $xgettext_line = empty $po_config->{xgettext}
+        ? "#XGETTEXT = xgettext" : "XGETTEXT = $config->{po}->{xgettext}";
+    my $xgettext_tt2_line = empty $po_config->{xgettext_tt2}
+        ? "#XGETTEXT_TT2 = xgettext-tt2" 
+        : "XGETTEXT = $config->{po}->{xgettext_tt2}";
+    my $msgmerge_line = empty $po_config->{msgmerge}
+        ? "#MSGMERGE = msgmerge" : "MSGMERGE = $config->{po}->{msgmerge}";
+    my $msgfmt_line = empty $po_config->{msgfmt}
+        ? "#MSGFMT = msgfmt" : "MSGFMT = $config->{po}->{msgfmt}";
+
+    my $contents = <<EOF;
+$header_comment
+$linguas_comment
+LINGUAS = $linguas
+
+$textdomain_comment
+TEXTDOMAIN = $textdomain
+
+$copyright_holder_comment
+COPYRIGHT_HOLDER = $copyright_holder
+
+$override_comment
+$xgettext_line
+$xgettext_tt2_line
+$msgmerge_line
+$msgfmt_line
+EOF
+
+    if (!write_file $package, $contents) {
+        $logger->fatal(__x("error writing '{filename}': {error}",
+                           filename => $package,
+                           error => $!));
+    }
+
+    return $self;
+}
+
+sub __addMissingMakefile {
+
+}
+
+sub __comment {
+    my ($self, $text) = @_;
+
+    $text =~ s/^/# /gm;
+
+    return $text;
 }
 
 1;

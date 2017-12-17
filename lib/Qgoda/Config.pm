@@ -77,26 +77,25 @@ sub new {
         $config = merge_data $config, $local if $local;
     }
 
+    my $local_filename;
     if (-e '_localconfig.yaml') {
-        $filename = '_localconfig.yaml';
+        $local_filename = '_localconfig.yaml';
     } elsif (-e '_localconfig.yml') {
-        $filename = '_localconfig.yml';
+        $local_filename = '_localconfig.yml';
     } elsif (-e '_localconfig.json') {
-        $filename = '_localconfig.json';
-    } else {
-        undef $filename;
+        $local_filename = '_localconfig.json';
     }
-    if (!empty $filename) {
+    if (!empty $local_filename) {
         $logger->info(__x("reading local configuration from '{filename}'",
-                          filename => $filename));
-        my $yaml = read_file $filename;
+                          filename => $local_filename));
+        my $yaml = read_file $local_filename;
         if (!defined $yaml) {
             $logger->fatal(__x("error reading file '{filename}': {error}",
-                               filename => $filename, error => $!));
+                               filename => $local_filename, error => $!));
         }
 
         my $local = eval { YAML::XS::Load($yaml) };
-        $logger->fatal(yaml_error $filename, $@) if $@;
+        $logger->fatal(yaml_error $local_filename, $@) if $@;
 
         foreach my $key (grep { /^__q_/ } keys %{$local || {}}) {
             $logger->fatal(__x("illegal configuration variable '{var}':"
@@ -114,14 +113,6 @@ sub new {
     if ($@) {
         $logger->fatal(__x("{filename}: {error}",
                            filename => $filename, error => $@));
-    }
-
-    if (-e '_localconfig.yaml') {
-        $filename = 'localconfig.yaml';
-    } elsif (-e 'localconfig.yml') {
-        $filename = 'localconfig.yml';
-    } else {
-        undef $filename;
     }
 
     # Fill in defaults and consistency checks.
@@ -308,6 +299,9 @@ sub checkConfig {
     foreach my $xgettext (keys %{$config->{po}->{xgettext} || {}}) {
 
     }
+
+    die __x("'{variable}' must be a list", variable => 'linguas')
+        if exists $self->{linguas} && !$self->__isArray($self->{linguas});
 
     # Has to be done after everything was read. We need the value of
     # case-sensitive.
