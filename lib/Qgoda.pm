@@ -778,10 +778,10 @@ sub __writePOTFile {
     }
 
     my @potfiles = map { keys %$_ } values %textdomains;
-    push @potfiles, 'MDPOTFILES' if @mdpotfiles;
 
     @potfiles = map { File::Spec->abs2rel($_, $podir) } 
                 map { File::Spec->catfile($viewdir, $_) } sort @potfiles;
+    push @potfiles, File::Spec->catfile(File::Spec->curdir, 'MDPOTFILES') if @mdpotfiles;
 
     my $potfiles = File::Spec->catfile($podir, 'POTFILES');
     write_file $potfiles, join "\n", @potfiles, ''

@@ -215,8 +215,8 @@ sub default {
         po => {
             tt2 => [qw(_views _includes)],
             from_code => 'utf-8',
-            copyright_holder => 'SET config.po.copyright_holder IN _config.yaml',
-            msgid_bugs_address => 'SET config.po.msgid_bugs_address IN _config.yaml',
+            copyright_holder => __"Set config.po.copyright_holder in _config.yaml",
+            msgid_bugs_address => __"Set config.po.msgid_bugs_address in _config.yaml",
         },
         front_matter_placeholder => "[% '' %]\n",
     };

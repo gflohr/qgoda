@@ -149,7 +149,7 @@ for extensive documentation.
 }
 
 sub commandUsageError {
-    my ($class, $cmd, $message) = @_;
+    my ($class, $cmd, $message, $usage) = @_;
 
     if ($message) {
         $message =~ s/\s+$//;
@@ -162,14 +162,19 @@ sub commandUsageError {
         $message = '';
     }
 
-    if (defined $cmd) {
+    if (defined $usage) {
+        $message .= __x(<<EOF, program => $0, command => $cmd, usage => $usage);
+Usage: {program} [GLOBAL_OPTIONS] {usage}
+Try '{program} {command} --help' for more information!
+EOF
+    } elsif (defined $cmd) {
         $message .= __x(<<EOF, program => $0, command => $cmd);
-Usage: {program} {command} [OPTIONS]
+Usage: {program} [GLOBAL_OPTIONS] {command} [OPTIONS]
 Try '{program} {command} --help' for more information!
 EOF
     } else {
         $message .= __x(<<EOF, program => $0);
-Usage: {program} COMMAND [OPTIONS]
+Usage: {program} [GLOBAL_OPTIONS] COMMAND [OPTIONS]
 Try '{program} --help' for more information!
 EOF
     }

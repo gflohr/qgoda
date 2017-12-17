@@ -20,26 +20,49 @@ package Qgoda::Command::Po;
 
 use strict;
 
-use File::Spec;
 use Locale::TextDomain qw(com.cantanea.qgoda);
+use File::Spec;
+use File::Temp;
+use File::Copy qw(copy);
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
+use Qgoda::CLI;
 
 use base 'Qgoda::Command';
 
-my $seed_repo = '/perl/Template-Plugin-Gettext-Seed';
+my $seed_repo = 'file://' . $ENV{HOME} . '/perl/Template-Plugin-Gettext-Seed';
 
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
 
+    Qgoda::CLI->commandUsageError('po', __"no target specified",
+                                  'po [OPTIONS] TARGET')
+        if !@$args;
+    
+    Qgoda::CLI->commandUsageError('po', __"only one target may be specified",
+                                  'po [OPTIONS] TARGET')
+        if 1 != @$args;
+    
+    my $target = $args->[0];
+
     my $qgoda = Qgoda->new($global_options);
 
-    my @missing = $self->__checkFiles;
+    my @missing;
+    if ('reset' eq $target) {
+        @missing = qw(Makefile PACKAGE PLFILES);
+    } else {
+        @missing = $self->__checkFiles;
+    }
+
     foreach my $missing (@missing) {
         my $method = '__addMissing' . $missing;
         $self->$method;
     }
+    return $self if 'reset' eq $target;
+
+    my $method = '__target' . ucfirst lc $target;
+    die $method;
 
     return $self;
 }
@@ -69,6 +92,9 @@ sub __checkFiles {
 
     my $package = File::Spec->catfile($podir, 'PACKAGE');
     push @missing, 'PACKAGE' if !-e $package;    
+
+    my $plfiles = File::Spec->catfile($podir, 'PLFILES');
+    push @missing, 'PLFILES' if !-e $plfiles;    
 
     return @missing;
 }
@@ -144,6 +170,9 @@ LINGUAS = $linguas
 $textdomain_comment
 TEXTDOMAIN = $textdomain
 
+$msgid_bugs_address_comment
+MSGID_BUGS_ADDRESS = $msgid_bugs_address
+
 $copyright_holder_comment
 COPYRIGHT_HOLDER = $copyright_holder
 
@@ -164,7 +193,62 @@ EOF
 }
 
 sub __addMissingMakefile {
+    my ($self) = @_;
 
+    # Fail early if Git is not installed.
+    require Git;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+    my $po_config = $config->{po};
+
+    my $podir = $config->{paths}->{po};
+
+    my $makefile = File::Spec->catfile($podir, 'Makefile');
+    $logger->info(__x("creating '{filename}'", filename => $makefile));
+
+    my $tmp = File::Temp->newdir;
+    $logger->debug(__x("created temporary directory '{dir}'",
+                       dir => $tmp));
+
+    Git::command('clone', '--depth', '1', $seed_repo, $tmp);
+
+    my $remote = File::Spec->catfile($tmp, 'po', 'Makefile');
+    $logger->debug(__x("copying '{from}' to '{to}'",
+                       from => $remote, to => $makefile));
+
+    if (!copy $remote, $podir) {
+        $logger->fatal(__x("error copying '{from}' to '{to}'",
+                           from => $remote, to => $makefile))
+    }
+
+    return $self;
+}
+
+sub __addMissingPLFILES {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+
+    my $podir = $config->{paths}->{po};
+
+    my $plfiles = File::Spec->catfile($podir, 'PLFILES');
+    $logger->info(__x("creating '{filename}'", filename => $plfiles));
+
+    my $header_comment = $self->__comment(__(<<EOF));
+Add any Perl source files here if your project has such.
+EOF
+
+    if (!write_file $plfiles, $header_comment) {
+        $logger->fatal(__x("error writing '{filename}': {error}",
+                           filename => $plfiles,
+                           error => $!));
+    }
+
+    return $self;
 }
 
 sub __comment {
