@@ -48,6 +48,16 @@ sub _run {
 
     my $qgoda = Qgoda->new($global_options);
 
+    my $config = $qgoda->config;
+    my $logger = $qgoda->logger;
+
+    my $textdomain = $config->{po}->{textdomain};
+    $logger->fatal(__"configuration variable 'po.textdomain' not set")
+        if empty $textdomain;
+    my $linguas = $config->{linguas};
+    $logger->fatal(__"configuration variable 'linguas' not set or empty")
+        if empty $linguas || !@$linguas;
+
     my @missing;
     if ('reset' eq $target) {
         @missing = qw(Makefile PACKAGE PLFILES GitIgnore);
@@ -76,13 +86,6 @@ sub __checkFiles {
     my $logger = $qgoda->logger;
 
     my $podir = $config->{paths}->{po};
-
-    my $textdomain = $config->{po}->{textdomain};
-    $logger->fatal(__"configuration variable 'po.textdomain' not set")
-        if empty $textdomain;
-    my $linguas = $config->{linguas};
-    $logger->fatal(__"configuration variable 'linguas' not set or empty")
-        if empty $linguas || !@$linguas;
 
     my @missing;
 
@@ -124,6 +127,7 @@ EOF
 Space-separated list of language codes.  Omit the base language!
 EOF
     chomp $linguas_comment;
+
     my @linguas = @{$config->{linguas}};
     shift @linguas;
     my $linguas = join ' ', @linguas;    
@@ -164,6 +168,8 @@ EOF
         ? "#MSGMERGE = msgmerge" : "MSGMERGE = $config->{po}->{msgmerge}";
     my $msgfmt_line = empty $po_config->{msgfmt}
         ? "#MSGFMT = msgfmt" : "MSGFMT = $config->{po}->{msgfmt}";
+    my $qgoda_line = empty $po_config->{qgoda}
+        ? "QGODA = qgoda" : "QGODA = $config->{po}->{qgoda}";
 
     my $contents = <<EOF;
 $header_comment
@@ -184,6 +190,7 @@ $xgettext_line
 $xgettext_tt2_line
 $msgmerge_line
 $msgfmt_line
+$qgoda_line
 EOF
 
     if (!write_file $package, $contents) {
@@ -243,11 +250,7 @@ sub __addMissingPLFILES {
     my $plfiles = File::Spec->catfile($podir, 'PLFILES');
     $logger->info(__x("creating '{filename}'", filename => $plfiles));
 
-    my $header_comment = $self->__comment(__(<<EOF));
-Add any Perl source files here if your project has such.
-EOF
-
-    if (!write_file $plfiles, $header_comment) {
+    if (!write_file $plfiles, '') {
         $logger->fatal(__x("error writing '{filename}': {error}",
                            filename => $plfiles,
                            error => $!));
