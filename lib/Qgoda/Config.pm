@@ -217,6 +217,11 @@ sub default {
             from_code => 'utf-8',
             copyright_holder => __"Set config.po.copyright_holder in _config.yaml",
             msgid_bugs_address => __"Set config.po.msgid_bugs_address in _config.yaml",
+            qgoda => 'qgoda',
+            xgettext => 'xgettext',
+            xgettext_tt2 => 'xgettext-tt2',
+            msgfmt => 'msgfmt',
+            msgmerge => 'msgmerge',
         },
         front_matter_placeholder => "[% '' %]\n",
     };
@@ -293,11 +298,16 @@ sub checkConfig {
 
     die __x("'{variable}' must be a dictionary", variable => 'po')
         if exists $self->{po} && !$self->__isHash($config->{po});
-    die __x("'{variable}' must be a dictionary", variable => 'po.xgettext')
-        if exists $self->{po}->{xgettext}
-        && !$self->__isHash($config->{po}->{xgettext});
-    foreach my $xgettext (keys %{$config->{po}->{xgettext} || {}}) {
-
+    foreach my $cmd (qw(xgettext xgettext_tt2 qgoda msgfmt msgmerge)) {
+        if (exists $config->{po}->{$cmd}) {
+            die __x("'{variable}' must not be empty", variable => "po.$cmd")
+                if empty $config->{po}->{$cmd};
+            if (ref $config->{po}->{$cmd} 
+                && !$self->__isArray($config->{po}->{$cmd})) {
+                die __x("'{variable}' must not be a single value or a a list", 
+                        variable => "po.$cmd");
+            }
+        }
     }
 
     die __x("'{variable}' must be a list", variable => 'linguas')

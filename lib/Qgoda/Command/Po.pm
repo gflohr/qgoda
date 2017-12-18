@@ -20,7 +20,7 @@ package Qgoda::Command::Po;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain 1.28 qw(com.cantanea.qgoda);
 use File::Spec;
 use File::Temp;
 use File::Copy qw(copy);
@@ -71,11 +71,22 @@ sub _run {
     }
     return $self if 'reset' eq $target;
 
+    my $podir = $config->{paths}->{po};
+    if (!chdir $podir) {
+        $logger->fatal(__x("cannot change directory to '{directory}': {error}",
+                           directory => $podir, error => $!));
+    }
+
     return $self->__make($target) if !empty $config->{po}->{make};
 
-    my $method = '__target' . ucfirst lc $target;
+    my $method = '__make' . ucfirst lc $target;
+    if (!$self->can($method)) {
+        my $msg = __x("unsupported target '{target}'", target => $target);
 
-    return $self;
+        Qgoda::CLI->commandUsageError('po', $msg, 'po [OPTIONS] TARGET');
+    }
+
+    return $self->$method;
 }
 
 sub __checkFiles {
@@ -333,6 +344,16 @@ sub __comment {
     return $text;
 }
 
+sub __expandCommand {
+    my ($self, $cmd) = @_;
+
+    if (ref $cmd) {
+        return @$cmd;
+    }
+
+    return $cmd;
+}
+
 sub __command {
     my ($self, @args) = @_;
 
@@ -368,6 +389,21 @@ sub __fatalCommand {
     $logger->fatal(__x("error {number}", $? >> 8));
 }
 
+sub __safeRename {
+    my ($self, $from, $to) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+
+    $logger->info(__x("rename '{from}' to '{to}': {error}",
+                      from => $from, to => $to, error => $!));
+    
+    return $self if rename $from, $to;
+
+    $logger->fatal(__x("error renaming '{from}' to '{to}': {error}",
+                       from => $from, to => $to, error => $!));    
+}
+
 sub __make {
     my ($self, $target) = @_;
 
@@ -375,15 +411,60 @@ sub __make {
     my $config = $qgoda->config;
     my $logger = $qgoda->logger;
 
-    my $podir = $config->{paths}->{po};
-    if (!chdir $podir) {
-        $logger->fatal(__x("cannot change directory to '{directory}': {error}",
-                           directory => $podir, error => $!));
-    }
-
     my $make = $config->{po}->{make};
 
     $self->__fatalCommand($make, $target);
+
+    return $self;
+}
+
+sub __makePot {
+     my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $po_config = $qgoda->config->{po};
+
+    # FIXME! Check dependencies!
+    my ($pox, $pot) = ('plfiles.pox', 'plfiles.pot');
+    my @options = split / /, Locale::TextDomain->options;
+    my @cmd = ($self->__expandCommand($po_config->{xgettext}),
+               "--output=$pox", "--from-code=utf-8",
+               "--add-comments=TRANSLATORS:", "--files-from=PLFILES",
+               "--copyright-holder='$po_config->{copyright_holder}'",
+               "--force-po",
+               "--msgid-bugs-address='$po_config->{msgid_bugs_address}'",
+               @options);
+    $self->__fatalCommand(@cmd);
+    $logger->info(__x("unlink '{filename}'", filename => $pot));
+    unlink $pot;
+    $self->__safeRename($pox, $pot);
+
+    ($pox, $pot) = ("markdown.pox", 
+                    "markdown.pot");
+    @cmd = ($self->__expandCommand($po_config->{qgoda}), "xgettext",
+               "--output=$pox", "--from-code=utf-8",
+               "--add-comments=TRANSLATORS:", "--files-from=MDPOTFILES",
+               "--copyright-holder='$po_config->{copyright_holder}'",
+               "--force-po",
+               "--msgid-bugs-address='$po_config->{msgid_bugs_address}'");
+    $self->__fatalCommand(@cmd);
+    $logger->info(__x("unlink '{filename}'", filename => $pot));
+    unlink $pot;
+    $self->__safeRename($pox, $pot);
+
+    ($pox, $pot) = ("$po_config->{textdomain}.pox", 
+                    "$po_config->{textdomain}.pot");
+    @cmd = ($self->__expandCommand($po_config->{xgettext_tt2}),
+               "--output=$pox", "--from-code=utf-8",
+               "--add-comments=TRANSLATORS:", "--files-from=POTFILES",
+               "--copyright-holder='$po_config->{copyright_holder}'",
+               "--force-po",
+               "--msgid-bugs-address='$po_config->{msgid_bugs_address}'");
+    $self->__fatalCommand(@cmd);
+    $logger->info(__x("unlink '{filename}'", filename => $pot));
+    unlink $pot;
+    $self->__safeRename($pox, $pot);
 
     return $self;
 }

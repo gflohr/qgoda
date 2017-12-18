@@ -44,7 +44,7 @@ WriteMakefile (
         'File::HomeDir' => 0,
         'File::Globstar' => '0.4',
         'Date::Parse' => '2.30',
-        'Locale::TextDomain' => '1.24',
+        'Locale::TextDomain' => '1.28',
         'Git' => 0,
         'AnyEvent' => '7.12',
         'AnyEvent::Filesys::Notify' => '1.21',
