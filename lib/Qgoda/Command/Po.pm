@@ -81,7 +81,8 @@ sub _run {
 
     my %methods = (
         pot => '__makePOT',
-        'update-po' => '__makeUpdatePO'
+        'update-po' => '__makeUpdatePO',
+        'update-mo' => '__makeUpdateMO',
     );
 
     my $method = $methods{lc $target};
@@ -542,6 +543,40 @@ sub __makeUpdatePO {
     }
 
     exit 1 if $errors;
+
+    return $self;
+}
+
+sub __makeUpdateMO {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+    my $po_config = $config->{po};
+
+    my $linguas = $config->{linguas};
+    shift @$linguas;
+
+    my @deps = $self->__filelist('PLFILES');
+    push @deps, $self->__filelist('MDPOTFILES');
+    push @deps, $self->__filelist('POTFILES');
+    push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
+
+    foreach my $lang (@$linguas) {
+        if ($self->__outOfDate("$lang.po", @deps)) {
+            $self->__makeUpdatePO;
+            last;
+        }
+    }
+
+    foreach my $lang (@$linguas) {
+        $self->__makeUpdatePO if $self->__outOfDate("$lang.po", @deps);
+        my @cmd = ($self->__expandCommand($po_config->{msgfmt}), "--check",
+                   "--statistics", "--verbose",
+                   '-o', "$lang.gmo", "$lang.po");
+        $self->__fatalCommand(@cmd);
+    }
 
     return $self;
 }
