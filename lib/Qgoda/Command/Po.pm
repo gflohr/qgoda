@@ -377,7 +377,7 @@ sub __command {
     my @pretty;
     foreach my $arg (@args) {
         my $pretty = $arg;
-        $pretty =~ s{(["\\])}{\\$1}g;
+        $pretty =~ s{(["\\\$])}{\\$1}g;
         $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
         push @pretty, $pretty;
     }
@@ -412,8 +412,8 @@ sub __safeRename {
     my $qgoda = Qgoda->new;
     my $logger = $qgoda->logger;
 
-    $logger->info(__x("rename '{from}' to '{to}': {error}",
-                      from => $from, to => $to, error => $!));
+    $logger->info(__x("rename '{from}' to '{to}'",
+                      from => $from, to => $to));
     
     return $self if rename $from, $to;
 
@@ -653,7 +653,14 @@ qgoda po - Translation workflow based on PO files
 
 =head1 SYNOPSIS
 
-qgoda po [<global options>] [<target>]
+    qgoda po [<global options>] pot
+    qgoda po [<global options>] update-po
+    qgoda po [<global options>] update-mo
+    qgoda po [<global options>] install
+
+Or for all of the above:
+
+    qgoda po [<global options>] all
 
 Try 'qgoda --help' for a description of global options.
 
@@ -687,8 +694,8 @@ markdown documents refers to another from the document variable C<master>
 Additionally, you must set the textdomain of your site in the configuration
 variable C<po.textdomain>.  The textdomain is
 the name under which translations are saved, usually the reverse domain name
-of your site.  The textdomain for L<http://www.qgoda.net/> is C<net.qgoda.www>
-for instance.
+of your site.  The textdomain for L<http://www.qgoda.net/> is for example
+C<net.qgoda.www>.
 
 The F<_po> directory contains the following files:
 
@@ -696,8 +703,9 @@ The F<_po> directory contains the following files:
 
 =item B<PACKAGE>
 
-Contains the basic configuration of your site.  It is auto-generated but then
-left untouched so that you can edit it to your needs.
+Contains the basic configuration of your site suitable for a Makefile and it
+is only needed if you use the Makefile.  The file is 
+auto-generated but then left untouched so that you can edit it to your needs.
 
 In order to reset the file to the latest upstream version, delete it and then
 run C<qgoda build> or C<qgoda watch> once.  Alternatively, run C<qgoda po
@@ -731,7 +739,30 @@ your site.  See below for an example.
 The copyright holder that should be put into the header of the master
 translation file F<TEXTDOMAIN.pot>.
 
+=item B<po.xgettext>
+
+The xgettext(1) program on your system, defaults to just "xgettext".
+
+=item B<po.xgettext_tt2>
+
+The xgettext-tt2(1) program on your system, defaults to just "xgettext-tt2".
+
+=item B<po.qgoda>
+
+The qgoda(1) program on your system, defaults to just "qgoda".
+
+=item B<po.msgmerge>
+
+The msgmerge(1) program on your system, defaults to just "msgmerge".
+
+=item B<po.msgfmt>
+
+The msgfmt(1) program on your system, defaults to just "msgfmt".
+
 =back
+
+For all configuration variables above that expect a command name, you can
+use a single value or a list, if you want to pass options to the command.
 
 Example configuration for F<PACKAGE>:
 
@@ -759,6 +790,11 @@ handling.  You can run the Makefile manually with the C<make(1)> command
 or use the option C<--make> (see <L/OPTIONS>) or set the configuration
 variable C<po.make>.
 
+=item B<PLFILES>
+
+A list of Perl source files for your site.  If missing, an empty file is
+automatically generated but you have to maintain it manually.
+
 =item B<MDPOTFILES>
 
 A list of Markdown documents found in your site that are referenced by
@@ -776,16 +812,6 @@ the referring files here.
 Note, that this file will normally also contain a line for F<./MDPOTFILES>.
 This line has the effect that all translatable strings in Markdown files
 are also included in the master translation catalog.
-
-=item B<qgoda.yaml>
-
-Contains information about additional commands that have to be run by
-F<po-make.pl>.  The file is auto-generated when missing but then left
-untouched.
-
-In order to reset the file to the latest upstream version, delete it and then
-run C<qgoda build> or C<qgoda watch> once.  Alternatively, run C<qgoda po
-reset>.
 
 =item B<qgoda.inc>
 
@@ -885,9 +911,19 @@ Show this help page and exit.
 
 =back
 
+=head1 CONFIGURATION
+
+If you set the configuration variable C<po.make> to the name of a make(1)
+executable on your system, the Makefile in F<_po> is executed instead of
+emulating the Makefile behavior with Perl.
+
+The Makefile includes all files in the C<_po> directory that match C<*.inc>
+so that you can easily extend it.
+
 =head1 SEE ALSO
 
-L<http://www.qgoda.net/en/docs/i18n/>, git(1)
+L<http://www.qgoda.net/en/docs/i18n/>, L<xgettext-tt2>, 
+L<Template::Plugin::Gettext>, xgettext(1), msgmerge(1), msgfmt(1), git(1)
 
 =head1 QGODA
 
