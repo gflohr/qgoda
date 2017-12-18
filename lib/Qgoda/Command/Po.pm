@@ -24,6 +24,8 @@ use Locale::TextDomain 1.28 qw(com.cantanea.qgoda);
 use File::Spec;
 use File::Temp;
 use File::Copy qw(copy);
+use File::Path qw(make_path);
+use Cwd qw(getcwd);
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
@@ -71,6 +73,12 @@ sub _run {
     }
     return $self if 'reset' eq $target;
 
+    my $here = getcwd;
+    if (!defined $here) {
+        $logger->fatal(__x("cannot get current working directory: {error}",
+                           error => $!));        
+    }
+
     my $podir = $config->{paths}->{po};
     if (!chdir $podir) {
         $logger->fatal(__x("cannot change directory to '{directory}': {error}",
@@ -83,6 +91,8 @@ sub _run {
         pot => '__makePOT',
         'update-po' => '__makeUpdatePO',
         'update-mo' => '__makeUpdateMO',
+        install => '__makeInstall',
+        all => '__makeAll',
     );
 
     my $method = $methods{lc $target};
@@ -93,7 +103,7 @@ sub _run {
         Qgoda::CLI->commandUsageError('po', $msg, 'po [OPTIONS] TARGET');
     }
 
-    return $self->$method;
+    return $self->$method($here);
 }
 
 sub __checkFiles {
@@ -579,6 +589,60 @@ sub __makeUpdateMO {
     }
 
     return $self;
+}
+
+sub __makeInstall {
+    my ($self, $srcdir) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+    my $po_config = $config->{po};
+
+    my $linguas = $config->{linguas};
+    shift @$linguas;
+
+    my @deps = $self->__filelist('PLFILES');
+    push @deps, $self->__filelist('MDPOTFILES');
+    push @deps, $self->__filelist('POTFILES');
+    push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
+    push @deps, map { "$_.po" } @$linguas;
+
+    foreach my $lang (@$linguas) {
+        if ($self->__outOfDate("$lang.gmo", @deps)) {
+            $self->__makeUpdateMO;
+            last;
+        }
+    }
+
+    my $targetdir = File::Spec->catfile($srcdir, '..', 'LocaleData');
+    foreach my $lang (@$linguas) {
+        my $destdir = File::Spec->catfile($targetdir, $lang, 'LC_MESSAGES');
+        if (!-e $destdir) {
+            $logger->info(__x("create directory '{directory}'",
+                              directory => $destdir));
+            make_path $destdir if !-e $destdir;
+        }
+        my $dest = File::Spec->catfile($destdir, "$po_config->{textdomain}.mo");
+        $logger->info(__x("copy '{from}' to '{to}'",
+                          from => "$lang.gmo", to => $dest));
+        if (!copy "$lang.gmo", "$destdir") {
+            $logger->fatal(__x("canot copy '{from}' to '{to}': {error}",
+                              from => "$lang.gmo", to => $dest, error => $!));
+            
+        }
+    }
+
+    return $self;
+}
+
+sub __makeAll {
+    my ($self, $srcdir) = @_;
+
+    $self->__makePOT($srcdir);
+    $self->__makeUpdatePO($srcdir);
+    $self->__makeUpdateMO($srcdir);
+    $self->__makeInstall($srcdir);
 }
 
 1;
