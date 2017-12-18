@@ -79,8 +79,14 @@ sub _run {
 
     return $self->__make($target) if !empty $config->{po}->{make};
 
-    my $method = '__make' . ucfirst lc $target;
-    if (!$self->can($method)) {
+    my %methods = (
+        pot => '__makePOT',
+        'update-po' => '__makeUpdatePO'
+    );
+
+    my $method = $methods{lc $target};
+
+    unless ($method && $self->can($method)) {
         my $msg = __x("unsupported target '{target}'", target => $target);
 
         Qgoda::CLI->commandUsageError('po', $msg, 'po [OPTIONS] TARGET');
@@ -404,6 +410,33 @@ sub __safeRename {
                        from => $from, to => $to, error => $!));    
 }
 
+sub __outOfDate {
+    my ($self, $target, @deps) = @_;
+
+    my @ref = stat $target or return 1;
+
+    foreach my $dep (@deps) {
+        my @stat = stat $dep or return 1;
+        return 1 if $stat[9] > $ref[9];
+    }
+
+    return;
+}
+
+sub __filelist {
+    my ($self, $filelist) = @_;
+
+    my $fh;
+    if (!open $fh, '<', $filelist) {
+        my $logger = Qgoda->new->logger;
+
+        $logger->fatal(__x("error reading '{filename}': {error}",
+                           filename => $filelist, error => $!));
+    }
+
+    return grep { length } map { s/^[ \r\t]*//; s/[ \t\r\n]*$//; $_ } <$fh>;
+}
+
 sub __make {
     my ($self, $target) = @_;
 
@@ -418,7 +451,7 @@ sub __make {
     return $self;
 }
 
-sub __makePot {
+sub __makePOT {
      my ($self) = @_;
 
     my $qgoda = Qgoda->new;
@@ -465,6 +498,50 @@ sub __makePot {
     $logger->info(__x("unlink '{filename}'", filename => $pot));
     unlink $pot;
     $self->__safeRename($pox, $pot);
+
+    return $self;
+}
+
+sub __makeUpdatePO {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+    my $po_config = $config->{po};
+
+    my @deps = $self->__filelist('PLFILES');
+    push @deps, $self->__filelist('MDPOTFILES');
+    push @deps, $self->__filelist('POTFILES');
+    push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
+    $self->__makePOT if $self->__outOfDate("$config->{po}->{textdomain}.pot", 
+                                           @deps);
+
+    my $linguas = $config->{linguas};
+    shift @$linguas;
+
+    my $errors = 0;
+    foreach my $lang (@$linguas) {
+        $logger->info(__x("merging {filename}", filename => "$lang.po"));
+
+        $self->__safeRename("$lang.po", "$lang.old.po");
+
+        my @cmd = ($self->__expandCommand($po_config->{msgmerge}), 
+                   "$lang.old.po", "$po_config->{textdomain}.pot", 
+                   '-o', "$lang.po");
+        if (0 == $self->__command(@cmd)) {
+            $logger->info(__x("unlink '{filename}'", 
+                              filename => "$lang.old.po"));
+            unlink "$lang.old.po";
+        } else {
+            ++$errors;
+            $logger->error(__x("Merging {filename} failed",
+                               filename => "$lang.po"));
+            $self->__safeRename("$lang.old.po", "$lang.po");
+        }
+    }
+
+    exit 1 if $errors;
 
     return $self;
 }
