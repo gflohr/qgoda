@@ -91,7 +91,7 @@ sub front_matter($) {
     return;
 }
 
-sub read_body($) {
+sub read_body($$) {
     my ($filename, $placeholder) = @_;
 
     my $fh = IO::File->new;
@@ -101,9 +101,10 @@ sub read_body($) {
     my $first_line = <$fh>;
     return if empty $first_line;
     return if $first_line !~ /---[ \t]*\n$/o;
+    my $lines = 1;
 
-    my $front_matter = '';
     while (1) {
+        ++$lines;
         my $line = <$fh>;
         return if !defined $line;
         last if $line =~ /---[ \t]*\n$/o;
@@ -111,7 +112,9 @@ sub read_body($) {
 
     local $/;
 
-    return <$fh>;
+    my $front_matter = "$placeholder" x $lines;
+
+    return $front_matter . <$fh>;
 }
 
 sub write_file($$) {

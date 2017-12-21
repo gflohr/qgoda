@@ -22,13 +22,15 @@ use strict;
 
 use Locale::TextDomain qw('com.cantanea.qgoda');
 use Date::Parse;
-use YAML;
+use YAML::XS;
+use File::Spec;
 use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(empty yaml_error front_matter lowercase collect_defaults
                    normalize_path strip_suffix merge_data slugify);
 use Qgoda::Util::Date;
+use Qgoda::Util::Translate qw(translate_front_matter);
 
 sub new {
     my ($class) = @_;
@@ -69,7 +71,7 @@ sub analyzeAsset {
     my $front_matter = front_matter $path;
     my $front_matter_data;
     if (defined $front_matter) {
-        $front_matter_data = eval { YAML::Load($front_matter) };
+        $front_matter_data = eval { YAML::XS::Load($front_matter) };
         if ($@) {
             $logger->error(yaml_error $path, $@);
             return;
@@ -77,12 +79,16 @@ sub analyzeAsset {
     } else {
         $front_matter_data->{raw} = 1;
     }
+
     merge_data $meta, $front_matter_data;
 
     delete $meta->{path};
     delete $meta->{relpath};
 
     merge_data $asset, $meta;
+    if (!empty $asset->{master}) {
+        translate_front_matter $asset;
+    }
 
     $self->__fillMeta($asset, $site) if !$asset->{raw};
 

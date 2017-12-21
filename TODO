@@ -46,9 +46,8 @@
   header applied.  Altertnatively, just add emtpy lines at the top, and
   remove them later.
 - just two lone --- lines do not work
-- arbitrary taxonomies (drop need to declare them first)
-- strftime()
 - real implementation for slugify (language dependant)
 - option for taxonomies to be case-insensitive
 - Important: Running templates twice through TT2 can be problematic if
   the first run produced TT2 code (try the INSERT directive!)
+- split up Qgoda::Util

@@ -528,11 +528,11 @@ sub __makeUpdatePO {
     $self->__makePOT if $self->__outOfDate("$config->{po}->{textdomain}.pot", 
                                            @deps);
 
-    my $linguas = $config->{linguas};
-    shift @$linguas;
+    my @linguas = @{$config->{linguas}};
+    shift @linguas;
 
     my $errors = 0;
-    foreach my $lang (@$linguas) {
+    foreach my $lang (@linguas) {
         $logger->info(__x("merging {filename}", filename => "$lang.po"));
 
         $self->__safeRename("$lang.po", "$lang.old.po");
@@ -565,22 +565,22 @@ sub __makeUpdateMO {
     my $config = $qgoda->config;
     my $po_config = $config->{po};
 
-    my $linguas = $config->{linguas};
-    shift @$linguas;
+    my @linguas = @{$config->{linguas}};
+    shift @linguas;
 
     my @deps = $self->__filelist('PLFILES');
     push @deps, $self->__filelist('MDPOTFILES');
     push @deps, $self->__filelist('POTFILES');
     push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
 
-    foreach my $lang (@$linguas) {
+    foreach my $lang (@linguas) {
         if ($self->__outOfDate("$lang.po", @deps)) {
             $self->__makeUpdatePO;
             last;
         }
     }
 
-    foreach my $lang (@$linguas) {
+    foreach my $lang (@linguas) {
         $self->__makeUpdatePO if $self->__outOfDate("$lang.po", @deps);
         my @cmd = ($self->__expandCommand($po_config->{msgfmt}), "--check",
                    "--statistics", "--verbose",
@@ -599,24 +599,24 @@ sub __makeInstall {
     my $config = $qgoda->config;
     my $po_config = $config->{po};
 
-    my $linguas = $config->{linguas};
-    shift @$linguas;
+    my @linguas = @{$config->{linguas}};
+    shift @linguas;
 
     my @deps = $self->__filelist('PLFILES');
     push @deps, $self->__filelist('MDPOTFILES');
     push @deps, $self->__filelist('POTFILES');
     push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
-    push @deps, map { "$_.po" } @$linguas;
+    push @deps, map { "$_.po" } @linguas;
 
-    foreach my $lang (@$linguas) {
+    foreach my $lang (@linguas) {
         if ($self->__outOfDate("$lang.gmo", @deps)) {
             $self->__makeUpdateMO;
             last;
         }
     }
 
-    my $targetdir = File::Spec->catfile($srcdir, '..', 'LocaleData');
-    foreach my $lang (@$linguas) {
+    my $targetdir = File::Spec->catfile($srcdir, 'LocaleData');
+    foreach my $lang (@linguas) {
         my $destdir = File::Spec->catfile($targetdir, $lang, 'LC_MESSAGES');
         if (!-e $destdir) {
             $logger->info(__x("create directory '{directory}'",
@@ -626,7 +626,7 @@ sub __makeInstall {
         my $dest = File::Spec->catfile($destdir, "$po_config->{textdomain}.mo");
         $logger->info(__x("copy '{from}' to '{to}'",
                           from => "$lang.gmo", to => $dest));
-        if (!copy "$lang.gmo", "$destdir") {
+        if (!copy "$lang.gmo", "$dest") {
             $logger->fatal(__x("canot copy '{from}' to '{to}': {error}",
                               from => "$lang.gmo", to => $dest, error => $!));
             

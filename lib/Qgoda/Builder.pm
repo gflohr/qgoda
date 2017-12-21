@@ -26,6 +26,7 @@ use Locale::Util qw(web_set_locale);
 use File::Spec;
 
 use Qgoda::Util qw(empty read_file read_body write_file);
+use Qgoda::Util::Translate qw(translate_body);
 
 sub new {
     my $self = '';
@@ -50,7 +51,6 @@ sub build {
                 my ($msg) = @_;
                 $logger->warning("$asset->{path}: $msg");
             };
-
             $logger->debug(__x("processing asset '/{relpath}'",
                                relpath => $asset->getRelpath));
             $self->processAsset($asset, $site);
@@ -73,7 +73,6 @@ sub build {
                 my ($msg) = @_;
                 $logger->warning("$asset->{path}: $msg");
             };
-
             $logger->debug(__x("wrapping asset '/{relpath}'",
                                relpath => $asset->getRelpath));
             $self->wrapAsset($asset, $site);
@@ -113,9 +112,11 @@ sub readAssetContent {
 
     if ($asset->{raw}) {
         return read_file($asset->getPath);
+    } elsif (!empty $asset->{master}) {
+        return translate_body $asset;
     } else {
         my $placeholder = Qgoda->new->config->{front_matter_placeholder};
-        return read_body($asset->getPath), $placeholder;
+        return read_body($asset->getPath, $placeholder);
     }
 }
 

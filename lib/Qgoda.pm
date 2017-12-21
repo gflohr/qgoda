@@ -27,6 +27,7 @@ $VERSION = '0.9.0-alpha.1';
 
 use Locale::TextDomain qw(com.cantanea.qgoda);
 use Locale::Messages;
+use Locale::gettext_dumb;
 use File::Find;
 use Scalar::Util qw(reftype);
 use AnyEvent;
@@ -94,6 +95,18 @@ sub build {
 
     $self->{__outfiles} = [];
     $self->__scan($site);
+
+    if (!empty $config->{po}->{textdomain}) {
+        my $textdomain = $config->{po}->{textdomain};
+        my $locale_dir = File::Spec->catfile($config->{srcdir}, 'LocaleData');
+        Locale::gettext_dumb::bindtextdomain($textdomain, $locale_dir);
+        eval {
+            # Delete the cached translations so that changes are immediately
+            # visible.
+            # It is the privilege of the author to use private variables. ;)
+            delete $Locale::gettext_pp::__gettext_pp_domains->{$textdomain};
+        };
+    }
 
     $self->__analyze($site);
     $self->__locate($site);
