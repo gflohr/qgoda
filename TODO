@@ -26,3 +26,5 @@
 - just two lone --- lines do not work
 - real implementation for slugify (language dependant)
 - split up Qgoda::Util
+- gettextize build
+- use Dist::Zilla?
