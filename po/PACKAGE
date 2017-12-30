@@ -1,0 +1,16 @@
+# Makefile snippet that holds all package-dependent information.
+
+# Add more languages here!  Beware that this is a makefile snippet and
+# you have to adhere to make syntax.
+LINGUAS = de 
+
+# Textdomain for our package.
+TEXTDOMAIN = qgoda
+
+# Initial copyright holder added to pot and po files.
+#COPYRIGHT_HOLDER = Guido Flohr
+COPYRIGHT_HOLDER = Guido Flohr <http://www.guido-flohr.net>
+
+# Where to send msgid bugs?  
+#MSGID_BUGS_ADDRESS = Guido Flohr <guido.flohr@cantanea.com>
+MSGID_BUGS_ADDRESS = Guido Flohr <guido.flohr@cantanea.com>
