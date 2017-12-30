@@ -1,3 +1,4 @@
+- Publish new versions of Locale::XGettext and Template::Plugin::Gettext.
 - add context to PO entries inside markdown (requires a comment parser)
 - complete computation of related documents
 - Use seconds since the epoch as stringified version of Qgoda::Util::Date
