@@ -37,7 +37,6 @@ use vars qw(@EXPORT_OK);
 sub __translate_property {
     my ($property, $value, $textdomain) = @_;
 
-$DB::single = 1;
     my $hash = flatten2hash {$property => $value};
 
     my $stash = Template::Stash->new({});
