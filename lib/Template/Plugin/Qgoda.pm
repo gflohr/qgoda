@@ -225,14 +225,6 @@ sub __include {
     my $relpath = File::Spec->abs2rel($path, $srcdir);
     my $asset = Qgoda::Asset->new($path, $relpath);
 
-    my $site = $q->getSite;
-    my $analyzers = $q->getAnalyzers;
-    foreach my $analyzer (@{$analyzers}) {
-        $analyzer->analyzeAsset($asset, $site, 1);
-    }
-
-    $q->locateAsset($asset, $site);
-
     if ($overlay) {
         my %overlay = %$overlay;
         delete $overlay{path};
@@ -243,6 +235,14 @@ sub __include {
     }
 
     merge_data $asset, $extra;
+
+    my $site = $q->getSite;
+    my $analyzers = $q->getAnalyzers;
+    foreach my $analyzer (@{$analyzers}) {
+        $analyzer->analyzeAsset($asset, $site, 1);
+    }
+
+    $q->locateAsset($asset, $site);
 
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
