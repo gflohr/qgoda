@@ -1,53 +1,28 @@
+- add context to PO entries inside markdown (requires a comment parser)
+- complete computation of related documents
 - Use seconds since the epoch as stringified version of Qgoda::Util::Date
-- It must be possible to write relative links ... maybe as a global configuration option? Or have a function that rewrites links?
-- _timestamp should not be written if no file was written
 - Markdown files have to end with an extra newline, otherwise the excerpt
-  is not found
+  is not found (and other cases are broken, too).
 - when merging configuration data into defaults, a wrong type will throw
   an exception (example: "helpers" is now a hash reference, not a list).
-- pre-process command line options: try to find the command before they are
-  passed to Getopt::Long.  Also pass a cleaned argument vector to the
-  methods.
 - do templates need access to "site"? Probably not.
 - make all paths configurable!
 - content is missing in dumps ;)
-- allow disabling markdown sections
-- do we need q.include()?
 - excerpt didn't work on the qgoda-default site
 - use Template::Stash for evaluating locations
 - [% asset.date.ISODate %] must return 2011-10-05T14:48:00.000Z
 - add support for variables {reldir} and {relpath} for location expansion.
   rationale: should be able copy _assets/images/* to /assets/images
-- q.link() should not die but warn only, or make it configurable
-- q.link() and friends should accept a hash
 - generalize the HTML cleaner into a plug-in interface!
-- passing the command in the constructor is brain-damaged!
 - dependency URI is missing
-- why gets moose included? anyevent::filesys::notify ...
-- Try to unfold arguments to virtual methods.  If that does not work,
-  use either only named arguments or positional arguments.
-  We need a utility function that creates a hash with named arguments
-  like in the ImgSrcset plugin.
 - Template function that removes all markup.  This is needed for the
   <title> attribute that does not allow markup.
-- concept for creation of automatic list pages
 - rename outdir to sitedir
 - consistency check for external plugin data
 - informative verbose output, when compiling plugins
 - Aria builder plug-in for aria enhancements
-- Better location in TT error messages
-- Error for list filters that are not taxonomies, or rather do not require
-  configuration of taxonomies.
 - Relative links must be possible so that qgoda content can be deployed into
-  a document root subdirectory.
-- q.include must merge the parent asset data! This is why the docs link
-  does not work
-- error messages from the template toolkit should have a line offset for the
-  header applied.  Altertnatively, just add emtpy lines at the top, and
-  remove them later.
+  a document root subdirectory. HTML base attribute?
 - just two lone --- lines do not work
 - real implementation for slugify (language dependant)
-- option for taxonomies to be case-insensitive
-- Important: Running templates twice through TT2 can be problematic if
-  the first run produced TT2 code (try the INSERT directive!)
 - split up Qgoda::Util
