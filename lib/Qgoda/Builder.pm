@@ -175,6 +175,8 @@ sub processAsset {
     $logger->debug(__x("processing asset '/{relpath}'",
                        relpath => $asset->getRelpath));
 
+    my $template_name = $asset->getRelpath;
+
     my $content = $self->readAssetContent($asset, $site);
     $asset->{content} = $content;
     my @processors = $qgoda->getProcessors($asset);
@@ -184,7 +186,7 @@ sub processAsset {
         $logger->debug(__x("processing with {processor}",
                            processor => $short_name));
         $asset->{content} = $processor->process($asset->{content},
-                                                $asset, $site);
+                                                $asset, $template_name);
     }
 
     if (@processors) {
@@ -217,12 +219,13 @@ sub wrapAsset {
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
         if !defined $content;
+    my $template_name = File::Spec->abs2rel($view_file, $srcdir);
     foreach my $processor (@processors) {
         my $short_name = ref $processor;
         $short_name =~ s/^Qgoda::Processor:://;
         $logger->debug(__x("wrapping with {processor}",
                            processor => $short_name));
-        $content = $processor->process($content, $asset, $site);
+        $content = $processor->process($content, $asset, $template_name);
     }
 
     $asset->{content} = $content;

@@ -34,7 +34,7 @@ sub new {
 }
 
 sub process {
-    my ($self, $content, $asset) = @_;
+    my ($self, $content, $asset, $filename) = @_;
 
     my %options = (
         extensions => 0x7fff_ffff

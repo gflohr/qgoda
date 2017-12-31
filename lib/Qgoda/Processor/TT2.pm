@@ -55,12 +55,12 @@ sub new {
 }
 
 sub process {
-    my ($self, $content, $asset, $site) = @_;
+    my ($self, $content, $asset, $filename) = @_;
 
     my $vars = {
         asset => $asset,
-        site => $site,
-        config => $site->{config},
+        config => Qgoda->new->config,
+        gettext_filename => $filename,
     };
 
     clear_utf8_flag $vars;

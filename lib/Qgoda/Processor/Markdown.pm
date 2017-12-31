@@ -34,7 +34,7 @@ sub new {
 }
 
 sub process {
-    my ($self, $content, $asset, $site) = @_;
+    my ($self, $content, $asset, $filename) = @_;
 
     return markdown $content;
 }
