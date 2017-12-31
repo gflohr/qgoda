@@ -40,7 +40,7 @@ is $meta->{description}, 'Test for po mechanism';
 is $splitter->metaLineNumber('description'), 4, 'description line number';
 
 my @entries = $splitter->entries;
-is scalar @entries, 3, 'number of entries';
+is scalar @entries, 4, 'number of entries';
 
 my $expected = <<EOF;
 Multiple lines
@@ -65,11 +65,13 @@ is $entries[1]->{text}, $expected, 'block';
 $expected = "Empty lines above should be ignored.";
 is $entries[2]->{text}, $expected, 'last line';
 
-my $round_trip = $splitter->reassemble(sub { shift });
+$expected = 'This entry has the context "my" and a translator comment.';
+is $entries[3]->{text}, $expected, 'text with comment';
 
-$expected = read_file $master_md;
-$expected =~ s/^---.*?---\n//s, $expected;
+$expected = 'TRANSLATORS: A translator comment.';
+is $entries[3]->{comment}, $expected, 'translator comment';
 
-is $round_trip, $expected, 'round-trip-test';
+$expected = 'my';
+is $entries[3]->{msgctxt}, $expected, 'message context';
 
 done_testing;

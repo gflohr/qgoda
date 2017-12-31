@@ -125,6 +125,8 @@ sub __extractFromMaster {
         $self->addEntry(
             msgid => $entry->{text},
             reference => $filename . ':' . $entry->{lineno},
+            msgctxt => $entry->{msgctxt},
+            comment => $entry->{comment},
         );
     }
 

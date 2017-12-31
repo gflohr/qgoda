@@ -24,3 +24,7 @@ my $qgoda = Qgoda->new;
 <!--/QGODA-NO-XGETTEXT-->
 
 Empty lines above should be ignored.
+
+<!--TRANSLATORS: A translator comment.
+    xgettext:msgctxt= my -->
+This entry has the context "my" and a translator comment.

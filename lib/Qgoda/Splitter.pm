@@ -118,6 +118,28 @@ sub new {
         $lineno += $chunk =~ y/\n/\n/;
     }
 
+    # Parse HTML comments.  Maybe this should be optional.
+    foreach my $entry (@entries) {
+        if ($entry->{text} =~ s{^[ \011-\015]*<!--(.*?)-->[ \011-\015]*}{}s) {
+            # We only extract message context hints as they are non-standard.
+            my $comment = $1;
+            if ($comment =~ s{xgettext:msgctxt=(.*)}{}) {
+                my $msgctxt = $1;
+                $msgctxt =~ s{^[ \011-\015]*}{};
+                $msgctxt =~ s{[ \011-\015]*$}{};
+                $entry->{msgctxt} = $msgctxt if !empty $msgctxt;
+            }
+
+            $comment =~ s{^[ \011-\015]*}{};
+            $comment =~ s{[ \011-\015]*$}{};
+            
+            $entry->{comment} = $comment if !empty $comment;
+
+            # Change to whitespace, if nothing left.
+            $entry->{type} = 'whitespace' if empty $entry->{text};
+        }
+    }
+
     bless {
         __meta => $meta,
         __body => $body,
