@@ -539,6 +539,7 @@ sub __makeUpdatePO {
 
         my @cmd = ($self->__expandCommand($po_config->{msgmerge}), 
                    "$lang.old.po", "$po_config->{textdomain}.pot", 
+                   '--previous',
                    '-o', "$lang.po");
         if (0 == $self->__command(@cmd)) {
             $logger->info(__x("unlink '{filename}'", 
