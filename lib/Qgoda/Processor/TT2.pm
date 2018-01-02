@@ -22,6 +22,7 @@ use strict;
 
 use Template;
 use Locale::TextDomain qw(com.cantanea.qgoda);
+use File::Spec;
 
 use Qgoda::Util qw(empty clear_utf8_flag);
 
@@ -57,10 +58,16 @@ sub new {
 sub process {
     my ($self, $content, $asset, $filename) = @_;
 
+    require Qgoda;
+    my $qgoda = Qgoda->new;
+    my $srcdir = $qgoda->config->{srcdir};
+    my $viewdir = $qgoda->config->{paths}->{views};
+    my $absviewdir = File::Spec->rel2abs($viewdir, $srcdir);
+    my $gettext_filename = File::Spec->abs2rel($filename, $absviewdir);
     my $vars = {
         asset => $asset,
         config => Qgoda->new->config,
-        gettext_filename => $filename,
+        gettext_filename => $gettext_filename,
     };
 
     clear_utf8_flag $vars;

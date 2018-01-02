@@ -219,7 +219,7 @@ sub wrapAsset {
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
         if !defined $content;
-    my $template_name = File::Spec->abs2rel($view_file, $srcdir);
+    my $template_name = File::Spec->join($view_dir, $view);
     foreach my $processor (@processors) {
         my $short_name = ref $processor;
         $short_name =~ s/^Qgoda::Processor:://;
