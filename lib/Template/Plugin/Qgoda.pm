@@ -199,9 +199,6 @@ sub bust_cache {
 sub include {
     my ($self, $path, $overlay, $extra) = @_;
 
-if ($overlay->{lingua} eq 'de') {
-$DB::single = 1;
-}
     die "usage: include(PATH, OVERLAY, KEY = VALUE, ...\n"
         if empty $path || empty $overlay;
     $overlay = $self->__sanitizeHashref($overlay, 'include');
