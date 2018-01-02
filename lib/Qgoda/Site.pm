@@ -272,12 +272,16 @@ sub searchAssets {
 sub computeRelations {
     my ($self) = @_;
 
+    my $config = Qgoda->new->{taxonomies};
+
     # First pass. Get permalinks.
     my %locations;
     my %permalinks;
     my $taxonomies = Qgoda->new->config->{taxonomies};
     my %taxonomies;
     my %links;
+
+    my %related;
 
     foreach my $asset (values %{$self->{assets}}) {
         my $permalink = $asset->{permalink};
@@ -294,12 +298,10 @@ sub computeRelations {
             @values = @{$values[0]}
                 if ref $values[0] && 'ARRAY' eq reftype $values[0];
             foreach my $value (@values) {
-                $taxonomies{$key}->{$value}->{$permalink} = $asset;
+                $taxonomies{$key}->{$value}->{$permalink} = 1;
             }
         }
     }
-
-    my %related;
 
     # Second pass.  Add values for links between assets.
     my $link_score = 5;  # FIXME! Should be configurable!
@@ -331,6 +333,24 @@ sub computeRelations {
         }
     }
 
+    # Third passs.  Evaluate common taxonmy values.
+    foreach my $name (keys %taxonomies) {
+        my $taxonomy = $taxonomies{$name};
+        my $score = $taxonomies->{$name};
+        foreach my $value (keys %$taxonomy) {
+            my $permalinks = $taxonomy->{$value};
+            my @permalinks = keys %$permalinks;
+            my $current = shift @permalinks;
+            while (@permalinks) {
+                foreach my $permalink (@permalinks) {
+                    $related{$current}->{$permalink} += $score;
+                    $related{$permalink}->{$current} += $score;
+                }
+                $current = shift @permalinks;
+            }
+        }
+    }
+
     foreach my $permalink (keys %related) {
         my $peers = $related{$permalink};
 
@@ -338,6 +358,7 @@ sub computeRelations {
         delete $peers->{$permalink};
 
         # Sort by relevance and replace score with asset-score pair.
+        # FIXME! Turn that into a hash instead?
         my @related = 
             map { [$permalinks{$_}, $peers->{$_}] }
             sort { $peers->{$a} <=> $peers->{$b} } keys %{$peers};
@@ -348,6 +369,7 @@ sub computeRelations {
     return $self
 }
 
+# FIXME! Do we need this method?
 sub getTaxonomyValues {
     my ($self, $taxonomy, %filters) = @_;
 
