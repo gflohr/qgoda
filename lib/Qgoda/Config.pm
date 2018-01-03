@@ -166,7 +166,7 @@ sub default {
     # Default configuration.
     return {
         title => __"A New Qgoda Powered Site",
-        type => 'page',
+        # FIXME! This should not be configurable.
         srcdir => '.',
         location => '/{directory}/{basename}/{index}{suffix}',
         permalink => '{significant-path}',
