@@ -52,18 +52,10 @@ sub postMeta {
     my @paragraphs = $tree->find('p', 'div');
     my $excerpt = '';
     foreach my $paragraph (@paragraphs) {
-        my @children = $paragraph->content_list;
-        foreach my $child (@children) {
-            # On recent Perls "next if $child->isa()" would be sufficient.
-            # On older Perls it is not.
-            next if ref $child && blessed $child && $child->isa('HTML::Element');
-            $excerpt = $child;
-            $excerpt =~ s/^[ \t\r\n]+//;
-            $excerpt =~ s/[ \t\r\n]+$//;
-            last;
-        }
-
-        last;
+        $excerpt = $paragraph->as_text;
+        $excerpt =~ s/^[ \t\r\n]+//;
+        $excerpt =~ s/[ \t\r\n]+$//;
+        last if !empty $excerpt;
     }
 
     # Collect links.
