@@ -643,4 +643,29 @@ sub loadJSON {
     return $data;
 }
 
+sub related {
+    my ($self, $threshold, $filters) = @_;
+
+    my $asset = $self->__getAsset;
+    my @related = map { $_->[0] } 
+                  sort { $b->[1] <=> $a->[1] }
+                  grep { $_->[1] >= $threshold } 
+                  @{$asset->{related}};
+
+    $filters = $self->__sanitizeFilters($filters);
+
+    my $site = Qgoda->new->getSite;
+
+    return $site->filter(\@related, %$filters);
+}
+
+sub lrelated {
+    my ($self, $threshold, $filters) = @_;
+
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{lingua} = $self->__getAsset->{lingua};
+
+    return $self->related($threshold, $filters);
+}
+
 1;
