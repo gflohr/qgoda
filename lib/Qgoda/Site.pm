@@ -304,21 +304,23 @@ sub computeRelations {
     }
 
     # Second pass.  Add values for links between assets.
-    my $link_score = 5;  # FIXME! Should be configurable!
-    foreach my $permalink (keys %permalinks) {
-        my $asset = $permalinks{$permalink};
-        my $links = $asset->{links};
-        foreach my $link (@$links) {
-            my $target;
-            if (exists $permalinks{$link}) {
-                $target = $permalinks{$link}
-            } elsif (exists $locations{$link}) {
-                $target = $locations{$link};
-            }
+    my $link_score = $config->{link_score};
+    if ($link_score) {
+        foreach my $permalink (keys %permalinks) {
+            my $asset = $permalinks{$permalink};
+            my $links = $asset->{links};
+            foreach my $link (@$links) {
+                my $target;
+                if (exists $permalinks{$link}) {
+                    $target = $permalinks{$link}
+                } elsif (exists $locations{$link}) {
+                    $target = $locations{$link};
+                }
 
-            if ($target && $target != $asset) {
-                $related{$permalink}->{$target->{permalink}} += $link_score;
-                $related{$target->{permalink}}->{$permalink} += $link_score;
+                if ($target && $target != $asset) {
+                    $related{$permalink}->{$target->{permalink}} += $link_score;
+                    $related{$target->{permalink}}->{$permalink} += $link_score;
+                }
             }
         }
     }
@@ -326,7 +328,7 @@ sub computeRelations {
     # Third passs.  Evaluate common taxonmy values.
     foreach my $name (keys %taxonomies) {
         my $taxonomy = $taxonomies{$name};
-        my $score = $taxonomies->{$name};
+        my $score = $taxonomies->{$name} or next;
         foreach my $value (keys %$taxonomy) {
             my $permalinks = $taxonomy->{$value};
             my @permalinks = keys %$permalinks;

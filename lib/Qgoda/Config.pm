@@ -208,6 +208,7 @@ sub default {
                 TT2 => {}
             },
         },
+        link_score => 5,
         taxonomies => {
             tags => 2,
             categories => 3,
