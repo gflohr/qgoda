@@ -44,7 +44,8 @@ sub build {
     my $errors = 0;
 
     # 1st pass, usually Markdown.
-    ASSET: foreach my $asset ($site->getAssets) {
+    ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
+                              $site->getAssets) {
         my $saved_locale = setlocale(POSIX::LC_ALL());
         eval {
             local $SIG{__WARN__} = sub {
@@ -66,7 +67,8 @@ sub build {
     $site->computeRelations;
 
     # 2nd pass, usually HTML.
-    ASSET: foreach my $asset ($site->getAssets) {
+    ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
+                              $site->getAssets) {
         my $saved_locale = setlocale(POSIX::LC_ALL());
         eval {
             local $SIG{__WARN__} = sub {
