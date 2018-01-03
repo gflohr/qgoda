@@ -211,6 +211,7 @@ sub default {
         taxonomies => {
             tags => 2,
             categories => 3,
+            links => 1,
         },
         po => {
             tt2 => [qw(_views _includes)],

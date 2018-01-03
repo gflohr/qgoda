@@ -288,7 +288,7 @@ sub computeRelations {
         $locations{$asset->{location}} = $asset;
         $permalinks{$permalink} = $asset;
 
-        foreach my $link (keys %{$asset->{links}}) {
+        foreach my $link (@{$asset->{links}}) {
             $links{$link}->{$permalink} = $asset;
         }
 
@@ -308,7 +308,7 @@ sub computeRelations {
     foreach my $permalink (keys %permalinks) {
         my $asset = $permalinks{$permalink};
         my $links = $asset->{links};
-        foreach my $link (keys %$links) {
+        foreach my $link (@$links) {
             my $target;
             if (exists $permalinks{$link}) {
                 $target = $permalinks{$link}
@@ -319,16 +319,6 @@ sub computeRelations {
             if ($target && $target != $asset) {
                 $related{$permalink}->{$target->{permalink}} += $link_score;
                 $related{$target->{permalink}}->{$permalink} += $link_score;
-            }
-        }
-    }
-
-    my $common_link_score = 1; # FIXME! Should be configurable.
-    foreach my $link (keys %links) {
-        my @group = keys %{$links{$link}};
-        foreach my $from (@group) {
-            foreach my $to (@group) {
-                $related{$from}->{$to} += $common_link_score;
             }
         }
     }

@@ -85,7 +85,7 @@ sub postMeta {
         }
     }
 
-    return excerpt => $excerpt, links => \%links;
+    return excerpt => $excerpt, links => [keys %links];
 }
 
 1;
