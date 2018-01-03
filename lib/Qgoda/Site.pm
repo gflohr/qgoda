@@ -160,7 +160,26 @@ sub searchAssets {
         return \@copy;
     }
 
+    my $found = $self->filter([values %{$self->{assets}}], %filters);
+
+    my @paths;
+    foreach my $found (@$found) {
+        push @paths, $found->{path};
+    }
+    $self->{__filter_cache}->{$canonical} = \@paths;
+
+    return $found;
+}
+
+sub filter {
+    my ($self, $set, %filters) = @_;
+
     # Preprocess the filters.
+    my @_filters;
+    foreach my $key (sort keys %filters) {
+        push @_filters, $key, $filters{$key};
+    }
+    
     my $visualize = sub {
         my ($index) = @_;
 
@@ -245,7 +264,7 @@ sub searchAssets {
         $filter->[2] = $value;
     }
 
-    my @found = values %{$self->{assets}};
+    my @found = @$set;
 
     {
         no warnings;
@@ -259,12 +278,6 @@ sub searchAssets {
             } @found;
         }
     }
-
-    my @paths;
-    foreach my $found (@found) {
-        push @paths, $found->{path};
-    }
-    $self->{__filter_cache}->{$canonical} = \@paths;
 
     return \@found;
 }
