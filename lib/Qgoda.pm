@@ -40,7 +40,7 @@ use IPC::Open3 qw(open3);
 use IPC::Signal;
 use POSIX qw(:sys_wait_h);
 use Template::Plugin::Gettext 0.2;
-use List::Util qw(uniq);
+use List::Util 1.45 qw(uniq);
 
 use Qgoda::Logger;
 use Qgoda::Config;
