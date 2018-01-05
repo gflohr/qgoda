@@ -122,9 +122,9 @@ sub build {
     my $site = $self->getSite;
     my $modified = scalar keys %{$site->getModified};
     
-    if ($modified + $deleted) {
+    if (($modified + $deleted) && !empty $config->{paths}->{timestamp}) {
         my $timestamp_file = File::Spec->catfile($config->{srcdir},
-                                                 '_timestamp');
+                                                 $config->{paths}->{timestamp});
         if (!write_file($timestamp_file, sprintf "%d\n", time)) {
                 $logger->error(__x("cannot write '{file}': {error}!",
                                file => $timestamp_file, error => $!));

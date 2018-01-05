@@ -177,6 +177,7 @@ sub default {
             plugins => '_plugins',
             po => '_po',
             site => '_site',
+            timestamp => '_timestamp',
         },
         compare_output => 1,
         helpers => {},
