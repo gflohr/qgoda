@@ -20,7 +20,7 @@ package Qgoda::Builder;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 use POSIX qw(setlocale);
 use Locale::Util qw(web_set_locale);
 use File::Spec;

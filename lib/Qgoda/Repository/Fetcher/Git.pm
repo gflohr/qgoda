@@ -20,7 +20,7 @@ package Qgoda::Repository::Fetcher::Git;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use Git;
 use File::Path qw(rmtree);
 

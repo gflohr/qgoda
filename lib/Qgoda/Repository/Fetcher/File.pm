@@ -20,7 +20,7 @@ package Qgoda::Repository::Fetcher::File;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use File::Copy::Recursive qw(dircopy);
 use File::Spec;
 use Archive::Extract;

@@ -25,7 +25,7 @@ use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
 $VERSION = '0.9.0-alpha.1';
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use Locale::Messages;
 use Locale::gettext_dumb;
 use File::Find;

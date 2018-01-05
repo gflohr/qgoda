@@ -20,7 +20,7 @@ package Qgoda::Init;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 use File::Spec;
 use JSON '2.90';
 use YAML::XS;

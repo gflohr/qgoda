@@ -20,7 +20,7 @@ package Qgoda::Migrator::Jekyll::LiquidConverter;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 
 use Qgoda;
 use Qgoda::Util qw(empty trim);

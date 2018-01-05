@@ -22,7 +22,7 @@ use strict;
 
 use Date::Parse qw(str2time);
 use POSIX qw(strftime);
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 
 use overload
     '""' => 'ISOString',

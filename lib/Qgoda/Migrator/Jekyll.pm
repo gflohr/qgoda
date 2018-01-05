@@ -20,7 +20,7 @@ package Qgoda::Migrator::Jekyll;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use YAML::XS;
 use File::Find;
 

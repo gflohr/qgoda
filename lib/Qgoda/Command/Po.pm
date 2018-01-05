@@ -20,7 +20,7 @@ package Qgoda::Command::Po;
 
 use strict;
 
-use Locale::TextDomain 1.28 qw(com.cantanea.qgoda);
+use Locale::TextDomain 1.28 qw(qgoda);
 use File::Spec;
 use File::Temp;
 use File::Copy qw(copy);

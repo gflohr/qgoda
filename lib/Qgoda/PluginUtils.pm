@@ -20,7 +20,7 @@ package Qgoda::PluginUtils;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use File::Spec;
 use JSON qw(decode_json);
 use Scalar::Util qw(reftype);

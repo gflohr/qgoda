@@ -20,7 +20,7 @@ package Qgoda::Analyzer;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 use Date::Parse;
 use YAML::XS;
 use File::Spec;

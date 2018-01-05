@@ -20,7 +20,7 @@ package Qgoda::Init::copy;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 use File::Spec;
 use File::Find qw(find);
 use File::Copy qw(copy);

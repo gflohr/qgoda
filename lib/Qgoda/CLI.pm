@@ -21,7 +21,7 @@ package Qgoda::CLI;
 use strict;
 
 use IO::Handle;
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
 use Qgoda;

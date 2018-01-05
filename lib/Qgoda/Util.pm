@@ -23,7 +23,7 @@ use strict;
 use IO::File;
 use File::Path qw(make_path);
 use File::Basename qw(fileparse);
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use Scalar::Util qw(reftype looks_like_number);
 use Encode qw(_utf8_on);
 use File::Find ();

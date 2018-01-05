@@ -20,7 +20,7 @@ package Qgoda::Config;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 use File::Spec;
 use YAML::XS;
 use Cwd;

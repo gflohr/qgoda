@@ -20,7 +20,7 @@ package Qgoda::Processor;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use Scalar::Util qw(blessed);
 use URI;
 use URI::Escape qw(uri_unescape);

@@ -20,7 +20,7 @@ package Qgoda::Init::config;
 
 use strict;
 
-use Locale::TextDomain qw('com.cantanea.qgoda');
+use Locale::TextDomain qw('qgoda');
 use YAML;
 
 use Qgoda::Util qw(merge_data read_file write_file);

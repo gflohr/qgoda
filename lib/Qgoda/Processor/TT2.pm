@@ -21,7 +21,7 @@ package Qgoda::Processor::TT2;
 use strict;
 
 use Template;
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use File::Spec;
 
 use Qgoda::Util qw(empty clear_utf8_flag);

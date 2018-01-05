@@ -20,7 +20,7 @@ package Qgoda::Migrator;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use File::Path qw(remove_tree make_path);
 use File::Spec;
 use File::Copy::Recursive qw(rcopy);

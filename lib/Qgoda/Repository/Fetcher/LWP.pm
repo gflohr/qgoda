@@ -20,7 +20,7 @@ package Qgoda::Repository::Fetcher::LWP;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use LWP::UserAgent;
 use File::Temp;
 

@@ -20,7 +20,7 @@ package Qgoda::PluginLoader::TT2::Filter;
 
 use strict;
 
-use Locale::TextDomain qw(com.cantanea.qgoda);
+use Locale::TextDomain qw(qgoda);
 use Template::Plugin::Filter;
 
 use Qgoda::Util qw(empty perl_class perl_identifier);
