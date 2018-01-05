@@ -189,7 +189,7 @@ sub default {
                     wrapper => 'html'
                 },
                 html => {
-                    modules => 'TT2',
+                    modules => [qw(TT2 HTMLFilter)],
                 },
             },
             triggers => {
@@ -203,7 +203,10 @@ sub default {
             },
             options => {
                 Markdown => {},
-                TT2 => {}
+                TT2 => {},
+                HTMLFilter => [
+                    'AnchorTarget',
+                ]
             },
         },
         link_score => 5,
