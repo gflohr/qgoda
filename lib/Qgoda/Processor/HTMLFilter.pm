@@ -93,11 +93,11 @@ sub process {
 
     my $output = '';
     
-    my $start_handler = sub {
-        my ($text, $tagname, $attr, $attrseq, $is_cdata) = @_;
-    	
+    my $handler = sub {
+        my ($event, $text, $tagname, $attr, $attrseq, $is_cdata) = @_;
+
         my $chunk = $text;
-        foreach my $plug_in (@{$self->{__handlers}->{start}}) {
+        foreach my $plug_in (@{$self->{__handlers}->{$event}}) {
             $chunk = $plug_in->start(
                 $chunk,
                 text => $text,
@@ -112,46 +112,16 @@ sub process {
 
         $output .= $chunk;
     };
-    
-    my $comment_handler = sub {
-        my ($text) = @_;
 
-        $output .= $text;
-    };
+    my $parser = HTML::Parser->new(
+        comment_h => [$handler, 'event, text'],
+        declaration_h => [$handler, 'event, text'],
+        start_h => [$handler, 'event, text, tagname, attr, attrseq, is_cdata'],
+        end_h => [$handler, 'event, text, tagname'],
+        process_h => [$handler, 'event, text'],
+        text_h => [$handler, 'event, text'],
+    );
 
-    my $declaration_handler = sub {
-        my ($text) = @_;
-
-        $output .= $text;
-    };
- 
-    my $process_handler = sub {
-        my ($text) = @_;
-
-        $output .= $text;
-    };
- 
-    my $end_handler = sub {
-        my ($text, $tagname) = @_;
-
-        $output .= $text;
-    };
-
-    my $text_handler = sub {
-        my ($text) = @_;
-
-        $output .= $text;
-    };
-
-    my $parser = HTML::Parser->new(comment_h => [$comment_handler, 'text'],
-                                   declaration_h => [$declaration_handler, 
-                                                     'text'],
-                                   start_h => [$start_handler,
-                                               'text, tagname, attr, attrseq, is_cdata'],
-                                   end_h => [$end_handler, 'text, tagname'],
-                                   process_h => [$process_handler, 'text'],
-                                   text_h => [$text_handler, 'text'],
-                                   );
     $parser->parse($content);
 
     return $output;    
