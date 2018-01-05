@@ -178,7 +178,6 @@ sub default {
         exclude_watch => [],
         paths => {
             views => '_views',
-            includes => '_includes',
             po => '_po',
         },
         compare_output => 1,
@@ -215,7 +214,7 @@ sub default {
             links => 1,
         },
         po => {
-            tt2 => [qw(_views _includes)],
+            tt2 => [qw(_views)],
             from_code => 'utf-8',
             copyright_holder => __"Set config.po.copyright_holder in _config.yaml",
             msgid_bugs_address => __"Set config.po.msgid_bugs_address in _config.yaml",
