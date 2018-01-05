@@ -492,7 +492,7 @@ sub __scan {
     my $logger = $self->{__logger};
     my $config = $self->{__config};
 
-    my $outdir = $config->{outdir};
+    my $outdir = $config->{paths}->{site};
     my $srcdir = $config->{srcdir};
 
     # Scan the source directory.
@@ -524,12 +524,12 @@ sub __scan {
     my @outfiles;
     $self->{__outfiles} = \@outfiles;
     $logger->debug(__x("scanning output directory '{outdir}'",
-                       outdir => $config->{outdir}));
+                       outdir => $config->{paths}->{site}));
     File::Find::find(sub {
         if ($_ ne '.' && $_ ne '..') {
             push @outfiles, Cwd::abs_path($_);
         }
-    }, $config->{outdir});
+    }, $config->{paths}->{site});
 
     return $self;
 }

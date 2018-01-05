@@ -115,13 +115,9 @@ sub new {
                            filename => $filename, error => $@));
     }
 
-    # Fill in defaults and consistency checks.
-    $config->{outdir} = File::Spec->catpath($config->{srcdir}, '_site')
-        if empty $config->{outdir};
-
     # Clean up certain variables or overwrite them unconditionally.
     $config->{srcdir} = Cwd::abs_path($config->{srcdir});
-    $config->{outdir} = Cwd::abs_path($config->{outdir});
+    $config->{paths}->{site} = Cwd::abs_path($config->{paths}->{site});
 
     my @exclude = (
         '/_*',
@@ -180,6 +176,7 @@ sub default {
             views => '_views',
             plugins => '_plugins',
             po => '_po',
+            site => '_site',
         },
         compare_output => 1,
         helpers => {},
