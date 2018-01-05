@@ -50,8 +50,8 @@ $html = <<EOF;
 EOF
 %postmeta = $processor->postMeta($html);
 is $postmeta{excerpt}, 'Find me!';
-is_deeply $postmeta{links}, {
-    'http://www.qgoda.net/' => 1,
-    '/path/to/other/' => 2,
-    ':colon:' => 3,
-};
+is_deeply [sort @{$postmeta{links}}], [
+    '/path/to/other/',
+    ':colon:',
+    'http://www.qgoda.net/',
+];
