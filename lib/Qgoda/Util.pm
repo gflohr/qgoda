@@ -159,7 +159,7 @@ sub merge_data {
         my $ref_x = reftype $x;
         my $ref_y = reftype $y;
 
-        return $ref_x = $ref_y;
+        return $ref_x eq $ref_y;
     }
 
     return $overlay if !equal_ref $overlay, $data;
