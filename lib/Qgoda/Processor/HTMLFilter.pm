@@ -98,8 +98,9 @@ sub process {
 
         my $chunk = $text;
         foreach my $plug_in (@{$self->{__handlers}->{$event}}) {
-            $chunk = $plug_in->start(
+            $chunk = $plug_in->$event(
                 $chunk,
+                event => $event,
                 text => $text,
                 output => $output,
                 text => $text,

@@ -206,6 +206,7 @@ sub default {
                 TT2 => {},
                 HTMLFilter => [
                     'AnchorTarget',
+                    'Generator',
                 ]
             },
         },
