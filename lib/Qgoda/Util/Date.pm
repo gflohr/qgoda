@@ -25,7 +25,7 @@ use POSIX qw(strftime);
 use Locale::TextDomain qw('qgoda');
 
 use overload
-    '""' => 'ISOString',
+    '""' => 'epoch',
     'eq' => 'equals',
     'cmp' => 'cmpDate',
     '==' => 'nequals',
