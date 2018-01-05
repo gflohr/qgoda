@@ -84,6 +84,7 @@ sub analyzeAsset {
 
     delete $meta->{path};
     delete $meta->{relpath};
+    delete $meta->{reldir};
 
     merge_data $asset, $meta;
     if (!empty $asset->{master}) {

@@ -31,6 +31,10 @@ sub new {
     $self->{path} = $path;
     $self->{relpath} = $relpath;
 
+    my $reldir = $relpath;
+    $reldir =~ s{/[^/]+$}{};
+    $self->{reldir} = $reldir;
+
     bless $self, $class;
 }
 
