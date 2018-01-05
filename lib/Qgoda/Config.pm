@@ -178,6 +178,7 @@ sub default {
         exclude_watch => [],
         paths => {
             views => '_views',
+            plugins => '_plugins',
             po => '_po',
         },
         compare_output => 1,

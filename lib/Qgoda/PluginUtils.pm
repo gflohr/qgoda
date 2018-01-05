@@ -64,7 +64,7 @@ sub load_plugins {
                           name => $name));
     }
 
-    my $plugin_dir = File::Spec->catfile($config->{srcdir}, '_plugins');
+    my $plugin_dir = $config->{paths}->{plugins};
     search_local_plugins(\%plugins, $plugin_dir, $logger);
 
     while (my ($name, $plugin) = each %plugins) {
