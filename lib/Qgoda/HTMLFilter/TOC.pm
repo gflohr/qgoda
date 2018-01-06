@@ -49,6 +49,7 @@ sub start_document {
     my ($self, $chunk, %args) = @_;
 
     delete $self->{__active};
+    delete $self->{__slugs};
 
     return $chunk;
 }
@@ -215,7 +216,8 @@ sub __generateDefaultTemplate {
     my $logger = Qgoda->new->logger;
     $logger->warning(__x("writing default template '{template}'",
                          template => $level_template_file));
-    my ($code, $level_code) = split "===\n", join '', <DATA>;
+    my ($mlcode, $code, $level_code) = split "===\n", join '', <DATA>;
+    $code = $mlcode if $config->{po}->{textdomain};
     if (!write_file $level_template_file, $level_code) {
         die __x("error writing template file '{template}': {error}\n",
                 template => $level_template_file, error => $!);
@@ -237,6 +239,15 @@ __DATA__
 [% IF asset.toc.size %]
 <div class="toc">
   <div class="toc-title">[% gtx.gettext('Table Of Contents') %]</div>
+  [% INCLUDE components/toc/level.html 
+      items = asset.toc
+      depth = 1 %]
+</div>
+[% END %]
+===
+[% IF asset.toc.size %]
+<div class="toc">
+  <div class="toc-title">Table Of Contents</div>
   [% INCLUDE components/toc/level.html 
       items = asset.toc
       depth = 1 %]
