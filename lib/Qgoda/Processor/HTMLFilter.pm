@@ -93,7 +93,7 @@ sub new {
 }
 
 sub process {
-    my ($self, $content, $asset, $site) = @_;
+    my ($self, $content, $asset) = @_;
 
     my $output = '';
     
@@ -119,6 +119,7 @@ sub process {
                 attr => $attr,
                 attrseq => $attrseq,
                 is_cdata => $is_cdata,
+                asset => $asset,
             );
         }
 
@@ -134,7 +135,7 @@ sub process {
         text_h => [$handler, 'event, text'],
         start_document_h => [$handler, 'event'],
     );
-
+    $parser->empty_element_tags(1);
     $parser->parse($content);
 
     # FIXME! Why can that handler not be registered like the others?

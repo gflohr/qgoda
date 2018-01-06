@@ -21,31 +21,25 @@ package Qgoda::HTMLFilter::TOC;
 use strict;
 
 use Qgoda;
-use Qgoda::Util qw(html_escape slugify);
+use Qgoda::Util qw(html_escape slugify empty write_file);
+use Locale::TextDomain qw(qgoda);
 
 use base qw(Qgoda::Processor);
 
 sub new {
     my ($class, %args) = @_;
 
-    # FIXME! Use tags instead, for example <qgoda-content>.
-    my $from = exists $args{from} ? $args{from} : '<!--QGODA-CONTENT-->';
-    my $to;
-    if (exists $args{to}) {
-        $to = $args{to};
-    } else {
-        $to = $from;
-        if ($to !~ s{<!--}{<!--/}) {
-            $to = '/' . $to;
-        }
-    }
+    my $content_tag = exists $args{content_tag} 
+        ? $args{content_tag} : 'qgoda-content';
+    my $toc_tag = exists $args{toc_tag} 
+        ? $args{toc_tag} : 'qgoda-toc';
     my $start = exists $args{start} ? $args{start} : 2;
-    my $end = exists $args{end} ? $args{end} : 6;
-    my $self = {
-        __from => $from,
-        __to => $to,
+    my $end = exists $args{end} ? $args{end} : 6;    my $self = {
+        __content_tag => $content_tag,
+        __toc_tag => $toc_tag,
         __start => $start,
         __end => $end,
+        __template => $args{template},
     };
 
     bless $self, $class;
@@ -64,29 +58,24 @@ sub end_document {
 
     delete $self->{__active};
 
-    my $root = $self->__deepen($self->{__items});
-
-    return $chunk;
-}
-
-sub comment {
-    my ($self, $chunk, %args) = @_;
-
-    if ($self->{__from} eq $args{text}) {
-        $self->{__active} = 1;
-        $self->{__headlines} = [];
-        $self->{__slugs} = {};
-        $self->{__items} = [];
-        $self->{__path} = [0];
-    } elsif ($self->{__to} eq $args{text}) {
-        $self->{__active} = 0;
-    }
-
     return $chunk;
 }
 
 sub start {
     my ($self, $chunk, %args) = @_;
+
+    if ($args{tagname} eq $self->{__content_tag}) {
+        $self->{__active} = 1;
+        $self->{__headlines} = [];
+        $self->{__slugs} ||= {};
+        $self->{__items} = [];
+        $self->{__path} = [0];
+
+        return $chunk;
+    } elsif ($args{tagname} eq $self->{__toc_tag}) {
+        # Normalize.
+        return "<$self->{__toc_tag} />";
+    }
 
     return $chunk if !$self->{__active};
 
@@ -103,6 +92,19 @@ sub start {
 sub end {
     my ($self, $chunk, %args) = @_;
 
+    if ($args{tagname} eq $self->{__content_tag}) {
+        return '' if !$self->{__active};
+        $self->{__active} = 0;
+
+        return '' if ${$args{output}} !~ m{<$self->{__toc_tag} />};
+
+$DB::single = 1;
+        my $toc = $self->__generateTOC($args{asset});
+        ${$args{output}} =~ s{<$self->{__toc_tag} />}{$toc}g;
+
+        return '';
+    }
+
     return $chunk if !$self->{__active};
 
     return $chunk if $args{tagname} !~ /^h([[1-9][0-9]*)$/;
@@ -111,6 +113,7 @@ sub end {
     return $chunk if $hlevel > $self->{__end};
 
     return $chunk if ${$args{output}} !~ s{<qgoda-toc-marker />(.*)}{}s;
+
     my $text = $1;
     my $level = $hlevel - $self->{__start} + 1;
     my $depth = @{$self->{__path}};
@@ -177,4 +180,79 @@ sub __deepen {
     return $root->{children};
 }
 
+sub __generateTOC {
+    my ($self, $asset) = @_;
+
+    my $root = $self->__deepen($self->{__items});
+
+    return '' if !@$root;
+
+    my $template = $self->{__template};
+    if (empty $template) {
+        $template = $self->__generateDefaultTemplate;
+    }
+
+    my $qgoda = Qgoda->new;
+    my $processor = $qgoda->getProcessor('Qgoda::Processor::TT2');
+    my $content = qq{[% INCLUDE $template %]};
+    $asset->{toc} = $root;
+
+    return $processor->process($content, $asset);
+}
+
+sub __generateDefaultTemplate {
+    my ($self) = @_;
+
+    my $config = Qgoda->new->config;
+
+    my $template = 'components/toc.html';
+    my $template_file = File::Spec->catfile($config->{paths}->{views},
+                                            $template);
+    return $template if -e $template_file;
+    my $level_template_file = File::Spec->catfile($config->{paths}->{views},
+                                                  'components/toc/level.html');
+    
+    my $logger = Qgoda->new->logger;
+    $logger->warning(__x("writing default template '{template}'",
+                         template => $level_template_file));
+    my ($code, $level_code) = split "===\n", join '', <DATA>;
+    if (!write_file $level_template_file, $level_code) {
+        die __x("error writing template file '{template}': {error}\n",
+                template => $level_template_file, error => $!);
+    }
+    $logger->warning(__x("writing default template '{template}'",
+                         template => $template_file));
+    if (!write_file $template_file, $code) {
+        die __x("error writing template file '{template}': {error}\n",
+                template => $template_file, error => $!);
+    }
+
+    return $template;
+}
+
 1;
+
+__DATA__
+[% USE gtx = Gettext(config.po.textdomain, asset.lingua) %]
+[% IF asset.toc.size %]
+<div class="toc">
+  <div class="toc-title">[% gtx.gettext('Table Of Contents') %]</div>
+  [% INCLUDE components/toc/level.html 
+      items = asset.toc
+      depth = 1 %]
+</div>
+[% END %]
+===
+<ul class="toclevel-[% depth %]">
+[% FOREACH item IN items %]
+  <li class="toclevel-[% depth %]">
+    [% item.path.join('.') %]
+    <a href="#[% item.slug %]">[% item.text %]</a>
+    [% IF item.children %]
+      [% INCLUDE components/toc/level.html
+           items = item.children
+           depth = depth + 1 %]
+    [% END %]
+  </li>
+[% END %]
+</ul>
