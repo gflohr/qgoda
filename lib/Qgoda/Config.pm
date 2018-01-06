@@ -207,6 +207,7 @@ sub default {
                 HTMLFilter => [
                     'AnchorTarget',
                     'Generator',
+                    'CleanUp',
                 ]
             },
         },
