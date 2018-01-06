@@ -79,6 +79,10 @@ sub new {
             if $plug_in->can('comment');
         push @{$handlers{process}}, $plug_in
             if $plug_in->can('process');
+        push @{$handlers{start_document}}, $plug_in
+            if $plug_in->can('start_document');
+        push @{$handlers{end_document}}, $plug_in
+            if $plug_in->can('end_document');
     }
 
     my $self = {
@@ -109,7 +113,7 @@ sub process {
                 $chunk,
                 event => $event,
                 text => $text,
-                output => $output,
+                output => \$output,
                 text => $text,
                 tagname => $tagname,
                 attr => $attr,
@@ -129,10 +133,12 @@ sub process {
         process_h => [$handler, 'event, text'],
         text_h => [$handler, 'event, text'],
         start_document_h => [$handler, 'event'],
-        end_document_h => [$handler, 'event'],
     );
 
     $parser->parse($content);
+
+    # FIXME! Why can that handler not be registered like the others?
+    $handler->('end_document', $output);
 
     return $output;    
 }
