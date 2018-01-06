@@ -208,6 +208,7 @@ sub default {
                     'AnchorTarget',
                     'Generator',
                     'CleanUp',
+                    'TOC'
                 ]
             },
         },

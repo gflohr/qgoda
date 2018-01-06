@@ -96,7 +96,14 @@ sub process {
     my $handler = sub {
         my ($event, $text, $tagname, $attr, $attrseq, $is_cdata) = @_;
 
-        my $chunk = $text;
+        my $chunk;
+        if ('start_document' eq $event || 'end_document' eq $event) {
+            $chunk = $output;
+            $output = '';
+        } else {
+            $chunk = $text;
+        }
+
         foreach my $plug_in (@{$self->{__handlers}->{$event}}) {
             $chunk = $plug_in->$event(
                 $chunk,
@@ -121,6 +128,8 @@ sub process {
         end_h => [$handler, 'event, text, tagname'],
         process_h => [$handler, 'event, text'],
         text_h => [$handler, 'event, text'],
+        start_document_h => [$handler, 'event'],
+        end_document_h => [$handler, 'event'],
     );
 
     $parser->parse($content);
