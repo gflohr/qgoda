@@ -44,7 +44,7 @@ sub end {
     my $head_indent = $1;
 
     my $content = "Qgoda $Qgoda::VERSION (http://www.qgoda.net)";
-    my $version = qq{<meta name="Generator" content="$content" />};
+    my $version = qq{<meta name="generator" content="$content" />};
 
     $chunk = $self->{__indent} . "$version\n$head_indent$chunk";
 
