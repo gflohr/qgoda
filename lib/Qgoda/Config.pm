@@ -178,6 +178,7 @@ sub default {
             po => '_po',
             site => '_site',
             timestamp => '_timestamp',
+            tours => '_tours.yaml'
         },
         compare_output => 1,
         helpers => {},

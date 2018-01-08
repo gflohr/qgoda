@@ -25,8 +25,10 @@ use strict;
 use MIME::Base64 qw(encode_base64);
 use List::Util qw(pairs any);
 use Scalar::Util qw(reftype);
+use YAML::XS qw(Load Dump);
+use Locale::TextDomain qw(qgoda);
 
-use Qgoda::Util qw(canonical empty);
+use Qgoda::Util qw(canonical empty read_file write_file canonical);
 use Qgoda::Artefact;
 
 sub new {
@@ -374,7 +376,121 @@ sub computeRelations {
     return $self
 }
 
-# FIXME! Do we need this method?
+sub __readTours {
+    my ($self, $path) = @_;
+
+    return if !-e $path;
+
+    my $yaml = read_file $path or die $!;
+    my $data = YAML::XS::Load($yaml);
+    if (!ref $data || 'HASH' ne reftype $data) {
+        die __"must be a dictionary\n";
+    }
+
+    my %tours;
+    foreach my $key1 (keys %$data) {
+        die __x("'{variable}' must be a dictionary", variable => $key1)
+            unless ref $data->{$key1} && 'HASH' eq reftype $data->{$key1};
+
+        foreach my $key2 (keys %{$data->{$key1}}) {
+            my $docs = $data->{$key1}->{$key2};
+            die __x("'{variable}' must be a list", variable => "$key1.$key2")
+                unless ref $docs && 'ARRAY' eq reftype $docs;
+            my $count = 0;
+            foreach my $doc (@{$docs}) {
+                $tours{$key1}->{$key2}->{$doc} = ++$count;
+            }
+        }
+    }
+
+    return %tours;
+}
+
+sub __writeTours {
+    my ($self, $path, $tours) = @_;
+
+    # Turn hash with order keys into ordered list.
+    foreach my $tour (keys %$tours) {
+        if (!keys %{$tours->{$tour}}) {
+            delete $tours->{$tour};
+            next;
+        }
+        foreach my $section (keys %{$tours->{$tour}}) {
+            my $docs = $tours->{$tour}->{$section};
+            $tours->{$tour}->{$section} 
+                = [sort { $docs->{$a} <=> $docs->{$b} } keys %$docs];
+            1;
+        }
+    }
+
+    if (!keys %$tours) {
+        if (!unlink $path) {
+            die __x("error deleting file: {error}\n",
+                    error => $!);
+        }
+    }
+
+    my $yaml = YAML::XS::Dump($tours);
+    unless (write_file $path, $yaml) {
+        die __x("error writing file: {error}\n",
+                error => $!);
+    }
+
+    return $self;
+}
+
+sub computeTours {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = Qgoda->new->config;
+    my %tours = %{$config->{tours} || {}} or return;
+
+    my %order = eval { 
+        $self->__readTours($config->{paths}->{tours});
+    };
+    if ($@) {
+        $logger->error(__x("tours file '{path}' corrupted or not readable: {error}",
+                           path => $config->{path}->{tours},
+                           error => $@));
+        return;
+    }
+
+    my %new;
+    foreach my $asset ($self->getAssets) {
+        delete $asset->{order};
+        foreach my $tour (keys %tours) {
+            # tour: doc-section
+            next if !exists $asset->{$tour};
+            my $section = $asset->{$tour};
+            # section: introduction;
+            my $tour_key = $tours{$tour};
+            # tour_key: name
+            next if !exists $asset->{$tour_key};
+            my $tour_value = $asset->{$tour_key};
+            # tour_value = 'qgoda-in-15-minutes'
+
+            my $order = $order{$tour}->{$section}->{$tour_value} || 0;
+            $new{$tour}->{$section}->{$tour_value} = $order;
+
+            $asset->{order}->{$tour} = $order;
+        }
+    }
+
+    my $corder = canonical \%order;
+    my $cnew = canonical \%new;
+    if ($corder ne $cnew) {
+        eval { $self->__writeTours($config->{paths}->{tours}, \%new) };
+        if ($@) {
+            $logger->error("$config->{paths}->{tours}: $@");
+            # continue;
+        }
+    }
+
+    return $self;
+}
+
 sub getTaxonomyValues {
     my ($self, $taxonomy, %filters) = @_;
 
