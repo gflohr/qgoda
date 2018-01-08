@@ -99,7 +99,6 @@ sub end {
 
         return '' if ${$args{output}} !~ m{<$self->{__toc_tag} />};
 
-$DB::single = 1;
         my $toc = $self->__generateTOC($args{asset});
         ${$args{output}} =~ s{<$self->{__toc_tag} />}{$toc}g;
 
