@@ -325,6 +325,9 @@ sub checkConfig {
     die __x("'{variable}' must be a list", variable => 'linguas')
         if exists $config->{linguas} && !$self->__isArray($config->{linguas});
 
+    die __x("'{variable}' must be a dictionary", variable => 'tours')
+        if exists $self->{tours} && !$self->__isHash($config->{tours});
+
     # Has to be done after everything was read. We need the value of
     # case-sensitive.
     $self->{defaults} = $self->__compileDefaults($self->{defaults});
