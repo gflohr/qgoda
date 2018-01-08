@@ -208,7 +208,13 @@ sub default {
                     'AnchorTarget',
                     'Generator',
                     'CleanUp',
-                    'TOC'
+                    ['TOC', 
+                     content_tag => 'qgoda-content',
+                     toc_tag => 'qgoda-toc',
+                     start => 2,
+                     end => 6,
+                     template => 'components/toc.html'
+                    ],
                 ]
             },
         },
