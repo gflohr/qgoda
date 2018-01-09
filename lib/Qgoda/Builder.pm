@@ -64,9 +64,7 @@ sub build {
         setlocale(POSIX::LC_ALL(), $saved_locale);
     }
 
-    # FIXME! This should be a post-analyzer step ...
     $site->computeRelations;
-    $site->computeTours;
 
     # 2nd pass, usually HTML.
     ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
