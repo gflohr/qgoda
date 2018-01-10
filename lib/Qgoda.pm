@@ -69,7 +69,6 @@ sub new {
     my $logger = $self->{__logger} = $self->logger;
 
     $self->{__config} = Qgoda::Config->new unless $params->{no_config};
-    $self->{__analyzers} = [Qgoda::Analyzer->new];
     $self->{__builders} = [Qgoda::Builder->new];
     $self->{__processors} = {};
     $self->{__load_plugins} = 1;
@@ -537,8 +536,37 @@ sub __scan {
 sub __analyze {
     my ($self, $site) = @_;
 
+    if (!$self->{__analyzers}) {
+        $self->__initAnalyzers;
+    }
+
     foreach my $analyzer (@{$self->{__analyzers}}) {
         $analyzer->analyze($site);
+    }
+
+    return $self;
+}
+
+sub __initAnalyzers {
+    my ($self) = @_;
+
+    my @analyzers = (Qgoda::Analyzer->new);
+    $self->{__analyzers} = \@analyzers;
+    my $names = $self->config->{analyzers} or return $self;
+
+    foreach my $name (@$names) {
+        my $class_name = 'Qgoda::Analyzer::' . $name;
+
+        $self->logger->fatal(__x("invalid analyzer name '{analyzer}'",
+                                 analyzer => $name))
+            if !perl_class $class_name;
+
+        my $module_name = class2module $class_name;
+
+        require $module_name;
+
+        my $analyzer = $class_name->new;
+        push @analyzers, $analyzer;
     }
 
     return $self;
