@@ -536,6 +536,8 @@ sub __scan {
 sub analyze {
     my ($self) = @_;
 
+    my $site = $self->getSite;
+
     my $logger = $self->logger;
     foreach my $analyzer (@{$self->{__analyzers}}) {
         my $class = ref $analyzer;
@@ -545,14 +547,17 @@ sub analyze {
         };
         $logger->debug(__x("{class} setup",
                            class => "[$class]"));
-        eval { $analyzer->setup };
+        eval {
+            $analyzer->setup($site);
+        };
         if ($@) {
             $logger->error("[$class] $@");
             return;
         }
+        $self->analyzeAssets([$site->getAssets]);
     }
 
-    return $self->analyzeAssets([$self->getSite->getAssets]);
+    return $self;
 }
 
 sub analyzeAssets {
