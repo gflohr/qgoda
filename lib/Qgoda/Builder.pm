@@ -68,12 +68,12 @@ sub build {
 
     # 2nd pass, usually HTML.
     ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
-                              $site->getAssets) {
+                            $site->getAssets) {
         if ($asset->{virtual}) {
             $logger->debug(__x("not wrapping virtual asset '/{relpath}'",
                                relpath => $asset->getRelpath));
-            next;
         }
+
         my $saved_locale = setlocale(POSIX::LC_ALL());
         eval {
             local $SIG{__WARN__} = sub {
@@ -81,21 +81,21 @@ sub build {
                 $logger->warning("$asset->{path}: $msg");
             };
             $logger->debug(__x("wrapping asset '/{relpath}'",
-                               relpath => $asset->getRelpath));
+                            relpath => $asset->getRelpath));
             $self->wrapAsset($asset, $site);
 
             $self->saveArtefact($asset, $site, $asset->{location});
             $logger->debug(__x("successfully built '{location}'",
-                               location => $asset->{location}));
+                            location => $asset->{location}));
         };
         if ($@) {
             ++$errors;
             my $path = $asset->getPath;
-               $logger->error("$path: $@");
+            $logger->error("$path: $@");
         }
         setlocale(POSIX::LC_ALL(), $saved_locale);
     }
-
+    
     if ($errors) {
         $logger->error(">>>>>>>>>>>>>>>>>>>");
         $logger->error(__nx("one artefact has not been built because of errors (see above)",

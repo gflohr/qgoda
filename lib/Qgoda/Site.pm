@@ -297,6 +297,8 @@ sub computeRelations {
     my %related;
 
     foreach my $asset (values %{$self->{assets}}) {
+        next if $asset->{virtual};
+
         my $permalink = $asset->{permalink};
         $locations{$asset->{location}} = $asset;
         $permalinks{$permalink} = $asset;
