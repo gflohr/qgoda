@@ -34,14 +34,14 @@ sub new {
 }
 
 sub build {
-    my ($self, $site) = @_;
-
-    my $logger = $self->logger;
-    $logger->debug(__"start building posts");
-    my $config = $site->{config};
+    my ($self) = @_;
 
     my $qgoda = Qgoda->new;
-    my $errors = 0;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+
+    my $site = $qgoda->getSite;
+    my $errors = $site->getErrors;
 
     # 1st pass, usually Markdown.
     ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
@@ -107,13 +107,6 @@ sub build {
     return $self;
 }
 
-sub logger {
-    my ($self) = @_;
-
-    require Qgoda;
-    my $logger = Qgoda->new->logger('builder');
-}
-
 sub readAssetContent {
     my ($self, $asset, $site) = @_;
 
@@ -131,14 +124,15 @@ sub saveArtefact {
     my ($self, $asset, $site, $permalink) = @_;
 
     require Qgoda;
-    my $config = Qgoda->new->config;
+    my $qgoda = Qgoda->new;
+    my $config = $qgoda->config;
     $permalink = '/' . $asset->getRelpath if empty $permalink;
     my $path = File::Spec->catdir($config->{paths}->{site}, $permalink);
 
     my $existing = $site->getArtefact($path);
     if ($existing) {
         my $origin = $existing->getAsset;
-        my $logger = $self->logger;
+        my $logger = $qgoda->logger;
         $logger->warning(__x("Overwriting artefact at '{outpath}', "
                              . "origin: {origin}",
                              outpath => $path,
@@ -153,8 +147,8 @@ sub saveArtefact {
                 my $old = read_file $path;
                 if (defined $old && $old eq $asset->{content}) {
                     undef $write_file;
-                    $self->logger->debug(__x("Skipping unchanged file"
-                                             . " '{output}'", output => $path));
+                    $qgoda->logger->debug(__x("Skipping unchanged file"
+                                              . " '{output}'", output => $path));
                 }
             }
         }
@@ -163,7 +157,7 @@ sub saveArtefact {
     if ($write_file) {
         $site->addModified($path, $asset);
         unless (write_file $path, $asset->{content}) {
-            my $logger = $self->logger;
+            my $logger = $qgoda->logger;
             $logger->error(__x("error writing '{filename}': {error}",
                                filename => $path, error => $!));
             return;
@@ -177,7 +171,7 @@ sub processAsset {
     my ($self, $asset, $site) = @_;
 
     my $qgoda = Qgoda->new;
-    my $logger = $self->logger;
+    my $logger = $qgoda->logger;
 
     $logger->debug(__x("processing asset '/{relpath}'",
                        relpath => $asset->getRelpath));
@@ -207,9 +201,10 @@ sub processAsset {
 }
 
 sub wrapAsset {
-    my ($self, $asset, $site) = @_;
+    my ($self, $asset) = @_;
 
     my $qgoda = Qgoda->new;
+    my $site = $qgoda->getSite;
 
     my @processors = $qgoda->getWrapperProcessors($asset);
     return $self if !@processors;
@@ -217,7 +212,7 @@ sub wrapAsset {
     my $view = $asset->{view};
     die __"no view specified.\n" if empty $view;
 
-    my $logger = $self->logger;
+    my $logger = $qgoda->logger;
     
     my $srcdir = $qgoda->config->{srcdir};
     my $view_dir = $qgoda->config->{paths}->{views};

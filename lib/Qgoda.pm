@@ -107,8 +107,8 @@ sub build {
         };
     }
 
-    $self->__analyze($site);
-    $self->__locate($site);
+    $self->__analyze($site) or return;
+    $self->__locate($site) or return;
 
     return $self if $options{dry_run};
 
@@ -533,18 +533,59 @@ sub __scan {
     return $self;
 }
 
-sub __analyze {
-    my ($self, $site) = @_;
+sub analyze {
+    my ($self) = @_;
 
-    if (!$self->{__analyzers}) {
-        $self->__initAnalyzers;
+    my $logger = $self->logger;
+    foreach my $analyzer (@{$self->{__analyzers}}) {
+        my $class = ref $analyzer;
+        local $SIG{__WARN__} = sub {
+            my ($msg) = @_;
+            $logger->warning("[$class] $msg");
+        };
+        $logger->debug(__x("{class} setup",
+                           class => "[$class]"));
+        eval { $analyzer->setup };
+        if ($@) {
+            $logger->error("[$class] $@");
+            return;
+        }
     }
 
+    return $self->analyzeAssets([$self->getSite->getAssets]);
+}
+
+sub analyzeAssets {
+    my ($self, $assets, $include) = @_;
+
+    my $logger = $self->logger;
     foreach my $analyzer (@{$self->{__analyzers}}) {
-        $analyzer->analyze($site);
+        my $class = ref $analyzer;
+        foreach my $asset (@$assets) {
+            my $relpath = $asset->getRelpath;
+            local $SIG{__WARN__} = sub {
+                my ($msg) = @_;
+                $logger->warning("[$class] $relpath: $msg");
+            };
+            $logger->debug(__x("{class} analyzing '{relpath}'",
+                            class => "[$class]", relpath => $relpath));
+            eval { $analyzer->analyze($asset) };
+            if ($@) {
+                $logger->error("[$class] $relpath: $@");
+                $self->getSite->purgeAsset($asset) if !$include;
+            }
+        }
     }
 
     return $self;
+}
+
+sub __analyze {
+    my ($self, $site) = @_;
+
+    $self->__initAnalyzers if !$self->{__analyzers};
+
+    return $self->analyze;
 }
 
 sub __initAnalyzers {
@@ -683,14 +724,16 @@ sub __locate {
     my ($self, $site) = @_;
 
     foreach my $asset ($site->getAssets) {
-        $self->locateAsset($asset, $site);
+        $self->locateAsset($asset);
     }
 
     return $self;
 }
 
 sub locateAsset {
-    my ($self, $asset, $site) = @_;
+    my ($self, $asset) = @_;
+
+    my $site = $self->getSite;
 
     my $logger = $self->logger;
 

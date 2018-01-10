@@ -237,18 +237,13 @@ sub __include {
 
     merge_data $asset, $extra;
 
-    my $site = $q->getSite;
-    my $analyzers = $q->getAnalyzers;
-    foreach my $analyzer (@{$analyzers}) {
-        $analyzer->analyzeAsset($asset, $site, 1);
-    }
-
-    $q->locateAsset($asset, $site);
+    $q->analyzeAssets([$asset], 1);
+    $q->locateAsset($asset);
 
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
-        $builder->processAsset($asset, $site);
-        $builder->wrapAsset($asset, $site);
+        $builder->processAsset($asset);
+        $builder->wrapAsset($asset);
     }
 
     return $asset;

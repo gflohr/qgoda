@@ -35,47 +35,28 @@ use Qgoda::Util::Translate qw(translate_front_matter);
 sub new {
     my ($class) = @_;
 
-    require Qgoda;
-    my $logger = Qgoda->new->logger('analyzer');
-    my $config = Qgoda->new->config;
+    bless {}, $class;
+}
 
-    bless {
-        __logger => $logger,
-        __config => $config,
-    }, $class;
+sub setup {
+    shift;
 }
 
 sub analyze {
-    my ($self, $site, $included) = @_;
+    my ($self, $asset, $included) = @_;
 
-    foreach my $asset ($site->getAssets) {
-        $self->analyzeAsset($asset, $site, $included);
-    }
-
-    return $self;
-}
-
-sub analyzeAsset {
-    my ($self, $asset, $site, $included) = @_;
-
-    my $logger = $self->{__logger};
+    my $qgoda = Qgoda->new;
 
     my $path = $asset->getPath;
-    $logger->debug(__x("analyzing asset '{path}'",
-                       path => $path));
     stat $path or die __x("error reading '{path}': {err}",
                           path => $path, err => $!);
-    my $config = Qgoda->new->config;
+    my $config = $qgoda->config;
     my $meta = collect_defaults $asset->getRelpath, $config->{defaults};
 
     my $front_matter = front_matter $path;
     my $front_matter_data;
     if (defined $front_matter) {
-        $front_matter_data = eval { YAML::XS::Load($front_matter) };
-        if ($@) {
-            $logger->error(yaml_error $path, $@);
-            return;
-        }
+        $front_matter_data = YAML::XS::Load($front_matter);
     } else {
         $front_matter_data->{raw} = 1;
     }
@@ -91,16 +72,18 @@ sub analyzeAsset {
         translate_front_matter $asset;
     }
 
-    $self->__fillMeta($asset, $site) if !$asset->{raw};
+    $self->__fillMeta($asset) if !$asset->{raw};
 
     return $self;
 }
 
 sub __fillMeta {
-    my ($self, $asset, $site) = @_;
+    my ($self, $asset) = @_;
 
-    my $logger = $self->{__logger};
-    my $config = $self->{__config};
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+    my $site = $qgoda->getSite;
 
     my $date = $asset->{date};
     if (defined $date) {

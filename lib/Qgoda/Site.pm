@@ -39,6 +39,7 @@ sub new {
         __filter_cache => {},
         __modified => {},
         __relpaths => {},
+        __errors => 0,
     };
 
     bless $self, $class;
@@ -52,6 +53,21 @@ sub addAsset {
     $self->{__relpaths}->{$asset->getRelpath} = $asset;
 
     return $self;
+}
+
+sub purgeAsset {
+    my ($self, $asset) = @_;
+
+    delete $self->{assets}->{$asset->getPath};
+    delete $self->{__relpaths}->{$asset->getRelpath};
+
+    ++$self->{__errors};
+
+    return $self;
+}
+
+sub getErrors {
+    shift->{__errors};
 }
 
 sub getAssets {
