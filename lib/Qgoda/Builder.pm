@@ -69,6 +69,11 @@ sub build {
     # 2nd pass, usually HTML.
     ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
                               $site->getAssets) {
+        if ($asset->{virtual}) {
+            $logger->debug(__x("not wrapping virtual asset '/{relpath}'",
+                               relpath => $asset->getRelpath));
+            next;
+        }
         my $saved_locale = setlocale(POSIX::LC_ALL());
         eval {
             local $SIG{__WARN__} = sub {
