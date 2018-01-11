@@ -241,16 +241,13 @@ sub __include {
     $q->analyzeAssets([$asset], 1);
     $q->locateAsset($asset);
 
-    if ($asset->{master}) {
-        $q->getSite->addIncludedSlave($asset);
-    }
-
     # The default builder will delete the master property in order to
     # avoid an infinite recursion.
     my $builders = $q->getBuilders;
+    my $site = $q->getSite;
     foreach my $builder (@{$builders}) {
-        $builder->processAsset($asset);
-        $builder->wrapAsset($asset);
+        $builder->processAsset($asset, $site);
+        $builder->wrapAsset($asset, $site);
     }
 
     return $asset;

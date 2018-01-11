@@ -40,7 +40,7 @@ sub new {
         __modified => {},
         __relpaths => {},
         __errors => 0,
-        __included_masters => {},
+        __masters => {},
     };
 
     bless $self, $class;
@@ -415,7 +415,7 @@ sub getTaxonomyValues {
     return keys %values;
 }
 
-sub addIncludedSlave {
+sub addMasterReference {
     my ($self, $asset) = @_;
 
     my $master = $asset->{master};
@@ -424,8 +424,8 @@ sub addIncludedSlave {
     # Allow relative path with or without leading slash.
     $master =~ s{^/}{};
 
-    $self->{__included_masters}->{$master} ||= [];
-    push @{$self->{__included_masters}->{$master}}, $asset->{relpath};
+    $self->{__masters}->{$master} ||= [];
+    push @{$self->{__masters}->{$master}}, $asset->{relpath};
 
     return $self;
 }
@@ -433,36 +433,7 @@ sub addIncludedSlave {
 sub getMasters {
     my ($self) = @_;
 
-    my $logger = Qgoda->new->logger;
-    $logger->debug("collecting master documents");
-
-    my %masters = %{$self->{__included_masters}};
-    foreach my $key (keys %masters) {
-        $masters{$key} = [@{$masters{$key}}];
-    }
-
-    foreach my $relpath (keys %{$self->{__relpaths}}) {
-        my $asset = $self->{__relpaths}->{$relpath};
-        next if empty $asset->{master};
-
-        my $master = $asset->{master};
-        # Allow relative path with or without leading slash.
-        $master =~ s{^/}{};
-
-        my $master_asset = $self->{__relpaths}->{$master};
-
-        # We collect missing master documents under the empty key so that
-        # we can later print proper error messages.
-        if (!defined $master_asset) {
-            $master = '';
-        } else {
-            $master = $master_asset->getRelpath;
-        }
-        $masters{$master} ||= [];
-        push @{$masters{$master}}, $relpath;
-    }
-
-    return %masters;
+    return %{$self->{__masters}};
 }
 
 sub getAssetByPath {

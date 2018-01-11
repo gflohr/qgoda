@@ -817,6 +817,7 @@ sub _reload {
 sub __writePOTFile {
     my ($self, $site) = @_;
 
+$DB::single = 1;
     my %masters = $site->getMasters;
 
     my %textdomains = Template::Plugin::Gettext->textdomains;
