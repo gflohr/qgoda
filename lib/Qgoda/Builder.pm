@@ -34,7 +34,7 @@ sub new {
 }
 
 sub build {
-    my ($self) = @_;
+    my ($self, $site, %options) = @_;
 
     my $qgoda = Qgoda->new;
     my $logger = $qgoda->logger;
@@ -84,7 +84,9 @@ sub build {
                             relpath => $asset->getRelpath));
             $self->wrapAsset($asset, $site);
 
-            $self->saveArtefact($asset, $site, $asset->{location});
+            if (!$options{dry_run}) {
+                $self->saveArtefact($asset, $site, $asset->{location});
+            }
             $logger->debug(__x("successfully built '{location}'",
                             location => $asset->{location}));
         };
@@ -113,7 +115,10 @@ sub readAssetContent {
     if ($asset->{raw}) {
         return read_file($asset->getPath);
     } elsif (!empty $asset->{master}) {
-        return translate_body $asset;
+        my $retval = translate_body $asset;
+        # Avoid infinite recursion.
+        delete $asset->{master};
+        return $retval;
     } else {
         my $placeholder = Qgoda->new->config->{front_matter_placeholder};
         return read_body($asset->getPath, $placeholder);

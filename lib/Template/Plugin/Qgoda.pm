@@ -228,10 +228,11 @@ sub __include {
     if ($overlay) {
         my %overlay = %$overlay;
         delete $overlay{path};
+        delete $overlay{relpath};
+        delete $overlay{reldir};
         delete $overlay{view};
         delete $overlay{chain};
         delete $overlay{wrapper};
-        delete $overlay{master};
         merge_data $asset, \%overlay;
     }
 
@@ -240,6 +241,12 @@ sub __include {
     $q->analyzeAssets([$asset], 1);
     $q->locateAsset($asset);
 
+    if ($asset->{master}) {
+        $q->getSite->addIncludedSlave($asset);
+    }
+
+    # The default builder will delete the master property in order to
+    # avoid an infinite recursion.
     my $builders = $q->getBuilders;
     foreach my $builder (@{$builders}) {
         $builder->processAsset($asset);

@@ -43,7 +43,7 @@ sub setup {
 }
 
 sub analyze {
-    my ($self, $asset, $included) = @_;
+    my ($self, $asset, $site, $included) = @_;
 
     my $qgoda = Qgoda->new;
 

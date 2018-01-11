@@ -103,6 +103,10 @@ sub __extractFromMaster {
     }
 
     my $master_asset = $site->getAssetByRelpath($master);
+    if (!$master_asset) {
+        my $path = File::Spec->rel2abs($master, $self->option('srcdir'));
+        $master_asset = Qgoda::Asset->new($path, $master);
+    }
     my $splitter = Qgoda::Splitter->new($master_asset->getPath);
 
     my $meta = $splitter->meta;

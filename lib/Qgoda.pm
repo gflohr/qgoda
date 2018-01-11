@@ -110,9 +110,9 @@ sub build {
     $self->__analyze($site) or return;
     $self->__locate($site) or return;
 
-    return $self if $options{dry_run};
+    $self->__build($site, %options);
 
-    $self->__build($site);
+    return $self if $options{dry_run};
 
     $self->__writePOTFile($site);
 
@@ -554,7 +554,21 @@ sub analyze {
             $logger->error("[$class] $@");
             return;
         }
-        $self->analyzeAssets([$site->getAssets]);
+
+        foreach my $asset ($site->getAssets) {
+            my $relpath = $asset->getRelpath;
+            local $SIG{__WARN__} = sub {
+                my ($msg) = @_;
+                $logger->warning("[$class] $relpath: $msg");
+            };
+            $logger->debug(__x("{class} analyzing '{relpath}'",
+                            class => "[$class]", relpath => $relpath));
+            eval { $analyzer->analyze($asset, $site) };
+            if ($@) {
+                $logger->error("[$class] $relpath: $@");
+                $self->getSite->purgeAsset($asset);
+            }
+        }
     }
 
     return $self;
@@ -562,6 +576,8 @@ sub analyze {
 
 sub analyzeAssets {
     my ($self, $assets, $include) = @_;
+
+    my $site = $self->getSite;
 
     my $logger = $self->logger;
     foreach my $analyzer (@{$self->{__analyzers}}) {
@@ -574,7 +590,7 @@ sub analyzeAssets {
             };
             $logger->debug(__x("{class} analyzing '{relpath}'",
                             class => "[$class]", relpath => $relpath));
-            eval { $analyzer->analyze($asset) };
+            eval { $analyzer->analyze($asset, $site) };
             if ($@) {
                 $logger->error("[$class] $relpath: $@");
                 $self->getSite->purgeAsset($asset) if !$include;
@@ -619,10 +635,11 @@ sub __initAnalyzers {
 }
 
 sub __build {
-    my ($self, $site) = @_;
+    my ($self, %options) = @_;
 
+    my $site = $self->getSite;
     foreach my $builder (@{$self->{__builders}}) {
-        $builder->build($site);
+        $builder->build($site, %options);
     }
 
     return $self;

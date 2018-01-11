@@ -40,6 +40,7 @@ sub new {
         __modified => {},
         __relpaths => {},
         __errors => 0,
+        __included_masters => {},
     };
 
     bless $self, $class;
@@ -414,13 +415,32 @@ sub getTaxonomyValues {
     return keys %values;
 }
 
+sub addIncludedSlave {
+    my ($self, $asset) = @_;
+
+    my $master = $asset->{master};
+    return if empty $master;
+
+    # Allow relative path with or without leading slash.
+    $master =~ s{^/}{};
+
+    $self->{__included_masters}->{$master} ||= [];
+    push @{$self->{__included_masters}->{$master}}, $asset->{relpath};
+
+    return $self;
+}
+
 sub getMasters {
     my ($self) = @_;
 
     my $logger = Qgoda->new->logger;
     $logger->debug("collecting master documents");
 
-    my %masters;
+    my %masters = %{$self->{__included_masters}};
+    foreach my $key (keys %masters) {
+        $masters{$key} = [@{$masters{$key}}];
+    }
+
     foreach my $relpath (keys %{$self->{__relpaths}}) {
         my $asset = $self->{__relpaths}->{$relpath};
         next if empty $asset->{master};
