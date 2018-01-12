@@ -525,11 +525,11 @@ sub __makePOTFILES {
     my @files;
     foreach my $path (keys %files) {
         my $abspath = File::Spec->rel2abs($path);
-        my $relpath = File::Spec->abs2rel($path, $podir);
+        my $relpath = File::Spec->abs2rel($abspath, $podir);
         push @files, $relpath;
     }
 
-    push @files, 'MDPOTFILES', 'PLFILES';
+    push @files, 'mdpotfiles.pot', 'plfiles.pot';
 
     if (!chdir $podir) {
         die __x("error changing working directory to '{dir}': {error}\n",
@@ -612,6 +612,35 @@ sub __makeMDPOTFILES {
     }
 
     $qgoda->analyze($site);
+
+    my %masters;
+    foreach my $asset (values %{$site->{assets}}) {
+        next if empty $asset->{master};
+
+        my $master = $asset->{master};
+        $master =~ s{^/+}{};
+        $masters{$master}->{$asset->getPath} = $asset;
+    }
+
+    my @files;
+    foreach my $path (keys %masters) {
+        my $relpath = File::Spec->abs2rel($path, $podir);
+        push @files, $relpath;
+    }
+
+    if (!chdir $podir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $podir, error => $!);
+    }
+
+    my $potfiles = join "\n", sort @files;
+    my $display_name = File::Spec->catfile($config->{paths}->{po},
+                                           'MDPOTFILES');
+    $logger->info(__x("writing '{filename}'", filename => $display_name));
+    unless (write_file 'MDPOTFILES', "$potfiles\n") {
+        $logger->fatal(__x("error writing '{filename}': {error}",
+                           filename => $display_name, error => $!));
+    }
 
     return $self;
 }
