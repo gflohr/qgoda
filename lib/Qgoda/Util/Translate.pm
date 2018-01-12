@@ -64,8 +64,8 @@ sub translate_front_matter {
     $master_relpath = 'index.html' if empty $master_relpath;
 
     my $front_matter = front_matter $master_relpath;
-    die __x("{relpath}: cannot read front matter from master '{path}': {error}",
-            relpath => $relpath, path => $master_relpath, error => $!)
+    die __x("cannot read front matter from master '{path}': {error}",
+            path => $master_relpath, error => $!)
         if !defined $front_matter;
     
     my $master = dclone YAML::XS::Load($front_matter);
