@@ -241,8 +241,6 @@ sub __include {
     $q->analyzeAssets([$asset], 1);
     $q->locateAsset($asset);
 
-    # The default builder will delete the master property in order to
-    # avoid an infinite recursion.
     my $builders = $q->getBuilders;
     my $site = $q->getSite;
     foreach my $builder (@{$builders}) {

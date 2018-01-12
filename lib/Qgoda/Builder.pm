@@ -117,8 +117,6 @@ sub readAssetContent {
     } elsif (!empty $asset->{master}) {
         my $retval = translate_body $asset;
         $site->addMasterReference($asset);
-        # Avoid infinite recursion.
-        delete $asset->{master};
         return $retval;
     } else {
         my $placeholder = Qgoda->new->config->{front_matter_placeholder};
