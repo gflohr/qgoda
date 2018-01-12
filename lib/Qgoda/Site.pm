@@ -56,11 +56,19 @@ sub addAsset {
     return $self;
 }
 
-sub purgeAsset {
+sub removeAsset {
     my ($self, $asset) = @_;
 
     delete $self->{assets}->{$asset->getPath};
     delete $self->{__relpaths}->{$asset->getRelpath};
+
+    return $self;
+}
+
+sub purgeAsset {
+    my ($self, $asset) = @_;
+
+    $self->removeAsset($asset);
 
     ++$self->{__errors};
 

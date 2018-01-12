@@ -31,6 +31,7 @@ use Cwd qw(getcwd);
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
 use Qgoda::CLI;
+use Qgoda::Site;
 
 use base 'Qgoda::Command';
 
@@ -543,6 +544,74 @@ sub __makePOTFILES {
         $logger->fatal(__x("error writing '{filename}': {error}",
                            filename => $display_name, error => $!));
     }
+
+    $self->__makeMDPOTFILES($srcdir);
+
+    return $self;
+}
+
+sub __makeMDPOTFILES {
+    my ($self, $srcdir) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $config = $qgoda->config;
+    my $logger = $qgoda->logger;
+
+    my $podir = getcwd;
+    if (!chdir $srcdir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $srcdir, error => $!);
+    }
+
+    my $qgoda = Qgoda->new;
+    $qgoda->initPlugins;
+    $qgoda->initAnalyzers;
+    my $site = Qgoda::Site->new($config);
+    $qgoda->setSite($site);
+    $qgoda->scan($site, 'just find');
+
+    my %mdextra;
+    my %mddelete;
+
+    my $mdextra = $config->{po}->{mdextra} || [];
+    foreach my $pattern (@$mdextra) {
+        my $negated = $pattern =~ s/^!//;
+        # Force path to be relative.
+        $pattern =~ s{^/+}{};
+        my @files = globstar $pattern;
+        foreach my $found (@files) {
+            if (-d $found) {
+                # Skip directory.
+            } elsif ($negated) {
+                $logger->debug(__x("removing markdown file '{filename}'",
+                                   filename => $found));
+                delete $mdextra{$found};  
+                $mddelete{$found} = 1;              
+            } else {
+                $logger->debug(__x("adding markdown file '{filename}'",
+                                   filename => $found));
+                $mdextra{$found} = 1;
+                delete $mddelete{$found};
+            }
+        }
+    }
+
+    foreach my $delete (keys %mddelete) {
+        my $path = File::Spec->rel2abs($delete);
+        my $asset = $site->{assets}->{$path} or next;
+        $site->removeAsset($asset);
+    }
+
+    foreach my $relpath (keys %mdextra) {
+        my $path = File::Spec->abs2rel($relpath);
+        next if $site->{assets}->{$path};
+
+        $logger->debug(__x("creating asset object for '{filename}'",
+                           filename => $relpath));
+        $site->addAsset(Qgoda::Asset->new($path, $relpath));
+    }
+
+    $qgoda->analyze($site);
 
     return $self;
 }

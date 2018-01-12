@@ -76,10 +76,26 @@ sub new {
     return $qgoda;
 }
 
+sub setSite {
+    my ($self, $site) = @_;
+
+    $self->{__site} = $site;
+
+    return $self;
+}
+
+sub initPlugins {
+    my ($self) = @_;
+
+    delete $self->{__load_plugins} && load_plugins $qgoda;
+
+    return $self;
+}
+
 sub build {
     my ($self, %options) = @_;
 
-    delete $self->{__load_plugins} && load_plugins $qgoda;
+    $self->initPlugins;
 
     my $logger = $self->{__logger};
     my $config = $self->{__config};
@@ -90,10 +106,11 @@ sub build {
         or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
                               dir => $config->{srcdir},
                               error => $!));
-    my $site = $self->{__site} = Qgoda::Site->new($config);
+    my $site = Qgoda::Site->new($config);
+    $self->setSite($site);
 
     $self->{__outfiles} = [];
-    $self->__scan($site);
+    $self->scan($site);
 
     if (!empty $config->{po}->{textdomain}) {
         my $textdomain = $config->{po}->{textdomain};
@@ -484,9 +501,8 @@ sub getProcessor {
     return $self->{__processors}->{$name};
 }
 
-# FIXME! This should instantiate scanner plug-ins and use them instead.
-sub __scan {
-    my ($self, $site) = @_;
+sub scan {
+    my ($self, $site, $just_find) = @_;
 
     my $logger = $self->{__logger};
     my $config = $self->{__config};
@@ -518,6 +534,8 @@ sub __scan {
             }
         }
     }, $config->{srcdir});
+
+    return $self if $just_find;
 
     # And the output directory.
     my @outfiles;
@@ -604,12 +622,12 @@ sub analyzeAssets {
 sub __analyze {
     my ($self, $site) = @_;
 
-    $self->__initAnalyzers if !$self->{__analyzers};
+    $self->initAnalyzers if !$self->{__analyzers};
 
     return $self->analyze;
 }
 
-sub __initAnalyzers {
+sub initAnalyzers {
     my ($self) = @_;
 
     my @analyzers = (Qgoda::Analyzer->new);
