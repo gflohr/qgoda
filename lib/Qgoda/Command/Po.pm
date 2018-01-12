@@ -395,15 +395,28 @@ sub __fatalCommand {
 
     return $self if 0 == $self->__command(@args);
 
+    my @pretty;
+    foreach my $arg (@args) {
+        my $pretty = $arg;
+        $pretty =~ s{(["\\\$])}{\\$1}g;
+        $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
+        push @pretty, $pretty;
+    }
+
+    my $pretty = join ' ', @pretty;
+
     my $logger = Qgoda->new->logger;
 
     if ($? == -1) {
-        $logger->fatal(__x("failed to execute: {error}", error => $!));;
+        $logger->fatal(__x("{command}: failed to execute: {error}", 
+                           command => $pretty, error => $!));;
     } elsif ($? & 127) {
-        $logger->fatal(__x("died with signal {signo}", signo => $? & 127));
+        $logger->fatal(__x("{command}: died with signal {signo}", 
+                           command => $pretty, signo => $? & 127));
     }
 
-    $logger->fatal(__x("error {number}", $? >> 8));
+    $logger->fatal(__x("{command}: terminated with exit code {code}", 
+                       command => $pretty, code => $? >> 8));
 }
 
 sub __safeRename {
