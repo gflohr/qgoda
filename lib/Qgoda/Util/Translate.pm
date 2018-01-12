@@ -25,10 +25,9 @@ use Locale::gettext_dumb;
 use Storable qw(dclone);
 use Scalar::Util qw(reftype);
 use Template::Stash;
-use YAML::XS;
 use File::Globstar qw(globstar);
 
-use Qgoda::Util qw(empty merge_data flatten2hash front_matter);
+use Qgoda::Util qw(empty merge_data flatten2hash front_matter safe_yaml_load);
 use Qgoda::Splitter;
 
 use base 'Exporter';
@@ -69,7 +68,7 @@ sub translate_front_matter {
             path => $master_relpath, error => $!)
         if !defined $front_matter;
     
-    my $master = dclone YAML::XS::Load($front_matter);
+    my $master = dclone safe_yaml_load $front_matter;
 
     my @translate;
     if (!empty $asset->{translate}) {

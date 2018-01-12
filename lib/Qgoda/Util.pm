@@ -29,6 +29,7 @@ use Encode qw(_utf8_on);
 use File::Find ();
 use Data::Walk 2.00;
 use Storable qw(freeze);
+use YAML::XS;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -38,7 +39,7 @@ use vars qw(@EXPORT_OK);
                 perl_identifier perl_class class2module
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
-                canonical purify clear_utf8_flag);
+                canonical purify clear_utf8_flag safe_yaml_load);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -721,6 +722,15 @@ sub clear_utf8_flag {
     walk $wanted, $data;
 
     return $data;
+}
+
+
+sub safe_yaml_load {
+    my ($yaml) = @_;
+
+    Encode::_utf8_off($yaml);
+
+    return clear_utf8_flag YAML::XS::Load($yaml);
 }
 
 1;

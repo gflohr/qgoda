@@ -21,10 +21,9 @@ package Qgoda::Splitter;
 use strict;
 
 use Locale::TextDomain qw('qgoda');
-use YAML::XS;
 use Scalar::Util qw(reftype);
 
-use Qgoda::Util qw(empty front_matter read_body);
+use Qgoda::Util qw(empty front_matter read_body safe_yaml_load);
 
 sub new {
     my ($class, $path) = @_;
@@ -36,12 +35,12 @@ sub new {
                 filename => $path. error => $error);    
     }
 
-    my $meta = YAML::XS::Load($front_matter);
+    my $meta = safe_yaml_load $front_matter;
     my %front_lines;
     my $lineno = 1;
     foreach my $line (split /\n/, $front_matter) {
         ++$lineno;
-        my $data = eval { YAML::XS::Load($line) };
+        my $data = eval { safe_yaml_load $line };
         if (!$@ && $data && ref $data && 'HASH' eq reftype $data) {
             my @keys = keys %$data;
             foreach my $key (keys %$data) {

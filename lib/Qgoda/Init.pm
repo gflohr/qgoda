@@ -23,10 +23,9 @@ use strict;
 use Locale::TextDomain qw('qgoda');
 use File::Spec;
 use JSON '2.90';
-use YAML::XS;
 use Scalar::Util qw(weaken reftype);
 
-use Qgoda::Util qw(read_file write_file yaml_error perl_class);
+use Qgoda::Util qw(read_file write_file yaml_error perl_class safe_yaml_load);
 use Qgoda::Repository;
 
 sub new {
@@ -126,7 +125,7 @@ sub __readInitYAML {
                            filename => $path, error => $!));
     }
 
-    my $data = eval { YAML::XS::Load($yaml) };
+    my $data = eval { safe_yaml_load $yaml };
     $logger->fatal(yaml_error $path, $@) if $@;
 
     return $data;

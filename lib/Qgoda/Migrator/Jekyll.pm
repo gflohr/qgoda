@@ -21,11 +21,11 @@ package Qgoda::Migrator::Jekyll;
 use strict;
 
 use Locale::TextDomain qw(qgoda);
-use YAML::XS;
 use File::Find;
+use YAML::XS;
 
 use Qgoda;
-use Qgoda::Util qw(empty read_file write_file yaml_error);
+use Qgoda::Util qw(empty read_file write_file yaml_error safe_yaml_load);
 use Qgoda::Migrator::Jekyll::LiquidConverter;
 
 use base qw(Qgoda::Migrator);
@@ -336,7 +336,7 @@ sub readConfig {
         $logger->fatal(__x("error reading file '{filename}': {error}",
                            filename => $filename, error => $!));
     }
-    my $config = eval { YAML::XS::Load($yaml) };
+    my $config = eval { safe_yaml_load $yaml };
     $logger->fatal(yaml_error $filename, $@) if $@;
 
     return $config;

@@ -22,6 +22,7 @@ use strict;
 
 use Locale::TextDomain qw('qgoda');
 use YAML;
+use Encode;
 
 use Qgoda::Util qw(merge_data read_file write_file);
 
@@ -76,6 +77,7 @@ sub run {
                                    error => $!));
 
         local $YAML::Preserve = 1;
+        Encode::_utf8_off($yaml);
         $old = YAML::Load($yaml);
     }
     my $data = merge_data $old, $new;

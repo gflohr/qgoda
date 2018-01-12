@@ -22,13 +22,13 @@ use strict;
 
 use Locale::TextDomain qw('qgoda');
 use Date::Parse;
-use YAML::XS;
 use File::Spec;
 use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
 use Qgoda::Util qw(empty yaml_error front_matter lowercase collect_defaults
-                   normalize_path strip_suffix merge_data slugify);
+                   normalize_path strip_suffix merge_data slugify
+                   safe_yaml_load);
 use Qgoda::Util::Date;
 use Qgoda::Util::Translate qw(translate_front_matter);
 
@@ -52,11 +52,14 @@ sub analyze {
                           path => $path, err => $!);
     my $config = $qgoda->config;
     my $meta = collect_defaults $asset->getRelpath, $config->{defaults};
+if ('bg' eq $meta->{lingua}) {
+    $DB::single = 1;
+}
 
     my $front_matter = front_matter $path;
     my $front_matter_data;
     if (defined $front_matter) {
-        $front_matter_data = YAML::XS::Load($front_matter);
+        $front_matter_data = safe_yaml_load $front_matter;
     } else {
         $front_matter_data->{raw} = 1;
     }

@@ -22,13 +22,13 @@ use strict;
 
 use Locale::TextDomain qw('qgoda');
 use File::Spec;
-use YAML::XS;
 use Cwd;
 use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
 
-use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase);
+use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase 
+                   safe_yaml_load);
 
 my %processors;
 
@@ -64,7 +64,7 @@ sub new {
                                filename => $filename, error => $!));
         }
 
-        my $local = eval { YAML::XS::Load($yaml) };
+        my $local = eval { safe_yaml_load $yaml };
         $logger->fatal(yaml_error $filename, $@) if $@;
 
         foreach my $key (grep { /^__q_/ } keys %{$local || {}}) {
@@ -94,7 +94,7 @@ sub new {
                                filename => $local_filename, error => $!));
         }
 
-        my $local = eval { YAML::XS::Load($yaml) };
+        my $local = eval { safe_yaml_load $yaml };
         $logger->fatal(yaml_error $local_filename, $@) if $@;
 
         foreach my $key (grep { /^__q_/ } keys %{$local || {}}) {

@@ -70,8 +70,6 @@ sub process {
         gettext_filename => $gettext_filename,
     };
 
-    clear_utf8_flag $vars;
-
     my $cooked;
     $self->{__tt}->process(\$content, $vars, \$cooked)
         or die $self->{__tt}->error, "\n" if !defined $cooked;
