@@ -26,13 +26,14 @@ use Storable qw(dclone);
 use Scalar::Util qw(reftype);
 use Template::Stash;
 use YAML::XS;
+use File::Globstar qw(globstar);
 
 use Qgoda::Util qw(empty merge_data flatten2hash front_matter);
 use Qgoda::Splitter;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(translate_front_matter translate_body);
+@EXPORT_OK = qw(translate_front_matter translate_body get_masters);
 
 sub __translate_property {
     my ($property, $value, $textdomain) = @_;
@@ -128,5 +129,73 @@ sub translate_body {
 
     return $splitter->reassemble($translate);
 }
+
+sub get_masters {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    $qgoda->initPlugins;
+    $qgoda->initAnalyzers;
+    my $config = $qgoda->config;
+    my $logger = $qgoda->logger;
+    my $site = Qgoda::Site->new($config);
+    $qgoda->setSite($site);
+    $qgoda->scan($site, 'just find');
+
+    my %mdextra;
+    my %mddelete;
+
+    my $mdextra = $config->{po}->{mdextra} || [];
+    foreach my $pattern (@$mdextra) {
+        my $negated = $pattern =~ s/^!//;
+        # Force path to be relative.
+        $pattern =~ s{^/+}{};
+        my @files = globstar $pattern;
+        foreach my $found (@files) {
+            if (-d $found) {
+                # Skip directory.
+            } elsif ($negated) {
+                $logger->debug(__x("removing markdown file '{filename}'",
+                                   filename => $found));
+                delete $mdextra{$found};  
+                $mddelete{$found} = 1;              
+            } else {
+                $logger->debug(__x("adding markdown file '{filename}'",
+                                   filename => $found));
+                $mdextra{$found} = 1;
+                delete $mddelete{$found};
+            }
+        }
+    }
+
+    foreach my $delete (keys %mddelete) {
+        my $path = File::Spec->rel2abs($delete);
+        my $asset = $site->{assets}->{$path} or next;
+        $site->removeAsset($asset);
+    }
+
+    foreach my $relpath (keys %mdextra) {
+        my $path = File::Spec->abs2rel($relpath);
+        next if $site->{assets}->{$path};
+
+        $logger->debug(__x("creating asset object for '{filename}'",
+                           filename => $relpath));
+        $site->addAsset(Qgoda::Asset->new($path, $relpath));
+    }
+
+    $qgoda->analyze($site);
+
+    my %masters;
+    foreach my $asset (values %{$site->{assets}}) {
+        next if empty $asset->{master};
+
+        my $master = $asset->{master};
+        $master =~ s{^/+}{};
+        $masters{$master}->{$asset->getPath} = $asset;
+    }
+
+    return %masters;
+}
+
 
 1;

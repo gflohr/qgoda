@@ -27,6 +27,7 @@ use File::Spec;
 
 use Qgoda;
 use Qgoda::Util qw(read_file flatten2hash);
+use Qgoda::Util::Translate qw(get_masters);
 use Qgoda::CLI;
 use Qgoda::Splitter;
 
@@ -45,7 +46,7 @@ sub extractFromNonFiles {
     my ($self) = @_;
 
     my $podir = getcwd;
-    my $srcdir = $self->option('srcdir');
+    my $srcdir = File::Spec->rel2abs($self->option('srcdir'));
 
     if (!chdir $srcdir) {
         die __x("error changing working directory to '{dir}': {error}\n",
@@ -58,16 +59,7 @@ sub extractFromNonFiles {
         log_stderr => 1,
     });
 
-    $qgoda->build(dry_run => 1);
-
-    my $site = $qgoda->getSite;
-    my %masters = $site->getMasters;
-
-    if (!chdir $podir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $podir, error => $!);
-    }
-
+    my %masters = get_masters;
     my %master_paths;
     foreach my $relpath (keys %masters) {
         my $abs = realpath(File::Spec->rel2abs($relpath, $srcdir));
@@ -83,6 +75,11 @@ sub extractFromNonFiles {
         }
     }
 
+    if (!chdir $podir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $podir, error => $!);
+    }
+
     return $self;
 }
 
@@ -91,7 +88,7 @@ sub __extractFromMaster {
 
     my %translate;
     my $site = Qgoda->new->getSite;
-    foreach my $relpath (@$translations) {
+    foreach my $relpath (%$translations) {
         my $asset = $site->getAssetByRelpath($relpath);
         my $translate = $asset->{translate};
         next if !defined $translate;

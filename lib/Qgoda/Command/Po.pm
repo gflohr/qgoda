@@ -30,6 +30,7 @@ use Cwd qw(getcwd);
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
+use Qgoda::Util::Translate qw(get_masters);
 use Qgoda::CLI;
 use Qgoda::Site;
 
@@ -529,7 +530,7 @@ sub __makePOTFILES {
         push @files, $relpath;
     }
 
-    push @files, 'mdpotfiles.pot', 'plfiles.pot';
+    push @files, 'markdown.pot', 'perl.pot';
 
     if (!chdir $podir) {
         die __x("error changing working directory to '{dir}': {error}\n",
@@ -563,65 +564,7 @@ sub __makeMDPOTFILES {
                 dir => $srcdir, error => $!);
     }
 
-    my $qgoda = Qgoda->new;
-    $qgoda->initPlugins;
-    $qgoda->initAnalyzers;
-    my $site = Qgoda::Site->new($config);
-    $qgoda->setSite($site);
-    $qgoda->scan($site, 'just find');
-
-    my %mdextra;
-    my %mddelete;
-
-    my $mdextra = $config->{po}->{mdextra} || [];
-    foreach my $pattern (@$mdextra) {
-        my $negated = $pattern =~ s/^!//;
-        # Force path to be relative.
-        $pattern =~ s{^/+}{};
-        my @files = globstar $pattern;
-        foreach my $found (@files) {
-            if (-d $found) {
-                # Skip directory.
-            } elsif ($negated) {
-                $logger->debug(__x("removing markdown file '{filename}'",
-                                   filename => $found));
-                delete $mdextra{$found};  
-                $mddelete{$found} = 1;              
-            } else {
-                $logger->debug(__x("adding markdown file '{filename}'",
-                                   filename => $found));
-                $mdextra{$found} = 1;
-                delete $mddelete{$found};
-            }
-        }
-    }
-
-    foreach my $delete (keys %mddelete) {
-        my $path = File::Spec->rel2abs($delete);
-        my $asset = $site->{assets}->{$path} or next;
-        $site->removeAsset($asset);
-    }
-
-    foreach my $relpath (keys %mdextra) {
-        my $path = File::Spec->abs2rel($relpath);
-        next if $site->{assets}->{$path};
-
-        $logger->debug(__x("creating asset object for '{filename}'",
-                           filename => $relpath));
-        $site->addAsset(Qgoda::Asset->new($path, $relpath));
-    }
-
-    $qgoda->analyze($site);
-
-    my %masters;
-    foreach my $asset (values %{$site->{assets}}) {
-        next if empty $asset->{master};
-
-        my $master = $asset->{master};
-        $master =~ s{^/+}{};
-        $masters{$master}->{$asset->getPath} = $asset;
-    }
-
+    my %masters = get_masters;
     my @files;
     foreach my $path (keys %masters) {
         my $relpath = File::Spec->abs2rel($path, $podir);
@@ -653,7 +596,7 @@ sub __makePOT {
     my $po_config = $qgoda->config->{po};
 
     # FIXME! Check dependencies!
-    my ($pox, $pot) = ('plfiles.pox', 'plfiles.pot');
+    my ($pox, $pot) = ('perl.pox', 'perl.pot');
     my @options = split / /, Locale::TextDomain->options;
     my @cmd = ($self->__expandCommand($po_config->{xgettext}),
                "--output=$pox", "--from-code=utf-8",
