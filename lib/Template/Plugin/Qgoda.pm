@@ -34,6 +34,7 @@ use File::Basename;
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
 use URI::Escape qw(uri_escape_utf8);
+use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape);
