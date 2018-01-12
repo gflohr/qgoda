@@ -326,6 +326,10 @@ sub checkConfig {
         if exists $config->{linguas} && !$self->__isArray($config->{linguas});
     die __x("'{variable}' must be a list", variable => 'analyzers')
         if exists $self->{analyzers} && !$self->__isArray($self->{analyzers});
+    die __x("'{variable}' must be a list", variable => 'po.mdextra')
+        if exists $self->{analyzers} && !$self->__isArray($self->{po}->{mdextra});
+    die __x("'{variable}' must be a list", variable => 'po.views')
+        if exists $self->{analyzers} && !$self->__isArray($self->{po}->{views});
 
     # Has to be done after everything was read. We need the value of
     # case-sensitive.

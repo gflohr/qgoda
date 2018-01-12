@@ -25,6 +25,7 @@ use File::Spec;
 use File::Temp;
 use File::Copy qw(copy);
 use File::Path qw(make_path);
+use File::Globstar qw(globstar);
 use Cwd qw(getcwd);
 
 use Qgoda;
@@ -88,6 +89,7 @@ sub _run {
     return $self->__make($target) if !empty $config->{po}->{make};
 
     my %methods = (
+        potfiles => '__makePOTFILES',
         pot => '__makePOT',
         'update-po' => '__makeUpdatePO',
         'update-mo' => '__makeUpdateMO',
@@ -475,8 +477,78 @@ sub __make {
     return $self;
 }
 
+sub __makePOTFILES {
+    my ($self, $srcdir) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $config = $qgoda->config;
+    my $logger = $qgoda->logger;
+
+    my $viewspatterns = $config->{po}->{views};
+    if (!$viewspatterns) {
+        my $pattern = $config->{paths}->{views};
+        $pattern =~ s{/+$}{};
+        die __"default views directory is '/', please configure 'po.views'"
+            if !length $pattern;
+        $pattern .= '/**';
+        $viewspatterns = [$pattern];
+    }
+
+    my $podir = getcwd;
+    if (!chdir $srcdir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $srcdir, error => $!);
+    }
+
+    my %files;
+    foreach my $pattern (@$viewspatterns) {
+        my $negated = $pattern =~ s/^!//;
+        # Force path to be relative.
+        $pattern =~ s{^/+}{};
+        my @files = globstar $pattern;
+        foreach my $found (@files) {
+            if (-d $found) {
+                # Skip directory.
+            } elsif ($negated) {
+                $logger->debug(__x("removing template file '{filename}'",
+                                   filename => $found));
+                delete $files{$found};                
+            } else {
+                $logger->debug(__x("adding template file '{filename}'",
+                                   filename => $found));
+                $files{$found} = 1;
+            }
+        }
+    }
+
+    my @files;
+    foreach my $path (keys %files) {
+        my $abspath = File::Spec->rel2abs($path);
+        my $relpath = File::Spec->abs2rel($path, $podir);
+        push @files, $relpath;
+    }
+
+    push @files, 'MDPOTFILES', 'PLFILES';
+
+    if (!chdir $podir) {
+        die __x("error changing working directory to '{dir}': {error}\n",
+                dir => $podir, error => $!);
+    }
+
+    my $potfiles = join "\n", sort @files;
+    my $display_name = File::Spec->catfile($config->{paths}->{po},
+                                           'POTFILES');
+    $logger->info(__x("writing '{filename}'", filename => $display_name));
+    unless (write_file 'POTFILES', "$potfiles\n") {
+        $logger->fatal(__x("error writing '{filename}': {error}",
+                           filename => $display_name, error => $!));
+    }
+
+    return $self;
+}
+
 sub __makePOT {
-     my ($self) = @_;
+    my ($self) = @_;
 
     my $qgoda = Qgoda->new;
     my $logger = $qgoda->logger;
@@ -653,6 +725,7 @@ sub __makeInstall {
 sub __makeAll {
     my ($self, $srcdir) = @_;
 
+    $self->__makePOTFILES($srcdir);
     $self->__makePOT($srcdir);
     $self->__makeUpdatePO($srcdir);
     $self->__makeUpdateMO($srcdir);
@@ -667,6 +740,7 @@ qgoda po - Translation workflow based on PO files
 
 =head1 SYNOPSIS
 
+    qgoda po [<global options>] potfiles
     qgoda po [<global options>] pot
     qgoda po [<global options>] update-po
     qgoda po [<global options>] update-mo
@@ -812,16 +886,30 @@ automatically generated but you have to maintain it manually.
 =item B<MDPOTFILES>
 
 A list of Markdown documents found in your site that are referenced by
-documents that have to be translated.  This file is auto-generated and gets
-overwritten without warning by C<qgoda build> or C<qgoda watch>.
+documents that have to be translated.  This file gets generated with
+the command "qgoda po potfiles".
+
+By default, all assets with front matter are taken into account for the
+creation of this list.  You can add additional search patterns to the
+configuration variable C<po.mdextra>.
 
 =item B<POTFILES>
 
-A list of templates that use the L<Template::Plugin::Gettext> plug-in with
-your configured textdomain.
+By default, all template files from the view directory (configuration
+variable C<paths.views>) which defaults to F<_views> are added.  You
+can override that setting with the configuration variable C<po.views>
+(this is not a typo).  The default setting is:
 
-If you use another textdomain, qgoda will produce a warning and not include
-the referring files here.
+po:
+  views:
+    - /_views/**
+
+You can extend or reduce that list like this:
+
+po:
+  views:
+    - /_views/**
+    - !/_views/**/*.bak
 
 Note, that this file will normally also contain a line for F<./MDPOTFILES>.
 This line has the effect that all translatable strings in Markdown files
