@@ -40,7 +40,6 @@ sub new {
         __modified => {},
         __relpaths => {},
         __errors => 0,
-        __masters => {},
     };
 
     bless $self, $class;
@@ -421,27 +420,6 @@ sub getTaxonomyValues {
     }
 
     return keys %values;
-}
-
-sub addMasterReference {
-    my ($self, $asset) = @_;
-
-    my $master = $asset->{master};
-    return if empty $master;
-
-    # Allow relative path with or without leading slash.
-    $master =~ s{^/}{};
-
-    $self->{__masters}->{$master} ||= [];
-    push @{$self->{__masters}->{$master}}, $asset->{relpath};
-
-    return $self;
-}
-
-sub getMasters {
-    my ($self) = @_;
-
-    return %{$self->{__masters}};
 }
 
 sub getAssetByPath {

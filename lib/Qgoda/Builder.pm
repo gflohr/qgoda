@@ -115,9 +115,7 @@ sub readAssetContent {
     if ($asset->{raw}) {
         return read_file($asset->getPath);
     } elsif (!empty $asset->{master}) {
-        my $retval = translate_body $asset;
-        $site->addMasterReference($asset);
-        return $retval;
+        return translate_body $asset;
     } else {
         my $placeholder = Qgoda->new->config->{front_matter_placeholder};
         return read_body($asset->getPath, $placeholder);
