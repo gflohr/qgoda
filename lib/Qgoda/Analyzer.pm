@@ -52,9 +52,6 @@ sub analyze {
                           path => $path, err => $!);
     my $config = $qgoda->config;
     my $meta = collect_defaults $asset->getRelpath, $config->{defaults};
-if ('bg' eq $meta->{lingua}) {
-    $DB::single = 1;
-}
 
     my $front_matter = front_matter $path;
     my $front_matter_data;
