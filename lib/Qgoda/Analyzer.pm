@@ -69,7 +69,7 @@ sub analyze {
 
     merge_data $asset, $meta;
     if (!empty $asset->{master}) {
-        translate_front_matter $asset;
+        translate_front_matter $asset, $front_matter_data;
     }
 
     $self->__fillMeta($asset) if !$asset->{raw};

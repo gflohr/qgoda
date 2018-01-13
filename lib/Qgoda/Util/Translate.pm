@@ -50,7 +50,7 @@ sub __translate_property {
 }
 
 sub translate_front_matter {
-    my ($asset) = @_;
+    my ($asset, $preserve) = @_;
 
     my $qgoda = Qgoda->new;
     my $config = $qgoda->config;
@@ -81,6 +81,10 @@ sub translate_front_matter {
 
     my $textdomain = $config->{po}->{textdomain};
 
+    # Merge the master data unconditionally into the asset.
+    merge_data $asset, $master;
+
+    # And now translate the translatable properties.
     local %ENV = %ENV;
     $ENV{LANGUAGE} = $lingua;
     foreach my $prop (@translate) {
@@ -88,6 +92,9 @@ sub translate_front_matter {
                                                $textdomain);
     }
     merge_data $master, $asset;
+
+    # Now overwrite the explicitely set properties.
+    merge_data $master, $preserve;
 
     %{$_[0]} = %$master;
 
