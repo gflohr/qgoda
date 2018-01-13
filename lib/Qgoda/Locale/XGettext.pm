@@ -89,7 +89,7 @@ sub __extractFromMaster {
     my %translate;
     my $site = Qgoda->new->getSite;
     foreach my $relpath (%$translations) {
-        my $asset = $site->getAssetByRelpath($relpath);
+        my $asset = $translations->{$relpath};
         my $translate = $asset->{translate};
         next if !defined $translate;
         if (ref $translate && 'ARRAY' eq reftype $translate) {
