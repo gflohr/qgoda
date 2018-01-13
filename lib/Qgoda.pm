@@ -120,7 +120,7 @@ sub build {
             # Delete the cached translations so that changes are immediately
             # visible.
             # It is the privilege of the author to use private variables. ;)
-            delete $Locale::gettext_pp::__gettext_pp_domains->{$textdomain};
+            delete $Locale::gettext_pp::__gettext_pp_domain_cache->{$locale_dir};
         };
     }
 
