@@ -230,6 +230,7 @@ sub default {
             copyright_holder => __"Set config.po.copyright_holder in _config.yaml",
             msgid_bugs_address => __"Set config.po.msgid_bugs_address in _config.yaml",
             qgoda => 'qgoda',
+            refresh => 0,
             xgettext => 'xgettext',
             xgettext_tt2 => 'xgettext-tt2',
             msgfmt => 'msgfmt',

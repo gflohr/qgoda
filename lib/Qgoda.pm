@@ -112,7 +112,7 @@ sub build {
     $self->{__outfiles} = [];
     $self->scan($site);
 
-    if (!empty $config->{po}->{textdomain}) {
+    if (!empty $config->{po}->{textdomain} && $config->{po}->{refresh}) {
         my $textdomain = $config->{po}->{textdomain};
         my $locale_dir = File::Spec->catfile($config->{srcdir}, 'LocaleData');
         Locale::gettext_dumb::bindtextdomain($textdomain, $locale_dir);
