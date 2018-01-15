@@ -888,4 +888,18 @@ sub __initNoSCMPatterns {
                                            $config->{'case-insensitive'});
 }
 
+sub versionControlled {
+    my ($self, $path, $is_absolute) = @_;
+
+    my $key = $is_absolute ? 'absolute' : 'relative';
+    return $self if $self->{__version_controlled}->{$key}->{$path};
+
+    my $no_scm = $self->__initNoSCMPatterns or return;
+    
+    $path = File::Spec->rel2abs($path, $self->config->{srcdir});
+    return $self if $no_scm->match($path);
+
+    return;
+}
+
 1;

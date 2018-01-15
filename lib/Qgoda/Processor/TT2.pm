@@ -90,12 +90,35 @@ package Qgoda::Template::GitProvider;
 
 use strict;
 
+use Template::Constants;
+use Locale::TextDomain qw(qgoda);
+
 use base qw(Template::Provider);
 
 sub fetch {
     my ($self, $name) = @_;
 
     if (!ref $name) {
+        my $is_absolute;
+        my $path = $name;
+
+        if (File::Spec->file_name_is_absolute($name)) {
+            $is_absolute = 1;
+        } elsif ($name !~ m/$Template::Provider::RELATIVE_PATH/o) {
+            foreach my $search (@{$self->{INCLUDE_PATH}}) {
+                my $try = File::Spec->catfile($search, $name);
+                if (-e $try) {
+                    $path = $try;
+                    $is_absolute = File::Spec->file_name_is_absolute($path);
+                    last;
+                }
+            }
+        }
+
+        if (!Qgoda->new->versionControlled($path, $is_absolute)) {
+            my $msg = __"not under version control";
+            return $msg, Template::Constants::STATUS_ERROR;
+        }
     }
 
     return $self->SUPER::fetch($name);
