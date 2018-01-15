@@ -891,6 +891,11 @@ sub __initNoSCMPatterns {
 sub versionControlled {
     my ($self, $path, $is_absolute) = @_;
 
+    my $config = $self->config;
+    return $self if !$config->{scm} || 'git' ne $config->{scm};
+
+    $self->__initVersionControlled if !$self->{__version_controlled};
+
     my $key = $is_absolute ? 'absolute' : 'relative';
     return $self if $self->{__version_controlled}->{$key}->{$path};
 

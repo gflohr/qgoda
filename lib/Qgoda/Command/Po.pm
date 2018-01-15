@@ -527,6 +527,9 @@ sub __makePOTFILES {
     foreach my $path (keys %files) {
         my $abspath = File::Spec->rel2abs($path);
         my $relpath = File::Spec->abs2rel($abspath, $podir);
+        if ($config->{scm}) {
+            next unless $qgoda->versionControlled($abspath, 1);
+        }
         push @files, $relpath;
     }
 
@@ -567,6 +570,9 @@ sub __makeMDPOTFILES {
     my %masters = get_masters;
     my @files;
     foreach my $path (keys %masters) {
+        if ($config->{scm}) {
+            next unless $qgoda->versionControlled($path);
+        }
         my $relpath = File::Spec->abs2rel($path, $podir);
         push @files, $relpath;
     }
