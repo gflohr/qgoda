@@ -29,7 +29,7 @@ use Locale::TextDomain qw(qgoda);
 use Locale::Messages;
 use Locale::gettext_dumb;
 use File::Find;
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype blessed);
 use AnyEvent;
 use AnyEvent::Loop;
 use AnyEvent::Filesys::Notify;
@@ -111,6 +111,8 @@ sub build {
 
     $self->{__outfiles} = [];
     $self->scan($site);
+    $self->__initVersionControlled($site)
+        if !empty $config->{scm} && 'git' eq $config->{scm};
 
     if (!empty $config->{po}->{textdomain} && $config->{po}->{refresh}) {
         my $textdomain = $config->{po}->{textdomain};
@@ -829,4 +831,61 @@ sub _reload {
 
     return $self;
 }
+
+sub __initVersionControlled {
+    my ($self, $site) = @_;
+
+    my $logger = $self->logger;
+    $logger->debug("finding files under version control (git)");
+
+    my $config = $self->config;
+
+    require Git;
+
+    my $repo = Git->repository(Directory => $config->{srcdir});
+    my @files = $repo->command(['ls-files'], STDERR => 0);
+
+    # These are all relative paths.
+    my $version_controlled = {
+        absolute => {},
+        relative => {},
+    };
+
+    my $srcdir = $config->{srcdir};
+    foreach my $relpath (@files) {
+        my $abspath = File::Spec->rel2abs($relpath, $srcdir);
+        $version_controlled->{absolute}->{$abspath} = $relpath;
+        $version_controlled->{relative}->{$relpath} = $abspath;
+    }
+    $self->{__version_controlled} = $version_controlled;
+
+    my $no_scm = $self->__initNoSCMPatterns;
+    foreach my $asset (values %{$site->{assets}}) {
+        if (!$version_controlled->{absolute}->{$asset->getPath}) {
+            my $relpath = $asset->getRelpath;
+            next if $no_scm && $no_scm->match($relpath);
+
+            $logger->debug(__x("ignoring '{relpath}': not under version control",
+                               relpath => $relpath));
+            $site->removeAsset($asset);
+        }
+    }
+
+    return 1;
+}
+
+sub __initNoSCMPatterns {
+    my ($self) = @_;
+
+    my $config = $self->config;
+    my $no_scm = $config->{no_scm};
+
+    return $no_scm if blessed $no_scm;
+
+    require File::Globstar::ListMatch;
+    return $config->{no_scm} = 
+            File::Globstar::ListMatch->new($no_scm,
+                                           $config->{'case-insensitive'});
+}
+
 1;

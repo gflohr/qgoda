@@ -172,6 +172,7 @@ sub default {
         latency => 0.5,
         exclude => [],
         exclude_watch => [],
+        no_scm => [],
         paths => {
             views => '_views',
             plugins => '_plugins',
@@ -330,6 +331,8 @@ sub checkConfig {
     die __x("'{variable}' must be a list", variable => 'po.mdextra')
         if exists $self->{analyzers} && !$self->__isArray($self->{po}->{mdextra});
     die __x("'{variable}' must be a list", variable => 'po.views')
+        if exists $self->{analyzers} && !$self->__isArray($self->{po}->{views});
+    die __x("'{variable}' must be a list", variable => 'no_scm')
         if exists $self->{analyzers} && !$self->__isArray($self->{po}->{views});
 
     # Has to be done after everything was read. We need the value of

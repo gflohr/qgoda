@@ -38,11 +38,12 @@ sub new {
 
     require Qgoda;
     my $qgoda = Qgoda->new;
-    my $srcdir = $qgoda->config->{srcdir};
-    my $viewdir = $qgoda->config->{paths}->{views};
+    my $config = $qgoda->config;
+    my $srcdir = $config->{srcdir};
+    my $viewdir = $config->{paths}->{views};
 
     # FIXME! Merge options with those from the configuration!
-    $self->{__tt} = Template->new({
+    my %options = (
         INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
         RECURSION => 1,
@@ -50,6 +51,14 @@ sub new {
         # for "binary" so that TT2 does not mess with character data.  Using
         # "utf-8" for ENCODING is a recipe for trouble.
         ENCODING => 'CP 1252'
+    );
+    my $scm = $config->{scm};
+    if (!empty $scm && 'git' eq $scm) {
+        my $provider = Qgoda::Template::GitProvider->new(%options);
+        $options{LOAD_TEMPLATES} = [$provider];
+    }
+    $self->{__tt} = Template->new({
+        %options
     }) or die Template->error;
 
     return $self;
@@ -75,6 +84,21 @@ sub process {
         or die $self->{__tt}->error, "\n" if !defined $cooked;
 
     return $cooked;
+}
+
+package Qgoda::Template::GitProvider;
+
+use strict;
+
+use base qw(Template::Provider);
+
+sub fetch {
+    my ($self, $name) = @_;
+
+    if (!ref $name) {
+    }
+
+    return $self->SUPER::fetch($name);
 }
 
 1;
