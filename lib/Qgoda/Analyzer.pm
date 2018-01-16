@@ -74,6 +74,14 @@ sub analyze {
 
     $self->__fillMeta($asset) if !$asset->{raw};
 
+    my %build_options = $qgoda->buildOptions;
+    if ($asset->{draft} && !$build_options{drafts}) {
+        my $logger = $qgoda->logger;
+        $logger->debug(__x("skipping draft '{relpath}'",
+                           relpath => $asset->getRelpath));
+        $site->removeAsset($asset);
+    }
+
     return $self;
 }
 

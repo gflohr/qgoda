@@ -30,6 +30,7 @@ use base 'Qgoda::Command';
 sub _getDefaults {}
 
 sub _getOptionSpecs {
+    drafts => 'D|drafts',
     dry_run => 'dry-run',
     watch => 'w|watch'
 }
@@ -96,6 +97,10 @@ See L<http://www.qgoda.net/> for detailed information!
 =head1 OPTIONS
 
 =over 4
+
+=item -D, --drafts
+
+Process draft documents (documents with the draft property set)
 
 =item --dry-run
 

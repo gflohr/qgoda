@@ -97,6 +97,8 @@ sub build {
 
     $self->initPlugins;
 
+    $self->{__build_options} = {%options};
+
     my $logger = $self->{__logger};
     my $config = $self->{__config};
 
@@ -905,6 +907,12 @@ sub versionControlled {
     return $self if $no_scm->match($path);
 
     return;
+}
+
+sub buildOptions {
+    my ($self) = @_;
+
+    return %{$self->{__build_options}};
 }
 
 1;

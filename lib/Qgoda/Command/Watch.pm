@@ -68,6 +68,10 @@ as a trigger to reload pages in the browser, restart a service, or similar.
 
 =over 4
 
+=item -D, --drafts
+
+Process draft documents (documents with the draft property set)
+
 =item --dry-run
 
 Just print what would be done but do not write any files.
