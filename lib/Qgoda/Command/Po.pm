@@ -65,7 +65,7 @@ sub _run {
 
     my @missing;
     if ('reset' eq $target) {
-        @missing = qw(Makefile PACKAGE PLFILES GitIgnore QgodaINC);
+        @missing = '', qw(Makefile PACKAGE PLFILES GitIgnore QgodaINC);
     } else {
         @missing = $self->__checkFiles;
     }
@@ -123,6 +123,9 @@ sub __checkFiles {
     my @missing;
 
     $logger->debug(__"checking for missing files in po directory");
+
+    push @missing, '' if !-e $podir;
+
     my $makefile = File::Spec->catfile($podir, 'Makefile');
     push @missing, 'Makefile' if !-e $makefile;
 
@@ -139,6 +142,26 @@ sub __checkFiles {
     push @missing, 'QgodaINC' if !-e $qgoda_inc;
 
     return @missing;
+}
+
+# Unfortunate name ... it's for the directory itself.
+sub __addMissing {
+    my ($self) = @_;
+
+    my $qgoda = Qgoda->new;
+    my $logger = $qgoda->logger;
+    my $config = $qgoda->config;
+
+    my $podir = $config->{paths}->{po};
+    $logger->info(__x("creating '{filename}'", filename => $podir));
+
+    if (!mkdir $podir) {
+        $logger->fatal(__x("error creating directory '{directory}': {error}",
+                           directory => $podir,
+                           error => $!));        
+    }
+
+    return $self;
 }
 
 sub __addMissingPACKAGE {
