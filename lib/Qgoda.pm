@@ -912,7 +912,7 @@ sub versionControlled {
 sub buildOptions {
     my ($self) = @_;
 
-    return %{$self->{__build_options}};
+    return %{$self->{__build_options} || {}};
 }
 
 1;
