@@ -132,7 +132,7 @@ The following commands are currently supported:
 
 Operation mode:
   -q, --quiet                 quiet mode
-  -v, --verbose               display progress on standard error
+  -v, --verbose               verbosely log what is going on 
       --log-stderr            log to standard error instead of standard out
 
 Informative output:
