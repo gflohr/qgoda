@@ -31,6 +31,7 @@ sub _getDefaults {}
 
 sub _getOptionSpecs {
     drafts => 'D|drafts',
+    future => 'F|future',
     dry_run => 'dry-run',
     watch => 'w|watch'
 }
@@ -101,6 +102,10 @@ See L<http://www.qgoda.net/> for detailed information!
 =item -D, --drafts
 
 Process draft documents (documents with the draft property set)
+
+=item -F, --future
+
+Process documents with a date (date property) in the future
 
 =item --dry-run
 

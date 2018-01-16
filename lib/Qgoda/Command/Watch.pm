@@ -72,6 +72,10 @@ as a trigger to reload pages in the browser, restart a service, or similar.
 
 Process draft documents (documents with the draft property set)
 
+=item -F, --future
+
+Process documents with a date (date property) in the future
+
 =item --dry-run
 
 Just print what would be done but do not write any files.

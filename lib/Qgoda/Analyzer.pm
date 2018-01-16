@@ -82,6 +82,14 @@ sub analyze {
         $site->removeAsset($asset);
     }
 
+    my $now = time;
+    if ($asset->{date} > $now && !$build_options{future}) {
+        my $logger = $qgoda->logger;
+        $logger->debug(__x("skipping future document '{relpath}'",
+                           relpath => $asset->getRelpath));
+        $site->removeAsset($asset);
+    }
+
     return $self;
 }
 
