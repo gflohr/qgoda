@@ -361,7 +361,11 @@ sub link {
         warn "ambiguous link($json)\n";
     }
 
-    return $set->[0]->{permalink};
+    my $baseurl = Qgoda->new->config->{baseurl};
+    $baseurl = '' if empty $baseurl;
+
+$DB::single = 1;
+    return $baseurl . $set->[0]->{permalink};
 }
 
 sub xref {
@@ -425,18 +429,7 @@ sub linkPost {
     $filters = $self->__sanitizeFilters($filters);
     $filters->{type} = 'post';
 
-    my $set = $self->list($filters);
-    if (@$set == 0) {
-        my $json = encode_json($filters);
-        $json =~ s{.(.*).}{$1};
-        die "broken linkPost($json)\n";
-    } if (@$set > 1) {
-        my $json = encode_json($filters);
-        $json =~ s{.(.*).}{$1};
-        die "ambiguous linkPost($json)\n";
-    }
-
-    return $set->[0]->{permalink};
+    return $self->link($filters);
 }
 
 sub llinkPost {

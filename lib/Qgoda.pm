@@ -373,41 +373,38 @@ sub dumpConfig {
 }
 
 sub migrate {
-    my ($self) = @_;
+    my ($self, %options) = @_;
 
-    my $from = $self->getOption('from_system');
-    die __"The option '--from-system' is mandatory!\n" if empty $from;
+    my $logger = $self->logger;
+
+    if (empty $options{output_directory}) {
+        $logger->fatal(__x("The option '--from-system' is mandatory! Try"
+                           . " '{program_name} --help' for more information!",
+                           program_name => $0));
+    }
+
+    my $from = $options{from_system};
 
     # Check for valid module names.  Yes, you can use an apostrophe as the
     # separator in Perl but not allowing it here is at our discretion.
-    die __x("Invalid source system name '{software}'", software => $from)
-        unless $from =~ /^[a-z][a-z0-9_]+(?:(?:::|-)[a-z][a-z0-9_]+)*$/i;
+    if (!perl_class $from) {
+        $logger->fatal(__x("Invalid source system name '{software}'", 
+                           software => $from));
+    }
 
-    my $module_name = 'Qgoda::Migrator::'  . $from;
-    $module_name =~ s/-/::/g;
-    $module_name = lc $module_name;
-    $module_name = ucfirst $module_name;
-    $module_name =~ s/::(.)/'::' . ucfirst $1/ge;
-
-    my $class_name = $module_name;
-    $module_name =~ s{::}{/}g;
-    $module_name .= '.pm';
+    my $class_name = 'Qgoda::Migrator::'  . $from;
+    my $module_name = class2module $class_name;
 
     eval {require $module_name};
     if ($@) {
         my $error = $@;
-        my $message = __x("Unsupported source system '{software}'!\nTry the"
-                          . " additional option '--verbose' for more"
-                          . " information!\n",
-                          software => $from);
-        $message .= $@ if $self->getOption('verbose');
-        die $message;
+        my $message = __x("Unsupported source system '{software}'! Error: {err}",
+                          software => $from,
+                          error => $@);
+        $logger->fatal($message);
     }
 
-    my $migrator = $class_name->new;
-    $migrator->migrate;
-
-    return $self;
+    $class_name->new(%options)->migrate;
 }
 
 sub init {

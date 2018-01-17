@@ -31,8 +31,14 @@ use Qgoda;
 use Qgoda::Util qw(write_file);
 
 sub new {
-    my ($class) = @_;
+    my ($class, %options) = @_;
 
+    my $self = {};
+    foreach my $option (keys %options) {
+        $option = '__' . $option;
+        $option =~ s/-/_/g;
+        $self->{$option} = $options{$option};
+    }
     bless {}, $class;
 }
 
@@ -73,11 +79,11 @@ sub createOutputDirectory {
 }
 
 sub dryRun {
-    Qgoda->new->getOption('nochange');
+    shift->{__dry_run};
 }
 
 sub outputDirectory {
-    shift->{_out_dir};
+    shift->{__output_directory};
 }
 
 sub writeConfig {
@@ -107,7 +113,7 @@ sub logError {
     $self->logger->error($msg);
     ++$self->{_err_count};
 
-    # This allows the construct $self->logError or return;
+    # This allows the construct return $self->logError.
     return;
 }
 

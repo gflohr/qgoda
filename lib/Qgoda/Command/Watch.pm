@@ -76,7 +76,7 @@ Process draft documents (documents with the draft property set)
 
 Process documents with a date (date property) in the future
 
-=item --dry-run
+=item -n, --no-change, --dry-run
 
 Just print what would be done but do not write any files.
 

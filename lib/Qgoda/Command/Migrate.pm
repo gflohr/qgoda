@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Command::Build;
+package Qgoda::Command::Migrate;
 
 use strict;
 
@@ -27,25 +27,20 @@ use Locale::TextDomain qw(qgoda);
 
 use base 'Qgoda::Command';
 
-sub _getDefaults {}
+sub _getDefaults {
+    from_system => 'Jekyll',
+    output_directory => '_migrated'
+}
 
 sub _getOptionSpecs {
-    drafts => 'D|drafts',
-    future => 'F|future',
-    dry_run => 'n|dry-run|no-change',
-    watch => 'w|watch'
+    from_system => 'f|from-sytem',
+    output_directory => 'o|output-directory',
 }
 
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
 
-    if ($options{watch}) {
-        Qgoda::CLI->commandUsageError(build => __x(<<EOF, program => $0));
-option '--watch' is not supported, use '{program} watch' instead!'
-EOF
-    }
-
-    Qgoda->new($global_options)->build(%options);
+    Qgoda->new($global_options)->migrate(%options);
 
     return $self;
 }
@@ -54,11 +49,11 @@ EOF
 
 =head1 NAME
 
-qgoda build - Build a qgoda site
+qgoda migrate - Migrate a site from another static site generator
 
 =head1 SYNOPSIS
 
-qgoda build [<global options>] [--dry-run]
+qgoda migrate [<global options>] [-n|--no-change|--dry-run]
 
 Try 'qgoda --help' for a description of global options.
 
@@ -99,15 +94,11 @@ See L<http://www.qgoda.net/> for detailed information!
 
 =over 4
 
-=item -D, --drafts
+=item -o, --output-directory=DIRECTORY
 
-Process draft documents (documents with the draft property set)
+Where to save the migrated site.
 
-=item -F, --future
-
-Process documents with a date (date property) in the future
-
-=item -n, --no-change, --dry-run
+=item -n, --dry-run, --no-change
 
 Just print what would be done but do not write any files.
 
@@ -119,9 +110,7 @@ Show this help page and exit.
 
 =head1 SEE ALSO
 
-qgoda(1), L<Qgoda::Command::Watch>,
-L<Markdown|https://daringfireball.net/projects/markdown/syntax>,
-L<Template Toolkit|http://www.template-toolkit.org/>, L<YAML|http://yaml.org/>
+qgoda(1)
 
 =head1 QGODA
 
