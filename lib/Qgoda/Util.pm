@@ -30,6 +30,7 @@ use File::Find ();
 use Data::Walk 2.00;
 use Storable qw(freeze);
 use YAML::XS;
+use URI::Escape qw(uri_escape_utf8);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -39,13 +40,16 @@ use vars qw(@EXPORT_OK);
                 perl_identifier perl_class class2module
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
-                canonical purify clear_utf8_flag safe_yaml_load);
+                canonical purify clear_utf8_flag safe_yaml_load
+                escape_link);
 
 sub js_unescape($);
 sub tokenize($$);
 sub evaluate($$);
 sub lookup($$);
 sub _globstar($;$);
+
+my $unsafe_for_links = "^A-Za-z0-9\-\._~/";
 
 sub empty(;$) {
     my ($what) = @_;
@@ -724,13 +728,19 @@ sub clear_utf8_flag {
     return $data;
 }
 
-
 sub safe_yaml_load {
     my ($yaml) = @_;
 
     Encode::_utf8_off($yaml);
 
     return clear_utf8_flag YAML::XS::Load($yaml);
+}
+
+sub escape_link {
+    my $link = shift;
+    $link = '' if empty $link;
+
+    return uri_escape_utf8 $link, $unsafe_for_links;
 }
 
 1;

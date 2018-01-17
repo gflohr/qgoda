@@ -33,11 +33,11 @@ use POSIX qw(strftime setlocale LC_ALL );
 use File::Basename;
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
-use URI::Escape qw(uri_escape_utf8);
 use Encode;
 
 use Qgoda;
-use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape);
+use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
+                   escape_link);
 use Qgoda::Builder;
 
 sub new {
@@ -404,7 +404,7 @@ sub lxref {
 sub anchor {
     my ($self, $filters) = @_;
 
-    my $href = uri_escape_utf8 $self->link($filters);
+    my $href = escape_link $self->link($filters);
     my $title = html_escape $self->xref(title => $filters);
 
     return qq{<a href="$href">$title</a>};
@@ -413,7 +413,7 @@ sub anchor {
 sub lanchor {
     my ($self, $filters) = @_;
 
-    my $href = uri_escape_utf8 $self->llink($filters);
+    my $href = escape_link $self->llink($filters);
     my $title = html_escape $self->lxref(title => $filters);
 
     return qq{<a href="$href">$title</a>};
