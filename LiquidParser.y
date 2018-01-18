@@ -27,17 +27,25 @@ use Qgoda::Util qw(read_file empty);
 
 %token CDATA
 %token SO
+%token IDENT
+%token DOT
+%token EO
 %token ST
+%token DIRECTIVE
 
 %%
 liquid: chunks
       ;
 
 chunks: chunks CDATA { $_[0]->addOutput($_[2]) }
-      | chunks tag
+      | chunks object
       | /* empty */
       ;
 
-tag: ST DIRECTIVE
-   ;
+object: SO ident EO
+      ;
+
+ident: IDENT
+     | ident DOT IDENT
+     ;
 %%

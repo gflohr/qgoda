@@ -29,12 +29,11 @@ use base 'Qgoda::Command';
 
 sub _getDefaults {
     from_system => 'Jekyll',
-    output_directory => '_migrated'
 }
 
 sub _getOptionSpecs {
-    from_system => 'f|from-sytem',
-    output_directory => 'o|output-directory',
+    from_system => 'f|from-sytem=s',
+    output_directory => 'o|output-directory=s',
 }
 
 sub _run {
@@ -54,41 +53,14 @@ qgoda migrate - Migrate a site from another static site generator
 =head1 SYNOPSIS
 
 qgoda migrate [<global options>] [-n|--no-change|--dry-run]
+              [--output-directory=DIRECTORY]
 
 Try 'qgoda --help' for a description of global options.
 
 =head1 DESCRIPTION
 
-Builds a Qgoda powered site.  In brief it does the following:
-
-It reads its configuration from the file F<_config.yaml> in the current
-working directory.
-
-It collects all files in the current directory but ignores all files and
-directories with names starting with an underscore ('_').
-
-If a file contains front matter, that front matter is taken as meta
-information about that file.  Front-matter is in L<YAML|http://yaml.org>
-format:
-
-    ---
-    title: My first blog post
-    type: post
-    ---
-    Text with *markup* or [% TemplateToolkit %] code follows.
-
-If the file does not contain front matter, default values are applied
-and no processing takes place.
-
-The resulting output is then copied to the output directory F<_site>.
-
-After the build was finished, the number of seconds elapsed since the epoch
-is written into the file F<_timestamp>.
-
-If you want to continuously recreate the site, whenever an input file
-was modified, created or deleted, try the command F<qgoda watch> instead!
-
-See L<http://www.qgoda.net/> for detailed information!
+Migrates a site that was created with another software.  The only supported
+software at the moment is L<Jekyll|https://jekyllrb.com/>.
 
 =head1 OPTIONS
 

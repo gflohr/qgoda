@@ -125,10 +125,11 @@ The following commands are currently supported:
   config                      dump the current configuration and exit
   init                        initialize a new qgoda site
   dump                        dump the site structure as JSON (implies --quiet)
-  markdown                    process Markdown
+  po                          various commands for processing translations
   xgettext                    extract translatable strings from Markdown
                               files
-  po                          various commands for processing translations
+  migrate                     migrate a site created with other software
+  markdown                    process Markdown
 
 Operation mode:
   -q, --quiet                 quiet mode

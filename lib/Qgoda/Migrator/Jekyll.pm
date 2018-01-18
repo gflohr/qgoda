@@ -41,10 +41,6 @@ sub migrate {
     $src_dir = '.' if empty $config->{source};
     $self->{_src_dir} = $src_dir;
 
-    my $out_dir = $qgoda->getOption('output_directory');
-    $out_dir = '_migrated' if empty $out_dir;
-    $self->{_out_dir} = $out_dir;
-
     my $layouts_dir = delete $config->{layouts_dir};
     $layouts_dir = '_layouts' if empty $layouts_dir;
     $self->{__layouts_dir} = $layouts_dir;
@@ -225,6 +221,7 @@ sub migrateLiquidDirectory {
 sub convertLiquidTemplate {
     my ($self, $name) = @_;
 
+$DB::single = 1;
     my $code = read_file $name
         or return $self->logError(__x("Error reading '{file}': {error}!",
                                       file => $name, error => $!));
@@ -233,11 +230,10 @@ sub convertLiquidTemplate {
         partials_dir => $self->{__partials_dir},
         includes_dir => $self->{__includes_dir},
     );
-    my $converter = Qgoda::Migrator::Jekyll::LiquidConverter->new($name,
-                                                                  $code,
-                                                                  $logger,
-                                                                  %options);
-    my $tt2 = $converter->convert($code);
+    my $converter = Qgoda::Migrator::Jekyll::LiquidConverter->new;
+    $DB::single = 1;
+    my $tt2 = $converter->convert($name, $code, $logger, %options);
+
     $self->{_err_count} += $converter->errorCount;
 
     return $tt2;
@@ -258,7 +254,7 @@ sub migrateConfig {
     foreach my $variable (qw(source destination safe keep_files timezone
                              encoding show_drafts future lsi
                              limit_posts incremental profile
-                             port host baseurl detach webrick
+                             port host detach webrick
                              no_fenced_code_blocks smart markdown
                              plugins_dir data_dir includes_dir
                              collections markdown_ext unpublished whitelist

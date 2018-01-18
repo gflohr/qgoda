@@ -86,11 +86,14 @@ sub install {
 
 package MY;
 
+use strict;
+
 use IO::Handle;
 
 sub postamble {
     my ($self) = @_;
 
+    my @post;
     if (-e 'maintainer.mk') {
         open my $fh, '<maintainer.mk'
             or die "Cannot open 'maintainer.mk': $!\n";
@@ -113,7 +116,7 @@ sub install {
             return $inner;
         }
 
-        return qq{"$innner"};
+        return qq{"$inner"};
     };
 
     unless ($ENV{QGODA_NO_INSTALL_CHECK}) {

@@ -38,8 +38,8 @@ sub convert {
     $self->{__output} = '';
 
     my $lineno = 1 + $options{offset};
-    # No need for a stack because there is no nesting.
-    my $state = 'INITIAL';
+
+    my @state = ('INITIAL');
     my $last_token = __"beginning of file";
     my $whitespace = sub {
         while ($input =~ s/^[ \x09-\x0d]*\n//) {
@@ -74,10 +74,8 @@ sub convert {
         return qq{'$string'};
     };
 
-    my $lexer = sub {
-        return '', undef if empty $input;
-
-        if ('INITIAL' eq $state) {
+    my %sub_lexers = (
+        INITIAL => sub {
             $input =~ s/([^\n\{]*)//;
             return CDATA => $1 if !empty $1;
 
@@ -85,24 +83,27 @@ sub convert {
                 ++$lineno;
                 return CDATA => "\n";
             } elsif ($input =~ s/^\{\{//) {
-                $state = 'OBJECT';
+                push @state, 'OBJECT';
+                # Think "start object" not "significant other"!
                 return SO => '{{';
             } elsif ($input =~ s/^\{\%//) {
-                $state = 'TAG';
+                push @state, 'TAG';
                 return ST => '{%';
             } else {
                 return $next_char->();
             }
-        } elsif ('TAG' eq $state) {
+        },
+        TAG => sub {
             $whitespace->() or return '', undef;
 
             if ($input =~ s/^([-a-zA-Z0-9_]+)//) {
-                $state = 'IN-TAG';
+                push @state, 'IN-TAG';
                 return DIRECTIVE => $1;
             } else {
                 return $next_char->();
             }
-        } elsif ('IN-TAG' eq $state) {
+        },
+        IN_TAG => sub {
             $whitespace->() or return '', undef;
 
             if ($input =~ s/^"(.*?)"//) {
@@ -112,9 +113,46 @@ sub convert {
             } else {
                 return $next_char->();
             }
-        } else {
-            die "unhandled state $state";
+        },
+        OBJECT => sub {
+            $whitespace->() or return '', undef;
+
+            if ($input =~ s/^"(.*?)"//) {
+                return LITERAL => $1;
+            } elsif ($input =~ s/^'(.*?)'//) {
+                return LITERAL => $1;
+            # This is probably too permissive but we leave complaints to the
+            # real compiler.
+            } elsif ($input =~ s/^([^ \[\.]+)//) {
+                push @state, 'DEREFERENCE';
+                return IDENT => $1;
+            } elsif ($input =~ s/^}}//) {
+                # Empty object. Illegal, but we don't care.
+                return LITERAL => '';
+            } elsif ($input =~ s/^(.+?)\}\}//s) {
+                # Garbage.  pretend it is a variable.
+                push @state, 'DEREFERENCE';
+                return IDENT => $!;
+            } else {
+                return $next_char->();
+            }
+        },
+        DEREFERENCE => sub {
+            $whitespace->() or return '', undef;
+            if ($input =~ s/^\.//) {
+                push @state, 'OBJECT';
+                return DOT => '.';
+            } else {
+                return $next_char->();
+            }
         }
+    );
+
+    my $lexer = sub {
+        return '', undef if empty $input;
+        my $sub_lexer = $sub_lexers{$state[0]}
+            or die "unhandled state $state[0]";
+        return $sub_lexer->();
     };
 
     my $lexer_wrapper = sub {
@@ -125,7 +163,7 @@ sub convert {
     };
 
     my $error = sub {
-        $state = 0;
+        @state = ('INITIAL');
 
         my $location = $last_token;
         $self->logger->error(__x("{filename}:{lineno}: Syntax error at or"

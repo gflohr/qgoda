@@ -378,8 +378,9 @@ sub migrate {
     my $logger = $self->logger;
 
     if (empty $options{output_directory}) {
-        $logger->fatal(__x("The option '--from-system' is mandatory! Try"
-                           . " '{program_name} --help' for more information!",
+        $logger->fatal(__x("The option '--output-directory' is mandatory! Try"
+                           . " '{program_name} migrate --help' for more"
+                           . " information!",
                            program_name => $0));
     }
 
@@ -404,7 +405,7 @@ sub migrate {
         $logger->fatal($message);
     }
 
-    $class_name->new(%options)->migrate;
+    return $class_name->new(%options)->migrate;
 }
 
 sub init {

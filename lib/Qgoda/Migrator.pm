@@ -35,11 +35,13 @@ sub new {
 
     my $self = {};
     foreach my $option (keys %options) {
+        my $value = $options{$option};
+        next if !defined $value;
+
         $option = '__' . $option;
-        $option =~ s/-/_/g;
-        $self->{$option} = $options{$option};
+        $self->{$option} = $value;
     }
-    bless {}, $class;
+    bless $self, $class;
 }
 
 sub logger {
