@@ -24,9 +24,13 @@ use Qgoda;
 
 use base 'Qgoda::Command';
 
-sub _getDefaults {}
+sub _getDefaults { npm => 'npm', skip => [] }
 
-sub _getOptionSpecs { force => 'f|force' }
+sub _getOptionSpecs { 
+    force => 'f|force+', 
+    npm => 'n|npm=s', 
+    skip => 's|skip=s@'
+}
 
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
@@ -44,7 +48,8 @@ qgoda init - Initialize a Qgoda site with a theme
 
 =head1 SYNOPSIS
 
-qgoda init [<global options>] [-f|--force] [<repository>]
+qgoda init [<global options>] [-f|--force] [-n|--npm=PROGRAM] 
+           [-s|--skip=TASK] [<repository>]
 
 Try 'qgoda --help' for a description of global options.
 
@@ -105,7 +110,39 @@ The contents of the directory is copied.
 
 =item -f, --force
 
-Update (and overwrite) files and merge configurations.
+Update (and overwrite) files and merge configurations.  You can give
+the option twice in order to also overwrite files which are considered
+"precious" by the theme author.  Most themes will only consider markdown
+documents as precious.
+
+=item -n, --npm=PROGRAM
+
+Use B<PROGRAM> instead of F<npm> for initializing Node.JS dependencies.
+
+You currently can B<not> use yarn instead of npm!
+
+=item -s, --skip=TASK
+
+Skip task B<TASK>.  Current tasks are:
+
+=over 8
+
+=item copy
+
+Copy files from repository.
+
+=item config
+
+Update F<_config.yaml>.  Note that the configuration file is only updated,
+when the option "--force" was specified on the command-line.
+
+=item node
+
+Do not update the project with the Node Package Manager NPM.
+
+=back
+
+You can specify the option multiple times if you want to skip multiple tasks.
 
 =item -h, --help
 

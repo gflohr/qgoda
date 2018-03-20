@@ -38,14 +38,14 @@ sub run {
 
     my $q = Qgoda->new;
     my $logger = $q->logger;
-    my $force = $q->getOption('force');
+    my $force = $self->{__init}->getOption('force');
     my $ignore_case = !$q->config->{'case-sensitive'};
     my @excludes = @{$config->{_exclude} || []};
     push @excludes, '/_config.yaml', '/_config.yml', '/_init.yaml', '/_init.yml';
     my $exclude = File::Globstar::ListMatch->new(\@excludes,
                                                  ignoreCase => $ignore_case);
     my $precious;
-    if ($force > 1 && $config->{_precious}) {
+    if ($force < 2 && $config->{_precious}) {
         $precious = File::Globstar::ListMatch->new($config->{_precious});
     }
 

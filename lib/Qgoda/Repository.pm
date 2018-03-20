@@ -90,22 +90,14 @@ sub new {
 
     $self->{__type} = $known{$protocol} || 'LWP';
 
-    # If there is a git directory at the location, use git.
-    if ('File' eq $self->{__type}) {
-        my $path = $self->{__uri}->file;
-        my $gitdir = File::Spec->catfile($path, '.git');
-        if (-e $gitdir) {
-            $self->{__uri} = URI->new($path, 'file');
-            $self->{__type} = 'Git';
-        }
-    } elsif ('Git' eq $self->{__type}) {
+    if ('Git' eq $self->{__type}) {
         my $scheme = $self->{__uri}->scheme;
         if ($scheme =~ /\+(.*)/) {
             $self->{__uri}->scheme($1);
         }
     }
 
-    # If an http/https URI does no look like an archive, assume that it is
+    # If an http/https URI does not look like an archive, assume that it is
     # also a git URI.
     if ('http' eq $uri->scheme || 'https' eq $uri->scheme) {
         # These are file name extenders likely to contain an archive.

@@ -55,9 +55,9 @@ sub run {
         $filename = '_config.yml';
     }
 
-    if ($filename && !$q->getOption('force')) {
-        $logger->warning(__x("not overwriting '{config_yaml}' without '--force'",
-                             config_yaml => $filename));
+    if ($filename && !$self->{__init}->getOption('force')) {
+        $logger->warning(__x("not overwriting '{file}' without '--force'",
+                             file => $filename));
         $logger->warning(__"This can lead to malfunctions.");
         $logger->warning(__"Please merge '_config.new.yaml' manually!");
         my $yaml = YAML::Dump($new);

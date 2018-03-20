@@ -35,9 +35,10 @@ sub new {
     my $uri = @$args ? $args->[0] : 'http://github.com/gflohr/qgoda-default';
     my $self = {
         __logger => $q->logger,
-        __force => $ptions{force},
+        __force => $options{force},
         __config => $q->config,
         __uri => $uri,
+        __options => \%options,
     };
 
     bless $self, $class;
@@ -55,13 +56,22 @@ sub init {
     my $init_yaml = File::Spec->catfile($dir, '_init.yaml');
     $init_yaml = File::Spec->catfile($dir, '_init.yml')
         if !-e $init_yaml;
+    my $init;
+    if (-e $init_yaml) {
+        $init = $self->__readInitYAML($init_yaml);
+    } else {
+        $logger->warning(__"Neither '_init.yaml' nor '_init.yml'  found in"
+                           . " repository, proceding with defaults");
+        return {};
+    }
 
-    my $init = $self->__readInitYAML($init_yaml);
     $init->{_srcdir} = $dir;
 
     my $tasks = $init->{_tasks} || [];
     unshift @$tasks, 'copy', 'config';
+    my %skip = map { $_ => 1 } @{$self->getOption('skip')};
     foreach my $task (@$tasks) {
+        next if $skip{$task};
         if (!perl_class $task) {
             $logger->fatal(__x("Invalid task name '{name}'",
                                name => $task));
@@ -77,6 +87,7 @@ sub init {
     }
 
     foreach my $task (@$tasks) {
+        next if $skip{$task};
         my $class = 'Qgoda::Init::' . $task;
         my $weak = $self;
         weaken $weak;
@@ -110,15 +121,16 @@ sub init {
     return $self;
 }
 
+sub getOption {
+    my ($self, $option) = @_;
+
+    return $self->{__options}->{$option};
+}
+
 sub __readInitYAML {
     my ($self, $path) = @_;
 
     my $logger = $self->{__logger};
-    if (!-e $path) {
-        $logger->warning(__"File 'init.yaml' not found, proceding with defaults");
-        return {};
-    }
-
     my $yaml = read_file $path;
     if (!defined $yaml) {
         $logger->fatal(__x("error reading file '{filename}': {error}",

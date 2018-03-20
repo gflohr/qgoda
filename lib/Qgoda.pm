@@ -414,7 +414,7 @@ sub init {
     my ($self, $args, %options) = @_;
 
     require Qgoda::Init;
-    Qgoda::Init->new->init($args, %options);
+    Qgoda::Init->new($args, %options)->init;
 
     return $self;
 }

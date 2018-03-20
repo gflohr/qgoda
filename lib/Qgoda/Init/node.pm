@@ -40,8 +40,10 @@ sub run {
     my $logger = $q->logger;
     my $init = $self->{__init};
 
-    my @cmd = ('npm', 'init', '--yes');
-    push @cmd, '--force' if $self->{__force};
+    my $npm = $init->getOption('npm');
+
+    my @cmd = ($npm, 'init', '--yes');
+    push @cmd, '--force' if $init->getOption('force');
 
     if (!$init->command(@cmd)) {
         $logger->error(__"Cannot setup asset processing.");
@@ -50,13 +52,13 @@ sub run {
 
     my @dev_deps = @{$config->{_node_dev_dependencies} || []};
     foreach my $dep (@dev_deps) {
-        @cmd = ('npm', 'install', '--save-dev', $dep);
+        @cmd = ($npm, 'install', '--save-dev', $dep);
         $init->command(@cmd);
     }
 
     my @deps = keys @{$config->{_node_dependencies} || []};
     foreach my $dep (@deps) {
-        @cmd = ('npm', 'install', '--save', $dep);
+        @cmd = ($npm, 'install', '--save', $dep);
         $init->command(@cmd);
     }
 

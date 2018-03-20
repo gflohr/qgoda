@@ -51,7 +51,8 @@ sub parseOptions {
 
     my %optspec;
     foreach my $key (keys %specs) {
-        $optspec{$specs{$key}} = \$options{$key};
+        $optspec{$specs{$key}} = 
+                ref $options{$key} ? $options{$key} : \$options{$key};
     }
 
     Getopt::Long::Configure('bundling');

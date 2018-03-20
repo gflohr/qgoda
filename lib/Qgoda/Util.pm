@@ -177,7 +177,7 @@ sub merge_data {
         foreach my $key (keys %$d) {
             if (exists $o->{$key}) {
                 if (!equal_ref $d->{$key}, $o->{$key}) {
-                    $d->{$key} = $o->{$key};
+                    eval { $d->{$key} = $o->{$key}; };
                 } elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
                     $merger->($d->{$key}, $o->{$key});
                 } else {
