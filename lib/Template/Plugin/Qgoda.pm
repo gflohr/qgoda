@@ -492,7 +492,7 @@ sub clone {
 sub strftime {
     my ($self, $format, $date, $lingua) = @_;
 
-    my $time = str2time $date;
+    my $time = $date =~ /^[-+]?[1-9][0-9]*$/ ? "$date" : str2time $date;
     $time = $date if !defined $time;
 
     $format = '%c' if empty $format;
@@ -503,12 +503,12 @@ sub strftime {
         web_set_locale($lingua, 'utf-8') if $lingua;
     }
 
-    my $date = POSIX::strftime($format, localtime $time);
+    my $formatted_date = POSIX::strftime($format, localtime $time);
 
     POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
 
-    Encode::_utf8_off($date);
-    return $date;
+    Encode::_utf8_off($formatted_date);
+    return $formatted_date;
 }
 
 sub try {
