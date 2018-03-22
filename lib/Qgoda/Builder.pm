@@ -44,7 +44,7 @@ sub build {
     my $errors = $site->getErrors;
 
     # 1st pass, usually Markdown.
-    ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
+    ASSET: foreach my $asset (sort { $b->{priority} <=> $a->{priority} }
                               $site->getAssets) {
         my $saved_locale = setlocale(POSIX::LC_ALL());
         eval {
