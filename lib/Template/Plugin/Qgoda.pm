@@ -239,7 +239,7 @@ sub __include {
 
     merge_data $asset, $extra;
 
-    $q->analyzeAssets([$asset], 1);
+    $q->analyzeAssets([$asset], $extra);
     $q->locateAsset($asset);
 
     my $builders = $q->getBuilders;
@@ -432,7 +432,6 @@ sub linkPost {
         die "broken linkPost($json)\n";
     } if (@$set > 1) {
         my $json = encode_json($filters);
-        $json =~ s{.(.*).}{$1};
         die "ambiguous linkPost($json)\n";
     }
 
@@ -516,13 +515,13 @@ sub try {
     Carp::croak("q.try is now invalid");
 }
 
-sub pagination {
+sub paginate {
     my ($self, $data) = @_;
 
-    $data = $self->__sanitizeHashref($data, 'pagination', 1);
-    die __"argument '{total}' is mandatory for pagination()\n"
+    $data = $self->__sanitizeHashref($data, 'paginate', 1);
+    die __"argument '{total}' is mandatory for paginate()\n"
         if empty $data->{total};
-    die __"argument '{total}' cannot be zero pagination()\n"
+    die __"argument '{total}' cannot be zero paginate()\n"
         if !$data->{total};
 
     use integer;

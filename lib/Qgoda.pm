@@ -595,7 +595,7 @@ sub analyze {
 }
 
 sub analyzeAssets {
-    my ($self, $assets, $include) = @_;
+    my ($self, $assets, $included) = @_;
 
     my $site = $self->getSite;
 
@@ -610,10 +610,10 @@ sub analyzeAssets {
             };
             $logger->debug(__x("{class} analyzing '{relpath}'",
                             class => "[$class]", relpath => $relpath));
-            eval { $analyzer->analyze($asset, $site) };
+            eval { $analyzer->analyze($asset, $site, $included) };
             if ($@) {
                 $logger->error("[$class] $relpath: $@");
-                $self->getSite->purgeAsset($asset) if !$include;
+                $self->getSite->purgeAsset($asset) if !$included;
             }
         }
     }

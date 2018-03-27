@@ -43,7 +43,7 @@ sub setup {
 }
 
 sub analyze {
-    my ($self, $asset, $site, $included) = @_;
+    my ($self, $asset, $site, $precious) = @_;
 
     my $qgoda = Qgoda->new;
 
@@ -62,6 +62,7 @@ sub analyze {
     }
 
     merge_data $meta, $front_matter_data;
+    merge_data $meta, $precious if $precious;
 
     delete $meta->{path};
     delete $meta->{relpath};
