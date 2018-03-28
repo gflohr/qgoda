@@ -272,7 +272,9 @@ sub __sanitizeFilters {
                  filters => $filters);
     }
 
-    return $filters;
+    # The caller may want to add default filters.  Make sure that the original
+    # reference is kept untouched.
+    return {%$filters};
 }
 
 sub __sanitizeHashref {
@@ -482,7 +484,7 @@ sub clone {
     };
 
     # Force these values.
-    $extra->{replath} = $asset->getRelpath;
+    $extra->{relpath} = $asset->getRelpath;
     $extra->{path} = $asset->getPath;
     $extra->{parent} = $parent;
     return $self->writeAsset($asset->getRelpath, $asset, $extra);
