@@ -294,11 +294,14 @@ sub filter {
         no warnings;
 
         foreach my $filter (@filters) {
+            my $stash = Template::Stash->new({found => \@found});
+            my $idx = 0;
             @found = grep {
                 my $asset = $_;
                 my ($sub, $key, $value) = @$filter;
-
-                $sub->($asset->{$key}, $value);
+                my $got_value = $stash->get("found.$idx.$key");
+                ++$idx;
+                $sub->($got_value, $value);
             } @found;
         }
     }
