@@ -535,11 +535,13 @@ sub paginate {
     my $page = $page0 + 1;
     my $stem = $data->{stem};
     my $extender = $data->{extender};
-    my $total_pages = 1 + $total / $per_page;
+    my $total_pages = 1 + ($total - 1) / $per_page;
 
     my $asset = $self->__getAsset;
     my $location;
-    if ($asset->{parent}) {
+    if (!empty $asset->{plocation}) {
+        $location = $asset->{plocation};
+    } elsif ($asset->{parent}) {
         $location = $asset->{parent}->{location};
     } else {
         $location = $asset->{location};
@@ -554,7 +556,7 @@ sub paginate {
     if ($page < $total_pages) {
         $next_start = $start + $per_page;
         $next_location = dirname $location;
-        $next_location .= "${stem}-" . ($page + 1) . $extender;
+        $next_location .= "/${stem}-" . ($page + 1) . $extender;
     }
 
     # FIXME! Not flexible enough.  We cannot put pages into a subdirectory.
@@ -580,7 +582,7 @@ sub paginate {
         page0 => $page0,
         page => $page,
         per_page => $per_page,
-        total_pages => 1 + $total / $per_page,
+        total_pages => $total_pages,
         previous_link => $previous_page,
         next_link => $next_page,
         links => \@links,
