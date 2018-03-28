@@ -117,6 +117,23 @@ sub new {
         return \@sorted;
     };
 
+    my $vmap = sub {
+        my ($objs, $field) = @_;
+
+        my @keys;
+        if ('ARRAY' eq reftype $objs) {
+            @keys = (0 .. $#$objs);
+        } elsif ('HASH' eq reftype $objs) {
+            # Make it deterministic.
+            @keys = sort keys %$objs;
+        } else {
+            return [];
+        }
+
+        my $stash = Template::Stash->new({objs => $objs});
+        return [map { $stash->get("objs.$_.$field") } @keys];
+    };
+
     my $kebap_snake = sub {
         return {
             pairmap {
@@ -148,6 +165,7 @@ sub new {
 
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
+    $context->define_vmethod(list => vmap => $vmap);
     $context->define_vmethod(scalar => slugify => \&Qgoda::Util::slugify);
     $context->define_vmethod(scalar => unmarkup => \&Qgoda::Util::unmarkup);
     $context->define_vmethod(hash => kebapSnake => $kebap_snake);
