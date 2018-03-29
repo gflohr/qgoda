@@ -445,17 +445,7 @@ sub linkPost {
     $filters = $self->__sanitizeFilters($filters);
     $filters->{type} = 'post';
 
-    my $set = $self->list($filters);
-    if (@$set == 0) {
-        my $json = encode_json($filters);
-        $json =~ s{.(.*).}{$1};
-        die "broken linkPost($json)\n";
-    } if (@$set > 1) {
-        my $json = encode_json($filters);
-        die "ambiguous linkPost($json)\n";
-    }
-
-    return $set->[0]->{permalink};
+    return $self->link($filters);
 }
 
 sub llinkPost {
