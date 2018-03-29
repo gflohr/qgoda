@@ -97,7 +97,11 @@ sub build {
 
     $self->initPlugins;
 
-    $self->{__build_options} = {%options};
+    if (!$self->{__build_options}) {
+        $self->{__build_options} = {%options};
+    } elsif (!%options) {
+        %options = %{$self->{__build_options}};
+    }
 
     my $logger = $self->{__logger};
     my $config = $self->{__config};
@@ -171,7 +175,7 @@ sub build {
 sub dumpAssets {
     my ($self) = @_;
 
-    $self->build(1);
+    $self->build;
 
     # Stringify all blessed references.
     map { purify { $_->dump } } $self->getSite->getAssets;
@@ -207,7 +211,7 @@ sub dump {
 }
 
 sub watch {
-    my ($self) = @_;
+    my ($self, %options) = @_;
 
     my $logger = $self->{__logger};
 
@@ -220,7 +224,7 @@ sub watch {
 
     eval {
         # An initial build failure is fatal.
-        $self->build;
+        $self->build(%options);
 
         my $config = $self->{__config};
 
