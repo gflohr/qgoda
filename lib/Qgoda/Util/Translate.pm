@@ -37,6 +37,17 @@ use vars qw(@EXPORT_OK);
 sub __translate_property {
     my ($property, $value, $textdomain) = @_;
 
+    # This only works on the top-level for one level!
+    if (ref $value && 'ARRAY' eq reftype $value) {
+        my @trans;
+        for (my $i = 0; $i < @$value; ++$i) {
+            my $ctx = "$property.$i";
+            push @trans, Locale::gettext_dumb::dpgettext($textdomain, $ctx,
+                                                         $value->[$i]);
+        }
+        return \@trans;
+    }
+
     my $hash = flatten2hash {$property => $value};
 
     my $stash = Template::Stash->new({});

@@ -33,7 +33,6 @@ use POSIX qw(strftime setlocale LC_ALL );
 use File::Basename;
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
-use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
@@ -516,7 +515,6 @@ sub strftime {
 
     POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
 
-    Encode::_utf8_off($formatted_date);
     return $formatted_date;
 }
 

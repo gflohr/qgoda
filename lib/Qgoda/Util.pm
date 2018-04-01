@@ -40,7 +40,7 @@ use vars qw(@EXPORT_OK);
                 perl_identifier perl_class class2module
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
-                canonical purify clear_utf8_flag safe_yaml_load
+                canonical purify safe_yaml_load
                 escape_link);
 
 sub js_unescape($);
@@ -691,49 +691,10 @@ sub purify {
     return $item->[1]->[0];
 }
 
-# Clean data polluted with Perl's "utf8" flag.
-sub clear_utf8_flag {
-    my ($data) = @_;
-
-    my $wanted = sub {
-        if (ref $_) {
-            my $obj = $_;
-            if ('HASH' eq reftype $obj) {
-                foreach my $key (keys %$obj) {
-                    if (Encode::is_utf8($key)) {
-                        my $value = delete $obj->{$key};
-                        Encode::_utf8_off($key);
-                        $obj->{$key} = $value;
-                    }
-
-                    my $value = $obj->{$key};
-                    if (defined $value && !ref $value
-                        && Encode::is_utf8($value)) {
-                        Encode::_utf8_off($obj->{$key});
-                    }
-                }
-            } elsif ('ARRAY' eq reftype $obj) {
-                foreach my $item (@$obj) {
-                    if (defined $item && !ref $item
-                        && Encode::is_utf8($item)) {
-                        Encode::_utf8_off($item);
-                    }
-                }
-            }
-        }
-    };
-
-    walk $wanted, $data;
-
-    return $data;
-}
-
 sub safe_yaml_load {
     my ($yaml) = @_;
 
-    Encode::_utf8_off($yaml);
-
-    return clear_utf8_flag YAML::XS::Load($yaml);
+    return YAML::XS::Load($yaml);
 }
 
 sub escape_link {
