@@ -50,7 +50,9 @@ sub new {
         # CP 1252 aka Windows-1252 defines all 8 bit characters.  We (ab)use it
         # for "binary" so that TT2 does not mess with character data.  Using
         # "utf-8" for ENCODING is a recipe for trouble.
-        ENCODING => 'CP 1252'
+        ENCODING => 'CP 1252',
+        # Needed for qgoda po pot
+        RELATIVE => 1
     );
     my $scm = $config->{scm};
     if (!empty $scm && 'git' eq $scm) {

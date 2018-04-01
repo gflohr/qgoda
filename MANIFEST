@@ -11,7 +11,6 @@ lib/Qgoda/Processor/Markdown.pm
 lib/Qgoda/Processor/TT2.pm
 lib/Qgoda/Site.pm
 lib/Qgoda/Util.pm
-lib/Template/Plugin/Pygments.pm
 lib/Template/Plugin/Qgoda.pm
 Makefile.PL
 MANIFEST
@@ -22,5 +21,3 @@ ReleaseNotes
 t/interpolate.t
 t/js_unescape.t
 t/strip_suffix.t
-TODO
-share/_config.yaml
