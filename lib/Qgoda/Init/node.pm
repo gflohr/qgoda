@@ -51,14 +51,14 @@ sub run {
     }
 
     my @dev_deps = @{$config->{_node_dev_dependencies} || []};
-    foreach my $dep (@dev_deps) {
-        @cmd = ($npm, 'install', '--save-dev', $dep);
+    if (@dev_deps) {
+        @cmd = ($npm, 'add', '--save-dev', @dev_deps);
         $init->command(@cmd);
     }
 
     my @deps = keys @{$config->{_node_dependencies} || []};
-    foreach my $dep (@deps) {
-        @cmd = ($npm, 'install', '--save', $dep);
+    if (@deps) {
+        @cmd = ($npm, 'install', '--save', @deps);
         $init->command(@cmd);
     }
 
