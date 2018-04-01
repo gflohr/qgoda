@@ -254,8 +254,6 @@ sub __include {
         merge_data $asset, \%overlay;
     }
 
-    merge_data $asset, $extra;
-
     $q->analyzeAssets([$asset], $extra);
     $q->locateAsset($asset);
 

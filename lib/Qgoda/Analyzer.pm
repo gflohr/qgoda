@@ -62,7 +62,6 @@ sub analyze {
     }
 
     merge_data $meta, $front_matter_data;
-    merge_data $meta, $precious if $precious;
 
     delete $meta->{path};
     delete $meta->{relpath};
@@ -72,6 +71,8 @@ sub analyze {
     if (!empty $asset->{master}) {
         translate_front_matter $asset, $front_matter_data;
     }
+
+    merge_data $asset, $precious if $precious;
 
     $self->__fillMeta($asset) if !$asset->{raw};
 
