@@ -414,11 +414,11 @@ sub getTaxonomyValues {
 
         my $value = $asset->{$taxonomy};
         if (ref $value && 'ARRAY' eq reftype $value) {
-            map { $values{$_} = 1 } @$value;
+            map { $values{$_} = 1 } grep { !empty $_ } @$value;
         } elsif (ref $value && 'HASH' eq reftype $value) {
-            map { $values{$_} = 1 } keys %$value;
+            map { $values{$_} = 1 if !empty $_ } keys %$value;
         } else {
-            $values{$value} = 1;
+            $values{$value} = 1 if !empty $value;
         }
     }
 
