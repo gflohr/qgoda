@@ -47,10 +47,6 @@ sub new {
         INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
         RECURSION => 1,
-        # CP 1252 aka Windows-1252 defines all 8 bit characters.  We (ab)use it
-        # for "binary" so that TT2 does not mess with character data.  Using
-        # "utf-8" for ENCODING is a recipe for trouble.
-        ENCODING => 'CP1252',
         # Needed for qgoda po pot
         RELATIVE => 1
     );
