@@ -25,7 +25,7 @@ use File::Path qw(make_path);
 use File::Basename qw(fileparse);
 use Locale::TextDomain qw(qgoda);
 use Scalar::Util qw(reftype looks_like_number);
-use Encode qw(_utf8_on);
+use Encode qw(_utf8_on _utf8_off);
 use File::Find ();
 use Data::Walk 2.00;
 use Storable qw(freeze);
@@ -131,6 +131,8 @@ sub write_file($$) {
     my $fh = IO::File->new;
     open $fh, ">", $path or return;
 
+    # Shut up "wide character in print ...".
+    _utf8_off $data;
     $fh->print($data) or return;
     $fh->close or return;
 
