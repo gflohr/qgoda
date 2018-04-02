@@ -25,7 +25,7 @@ use POSIX qw(setlocale);
 use Locale::Util qw(web_set_locale);
 use File::Spec;
 
-use Qgoda::Util qw(empty read_file read_body write_file);
+use Qgoda::Util qw(empty read_file read_body write_file blength);
 use Qgoda::Util::Translate qw(translate_body);
 
 sub new {
@@ -145,8 +145,9 @@ sub saveArtefact {
     if ($config->{compare_output}) {
         my @stat = stat $path;
         if (@stat) {
-            if ($stat[7] == length $asset->{content}) {
+            if ($stat[7] == blength $asset->{content}) {
                 my $old = read_file $path;
+                Encode::_utf8_on($old) if Encode::is_utf8($asset->{content});
                 if (defined $old && $old eq $asset->{content}) {
                     undef $write_file;
                     $qgoda->logger->debug(__x("Skipping unchanged file"

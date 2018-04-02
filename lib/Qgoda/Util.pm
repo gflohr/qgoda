@@ -41,7 +41,7 @@ use vars qw(@EXPORT_OK);
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
                 canonical purify safe_yaml_load
-                escape_link);
+                escape_link blength);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -703,6 +703,7 @@ sub purify {
     return $item->[1]->[0];
 }
 
+# Maybe we want to remove the utf-8 flag from the returned yaml data again ...
 sub safe_yaml_load {
     my ($yaml) = @_;
 
@@ -714,6 +715,18 @@ sub escape_link {
     $link = '' if empty $link;
 
     return uri_escape_utf8 $link, $unsafe_for_links;
+}
+
+sub blength {
+    my ($scalar) = @_;
+
+    return length $scalar if !Encode::is_utf8($scalar);
+
+    Encode::_utf8_off($scalar);
+    my $blength = length $scalar;
+    Encode::_utf8_on($scalar);
+
+    return $blength;
 }
 
 1;
