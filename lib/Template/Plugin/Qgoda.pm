@@ -513,6 +513,8 @@ sub strftime {
 
     POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
 
+    Encode::_utf8_on($formatted_date);
+
     return $formatted_date;
 }
 

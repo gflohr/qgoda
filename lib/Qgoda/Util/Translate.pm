@@ -26,6 +26,7 @@ use Storable qw(dclone);
 use Scalar::Util qw(reftype);
 use Template::Stash;
 use File::Globstar qw(globstar);
+use Encode;
 
 use Qgoda::Util qw(empty merge_data flatten2hash front_matter safe_yaml_load);
 use Qgoda::Splitter;
@@ -44,6 +45,7 @@ sub __translate_property {
             my $ctx = "$property.$i";
             push @trans, Locale::gettext_dumb::dpgettext($textdomain, $ctx,
                                                          $value->[$i]);
+            Encode::_utf8_on($trans[$i]);
         }
         return \@trans;
     }
@@ -57,7 +59,11 @@ sub __translate_property {
                                                     $hash->{$key}));
     }
 
-    return $stash->get($property);
+    my $translated = $stash->get($property);
+
+    Encode::_utf8_on($translated);
+
+    return $translated;
 }
 
 sub translate_front_matter {

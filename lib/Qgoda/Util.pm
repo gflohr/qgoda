@@ -25,7 +25,7 @@ use File::Path qw(make_path);
 use File::Basename qw(fileparse);
 use Locale::TextDomain qw(qgoda);
 use Scalar::Util qw(reftype looks_like_number);
-use Encode qw(_utf8_on _utf8_off);
+use Encode 2.12;
 use File::Find ();
 use Data::Walk 2.00;
 use Storable qw(freeze);
@@ -128,12 +128,22 @@ sub write_file($$) {
     my (undef, $directory) = fileparse $path;
     make_path $directory unless -e $directory;
 
-    my $fh = IO::File->new;
-    open $fh, ">", $path or return;
+    my $octets;
+    if (Encode::is_utf8($data)) {
+         my $handle_malformed = sub {
+             my $replacement = sprintf "{{+%04X}}", shift;
+             warn "malformed multi-byte sequence, search for '$replacement' in output file\n";
 
-    # Shut up "wide character in print ...".
-    _utf8_off $data;
-    $fh->print($data) or return;
+             return $replacement;
+         };
+         $octets = Encode::encode('UTF-8', $data, $handle_malformed);
+    } else {
+         $octets = $data;
+    }
+
+    open my $fh, ">", $path or return;
+
+    $fh->print($octets) or return;
     $fh->close or return;
 
     return 1;

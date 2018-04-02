@@ -182,6 +182,7 @@ sub processAsset {
 
     my $content = $self->readAssetContent($asset, $site);
     $asset->{content} = $content;
+    Encode::_utf8_on($asset->{content}) if !$asset->{raw};
     my @processors = $qgoda->getProcessors($asset);
     foreach my $processor (@processors) {
         my $short_name = ref $processor;
@@ -190,6 +191,7 @@ sub processAsset {
                            processor => $short_name));
         $asset->{content} = $processor->process($asset->{content},
                                                 $asset, $template_name);
+        Encode::_utf8_on($asset->{content}) if !$asset->{raw};
     }
 
     if (@processors) {
@@ -223,6 +225,7 @@ sub wrapAsset {
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)
         if !defined $content;
+    Encode::_utf8_on($content) if !$asset->{raw};
     my $template_name = File::Spec->join($view_dir, $view);
     foreach my $processor (@processors) {
         my $short_name = ref $processor;
@@ -230,6 +233,7 @@ sub wrapAsset {
         $logger->debug(__x("wrapping with {processor}",
                            processor => $short_name));
         $content = $processor->process($content, $asset, $template_name);
+        Encode::_utf8_on($content) if !$asset->{raw};
     }
 
     $asset->{content} = $content;
