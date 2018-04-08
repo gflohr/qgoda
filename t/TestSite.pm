@@ -58,6 +58,7 @@ sub setup {
     chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
 
     $self->__setupConfig;
+    $self->__setupFiles;
     $self->__setupAssets;
 
     return $self;
@@ -92,6 +93,18 @@ sub __setupAssets {
             write_file $relpath, $data
                 or die "cannot write '$relpath': $!";
         }
+    }
+
+    return $self;
+}
+
+sub __setupFiles {
+    my ($self) = @_;
+
+    foreach my $relpath (keys %{$self->{files} || {}}) {
+        my $content = $self->{files}->{$relpath};
+        write_file $relpath, $content
+            or die "cannot write '$relpath': $!";
     }
 
     return $self;
