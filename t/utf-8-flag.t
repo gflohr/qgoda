@@ -28,31 +28,14 @@ use TestSite;
 use Test::More;
 use Qgoda::CLI;
 
-my $po = <<EOF;
-msgid ""
-msgstr ""
-"Content-Type: text/plain; charset=UTF-8\\n"
-
-msgctxt "month"
-msgid "March"
-msgstr "März"
-
-msgctxt "title"
-msgid "Hello, world!"
-msgstr "Hallo, Welt!"
-
-msgid "98.96 °F in the morning."
-msgstr "37,2 °C am Morgen."
-EOF
-
 my $content = <<EOF;
-[% USE q = Qgoda %]
+<!--QGODA-NO-XGETTEXT-->[% USE q = Qgoda %]<!--/QGODA-NO-XGETTEXT-->
 
 config.title: [% config.title %]
 
 month: [% asset.month %]
 
-full date: [% q.strftime('%B', -120067740, 'en_US.UTF-8') %]
+full date: [% q.strftime('%B', -120067740, asset.lingua) %]
 
 98.96 °F in the morning.
 EOF
@@ -81,18 +64,13 @@ my $site = TestSite->new(name => 'utf-8-flag',
                                  lingua => 'de',
                                  translate => ['month', 'title']
                              }
-                         },
-                         files => {
-                             '_po/de.po' => $po,
                          });
 
 
-ok (Qgoda::CLI->new(['po', 'potfiles'])->dispatch);
-ok (Qgoda::CLI->new(['po', 'pot'])->dispatch);
 ok (Qgoda::CLI->new(['build'])->dispatch);
 ok -e '_site/en/index.html';
 ok -e '_site/de/index.html';
 
-#$site->tearDown;
+$site->tearDown;
 
 done_testing;
