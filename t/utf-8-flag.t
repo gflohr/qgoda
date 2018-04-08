@@ -26,27 +26,64 @@ BEGIN {
 
 use TestSite;
 use Test::More;
+use Qgoda::CLI;
+
+my $po = <<EOF;
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\\n"
+
+msgctxt "month"
+msgid "March"
+msgstr "März"
+
+msgctxt "title"
+msgid "Hello, world!"
+msgstr "Hallo, Welt!"
+
+msgid "98.96 °F in the morning."
+msgstr "37,2 °C am Morgen."
+EOF
 
 my $content = <<EOF;
----
-location: /index.html
-month: March
----
-
+98.96 °F in the morning.
 EOF
 
 my $site = TestSite->new(name => 'utf-8-flag',
+                         precious => ['*.mo'],
                          config => {
                              title => 'Lots of €€',
+                             linguas => ['en', 'de'],
+                             po => {
+                                 textdomain => 'messages',
+                             },
+                             exclude => ['/LocaleData'],
                          },
                          assets => {
-                             'index.md' => {
+                             'en/index.md' => {
+                                 location => '/en/index.html',
+                                 month => 'March',
+                                 lingua => 'de',
+                                 title => 'Hello, world!',
                                  content => $content,
+                             },
+                             'de/index.md' => {
+                                 location => '/de/index.html',
+                                 master => '/en/index.md',
+                                 lingua => 'de',
+                                 translate => ['month', 'title']
                              }
+                         },
+                         files => {
+                             '_po/de.po' => $po,
                          });
 
-ok 1;
 
-$site->tearDown;
+ok (Qgoda::CLI->new(['po', 'potfiles'])->dispatch);
+ok (Qgoda::CLI->new(['build'])->dispatch);
+ok -e '_site/en/index.html';
+ok -e '_site/de/index.html';
+
+#$site->tearDown;
 
 done_testing;
