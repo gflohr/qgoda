@@ -27,12 +27,26 @@ BEGIN {
 use TestSite;
 use Test::More;
 
-$DB::single = 1;
+my $content = <<EOF;
+---
+location: /index.html
+month: March
+---
+
+EOF
+
 my $site = TestSite->new(name => 'utf-8-flag',
                          config => {
-                             title => 'Test for UTF-8 Flag',
+                             title => 'Lots of €€',
+                         },
+                         assets => {
+                             'index.md' => {
+                                 content => $content,
+                             }
                          });
 
 ok 1;
+
+$site->tearDown;
 
 done_testing;

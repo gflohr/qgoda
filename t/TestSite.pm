@@ -22,6 +22,8 @@ use strict;
 
 use File::Spec;
 use File::Path;
+use File::Find;
+use File::Globstar::ListMatch;
 use YAML::XS;
 
 use Qgoda::Util qw(empty write_file);
@@ -46,15 +48,21 @@ sub setup {
     my ($volume, $directory) = File::Spec->splitpath(__FILE__);
 
     my $repodir = File::Spec->catpath($volume, $directory, '..');
+    $repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
     $self->{repodir} = $repodir;
     chdir $repodir or die "cannot chdir to '$repodir': $!\n";
 
-    my $rootdir = File::Spec->catpath($volume, $directory, $self->{name});
+    my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
     $self->{rootdir} = $rootdir;
     mkdir $rootdir;
     chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
 
     $self->__setupConfig;
+
+    mkdir "foo";
+    mkdir "bar";
+    mkdir "baz";
+    write_file "baz/bazoo", "Yana";
 
     return $self;
 }
@@ -76,13 +84,22 @@ sub __setupConfig {
 sub tearDown {
     my ($self) = @_;
 
-    my ($volume, $directory) = File::Spec->splitpath(__FILE__);
+    chdir $self->{repodir} or die "cannot chdir to '$self->{repodir}': $!\n";
 
-    my $repodir = File::Spec->catpath($volume, $directory, '..');
-    chdir $repodir or die "cannot chdir to '$repodir': $!\n";
+    my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
+    File::Find::find({
+        wanted => sub {
+            my $rel = File::Spec->abs2rel($File::Find::name, $self->{rootdir});
 
-    File::Path::remove_tree($repodir);
+            return if '.' eq $rel;
+            return if $matcher->match($rel);
+
+            File::Path::remove_tree($File::Find::name);
+        },
+    }, $self->{rootdir});
+    rmdir $self->{rootdir};
 
     return $self;
 }
+
 1;
