@@ -46,11 +46,19 @@ msgstr "37,2 °C am Morgen."
 EOF
 
 my $content = <<EOF;
+[% USE q = Qgoda %]
+
+config.title: [% config.title %]
+
+month: [% asset.month %]
+
+full date: [% q.strftime('%B', -120067740, 'en_US.UTF-8') %]
+
 98.96 °F in the morning.
 EOF
 
 my $site = TestSite->new(name => 'utf-8-flag',
-                         precious => ['*.mo'],
+                         precious => ['*.mo', '*.po'],
                          config => {
                              title => 'Lots of €€',
                              linguas => ['en', 'de'],
@@ -80,6 +88,7 @@ my $site = TestSite->new(name => 'utf-8-flag',
 
 
 ok (Qgoda::CLI->new(['po', 'potfiles'])->dispatch);
+ok (Qgoda::CLI->new(['po', 'pot'])->dispatch);
 ok (Qgoda::CLI->new(['build'])->dispatch);
 ok -e '_site/en/index.html';
 ok -e '_site/de/index.html';
