@@ -116,14 +116,18 @@ sub tearDown {
     chdir $self->{repodir} or die "cannot chdir to '$self->{repodir}': $!\n";
 
     my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
-    File::Find::find({
+    File::Find::finddepth({
         wanted => sub {
             my $rel = File::Spec->abs2rel($File::Find::name, $self->{rootdir});
 
             return if '.' eq $rel;
             return if $matcher->match($rel);
 
-            File::Path::remove_tree($File::Find::name);
+            if (-d $File::Find::name) {
+                rmdir $File::Find::name;
+            } else {
+                unlink $File::Find::name;
+            }
         },
     }, $self->{rootdir});
     rmdir $self->{rootdir};
