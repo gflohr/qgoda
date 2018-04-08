@@ -26,6 +26,9 @@ BEGIN {
 
 use TestSite;
 use Test::More;
+use Encode;
+
+use Qgoda::Util qw(read_file);
 use Qgoda::CLI;
 
 my $content = <<EOF;
@@ -40,10 +43,12 @@ full date: [% q.strftime('%B', -120067740, asset.lingua) %]
 98.96 °F in the morning.
 EOF
 
+my $title = 'Lots of €€';
+Encode::_utf8_on($title);
 my $site = TestSite->new(name => 'utf-8-flag',
                          precious => ['*.mo', '*.po'],
                          config => {
-                             title => 'Lots of €€',
+                             title => $title,
                              linguas => ['en', 'de'],
                              po => {
                                  textdomain => 'messages',
@@ -70,6 +75,18 @@ my $site = TestSite->new(name => 'utf-8-flag',
 ok (Qgoda::CLI->new(['build'])->dispatch);
 ok -e '_site/en/index.html';
 ok -e '_site/de/index.html';
+
+my $html = read_file '_site/de/index.html' or die;
+
+ok $html =~ m{<title>Hallo, Welt!</title>};
+ok $html =~ m{<h1>Hallo, Welt!</h1>};
+ok $html =~ m{<p>config.title: Lots of €€</p>};
+if ($ENV{AUTHOR_TESTING}) {
+    # Requires a German locale being installed.
+    ok $html =~ m{<p>month: März</p>};
+}
+ok $html =~ m{<p>full date: März</p>};
+ok $html =~ m{<p>37,2 °C am Morgen.</p>};
 
 $site->tearDown;
 
