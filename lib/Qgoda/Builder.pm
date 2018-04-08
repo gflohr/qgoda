@@ -222,6 +222,30 @@ sub wrapAsset {
     my $srcdir = $qgoda->config->{srcdir};
     my $view_dir = $qgoda->config->{paths}->{views};
     my $view_file = File::Spec->join($srcdir, $view_dir, $view);
+    if (!-e $view_file && 'default.html' eq $view) {
+        warn __x("no default view '{file}', creating one with defaults.\n",
+                 file => $view_file);
+        my $msg = __x("This view has been automatically created.  Please edit "
+                      . " '{path}' to your needs!", path => $view_file);
+        my $html = <<EOF;
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>[% asset.title | html %]</title>
+  </head>
+  <body>
+    <h1>[% asset.title | html %]</h1>
+    [% asset.content %]
+    <p>$msg</p>
+  </body>
+</html>
+EOF
+
+        write_file $view_file, $html
+            or die __x("error writing view '{file}': {error}.\n",
+                       file => $view_file, error => $!);
+    }
     my $content = read_file $view_file;
     die __x("error reading view '{file}': {error}.\n",
             file => $view_file, error => $!)

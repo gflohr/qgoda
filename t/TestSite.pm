@@ -58,11 +58,7 @@ sub setup {
     chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
 
     $self->__setupConfig;
-
-    mkdir "foo";
-    mkdir "bar";
-    mkdir "baz";
-    write_file "baz/bazoo", "Yana";
+    $self->__setupAssets;
 
     return $self;
 }
@@ -77,6 +73,26 @@ sub __setupConfig {
 
     my $yaml = YAML::XS::Dump($self->{config});
     write_file '_config.yaml', $yaml or die;
+
+    return $self;
+}
+
+sub __setupAssets {
+    my ($self) = @_;
+
+    foreach my $relpath (keys %{$self->{assets} || {}}) {
+        my $asset = $self->{assets}->{$relpath};
+        my $content = delete $asset->{content};
+        if ($asset->{raw}) {
+            write_file $relpath, $content
+                or die "cannot write '$relpath': $!";
+        } else {
+            my $data = YAML::XS::Dump($asset);
+            $data .= "---\n$content";
+            write_file $relpath, $data
+                or die "cannot write '$relpath': $!";
+        }
+    }
 
     return $self;
 }
