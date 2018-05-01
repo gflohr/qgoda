@@ -52,9 +52,11 @@ WriteMakefile (
         'JSON' => '2.90',
         'HTML::TreeBuilder' => '5.03',
         'Text::Unidecode' => '1.27',
+        'Text::Markdown' => '0',
+        # FIXME! This should be a "soft" requirement.
         'Text::Markdown::Hoedown' => '1.02',
         'Template' => '2.26',
-        'Template::Plugin::Gettext' => '0.2',
+        'Template::Plugin::Gettext' => '0.6',
         # The pure Perl YAML has problems parsing comments and is not
         # sufficient.
         'YAML::LibYAML' => '0.63',
@@ -67,6 +69,7 @@ WriteMakefile (
         'Term::ANSIColor' => '4.04',
         'Locale::XGettext' => '0.3',
         'List::Util' => '1.45',
+        'URI::Escape' => '0'
     },
     EXE_FILES => ['qgoda'],
     PL_FILES => {},
