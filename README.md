@@ -33,6 +33,32 @@ Qgoda uses [Markdown](https://daringfireball.net/projects/markdown/syntax)
 and the [Template Toolkit](http://www.template-toolkit.org/) by default for
 processing content, although it is possible to change that.
 
+## Run Qgoda in Docker Container
+
+Due to missing dependencies, you may have problems installing and running
+Qgoda on your platform (especially on Microsoft Windows systems).  You can
+instead try using a Qgoda Docker image:
+
+1. Install Docker.  On Linux/Unix systems, Docker will be available from
+your package manager.  On Mac OS X you can install Docker with Mac Ports
+or Homebrew.  On Windows, get a pre-compiled binary from
+https://www.docker.com/get-docker.
+
+2. In a shell, run:
+
+```bash
+$ docker run --rm -it -v $(pwd):/data dsonntag/qgoda
+```
+
+3. You may want to create an alias, so that you do not have to type in
+the Docker commands all the time.  Depending on your operating system,
+you have to open `~/.bash_profile`, `~/.bashrc`, `~/.alias`, `~/.zshrc`
+or similar and add this line:
+
+```bash
+alias qgoda="docker run --rm -it -v $(pwd):/data dsonntag/qgoda"
+```
+
 ## Copyright
 
 Copyright (C) 2016-2017 Guido Flohr <guido.flohr@cantanea.com>, all
