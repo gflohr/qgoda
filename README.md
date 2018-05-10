@@ -47,7 +47,7 @@ https://www.docker.com/get-docker.
 2. In a shell, run:
 
 ```bash
-$ docker run --rm -it -v $(pwd):/data dsonntag/qgoda
+$ docker run --rm -it -v $(pwd):/data gflohr/qgoda
 ```
 
 3. You may want to create an alias, so that you do not have to type in
@@ -56,12 +56,12 @@ you have to open `~/.bash_profile`, `~/.bashrc`, `~/.alias`, `~/.zshrc`
 or similar and add this line:
 
 ```bash
-alias qgoda="docker run --rm -it -v $(pwd):/data dsonntag/qgoda"
+alias qgoda='docker run --rm -it -v $(pwd):/data gflohr/qgoda'
 ```
 
 ## Copyright
 
-Copyright (C) 2016-2017 Guido Flohr <guido.flohr@cantanea.com>, all
+Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>, all
 rights reserved.
 
 Qgoda is available under the terms and conditions of the GNU General
