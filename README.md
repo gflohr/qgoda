@@ -44,13 +44,19 @@ your package manager.  On Mac OS X you can install Docker with Mac Ports
 or Homebrew.  On Windows, get a pre-compiled binary from
 https://www.docker.com/get-docker.
 
-2. In a shell, run:
+2. Start Docker.  You may want to start the docker daemon automatically.
+Check your vendor's documentation for that!
+
+3. In a shell, run:
 
 ```bash
 $ docker run --rm -it -v $(pwd):/data gflohr/qgoda
 ```
 
-3. You may want to create an alias, so that you do not have to type in
+You may have to add the user that runs the command to the group "docker"
+if you get an error like "permission denied".
+
+4. You may want to create an alias, so that you do not have to type in
 the Docker commands all the time.  Depending on your operating system,
 you have to open `~/.bash_profile`, `~/.bashrc`, `~/.alias`, `~/.zshrc`
 or similar and add this line:
