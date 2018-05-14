@@ -485,7 +485,8 @@ sub __filelist {
                            filename => $filelist, error => $!));
     }
 
-    return grep { length } map { s/^[ \r\t]*//; s/[ \t\r\n]*$//; $_ } <$fh>;
+    return grep { length } 
+           map { my $u = $_; $u =~ s/^[ \r\t]*//; $u =~ s/[ \t\r\n]*$//; $u } <$fh>;
 }
 
 sub __make {
