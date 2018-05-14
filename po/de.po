@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: qgoda 0.1.1\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
 "POT-Creation-Date: 2018-05-14 22:38+0300\n"
-"PO-Revision-Date: 2018-05-14 22:41+0300\n"
+"PO-Revision-Date: 2018-05-14 22:53+0300\n"
 "Last-Translator: Guido Flohr <guido.flohr@cantanea.com>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -78,12 +78,12 @@ msgstr "Erzeuge Verzeichnis „{dir}“"
 #: ../lib/Qgoda/Init/copy.pm:89
 #, perl-brace-format
 msgid "cannot create '{dir}': {error}"
-msgstr "Verzeichnis „{dir}“ kann nicht erzeugt werden: "
+msgstr "Verzeichnis „{dir}“ kann nicht erzeugt werden: {error}"
 
 #: ../lib/Qgoda/Init/copy.pm:104
 #, perl-brace-format
 msgid "not overwriting precious '{file}' without '--force --force'"
-msgstr "wertvolle Dateien werden ohne „—force —force” nicht überschrieben"
+msgstr "wertvolle Dateien '{file}' wird ohne „—force —force” nicht überschrieben"
 
 #: ../lib/Qgoda/Init/copy.pm:111
 #, perl-brace-format
@@ -130,7 +130,7 @@ msgstr ""
 #, perl-brace-format
 msgid ""
 "Migrating Jekyll posts from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
-msgstr ""
+msgstr "Migriere Jekyll-Posts von '{from_dir}' in Qgoda-Views in '{to_dir}'.\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:198
 #, perl-brace-format
