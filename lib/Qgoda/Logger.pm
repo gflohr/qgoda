@@ -23,6 +23,7 @@ use strict;
 use POSIX qw (setlocale LC_TIME strftime);
 use Time::HiRes qw(gettimeofday);
 use Term::ANSIColor qw(colored);
+use IO::Interactive;
 
 sub new {
     my ($class, %args) = @_;
@@ -81,7 +82,7 @@ sub __makeMessage {
 
     my $colored = sub { $_[0] };
 
-    if (-t STDOUT) {
+    if (IO::Interactive::is_interactive()) {
         my %colors = (
             error => 'bold bright_red',
             warning => 'red',
