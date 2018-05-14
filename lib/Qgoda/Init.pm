@@ -204,7 +204,7 @@ sub __write {
 
     $logger->info(__x("Initializing '{filename}'.", filename => $filename));
 
-    open my $fh, ">$filename"
+    open my $fh, '>', $filename
         or $logger->fatal(__x("Cannot write '{filename}': {error}!\n",
                               filename => $filename, error => $!));
     print $fh $content;
