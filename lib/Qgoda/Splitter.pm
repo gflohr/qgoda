@@ -75,8 +75,8 @@ sub new {
         if ($chunk =~ /^[ \011-\015]+$/) {
             push @chunks, $chunk;
         } else {
-            my $head = $1 if $chunk =~ s/^([ \011-\015]+)//;        
-            my $tail = $1 if $chunk =~ s/([ \011-\015]+)$//;
+            my $head = $chunk =~ s/^([ \011-\015]+)// ? $1 : undef;
+            my $tail = $chunk =~ s/([ \011-\015]+)$// ? $1 : undef;
             push @chunks, $head if !empty $head;
             push @chunks, $chunk if !empty $chunk;
             push @chunks, $tail if !empty $tail;
