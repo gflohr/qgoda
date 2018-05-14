@@ -14,3 +14,7 @@
 /blib/
 /pm_to_blib
 /set-path
+
+# Dist::Zilla
+/.build
+/Qgoda-v*
