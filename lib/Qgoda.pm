@@ -920,3 +920,21 @@ sub buildOptions {
 }
 
 1;
+
+=head1 NAME
+
+Qgoda - The Qgoda Static Site Generator
+
+=head1 SYNOPSIS
+
+    qgoda --help
+
+    open http://www.qgoda.net/
+
+=head1 DOCUMENTATION
+
+The documentation for Qgoda can be found at the
+L<Qgoda web site|http://www.qgoda.net/>.
+
+Other Qgoda modules that do not contain POD are for internal use only and
+should not be used directly.
