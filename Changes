@@ -1,0 +1,19 @@
+{{$NEXT}}
+        - content translation with PO files and gettext workflow
+        - Dockerfile thanks to Dominic Sonntag
+        - automatic creation of default template
+        - use utf8 flag
+        - q.anchor() and q.lanchor()
+        - calculate related documents based on shared taxonomy values
+        - generic html filter interface
+        - automatic TOC generation
+        - virtual assets
+        - pluggable analyzers
+        - version control mode (only git supported at the moment)
+        - drafts mode
+        - do not process future documents (unless requested)
+        - inverted semantics for "priority"
+        - q.vmap()
+
+v0.9.0-alpha.1 - 2017-12-08
+        - First alpha version (github only)
