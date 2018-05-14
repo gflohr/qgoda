@@ -69,7 +69,7 @@ sub run {
 
         my $json = JSON->new;
         my $json_data = read_file 'package.json'
-            or $logger->fatal(__x("Unable to read '{filename}': {error})",
+            or $logger->fatal(__x("cannot read '{filename}': {error}",
                                   filename => 'package.json',
                                   error => $!));
 
@@ -81,7 +81,7 @@ sub run {
         $json_data = $json->encode($data);
 
         write_file 'package.json', $json_data
-            or $logger->fatal(__x("Unable to write '{filename}': {error})",
+            or $logger->fatal(__x("cannot write '{filename}': {error}",
                                   filename => 'package.json',
                                   error => $!));
     }

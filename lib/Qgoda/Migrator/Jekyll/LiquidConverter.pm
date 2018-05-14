@@ -174,7 +174,7 @@ sub parse {
 
     my $logger = $self->logger;
     my $input = read_file $filename
-        or $logger->fatal(__x("Cannot read '{filename}': {error}!\n"));
+        or $logger->fatal(__x("cannot read '{filename}': {error}"));
 
     my $lineno = 1;
     my $state = 0;
