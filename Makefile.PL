@@ -24,7 +24,7 @@ sub postamble {
     my ($self) = @_;
 
     if (-e 'maintainer.mk') {
-        open my $fh, '<maintainer.mk'
+        open my $fh, '<', 'maintainer.mk'
             or die "Cannot open 'maintainer.mk': $!\n";
         local $/;
         push @post, <$fh>;
