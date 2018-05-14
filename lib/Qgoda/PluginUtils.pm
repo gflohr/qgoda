@@ -51,6 +51,10 @@ sub load_plugins {
     $logger->info(__("initializing plug-ins."));
 
     my $config = $q->config;
+
+    # Allow loading local Perl plug-ins.
+    push @INC, $config->{srcdir};
+
     my $modules_dir = File::Spec->catfile($config->{srcdir}, 'node_modules');
     my %plugins = map {
         $_ => {
