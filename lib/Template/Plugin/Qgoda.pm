@@ -74,7 +74,7 @@ sub new {
         return @values;
     };
 
-    sub compare_array {
+    my $compare_array = sub {
         my $arr1 = $a->[1];
         my $arr2 = $b->[1];
 
@@ -85,9 +85,9 @@ sub new {
         }
 
         return 0;
-    }
+    };
 
-    sub ncompare_array {
+    my $ncompare_array = sub {
         my $arr1 = $a->[1];
         my $arr2 = $b->[1];
 
@@ -98,13 +98,13 @@ sub new {
         }
 
         return 0;
-    }
+    };
 
     my $sort_by = sub {
         my ($assets, $field) = @_;
 
         my @sorted = map { $assets->[$_->[0]] }
-                     sort compare_array $get_values->($assets, $field);
+                     sort $compare_array $get_values->($assets, $field);
         return \@sorted;
     };
 
@@ -112,7 +112,7 @@ sub new {
         my ($assets, $field) = @_;
 
         my @sorted = map { $assets->[$_->[0]] }
-                     sort ncompare_array $get_values->($assets, $field);
+                     sort $ncompare_array $get_values->($assets, $field);
         return \@sorted;
     };
 
@@ -676,3 +676,23 @@ sub lrelated {
 }
 
 1;
+
+=head1 NAME
+
+Template::Plugin::Qgoda - Interface to Qgoda from Template Toolkit
+
+=head1 SYNOPSIS
+
+In your template:
+
+    [% USE q = Qgoda %]
+
+=head1 DESCRIPTION
+
+Please see L<http://www.qgoda.net/en/docs/qgoda-plug-in/> for exhaustive
+documentation.
+
+=head1 SEE ALSO
+
+L<http://www.qgoda.net/en/docs/qgoda-plug-in/>,
+L<qgoda>, L<Template>, L<Perl>
