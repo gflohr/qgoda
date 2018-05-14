@@ -167,7 +167,7 @@ sub merge_data {
     my ($data, $overlay) = @_;
 
     # Return $overlay if it is of a different type than $data.
-    sub equal_ref {
+    my $equal_ref = sub {
         my ($x, $y) = @_;
 
         return if !ref $x;
@@ -177,9 +177,9 @@ sub merge_data {
         my $ref_y = reftype $y;
 
         return $ref_x eq $ref_y;
-    }
+    };
 
-    return $overlay if !equal_ref $overlay, $data;
+    return $overlay if !$equal_ref->($overlay, $data);
     return $overlay if 'ARRAY' eq reftype $overlay;
 
     my $merger;
@@ -188,7 +188,7 @@ sub merge_data {
 
         foreach my $key (keys %$d) {
             if (exists $o->{$key}) {
-                if (!equal_ref $d->{$key}, $o->{$key}) {
+                if (!$equal_ref->($d->{$key}, $o->{$key})) {
                     eval { $d->{$key} = $o->{$key}; };
                 } elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
                     $merger->($d->{$key}, $o->{$key});
