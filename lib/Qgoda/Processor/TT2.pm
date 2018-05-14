@@ -98,10 +98,11 @@ sub fetch {
 
     if (!ref $name) {
         my $is_absolute;
-        my $path = $name;
+        my $path;
 
         if (File::Spec->file_name_is_absolute($name)) {
             $is_absolute = 1;
+            $path = $name if -e $name;
         } elsif ($name !~ m/$Template::Provider::RELATIVE_PATH/o) {
             foreach my $search (@{$self->{INCLUDE_PATH}}) {
                 my $try = File::Spec->catfile($search, $name);
@@ -113,8 +114,10 @@ sub fetch {
             }
         }
 
-        if (!Qgoda->new->versionControlled($path, $is_absolute)) {
-            my $msg = __"not under version control";
+        if (defined $path
+            && !Qgoda->new->versionControlled($path, $is_absolute)) {
+            my $msg = __x("template file '{path}' is not under version control",
+                          path => $path);
             return $msg, Template::Constants::STATUS_ERROR;
         }
     }
