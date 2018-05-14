@@ -81,15 +81,11 @@ sub addPlugin {
         return $self;
     };
 
-    eval <<EOF;
-    package $class_name;
-
-    sub filter {
+    *{"${class_name}::filter"} = sub {
         my (\$self, \$text, \$config, \$args) = \@_;
 
         return $plugin_data->{entry}(\$self, \$text, \$config, \$args);
-    }
-EOF
+    };
 
     @{"${class_name}::ISA"} = 'Template::Plugin::Filter';
 

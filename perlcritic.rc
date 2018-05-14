@@ -19,3 +19,7 @@
 
 ; Outsmarts automatic versioning.
 [-TestingAndDebugging::RequireUseStrict]
+
+; This is occasionally needed.
+[TestingAndDebugging::ProhibitNoStrict]
+allow = refs
