@@ -23,3 +23,6 @@
 ; This is occasionally needed.
 [TestingAndDebugging::ProhibitNoStrict]
 allow = refs
+
+; FIXME! Currently needed in lib/Qgoda/Plugger/Inline.pm.
+[-BuiltinFunctions::ProhibitStringyEval]
