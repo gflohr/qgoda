@@ -1,4 +1,4 @@
-# German translations for qgoda package.
+# Austrian German translations for qgoda package.
 # Copyright (C) 2018 Guido Flohr <http://www.guido-flohr.net>
 # This file is distributed under the same license as the qgoda package.
 # Guido Flohr <guido.flohr@cantanea.com>, 2018.
@@ -11,7 +11,7 @@ msgstr ""
 "PO-Revision-Date: 2018-05-14 22:53+0300\n"
 "Last-Translator: Guido Flohr <guido.flohr@cantanea.com>\n"
 "Language-Team: German\n"
-"Language: de\n"
+"Language: de_AT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -20,7 +20,7 @@ msgstr ""
 #: ../lib/Qgoda/Init/config.pm:58 ../lib/Qgoda/Init/copy.pm:98
 #, perl-brace-format
 msgid "not overwriting '{file}' without '--force'"
-msgstr "Datei „{file}“ wird ohne „--force“ nicht überschrieben"
+msgstr "Datei „{file}„ wird ohne „--force„ nicht überschrieben"
 
 #: ../lib/Qgoda/Init/config.pm:60
 msgid "This can lead to malfunctions."
@@ -28,19 +28,19 @@ msgstr "Dies kann zu Fehlfunktionen führen."
 
 #: ../lib/Qgoda/Init/config.pm:61
 msgid "Please merge '_config.new.yaml' manually!"
-msgstr "„_config.new.yaml“ muss von Hand aktualisiert werden!"
+msgstr "„_config.new.yaml„ muss von Hand aktualisiert werden!"
 
 #: ../lib/Qgoda/Init/config.pm:64 ../lib/Qgoda/Init/config.pm:87
 #: ../lib/Qgoda/Init/node.pm:84
 #, perl-brace-format
 msgid "cannot write '{filename}': {error}"
-msgstr "Fehler beim Schreiben von „{filename}“: {error}"
+msgstr "Fehler beim Schreiben von „{filename}„: {error}"
 
 #: ../lib/Qgoda/Init/config.pm:74 ../lib/Qgoda/Init/node.pm:72
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:177
 #, perl-brace-format
 msgid "cannot read '{filename}': {error}"
-msgstr "Fehler beim Lesen von „{filename}“: {error}"
+msgstr "Fehler beim Lesen von „{filename}„: {error}"
 
 #: ../lib/Qgoda/Init/config.pm:92
 msgid "force reload of configuration"
@@ -52,11 +52,11 @@ msgstr "Kopieren von Dateien"
 
 #: ../lib/Qgoda/Init/copy.pm:54
 msgid "option '--force' given, will overwrite files"
-msgstr "Option „—force“ angegeben; Dateien werden überschreiben"
+msgstr "Option „—force„ angegeben; Dateien werden überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:57
 msgid "option '--force' given twice, will overwrite precious files"
-msgstr "Option „--force“ zweimal angegeben, wertvolle Dateien werden überschreiben"
+msgstr "Option „--force„ zweimal angegeben, wertvolle Dateien werden überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:59
 msgid "but will preserve precious files, give '--force' twice to overwrite"
@@ -64,32 +64,32 @@ msgstr "aber wertvolle Dateien werden bewahrt (zweimal „—force” erzwingt �
 
 #: ../lib/Qgoda/Init/copy.pm:63
 msgid "will preserve files, use '--force' to overwrite"
-msgstr "wertvolle Dateien werden bewahrt, „—force“ erzwingt Überschreiben"
+msgstr "wertvolle Dateien werden bewahrt, „—force„ erzwingt Überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:86
 #, perl-brace-format
 msgid "create directory '{dir}'"
-msgstr "Erzeuge Verzeichnis „{dir}“"
+msgstr "Erzeuge Verzeichnis „{dir}„"
 
 #: ../lib/Qgoda/Init/copy.pm:89
 #, perl-brace-format
 msgid "cannot create '{dir}': {error}"
-msgstr "Verzeichnis „{dir}“ kann nicht erzeugt werden: {error}"
+msgstr "Verzeichnis „{dir}„ kann nicht erzeugt werden: {error}"
 
 #: ../lib/Qgoda/Init/copy.pm:104
 #, perl-brace-format
 msgid "not overwriting precious '{file}' without '--force --force'"
-msgstr "wertvolle Datei „{file}“ wird ohne „—force —force” nicht überschrieben"
+msgstr "wertvolle Dateien „{file}„ wird ohne „—force —force” nicht überschrieben"
 
 #: ../lib/Qgoda/Init/copy.pm:111
 #, perl-brace-format
 msgid "copy '{src}' to '{dest}'"
-msgstr "Kopieren von „{src}“ nach „{dest}“"
+msgstr "Kopieren von „{src}„ nach „{dest}„"
 
 #: ../lib/Qgoda/Init/copy.pm:114
 #, perl-brace-format
 msgid "cannot copy '{src}' to '{dest}': {error}"
-msgstr "Fehler beim Kopieren von „{src}“ nach „{dest}“: {error}"
+msgstr "Fehler beim Kopieren von „{src}„ nach „{dest}„: {error}"
 
 #: ../lib/Qgoda/Init/node.pm:49
 msgid "Cannot setup asset processing."
@@ -97,7 +97,7 @@ msgstr "Fehler beim Einrichten der Asset-Verarbeitung."
 
 #: ../lib/Qgoda/Init/node.pm:68
 msgid "updating 'package.json'"
-msgstr "Aktualisieren von „{package.json}“"
+msgstr "Aktualisieren von „{package.json}„"
 
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:43
 msgid "beginning of file"
@@ -106,7 +106,7 @@ msgstr "Dateianfang"
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:131
 #, perl-brace-format
 msgid "{filename}:{lineno}: Syntax error at or near '{location}'!"
-msgstr "{filename}:{lineno}: Syntaxfehler bei oder in der Nähe von „{location}“"
+msgstr "{filename}:{lineno}: Syntaxfehler bei oder in der Nähe von „{location}„"
 
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:202
 msgid "Syntax error!\n"
@@ -124,7 +124,7 @@ msgstr ""
 #: ../lib/Qgoda/Migrator/Jekyll.pm:135
 #, perl-brace-format
 msgid "Migrating Jekyll posts from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
-msgstr "Migriere Jekyll-Posts von „{from_dir}“ in Qgoda-Views in „{to_dir}“.\n"
+msgstr "Migriere Jekyll-Posts von „{from_dir}„ in Qgoda-Views in „{to_dir}„.\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:198
 #, perl-brace-format
@@ -1202,16 +1202,4 @@ msgstr ""
 #, perl-brace-format
 msgid "ignoring '{relpath}': not under version control"
 msgstr ""
-
-#, fuzzy
-#~ msgid "cannot read '{filename}': {error})"
-#~ msgstr "Fehler beim Lesen von â{filename}â: {error}"
-
-#, fuzzy
-#~ msgid "cannot write '{filename}': {error})"
-#~ msgstr "Fehler beim Schreiben von â{filename}â: {error}"
-
-#, fuzzy
-#~ msgid "cannot read '{filename}': {error}!\n"
-#~ msgstr "Fehler beim Lesen von â{filename}â: {error}"
 
