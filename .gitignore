@@ -14,6 +14,7 @@
 /blib/
 /pm_to_blib
 /set-path
+/po/*.mo
 
 # Dist::Zilla
 /.build
