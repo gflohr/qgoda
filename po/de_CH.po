@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: qgoda 0.1.1\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
-"POT-Creation-Date: 2018-05-14 22:38+0300\n"
+"POT-Creation-Date: 2018-05-15 16:44+0300\n"
 "PO-Revision-Date: 2018-05-14 22:53+0300\n"
 "Last-Translator: Guido Flohr <guido.flohr@cantanea.com>\n"
 "Language-Team: German\n"
@@ -31,13 +31,16 @@ msgid "Please merge '_config.new.yaml' manually!"
 msgstr "«_config.new.yaml» muss von Hand aktualisiert werden!"
 
 #: ../lib/Qgoda/Init/config.pm:64 ../lib/Qgoda/Init/config.pm:87
-#: ../lib/Qgoda/Init/node.pm:84
+#: ../lib/Qgoda/Init/node.pm:84 ../lib/Qgoda/Migrator/Jekyll.pm:102
 #, perl-brace-format
 msgid "cannot write '{filename}': {error}"
 msgstr "Fehler beim Schreiben von «{filename}»: {error}"
 
 #: ../lib/Qgoda/Init/config.pm:74 ../lib/Qgoda/Init/node.pm:72
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:177
+#: ../lib/Qgoda/Migrator/Jekyll.pm:229 ../lib/Qgoda/Migrator/Jekyll.pm:336
+#: ../lib/Qgoda/Config.pm:63 ../lib/Qgoda/Config.pm:93
+#: ../lib/Qgoda/Analyzer.pm:51 ../lib/Qgoda/Init.pm:136
 #, perl-brace-format
 msgid "cannot read '{filename}': {error}"
 msgstr "Fehler beim Lesen von «{filename}»: {error}"
@@ -56,11 +59,14 @@ msgstr "Option «—force» angegeben; Dateien werden überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:57
 msgid "option '--force' given twice, will overwrite precious files"
-msgstr "Option «--force» zweimal angegeben, wertvolle Dateien werden überschreiben"
+msgstr ""
+"Option «--force» zweimal angegeben, wertvolle Dateien werden überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:59
 msgid "but will preserve precious files, give '--force' twice to overwrite"
-msgstr "aber wertvolle Dateien werden bewahrt (zweimal „—force” erzwingt Überschreiben)"
+msgstr ""
+"aber wertvolle Dateien werden bewahrt (zweimal „—force” erzwingt "
+"Überschreiben)"
 
 #: ../lib/Qgoda/Init/copy.pm:63
 msgid "will preserve files, use '--force' to overwrite"
@@ -79,7 +85,8 @@ msgstr "Verzeichnis «{dir}» kann nicht erzeugt werden: {error}"
 #: ../lib/Qgoda/Init/copy.pm:104
 #, perl-brace-format
 msgid "not overwriting precious '{file}' without '--force --force'"
-msgstr "wertvolle Dateien «{file}» wird ohne „—force —force” nicht überschrieben"
+msgstr ""
+"wertvolle Dateien «{file}» wird ohne „—force —force” nicht überschrieben"
 
 #: ../lib/Qgoda/Init/copy.pm:111
 #, perl-brace-format
@@ -106,16 +113,12 @@ msgstr "Dateianfang"
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:131
 #, perl-brace-format
 msgid "{filename}:{lineno}: Syntax error at or near '{location}'!"
-msgstr "{filename}:{lineno}: Syntaxfehler bei oder in der Nähe von «{location}»"
+msgstr ""
+"{filename}:{lineno}: Syntaxfehler bei oder in der Nähe von «{location}»"
 
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:202
 msgid "Syntax error!\n"
 msgstr "Syntaxfehler!\n"
-
-#: ../lib/Qgoda/Migrator/Jekyll.pm:102
-#, perl-brace-format
-msgid "Error writing '{filename}': {error}!\n"
-msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:113
 msgid "The migration had errors! See above for details!\n"
@@ -123,22 +126,22 @@ msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:135
 #, perl-brace-format
-msgid "Migrating Jekyll posts from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
+msgid ""
+"Migrating Jekyll posts from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
 msgstr "Migriere Jekyll-Posts von «{from_dir}» in Qgoda-Views in «{to_dir}».\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:198
 #, perl-brace-format
-msgid "Migrating Jekyll liquid template from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
-msgstr ""
-
-#: ../lib/Qgoda/Migrator/Jekyll.pm:229
-#, perl-brace-format
-msgid "Error reading '{file}': {error}!"
+msgid ""
+"Migrating Jekyll liquid template from '{from_dir}' to Qgoda views in "
+"'{to_dir}'.\n"
 msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:270
 #, perl-brace-format
-msgid "The configuration variable '{varname}' from '_config.yaml' is not supported or by Qgoda or it does not make sense."
+msgid ""
+"The configuration variable '{varname}' from '_config.yaml' is not supported "
+"or by Qgoda or it does not make sense."
 msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:286
@@ -147,19 +150,14 @@ msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:299
 #, perl-brace-format
-msgid "Cannot migrate default without path:\n"
+msgid ""
+"Cannot migrate default without path:\n"
 "{dump}"
 msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:331 ../lib/Qgoda/Config.pm:59
 #, perl-brace-format
 msgid "reading configuration from '{filename}'"
-msgstr ""
-
-#: ../lib/Qgoda/Migrator/Jekyll.pm:336 ../lib/Qgoda/Config.pm:63
-#: ../lib/Qgoda/Config.pm:93 ../lib/Qgoda/Init.pm:136
-#, perl-brace-format
-msgid "error reading file '{filename}': {error}"
 msgstr ""
 
 #: ../lib/Qgoda/Repository/Fetcher/Git.pm:36
@@ -203,7 +201,8 @@ msgstr ""
 
 #: ../lib/Qgoda/Repository/Fetcher/File.pm:73
 #, perl-brace-format
-msgid "archive '{archive}' has ambiguous content, trying first entry '{first}''"
+msgid ""
+"archive '{archive}' has ambiguous content, trying first entry '{first}''"
 msgstr ""
 
 #: ../lib/Qgoda/Repository/Fetcher/LWP.pm:43
@@ -233,7 +232,9 @@ msgstr ""
 
 #: ../lib/Qgoda/Config.pm:71 ../lib/Qgoda/Config.pm:101
 #, perl-brace-format
-msgid "illegal configuration variable '{var}': names starting with '__q_' are reserved for internal purposes."
+msgid ""
+"illegal configuration variable '{var}': names starting with '__q_' are "
+"reserved for internal purposes."
 msgstr ""
 
 #: ../lib/Qgoda/Config.pm:89
@@ -301,15 +302,17 @@ msgstr ""
 
 #: ../lib/Qgoda/Config.pm:321
 #, perl-brace-format
-msgid "'{variable}' must not be a single value or a a list"
+msgid "'{variable}' must be a single value or a a list"
 msgstr ""
 
 #: ../lib/Qgoda/Config.pm:405
-msgid "'defaults.files' must be a scalar or a list"
+#, perl-brace-format
+msgid "'{variable}' must be a scalar or a list"
 msgstr ""
 
-#: ../lib/Qgoda/Config.pm:415
-msgid "defaults.values must be a hash"
+#: ../lib/Qgoda/Config.pm:416
+#, perl-brace-format
+msgid "'{variable}' must be a hash"
 msgstr ""
 
 #: ../lib/Qgoda/Util/Translate.pm:77 ../lib/Qgoda/Util/Translate.pm:129
@@ -343,7 +346,7 @@ msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:45
 #, perl-brace-format
-msgid "Field 'qgoda.module' missing in package.json.\n"
+msgid "Field '{field}' missing in 'package.json.\n"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:48
@@ -352,17 +355,13 @@ msgid "Invalid module name '{name}'.\n"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:65
-msgid "Field 'qgoda.entry' missing in package.json.\n"
+#, perl-brace-format
+msgid "field '{field}' missing in 'package.json'.\n"
 msgstr ""
 
-#: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:68
+#: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:69
 #, perl-brace-format
 msgid "Invalid entry point '{entry}'.\n"
-msgstr ""
-
-#: ../lib/Qgoda/Analyzer.pm:51
-#, perl-brace-format
-msgid "error reading '{path}': {err}"
 msgstr ""
 
 #: ../lib/Qgoda/Analyzer.pm:82
@@ -432,64 +431,85 @@ msgstr ""
 msgid "{program}: {command}: {error}\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:118
+#: ../lib/Qgoda/CLI.pm:119
 #, perl-brace-format
+msgid "Usage: {program} COMMAND [OPTIONS]\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:125
 msgid ""
-"Usage: {program} COMMAND [OPTIONS]\n"
 "Mandatory arguments to long options, are mandatory to short options, too.\n"
-"\n"
-"The following commands are currently supported:\n"
-"\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:131
+msgid "The following commands are currently supported:\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:137
+msgid ""
 "  build                       build site and exit\n"
-"  watch                       build, then watch for changes and build on demand\n"
+"  watch                       build, then watch for changes and build on "
+"demand\n"
 "  config                      dump the current configuration and exit\n"
 "  init                        initialize a new qgoda site\n"
-"  dump                        dump the site structure as JSON (implies --quiet)\n"
+"  dump                        dump the site structure as JSON (implies --"
+"quiet)\n"
 "  markdown                    process Markdown\n"
 "  xgettext                    extract translatable strings from Markdown\n"
 "                              files\n"
 "  po                          various commands for processing translations\n"
-"\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:151
+msgid ""
 "Operation mode:\n"
 "  -q, --quiet                 quiet mode\n"
 "  -v, --verbose               verbosely log what is going on \n"
 "      --log-stderr            log to standard error instead of standard out\n"
-"\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:160
+msgid ""
 "Informative output:\n"
 "  -h, --help                  display this help and exit\n"
 "  -V, --version               output version information and exit\n"
-"\n"
-"Try '{program} --help' for more information or visit http://www.qgoda.net/\n"
-"for extensive documentation.\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:167
+#: ../lib/Qgoda/CLI.pm:168
+#, perl-brace-format
+msgid ""
+"Try '{program} --help' for more information or visit\n"
+"http://www.qgoda.net/en/docs/ for extensive documentation.\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:193
 #, perl-brace-format
 msgid ""
 "Usage: {program} [GLOBAL_OPTIONS] {usage}\n"
 "Try '{program} {command} --help' for more information!\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:172
+#: ../lib/Qgoda/CLI.pm:198
 #, perl-brace-format
 msgid ""
 "Usage: {program} [GLOBAL_OPTIONS] {command} [OPTIONS]\n"
 "Try '{program} {command} --help' for more information!\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:177
+#: ../lib/Qgoda/CLI.pm:203
 #, perl-brace-format
 msgid ""
 "Usage: {program} [GLOBAL_OPTIONS] COMMAND [OPTIONS]\n"
 "Try '{program} --help' for more information!\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:192
+#: ../lib/Qgoda/CLI.pm:218
 #, perl-brace-format
 msgid ""
 "{program} (Qgoda static site generator) {version}\n"
 "Copyright (C) {years} Cantanea EOOD (http://www.cantanea.com/).\n"
-"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law.\n"
 "Written by Guido Flohr (http://www.guido-flohr.net/).\n"
@@ -523,7 +543,8 @@ msgstr ""
 #: ../lib/Qgoda/Builder.pm:103
 #, perl-brace-format
 msgid "one artefact has not been built because of errors (see above)"
-msgid_plural "{num} artefacts have not been built because of errors (see above)"
+msgid_plural ""
+"{num} artefacts have not been built because of errors (see above)"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -565,7 +586,9 @@ msgstr ""
 
 #: ../lib/Qgoda/Builder.pm:228
 #, perl-brace-format
-msgid "This view has been automatically created.  Please edit  '{path}' to your needs!"
+msgid ""
+"This view has been automatically created.  Please edit  '{path}' to your "
+"needs!"
 msgstr ""
 
 #: ../lib/Qgoda/Builder.pm:246
@@ -869,7 +892,9 @@ msgid "unable to open '{filename}' for reading: {error}!\n"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:63
-msgid "Neither '_init.yaml' nor '_init.yml'  found in repository, proceding with defaults"
+msgid ""
+"Neither '_init.yaml' nor '_init.yml'  found in repository, proceding with "
+"defaults"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:76
@@ -883,7 +908,9 @@ msgid "Cannot load task runner '{name}': {error}"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:101
-msgid "IMPORTANT! The following external helper program will be automatically started by Qgoda:"
+msgid ""
+"IMPORTANT! The following external helper program will be automatically "
+"started by Qgoda:"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:118
@@ -1016,7 +1043,8 @@ msgstr ""
 
 #: ../lib/Template/Plugin/Qgoda.pm:316 ../lib/Template/Plugin/Qgoda.pm:320
 #, perl-brace-format
-msgid "invalid arguments '{args}' for method '{method}()' (use named arguments)\n"
+msgid ""
+"invalid arguments '{args}' for method '{method}()' (use named arguments)\n"
 msgstr ""
 
 #: ../lib/Template/Plugin/Qgoda.pm:483
@@ -1202,4 +1230,3 @@ msgstr ""
 #, perl-brace-format
 msgid "ignoring '{relpath}': not under version control"
 msgstr ""
-

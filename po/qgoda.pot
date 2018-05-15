@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
-"POT-Creation-Date: 2018-05-14 22:38+0300\n"
+"POT-Creation-Date: 2018-05-15 16:44+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,13 +32,16 @@ msgid "Please merge '_config.new.yaml' manually!"
 msgstr ""
 
 #: ../lib/Qgoda/Init/config.pm:64 ../lib/Qgoda/Init/config.pm:87
-#: ../lib/Qgoda/Init/node.pm:84
+#: ../lib/Qgoda/Init/node.pm:84 ../lib/Qgoda/Migrator/Jekyll.pm:102
 #, perl-brace-format
 msgid "cannot write '{filename}': {error}"
 msgstr ""
 
 #: ../lib/Qgoda/Init/config.pm:74 ../lib/Qgoda/Init/node.pm:72
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:177
+#: ../lib/Qgoda/Migrator/Jekyll.pm:229 ../lib/Qgoda/Migrator/Jekyll.pm:336
+#: ../lib/Qgoda/Config.pm:63 ../lib/Qgoda/Config.pm:93
+#: ../lib/Qgoda/Analyzer.pm:51 ../lib/Qgoda/Init.pm:136
 #, perl-brace-format
 msgid "cannot read '{filename}': {error}"
 msgstr ""
@@ -113,11 +116,6 @@ msgstr ""
 msgid "Syntax error!\n"
 msgstr ""
 
-#: ../lib/Qgoda/Migrator/Jekyll.pm:102
-#, perl-brace-format
-msgid "Error writing '{filename}': {error}!\n"
-msgstr ""
-
 #: ../lib/Qgoda/Migrator/Jekyll.pm:113
 msgid "The migration had errors! See above for details!\n"
 msgstr ""
@@ -133,11 +131,6 @@ msgstr ""
 msgid ""
 "Migrating Jekyll liquid template from '{from_dir}' to Qgoda views in "
 "'{to_dir}'.\n"
-msgstr ""
-
-#: ../lib/Qgoda/Migrator/Jekyll.pm:229
-#, perl-brace-format
-msgid "Error reading '{file}': {error}!"
 msgstr ""
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:270
@@ -161,12 +154,6 @@ msgstr ""
 #: ../lib/Qgoda/Migrator/Jekyll.pm:331 ../lib/Qgoda/Config.pm:59
 #, perl-brace-format
 msgid "reading configuration from '{filename}'"
-msgstr ""
-
-#: ../lib/Qgoda/Migrator/Jekyll.pm:336 ../lib/Qgoda/Config.pm:63
-#: ../lib/Qgoda/Config.pm:93 ../lib/Qgoda/Init.pm:136
-#, perl-brace-format
-msgid "error reading file '{filename}': {error}"
 msgstr ""
 
 #: ../lib/Qgoda/Repository/Fetcher/Git.pm:36
@@ -311,15 +298,17 @@ msgstr ""
 
 #: ../lib/Qgoda/Config.pm:321
 #, perl-brace-format
-msgid "'{variable}' must not be a single value or a a list"
+msgid "'{variable}' must be a single value or a a list"
 msgstr ""
 
 #: ../lib/Qgoda/Config.pm:405
-msgid "'defaults.files' must be a scalar or a list"
+#, perl-brace-format
+msgid "'{variable}' must be a scalar or a list"
 msgstr ""
 
-#: ../lib/Qgoda/Config.pm:415
-msgid "defaults.values must be a hash"
+#: ../lib/Qgoda/Config.pm:416
+#, perl-brace-format
+msgid "'{variable}' must be a hash"
 msgstr ""
 
 #: ../lib/Qgoda/Util/Translate.pm:77 ../lib/Qgoda/Util/Translate.pm:129
@@ -353,7 +342,7 @@ msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:45
 #, perl-brace-format
-msgid "Field 'qgoda.module' missing in package.json.\n"
+msgid "Field '{field}' missing in 'package.json.\n"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:48
@@ -362,17 +351,13 @@ msgid "Invalid module name '{name}'.\n"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:65
-msgid "Field 'qgoda.entry' missing in package.json.\n"
+#, perl-brace-format
+msgid "field '{field}' missing in 'package.json'.\n"
 msgstr ""
 
-#: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:68
+#: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:69
 #, perl-brace-format
 msgid "Invalid entry point '{entry}'.\n"
-msgstr ""
-
-#: ../lib/Qgoda/Analyzer.pm:51
-#, perl-brace-format
-msgid "error reading '{path}': {err}"
 msgstr ""
 
 #: ../lib/Qgoda/Analyzer.pm:82
@@ -442,14 +427,22 @@ msgstr ""
 msgid "{program}: {command}: {error}\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:118
+#: ../lib/Qgoda/CLI.pm:119
 #, perl-brace-format
+msgid "Usage: {program} COMMAND [OPTIONS]\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:125
 msgid ""
-"Usage: {program} COMMAND [OPTIONS]\n"
 "Mandatory arguments to long options, are mandatory to short options, too.\n"
-"\n"
-"The following commands are currently supported:\n"
-"\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:131
+msgid "The following commands are currently supported:\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:137
+msgid ""
 "  build                       build site and exit\n"
 "  watch                       build, then watch for changes and build on "
 "demand\n"
@@ -461,42 +454,52 @@ msgid ""
 "  xgettext                    extract translatable strings from Markdown\n"
 "                              files\n"
 "  po                          various commands for processing translations\n"
-"\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:151
+msgid ""
 "Operation mode:\n"
 "  -q, --quiet                 quiet mode\n"
 "  -v, --verbose               verbosely log what is going on \n"
 "      --log-stderr            log to standard error instead of standard out\n"
-"\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:160
+msgid ""
 "Informative output:\n"
 "  -h, --help                  display this help and exit\n"
 "  -V, --version               output version information and exit\n"
-"\n"
-"Try '{program} --help' for more information or visit http://www.qgoda.net/\n"
-"for extensive documentation.\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:167
+#: ../lib/Qgoda/CLI.pm:168
+#, perl-brace-format
+msgid ""
+"Try '{program} --help' for more information or visit\n"
+"http://www.qgoda.net/en/docs/ for extensive documentation.\n"
+msgstr ""
+
+#: ../lib/Qgoda/CLI.pm:193
 #, perl-brace-format
 msgid ""
 "Usage: {program} [GLOBAL_OPTIONS] {usage}\n"
 "Try '{program} {command} --help' for more information!\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:172
+#: ../lib/Qgoda/CLI.pm:198
 #, perl-brace-format
 msgid ""
 "Usage: {program} [GLOBAL_OPTIONS] {command} [OPTIONS]\n"
 "Try '{program} {command} --help' for more information!\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:177
+#: ../lib/Qgoda/CLI.pm:203
 #, perl-brace-format
 msgid ""
 "Usage: {program} [GLOBAL_OPTIONS] COMMAND [OPTIONS]\n"
 "Try '{program} --help' for more information!\n"
 msgstr ""
 
-#: ../lib/Qgoda/CLI.pm:192
+#: ../lib/Qgoda/CLI.pm:218
 #, perl-brace-format
 msgid ""
 "{program} (Qgoda static site generator) {version}\n"
