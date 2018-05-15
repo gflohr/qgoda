@@ -59,14 +59,11 @@ msgstr "Option «—force» angegeben; Dateien werden überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:57
 msgid "option '--force' given twice, will overwrite precious files"
-msgstr ""
-"Option «--force» zweimal angegeben, wertvolle Dateien werden überschreiben"
+msgstr "Option «--force» zweimal angegeben, wertvolle Dateien werden überschreiben"
 
 #: ../lib/Qgoda/Init/copy.pm:59
 msgid "but will preserve precious files, give '--force' twice to overwrite"
-msgstr ""
-"aber wertvolle Dateien werden bewahrt (zweimal „—force” erzwingt "
-"Überschreiben)"
+msgstr "aber wertvolle Dateien werden bewahrt (zweimal „—force” erzwingt Überschreiben)"
 
 #: ../lib/Qgoda/Init/copy.pm:63
 msgid "will preserve files, use '--force' to overwrite"
@@ -85,8 +82,7 @@ msgstr "Verzeichnis «{dir}» kann nicht erzeugt werden: {error}"
 #: ../lib/Qgoda/Init/copy.pm:104
 #, perl-brace-format
 msgid "not overwriting precious '{file}' without '--force --force'"
-msgstr ""
-"wertvolle Dateien «{file}» wird ohne „—force —force” nicht überschrieben"
+msgstr "wertvolle Dateien «{file}» wird ohne „—force —force” nicht überschrieben"
 
 #: ../lib/Qgoda/Init/copy.pm:111
 #, perl-brace-format
@@ -113,8 +109,7 @@ msgstr "Dateianfang"
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:131
 #, perl-brace-format
 msgid "{filename}:{lineno}: Syntax error at or near '{location}'!"
-msgstr ""
-"{filename}:{lineno}: Syntaxfehler bei oder in der Nähe von «{location}»"
+msgstr "{filename}:{lineno}: Syntaxfehler bei oder in der Nähe von «{location}»"
 
 #: ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm:202
 msgid "Syntax error!\n"
@@ -122,146 +117,137 @@ msgstr "Syntaxfehler!\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:113
 msgid "The migration had errors! See above for details!\n"
-msgstr ""
+msgstr "Während der Migration sind Fehler aufgetreten, siehe oben!\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:135
 #, perl-brace-format
-msgid ""
-"Migrating Jekyll posts from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
+msgid "Migrating Jekyll posts from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
 msgstr "Migriere Jekyll-Posts von «{from_dir}» in Qgoda-Views in «{to_dir}».\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:198
 #, perl-brace-format
-msgid ""
-"Migrating Jekyll liquid template from '{from_dir}' to Qgoda views in "
-"'{to_dir}'.\n"
-msgstr ""
+msgid "Migrating Jekyll liquid template from '{from_dir}' to Qgoda views in '{to_dir}'.\n"
+msgstr "Migriere Liquid-Templates für Jekyll liquid in «{from_dir}» in Qgoda-Views in «{to_dir}».\n"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:270
 #, perl-brace-format
-msgid ""
-"The configuration variable '{varname}' from '_config.yaml' is not supported "
-"or by Qgoda or it does not make sense."
-msgstr ""
+msgid "The configuration variable '{varname}' from '_config.yaml' is not supported or by Qgoda or it does not make sense."
+msgstr "Die Konfigurationsvariable «{varname}» in «_config.yaml» wird von Qgoda nicht unterstützt oder ergibt keinen Sinn."
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:286
 msgid "Migrating defaults."
-msgstr ""
+msgstr "Migriere Vorgabewerte (Defaults)."
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:299
 #, perl-brace-format
-msgid ""
-"Cannot migrate default without path:\n"
+msgid "Cannot migrate default without path:\n"
 "{dump}"
-msgstr ""
+msgstr "Vorabewerte ohne Pfad kann nicht migriert werden: {dump}"
 
 #: ../lib/Qgoda/Migrator/Jekyll.pm:331 ../lib/Qgoda/Config.pm:59
 #, perl-brace-format
 msgid "reading configuration from '{filename}'"
-msgstr ""
+msgstr "lese Konfiguration aus «{filename}»"
 
 #: ../lib/Qgoda/Repository/Fetcher/Git.pm:36
 #, perl-brace-format
 msgid "cloning repository '{repository}'"
-msgstr ""
+msgstr "Klone Repository «{repository}»"
 
 #: ../lib/Qgoda/Repository/Fetcher/Git.pm:43
 #, perl-brace-format
 msgid "deleting '{directory}'"
-msgstr ""
+msgstr "lösche «{directory}»"
 
 #: ../lib/Qgoda/Repository/Fetcher/Git.pm:53
 #, perl-brace-format
 msgid "error deleting '{file}': {error}"
-msgstr ""
+msgstr "Fehler beim Löschen von «{file}»: {error}"
 
 #: ../lib/Qgoda/Repository/Fetcher/Git.pm:57
 msgid "giving up after previous errors"
-msgstr ""
+msgstr "gebe auf wegen vorhergehender Fehler"
 
 #: ../lib/Qgoda/Repository/Fetcher/File.pm:40
 #, perl-brace-format
 msgid "error copying '{src}' to '{dest}': {error}"
-msgstr ""
+msgstr "Fehler beim Kopieren von «{src}» in «{dest}»: {error}"
 
 #: ../lib/Qgoda/Repository/Fetcher/File.pm:58
 #, perl-brace-format
 msgid "error extracing '{archive}' to '{destination}': {error}"
-msgstr ""
+msgstr "Fehler beim Auspacken von «{archive}» in «{destination}»: {error}"
 
 #: ../lib/Qgoda/Repository/Fetcher/File.pm:65
 #, perl-brace-format
 msgid "error reading directory '{directory}': {error}"
-msgstr ""
+msgstr "Fehler beim Lesen des Verzeichnisses «{directory}»: {error}"
 
 #: ../lib/Qgoda/Repository/Fetcher/File.pm:70
 #, perl-brace-format
 msgid "archive '{archive} is empty"
-msgstr ""
+msgstr "Archiv '{archive} ist leer"
 
 #: ../lib/Qgoda/Repository/Fetcher/File.pm:73
 #, perl-brace-format
-msgid ""
-"archive '{archive}' has ambiguous content, trying first entry '{first}''"
-msgstr ""
+msgid "archive '{archive}' has ambiguous content, trying first entry '{first}''"
+msgstr "Archiv «{archive}» hat keinen eindeutigen Inhalte, versuche den ersten Eintrag «{first}»'"
 
 #: ../lib/Qgoda/Repository/Fetcher/LWP.pm:43
 #, perl-brace-format
 msgid "downloading '{uri}' with lwp-perl"
-msgstr ""
+msgstr "Download von «{uri}» mit lwp-perl"
 
 #: ../lib/Qgoda/Repository/Fetcher/LWP.pm:46
 #, perl-brace-format
 msgid "error downloading '{uri}': {error}"
-msgstr ""
+msgstr "Fehler beim Download von «{uri}»: {error}"
 
 #: ../lib/Qgoda/Locale/XGettext.pm:52 ../lib/Qgoda/Locale/XGettext.pm:79
 #: ../lib/Qgoda/Command/Po.pm:525 ../lib/Qgoda/Command/Po.pm:563
 #: ../lib/Qgoda/Command/Po.pm:590 ../lib/Qgoda/Command/Po.pm:605
 #, perl-brace-format
 msgid "error changing working directory to '{dir}': {error}\n"
-msgstr ""
+msgstr "Fehler beim Wechsel des Arbeitsverzeichnisses nach «{dir}»: {error}\n"
 
 #: ../lib/Qgoda/Locale/XGettext.pm:151
 msgid "the Qgoda top-level source directory (defaults to '..')"
-msgstr ""
+msgstr "das Qgoda-Wurzelverzeichnis (Vorgabewert ist «..»)"
 
 #: ../lib/Qgoda/Config.pm:52
 msgid "config file '_config.yaml' not found, proceeding with defaults."
-msgstr ""
+msgstr "Konfigurationsdatei «_config.yaml» nicht gefunden, fahre mit Vorgabewerten fort."
 
 #: ../lib/Qgoda/Config.pm:71 ../lib/Qgoda/Config.pm:101
 #, perl-brace-format
-msgid ""
-"illegal configuration variable '{var}': names starting with '__q_' are "
-"reserved for internal purposes."
-msgstr ""
+msgid "illegal configuration variable '{var}': names starting with '__q_' are reserved for internal purposes."
+msgstr "Unzulässige Konfigurations-Variable «{var}»: Mit  «__q_» beginnende Namen sind für interne Verwendung reserviert."
 
 #: ../lib/Qgoda/Config.pm:89
 #, perl-brace-format
 msgid "reading local configuration from '{filename}'"
-msgstr ""
+msgstr "lese lokale Konfiguration aus «{filename}»"
 
 #: ../lib/Qgoda/Config.pm:114
 #, perl-brace-format
 msgid "{filename}: {error}"
-msgstr ""
+msgstr "{filename}: {error}"
 
 #: ../lib/Qgoda/Config.pm:164
 msgid "A New Qgoda Powered Site"
-msgstr ""
+msgstr "Eine weitere Qgoda-Website"
 
 #: ../lib/Qgoda/Config.pm:231
 msgid "Set config.po.copyright_holder in _config.yaml"
-msgstr ""
+msgstr "Setze config.po.copyright_holder in _config.yaml"
 
 #: ../lib/Qgoda/Config.pm:232
 msgid "Set config.po.msgid_bugs_address in _config.yaml"
-msgstr ""
+msgstr "Setze config.po.msgid_bugs_address in _config.yaml"
 
 #: ../lib/Qgoda/Config.pm:248
 msgid "invalid format (not a hash)\n"
-msgstr ""
+msgstr "unzulässiges Format (kein Hash)\n"
 
 #: ../lib/Qgoda/Config.pm:250 ../lib/Qgoda/Config.pm:252
 #: ../lib/Qgoda/Config.pm:255 ../lib/Qgoda/Config.pm:272
@@ -269,22 +255,22 @@ msgstr ""
 #: ../lib/Qgoda/Config.pm:303 ../lib/Qgoda/Config.pm:313
 #, perl-brace-format
 msgid "'{variable}' must be a dictionary"
-msgstr ""
+msgstr "«{variable}» muss ein Dictionary (Hash) sein"
 
 #: ../lib/Qgoda/Config.pm:258
 #, perl-brace-format
 msgid "'{variable}' must not be a dictionary"
-msgstr ""
+msgstr "«{variable}» darf kein Dictionary (Hash) sein"
 
 #: ../lib/Qgoda/Config.pm:268 ../lib/Qgoda/Config.pm:310
 #, perl-brace-format
 msgid "'{variable}' must be a single value"
-msgstr ""
+msgstr "«{variable}» muss ein Einzelwert sein"
 
 #: ../lib/Qgoda/Config.pm:276
 #, perl-brace-format
 msgid "processor chain suffix '{suffix}' references undefined chain '{chain}'"
-msgstr ""
+msgstr "Das Prozessor-Chain-Suffix «{suffix}» referenzierte eine undefinierte Chain «{chain}»"
 
 #: ../lib/Qgoda/Config.pm:289 ../lib/Qgoda/Config.pm:296
 #: ../lib/Qgoda/Config.pm:298 ../lib/Qgoda/Config.pm:300
@@ -293,172 +279,183 @@ msgstr ""
 #: ../lib/Qgoda/Config.pm:335
 #, perl-brace-format
 msgid "'{variable}' must be a list"
-msgstr ""
+msgstr "«{variable}» muss eine Liste sein"
 
 #: ../lib/Qgoda/Config.pm:317
 #, perl-brace-format
 msgid "'{variable}' must not be empty"
-msgstr ""
+msgstr "«{variable}» darf nicht leer sein"
 
 #: ../lib/Qgoda/Config.pm:321
 #, perl-brace-format
 msgid "'{variable}' must be a single value or a a list"
-msgstr ""
+msgstr "«{variable}» muss ein Einzelwerte oder eine Liste sein"
 
 #: ../lib/Qgoda/Config.pm:405
 #, perl-brace-format
 msgid "'{variable}' must be a scalar or a list"
-msgstr ""
+msgstr "«{variable}» muss eine Liste sein"
 
 #: ../lib/Qgoda/Config.pm:416
 #, perl-brace-format
 msgid "'{variable}' must be a hash"
-msgstr ""
+msgstr "«{variable}» muss eine Liste sein"
 
 #: ../lib/Qgoda/Util/Translate.pm:77 ../lib/Qgoda/Util/Translate.pm:129
 msgid "lingua not set"
-msgstr ""
+msgstr "lingua nicht gesetzt"
 
 #: ../lib/Qgoda/Util/Translate.pm:84 ../lib/Qgoda/Util/Translate.pm:136
 #, perl-brace-format
 msgid "cannot read front matter from master '{path}': {error}"
-msgstr ""
+msgstr "kann Titelei (Front Matter) nicht vom Master-Dokument lesen «{path}»: {error}"
 
 #: ../lib/Qgoda/Util/Translate.pm:181
 #, perl-brace-format
 msgid "removing markdown file '{filename}'"
-msgstr ""
+msgstr "lösche Markdown-Datei «{filename}»"
 
 #: ../lib/Qgoda/Util/Translate.pm:186
 #, perl-brace-format
 msgid "adding markdown file '{filename}'"
-msgstr ""
+msgstr "füe Markdown-Datei «{filename}» zu"
 
 #: ../lib/Qgoda/Util/Translate.pm:204
 #, perl-brace-format
 msgid "creating asset object for '{filename}'"
-msgstr ""
+msgstr "erzeue Asset-Objekt für «{filename}»"
 
 #. TRANSLATORS: This stands for "Daylight Savings Time".
 #: ../lib/Qgoda/Util/Date.pm:133
 msgid "DST"
-msgstr ""
+msgstr "SZ"
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:45
 #, perl-brace-format
 msgid "Field '{field}' missing in 'package.json.\n"
-msgstr ""
+msgstr "Das Feld «qgoda.module» fehlt in «package.json».\n"
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:48
 #, perl-brace-format
 msgid "Invalid module name '{name}'.\n"
-msgstr ""
+msgstr "Unzulässiger Modulname «{name}».\n"
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:65
 #, perl-brace-format
 msgid "field '{field}' missing in 'package.json'.\n"
-msgstr ""
+msgstr "Das Feld «qgoda.module» fehlt in «package.json».\n"
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:69
 #, perl-brace-format
 msgid "Invalid entry point '{entry}'.\n"
-msgstr ""
+msgstr "Unzulässiger Einstiegspunkt («entry») «{entry}».\n"
 
 #: ../lib/Qgoda/Analyzer.pm:82
 #, perl-brace-format
 msgid "skipping draft '{relpath}'"
-msgstr ""
+msgstr "überspringe Entwurf «{relpath}»"
 
 #: ../lib/Qgoda/Analyzer.pm:90
 #, perl-brace-format
 msgid "skipping future document '{relpath}'"
-msgstr ""
+msgstr "überspringe Dokument mit Datum in der Zukunft «{relpath}»"
 
 #: ../lib/Qgoda/Analyzer.pm:111
 #, perl-brace-format
 msgid "{filename}: cannot parse date '{date}'"
-msgstr ""
+msgstr "{filename}: kann Datum «{date}» nicht parsen"
 
 #: ../lib/Qgoda/Analyzer.pm:120
 #, perl-brace-format
 msgid "cannot stat '{filename}': {error}"
-msgstr ""
+msgstr "Fehler beim Ermitteln der  Dateiinformationen für «{filename}»: {error}"
 
 #: ../lib/Qgoda/Splitter.pm:33
 msgid "no front matter"
-msgstr ""
+msgstr "keine Titelei (Front Matter)"
 
 #: ../lib/Qgoda/Splitter.pm:34
 #, perl-brace-format
 msgid "error reading front matter from '{filename}': {error}\n"
-msgstr ""
+msgstr "Fehler beim Lesen der Titelei (Front Matter) aus «{filename}»: {error}\n"
 
 #: ../lib/Qgoda/Splitter.pm:54
 msgid "no body found"
-msgstr ""
+msgstr "kein Inhalt (Body) gefunden"
 
 #: ../lib/Qgoda/Splitter.pm:55
 #, perl-brace-format
 msgid "error reading body from '{filename}': {error}\n"
-msgstr ""
+msgstr "Fehler beim Lesen des Inhalts (Body) aus «{filename}»: {error}\n"
 
 #: ../lib/Qgoda/Processor/TT2.pm:119
 #, perl-brace-format
 msgid "template file '{path}' is not under version control"
-msgstr ""
+msgstr "Template-Datei «{path}» ist nicht unter Versionskontrolle"
 
 #: ../lib/Qgoda/Processor.pm:38
 #, perl-brace-format
 msgid "Processor class '{class}' does not implement the method process().\n"
-msgstr ""
+msgstr "Die Prozessorklasse «{class}» implementiert die Methode process() nicht.\n"
 
 #: ../lib/Qgoda/CLI.pm:86
 msgid "no command given!"
-msgstr ""
+msgstr "kein Kommando angegeben!"
 
 #: ../lib/Qgoda/CLI.pm:88
 #, perl-brace-format
 msgid "invalid command name '{command}'"
-msgstr ""
+msgstr "unzulässier Kommandoname «{command}»"
 
 #: ../lib/Qgoda/CLI.pm:102
 #, perl-brace-format
 msgid "unknown command '{command}'"
-msgstr ""
+msgstr "unbekanntes Kommando «{command}»"
 
 #: ../lib/Qgoda/CLI.pm:107
 #, perl-brace-format
 msgid "{program}: {command}: {error}\n"
-msgstr ""
+msgstr "{program}: {command}: {error}\n"
 
 #: ../lib/Qgoda/CLI.pm:119
 #, perl-brace-format
 msgid "Usage: {program} COMMAND [OPTIONS]\n"
-msgstr ""
+msgstr "Syntax: {program} KOMMANDO [OPTIONEN]\n"
 
 #: ../lib/Qgoda/CLI.pm:125
-msgid ""
-"Mandatory arguments to long options, are mandatory to short options, too.\n"
+msgid "Mandatory arguments to long options, are mandatory to short options, too.\n"
 msgstr ""
+"Notwendige Argumente für Optionen in Langform sind auch für die Kurzform\n"
+"notwendig. Dies gilt in gleicher Weise für optionale Argumente.\n"
 
 #: ../lib/Qgoda/CLI.pm:131
 msgid "The following commands are currently supported:\n"
-msgstr ""
+msgstr "Die folgenden Kommandos werden derzeit unterstützt:\n"
 
 #: ../lib/Qgoda/CLI.pm:137
 msgid ""
 "  build                       build site and exit\n"
-"  watch                       build, then watch for changes and build on "
-"demand\n"
+"  watch                       build, then watch for changes and build on demand\n"
 "  config                      dump the current configuration and exit\n"
 "  init                        initialize a new qgoda site\n"
-"  dump                        dump the site structure as JSON (implies --"
-"quiet)\n"
+"  dump                        dump the site structure as JSON (implies --quiet)\n"
 "  markdown                    process Markdown\n"
 "  xgettext                    extract translatable strings from Markdown\n"
 "                              files\n"
 "  po                          various commands for processing translations\n"
 msgstr ""
+"  build                       Site bauen und beenden\n"
+"  watch                       Site bauen, dann auf Änderungen warten und\n"
+"                                bei Bedarf neu bauen\n"
+"  config                      aktuelle Konfiguration ausgeben und beenden\n"
+"  init                        eine neue Qgoda-Site initialisieren\n"
+"  dump                        Site-Struktur als JSON ausgeben (impliziert\n"
+"                                Option --quiet)\n"
+"  markdown                    verarbeite Markdown\n"
+"  xgettext                    extrahiere übersetzbare Zeichenketten aus\n"
+"                                Markdown-Dateien\n"
+"  po                          verschiedene Kommandos, um Übersetzungen zu\n"
+"                                verarbeiten\n"
 
 #: ../lib/Qgoda/CLI.pm:151
 msgid ""
@@ -467,6 +464,11 @@ msgid ""
 "  -v, --verbose               verbosely log what is going on \n"
 "      --log-stderr            log to standard error instead of standard out\n"
 msgstr ""
+"Betriebsmodus:\n"
+"  -q, --quiet                 keine Ausgabe\n"
+"  -v, --verbose               mehr Hinweise während der Verarbeitung geben\n"
+"  --log-stderr                protokolliere auf Standard-Fehlerausgabe statt\n"
+"                                 Standard-Ausgabe\n"
 
 #: ../lib/Qgoda/CLI.pm:160
 msgid ""
@@ -474,13 +476,16 @@ msgid ""
 "  -h, --help                  display this help and exit\n"
 "  -V, --version               output version information and exit\n"
 msgstr ""
+"Informative Ausgabe:\n"
+"  -h, --help                  diese Hilfe anzeigen und beenden\n"
+"  -V, —version                Versionsinformation ausgeben und beenden\n"
 
 #: ../lib/Qgoda/CLI.pm:168
 #, perl-brace-format
 msgid ""
 "Try '{program} --help' for more information or visit\n"
 "http://www.qgoda.net/en/docs/ for extensive documentation.\n"
-msgstr ""
+msgstr "Versuche «{program} —help» für weitere Informationen oder besuche http://www.qgoda.net/de/docs/für umfangreiche Dokumentation.\n"
 
 #: ../lib/Qgoda/CLI.pm:193
 #, perl-brace-format
@@ -508,8 +513,7 @@ msgstr ""
 msgid ""
 "{program} (Qgoda static site generator) {version}\n"
 "Copyright (C) {years} Cantanea EOOD (http://www.cantanea.com/).\n"
-"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
-"html>\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n"
 "This is free software: you are free to change and redistribute it.\n"
 "There is NO WARRANTY, to the extent permitted by law.\n"
 "Written by Guido Flohr (http://www.guido-flohr.net/).\n"
@@ -518,7 +522,7 @@ msgstr ""
 #: ../lib/Qgoda/Site.pm:284
 #, perl-brace-format
 msgid "invalid regular expression in filter: {error}"
-msgstr ""
+msgstr "Ungültiger regulärer Ausdruck im Filter: {error}"
 
 #: ../lib/Qgoda/Builder.pm:55 ../lib/Qgoda/Builder.pm:179
 #, perl-brace-format
@@ -543,24 +547,23 @@ msgstr ""
 #: ../lib/Qgoda/Builder.pm:103
 #, perl-brace-format
 msgid "one artefact has not been built because of errors (see above)"
-msgid_plural ""
-"{num} artefacts have not been built because of errors (see above)"
-msgstr[0] ""
-msgstr[1] ""
+msgid_plural "{num} artefacts have not been built because of errors (see above)"
+msgstr[0] "ein Artefakt wurde aufgrund von Fehlern nicht erzeugt (siehe oben)"
+msgstr[1] "{num} Artefakte wurden aufgrund von Fehlern nicht erzeugt (siehe oben)"
 
 #: ../lib/Qgoda/Builder.pm:138
 #, perl-brace-format
 msgid "Overwriting artefact at '{outpath}', origin: {origin}"
-msgstr ""
+msgstr "Überschreiben von Artefakt «{outpath}», Ursprung: {origin}"
 
 #: ../lib/Qgoda/Builder.pm:141
 msgid "[unknown origin]"
-msgstr ""
+msgstr "[unbekannte Herkunft]"
 
 #: ../lib/Qgoda/Builder.pm:153
 #, perl-brace-format
 msgid "Skipping unchanged file '{output}'"
-msgstr ""
+msgstr "Unveränderte Datei « {output} » wird übersprungen"
 
 #: ../lib/Qgoda/Builder.pm:164 ../lib/Qgoda/Command/Po.pm:256
 #: ../lib/Qgoda/Command/Po.pm:313 ../lib/Qgoda/Command/Po.pm:339
@@ -573,28 +576,26 @@ msgstr ""
 #: ../lib/Qgoda/Builder.pm:191
 #, perl-brace-format
 msgid "processing with {processor}"
-msgstr ""
+msgstr "Verarbeitung mit {processor}"
 
 #: ../lib/Qgoda/Builder.pm:218
 msgid "no view specified.\n"
-msgstr ""
+msgstr "kein View angegeben.\n"
 
 #: ../lib/Qgoda/Builder.pm:226
 #, perl-brace-format
 msgid "no default view '{file}', creating one with defaults.\n"
-msgstr ""
+msgstr "erzeuge Standardview «{file}» mit Vorabewerten.\n"
 
 #: ../lib/Qgoda/Builder.pm:228
 #, perl-brace-format
-msgid ""
-"This view has been automatically created.  Please edit  '{path}' to your "
-"needs!"
-msgstr ""
+msgid "This view has been automatically created.  Please edit  '{path}' to your needs!"
+msgstr "Diese Viewdatei wurde automatisch erstellt.  Bitte «{pfad}» nach den eigenen Bedürfnissen bearbeiten!"
 
 #: ../lib/Qgoda/Builder.pm:246
 #, perl-brace-format
 msgid "error writing view '{file}': {error}.\n"
-msgstr ""
+msgstr "Fehler beim Schreiben der Viewdatei « {file} »: {error}.\n"
 
 #: ../lib/Qgoda/Builder.pm:250
 #, perl-brace-format
@@ -604,36 +605,36 @@ msgstr ""
 #: ../lib/Qgoda/Builder.pm:258
 #, perl-brace-format
 msgid "wrapping with {processor}"
-msgstr ""
+msgstr "wrappe mit {processor}"
 
 #: ../lib/Qgoda/PluginUtils.pm:51
 msgid "initializing plug-ins."
-msgstr ""
+msgstr "Initialisieren der Plug-ins."
 
 #: ../lib/Qgoda/PluginUtils.pm:67
 #, perl-brace-format
 msgid "plugin {name} found in configuration."
-msgstr ""
+msgstr "Plug-In {name} wurde in der Konfiguration gefunden."
 
 #: ../lib/Qgoda/PluginUtils.pm:79
 #, perl-brace-format
 msgid "plugin '{name}': {error}"
-msgstr ""
+msgstr "Plug-In « {name} »: {error}"
 
 #: ../lib/Qgoda/PluginUtils.pm:94
 #, perl-brace-format
 msgid "cannot open directory '{dir}': {error}!"
-msgstr ""
+msgstr "Verzeichnis «{dir}» kann nicht geöffnet werden:  {error}!"
 
 #: ../lib/Qgoda/PluginUtils.pm:98
 #, perl-brace-format
 msgid "plugin {name} found in plugin directory."
-msgstr ""
+msgstr "Plug-In {name} wurde im Plug-In-Verzeichnis gefunden."
 
 #: ../lib/Qgoda/PluginUtils.pm:113
 #, perl-brace-format
 msgid "initializing plugin {name}."
-msgstr ""
+msgstr "Initialisieren der Plug-Ins {name}.."
 
 #: ../lib/Qgoda/PluginUtils.pm:117
 #, perl-brace-format
@@ -892,9 +893,7 @@ msgid "unable to open '{filename}' for reading: {error}!\n"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:63
-msgid ""
-"Neither '_init.yaml' nor '_init.yml'  found in repository, proceding with "
-"defaults"
+msgid "Neither '_init.yaml' nor '_init.yml'  found in repository, proceding with defaults"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:76
@@ -908,9 +907,7 @@ msgid "Cannot load task runner '{name}': {error}"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:101
-msgid ""
-"IMPORTANT! The following external helper program will be automatically "
-"started by Qgoda:"
+msgid "IMPORTANT! The following external helper program will be automatically started by Qgoda:"
 msgstr ""
 
 #: ../lib/Qgoda/Init.pm:118
@@ -1043,8 +1040,7 @@ msgstr ""
 
 #: ../lib/Template/Plugin/Qgoda.pm:316 ../lib/Template/Plugin/Qgoda.pm:320
 #, perl-brace-format
-msgid ""
-"invalid arguments '{args}' for method '{method}()' (use named arguments)\n"
+msgid "invalid arguments '{args}' for method '{method}()' (use named arguments)\n"
 msgstr ""
 
 #: ../lib/Template/Plugin/Qgoda.pm:483
@@ -1230,3 +1226,4 @@ msgstr ""
 #, perl-brace-format
 msgid "ignoring '{relpath}': not under version control"
 msgstr ""
+
