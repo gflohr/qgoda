@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
-"POT-Creation-Date: 2018-05-15 16:44+0300\n"
+"POT-Creation-Date: 2018-05-16 09:00+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -341,18 +341,14 @@ msgid "DST"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:45
+#: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:65
 #, perl-brace-format
-msgid "Field '{field}' missing in 'package.json.\n"
+msgid "Field '{field}' missing in 'package.json'.\n"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:48
 #, perl-brace-format
 msgid "Invalid module name '{name}'.\n"
-msgstr ""
-
-#: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:65
-#, perl-brace-format
-msgid "field '{field}' missing in 'package.json'.\n"
 msgstr ""
 
 #: ../lib/Qgoda/PluginLoader/TT2/Filter.pm:69
@@ -866,7 +862,7 @@ msgstr ""
 
 #: ../lib/Qgoda/Command/Po.pm:787
 #, perl-brace-format
-msgid "canot copy '{from}' to '{to}': {error}"
+msgid "cannot copy '{from}' to '{to}': {error}"
 msgstr ""
 
 #: ../lib/Qgoda/Command/Markdown.pm:44
@@ -875,7 +871,7 @@ msgstr ""
 
 #: ../lib/Qgoda/Command/Markdown.pm:54
 #, perl-brace-format
-msgid "error instantiating process 'processor'.\n"
+msgid "error instantiating processor '{processor}'.\n"
 msgstr ""
 
 #: ../lib/Qgoda/Command/Markdown.pm:70
@@ -889,7 +885,7 @@ msgstr ""
 
 #: ../lib/Qgoda/Init.pm:63
 msgid ""
-"Neither '_init.yaml' nor '_init.yml'  found in repository, proceding with "
+"Neither '_init.yaml' nor '_init.yml'  found in repository, proceeding with "
 "defaults"
 msgstr ""
 
