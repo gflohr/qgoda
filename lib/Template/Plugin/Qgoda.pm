@@ -1,4 +1,4 @@
-#! /bin/false
+ #! /bin/false
 
 # Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
@@ -272,7 +272,7 @@ sub __sanitizeFilters {
 
     return {} if empty $filters;
     if (!ref $filters) {
-        die __x("invalid filters '{filters}' (used named arguments)\n",
+        die __x("invalid filters '{filters}' (use named arguments!)\n",
                 filters => $filters);
     }
 
@@ -280,10 +280,10 @@ sub __sanitizeFilters {
     if ('ARRAY' eq $reftype) {
         my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
-        die __x("invalid filters '{filters}' (use named arguments)\n",
+        die __x("invalid filters '{filters}' (use named arguments!)\n",
                  filters => $json);
     } elsif ('HASH' ne $reftype) {
-        die __x("invalid filters '{filters}' (use named arguments)\n",
+        die __x("invalid filters '{filters}' (use named arguments!)\n",
                  filters => $filters);
     }
 
@@ -314,11 +314,11 @@ sub __sanitizeHashref {
         my $json = encode_json($hashref);
         $json =~ s{.(.*).}{$1};
         die __x("invalid arguments '{args}' for method '{method}()'"
-                . " (use named arguments)\n",
+                . " (use named arguments!)\n",
                  args => $json, method => $method);
     } elsif ('HASH' ne $reftype) {
         die __x("invalid arguments '{args}' for method '{method}()'"
-                . " (use named arguments)\n",
+                . " (use named arguments!)\n",
                  args => $hashref, method => $method);
     }
 

@@ -136,7 +136,7 @@ sub createFile {
     $self->createDirectory(File::Spec->catpath($volume, $directory));
 
     write_file $path, $data
-        or $self->logError(__x("Error creating file '{file}': {error}!",
+        or $self->logError(__x("Error creating file '{filename}': {error}!",
                                file => $path, error => $!));
 
     return $self;
