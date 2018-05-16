@@ -99,8 +99,8 @@ sub migrate {
 
         my $tt2 = $self->convertLiquidTemplate($to);
         write_file $to, $tt2
-            or return $self->logError(__x("Error writing '{filename}':"
-                                          . " {error}!\n",
+            or return $self->logError(__x("cannot write '{filename}':"
+                                          . " {error}",
                                           filename => $to,
                                           error => $!));
 
@@ -226,7 +226,7 @@ sub convertLiquidTemplate {
     my ($self, $name) = @_;
 
     my $code = read_file $name
-        or return $self->logError(__x("Error reading '{file}': {error}!",
+        or return $self->logError(__x("cannot read '{filename}': {error}",
                                       file => $name, error => $!));
     my $logger = $self->logger;
     my %options = (
@@ -333,7 +333,7 @@ sub readConfig {
 
     my $yaml = read_file $filename;
     if (!defined $yaml) {
-        $logger->fatal(__x("error reading file '{filename}': {error}",
+        $logger->fatal(__x("cannot read '{filename}': {error}",
                            filename => $filename, error => $!));
     }
     my $config = eval { safe_yaml_load $yaml };

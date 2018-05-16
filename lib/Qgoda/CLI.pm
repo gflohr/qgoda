@@ -115,11 +115,25 @@ sub dispatch {
 }
 
 sub displayUsage {
-    my $msg = __x(q(Usage: {program} COMMAND [OPTIONS]
+    my $msg = __x(<<EOF, program => $0);
+Usage: {program} COMMAND [OPTIONS]
+EOF
+
+    $msg .= "\n";
+
+    $msg .= __<<EOF;
 Mandatory arguments to long options, are mandatory to short options, too.
+EOF
 
+    $msg .= "\n";
+
+    $msg .= __<<EOF;
 The following commands are currently supported:
+EOF
 
+    $msg .= "\n";
+
+    $msg .= __<<EOF;
   build                       build site and exit
   watch                       build, then watch for changes and build on demand
   config                      dump the current configuration and exit
@@ -129,19 +143,31 @@ The following commands are currently supported:
   xgettext                    extract translatable strings from Markdown
                               files
   po                          various commands for processing translations
+EOF
 
+    $msg .= "\n";
+
+    $msg .= __<<EOF;
 Operation mode:
   -q, --quiet                 quiet mode
   -v, --verbose               verbosely log what is going on 
       --log-stderr            log to standard error instead of standard out
+EOF
 
+    $msg .= "\n";
+
+    $msg .= __<<EOF;
 Informative output:
   -h, --help                  display this help and exit
   -V, --version               output version information and exit
+EOF
 
-Try '{program} --help' for more information or visit http://www.qgoda.net/
-for extensive documentation.
-), program => $0);
+    $msg .= "\n";
+
+    $msg .= __x(<<EOF, program => $0);
+Try '{program} --help' for more information or visit
+http://www.qgoda.net/en/docs/ for extensive documentation.
+EOF
 
     print $msg;
 

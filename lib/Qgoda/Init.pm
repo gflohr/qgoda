@@ -61,7 +61,7 @@ sub init {
         $init = $self->__readInitYAML($init_yaml);
     } else {
         $logger->warning(__"Neither '_init.yaml' nor '_init.yml'  found in"
-                           . " repository, proceding with defaults");
+                           . " repository, proceeding with defaults");
         return {};
     }
 
@@ -133,7 +133,7 @@ sub __readInitYAML {
     my $logger = $self->{__logger};
     my $yaml = read_file $path;
     if (!defined $yaml) {
-        $logger->fatal(__x("error reading file '{filename}': {error}",
+        $logger->fatal(__x("cannot read '{filename}': {error}",
                            filename => $path, error => $!));
     }
 

@@ -42,8 +42,8 @@ sub new {
 sub namespace {
     my ($self, $plugin_data) = @_;
 
-    die __x("Field 'qgoda.module' missing in package.json.\n",
-            name => $plugin_data->{module})
+    die __x("Field '{field}' missing in 'package.json'.\n",
+            field => 'qgoda.module')
         if !exists $plugin_data->{module};
     die __x("Invalid module name '{name}'.\n", name => $plugin_data->{module})
         if !perl_class $plugin_data->{module};
@@ -62,7 +62,8 @@ sub addPlugin {
 
     $self->{__modules}->{$module_name} = $plugin_data;
 
-    die __"Field 'qgoda.entry' missing in package.json.\n"
+    die __x("Field '{field}' missing in 'package.json'.\n", 
+            field => 'qgoda.entry')
         if !exists $plugin_data->{entry};
     my $entry = $plugin_data->{entry};
     die __x("Invalid entry point '{entry}'.\n", entry => $entry)

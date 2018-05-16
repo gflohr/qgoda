@@ -51,7 +51,7 @@ sub _run {
     my $q = Qgoda->new($global_options);
     my ($processor) = $q->_getProcessors($options{processor});
     if (!$processor) {
-        die __x("error instantiating process 'processor'.\n",
+        die __x("error instantiating processor '{processor}'.\n",
                 processor => $options{processor});
     }
 

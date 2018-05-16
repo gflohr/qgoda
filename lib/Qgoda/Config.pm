@@ -60,7 +60,7 @@ sub new {
                           filename => $filename));
         my $yaml = read_file $filename;
         if (!defined $yaml) {
-            $logger->fatal(__x("error reading file '{filename}': {error}",
+            $logger->fatal(__x("cannot read '{filename}': {error}",
                                filename => $filename, error => $!));
         }
 
@@ -90,7 +90,7 @@ sub new {
                           filename => $local_filename));
         my $yaml = read_file $local_filename;
         if (!defined $yaml) {
-            $logger->fatal(__x("error reading file '{filename}': {error}",
+            $logger->fatal(__x("cannot read '{filename}': {error}",
                                filename => $local_filename, error => $!));
         }
 
@@ -318,7 +318,7 @@ sub checkConfig {
                 if empty $config->{po}->{$cmd};
             if (ref $config->{po}->{$cmd} 
                 && !$self->__isArray($config->{po}->{$cmd})) {
-                die __x("'{variable}' must not be a single value or a a list", 
+                die __x("'{variable}' must be a single value or a a list", 
                         variable => "po.$cmd");
             }
         }
@@ -402,7 +402,8 @@ sub __compileDefaults {
 
         if (ref $pattern) {
             if (!$self->__isArray($pattern)) {
-                die __"'defaults.files' must be a scalar or a list";
+                die __x("'{variable}' must be a scalar or a list",
+                        variable => 'defaults.file');
             }
         } else {
             $pattern = [$pattern];
@@ -412,7 +413,8 @@ sub __compileDefaults {
                                                   $self->{'case-insensitive'});
         if (exists $rule->{values}) {
             if (!$self->__isHash($rule->{values})) {
-                die __"defaults.values must be a hash";
+                die __x("'{variable}' must be a hash",
+                        variable => 'defaults.value');
             }
         }
 

@@ -48,8 +48,8 @@ sub analyze {
     my $qgoda = Qgoda->new;
 
     my $path = $asset->getPath;
-    stat $path or die __x("error reading '{path}': {err}",
-                          path => $path, err => $!);
+    stat $path or die __x("cannot read '{filename}': {error}",
+                          filename => $path, error => $!);
     my $config = $qgoda->config;
     my $meta = collect_defaults $asset->getRelpath, $config->{defaults};
 

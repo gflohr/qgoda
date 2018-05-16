@@ -784,7 +784,7 @@ sub __makeInstall {
         $logger->info(__x("copy '{from}' to '{to}'",
                           from => "$lang.gmo", to => $dest));
         if (!copy "$lang.gmo", "$dest") {
-            $logger->fatal(__x("canot copy '{from}' to '{to}': {error}",
+            $logger->fatal(__x("cannot copy '{from}' to '{to}': {error}",
                               from => "$lang.gmo", to => $dest, error => $!));
             
         }
