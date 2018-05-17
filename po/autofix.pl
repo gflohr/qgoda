@@ -2,8 +2,6 @@
 
 use strict;
 
-use utf8;
-
 use Getopt::Long;
 use IO::Handle;
 use Locale::PO;
@@ -51,7 +49,7 @@ if ($option_language =~ /^de_CH$/) {
     push @filters, \&german_handler;
 }
 
-my $entries = Locale::PO->load_file_asarray ($option_input) or
+my $entries = Locale::PO->load_file_asarray ($option_input, 'utf-8') or
     die "cannot read file '$option_input': $!\n";
 
 my $alpine_entries;
@@ -99,7 +97,7 @@ sub decompose_po {
         @msgstrs = $entry->dequote($entry->msgstr);
     }
 
-    return map { Encode::_utf8_on($_); $_ } @msgstrs;
+    return @msgstrs;
 }
 
 sub decompose_po_sg {
@@ -185,7 +183,7 @@ sub _german_quotes {
 
     my $dirty;
     foreach my $msg (@msgstrs) {
-        $msg =~ s/(\w)'(\w)/$1\x{2019}$2/;
+        $msg =~ s/(\w)'(\w)/$1\x{2019}$2/g;
         $msg =~ s/(["'])(.*?)\1/${open_quote}$2${closed_quote}/g;
         $msg =~ s/($open{DE})(.*?)$closed{DE}/${open_quote}$2${closed_quote}/g;
     }
@@ -221,7 +219,7 @@ sub _alpine_german {
     my ($entry) = @_;
  
     unless ($alpine_entries) {
-        $alpine_entries = Locale::PO->load_file_asarray('de.po')
+        $alpine_entries = Locale::PO->load_file_asarray('de.po', 'utf8')
             or die "cannot read file 'de.po': $!\n";
     }
 
