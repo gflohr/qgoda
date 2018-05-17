@@ -4,7 +4,8 @@ Qgoda (pronounce: yagoda!) is an extensible static site generator.
 
 ## Description
 
-Qgoda is considered feature-complete but still under heavy development.
+Qgoda is considered feature-complete and ready for beta testing.
+Incompatible changes will try to be avoided but are possible.
 
 The documentation is currently being written.  You can check out the
 current state at http://www.qgoda.net/.
@@ -16,7 +17,7 @@ or [Hugo](https://gohugo.io/) but with a strong focus on:
 
 - Flexible site structures with arbitrary taxonomies.
 - Listings with pagination for arbitrary taxonomies and filters.
-- Extensibilities with plug-ins written in Perl, Python, Ruby,
+- Extensibility with plug-ins written in Perl, Python, Ruby,
   or Java.
 - Built-in multi-language features based on GNU gettext, both
   for template code and --- optionally --- for content.
@@ -47,12 +48,7 @@ https://www.docker.com/get-docker.
 2. Start Docker.  You may want to start the docker daemon automatically.
 Check your vendor's documentation for that!
 
-3. In a shell, run:
-
-```bash
-$ docker run --rm -it -v $(pwd):/data gflohr/qgoda
-```
-
+3. In a shell, run `docker run --rm -it -v $(pwd):/data gflohr/qgoda`.  
 You may have to add the user that runs the command to the group "docker"
 if you get an error like "permission denied".
 
@@ -65,9 +61,33 @@ or similar and add this line:
 alias qgoda='docker run --rm -it -v $(pwd):/data gflohr/qgoda'
 ```
 
+## Contribute
+
+Qgoda uses [Github](https://github.com/) as the collaboration platform.
+Fork the [Qgoda repository](https://github.com/gflohr/qgoda) and send
+a pull request with your changes.
+
+Apart from adding or fixing Perl code, the following contributions are
+welcome:
+
+* Corrections to the documentation.  Please use the
+[github repository issue tracker](https://github.com/gflohr/qgoda-site/issues)
+for errors that you have found.
+* Translate Qgoda to your language.  Please use the [Qgoda issue
+tracker](https://github.com/gflohr/qgoda/issues) for getting in
+touch first.
+* Contribute a new Qgoda theme!  You can use one of the following
+github repositories for examples:
+    * https://github.com/gflohr/qgoda-default
+    * https://github.com/gflohr/qgoda-multilang
+    * https://github.com/gflohr/qgoda-essential
+    * https://github.com/gflohr/qgoda-minimal
+* [Star qgoda's github repository](https://github.com/gflohr/qgoda/stargazers).  This will also push up
+Qgoda (and Perl and Template Toolkit) on the staticgen.com.
+
 ## Copyright
 
-Copyright (C) 2016-2018-2018 Guido Flohr <guido.flohr@cantanea.com>, all
+Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>, all
 rights reserved.
 
 Qgoda is available under the terms and conditions of the GNU General
