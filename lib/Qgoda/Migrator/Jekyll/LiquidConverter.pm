@@ -25,7 +25,7 @@ use Locale::TextDomain qw(qgoda);
 use Qgoda;
 use Qgoda::Util qw(empty trim);
 
-use base qw (Qgoda::Migrator::Jekyll::LiquidParser);
+#use base qw (Qgoda::Migrator::Jekyll::LiquidParser);
 
 sub convert {
     my ($self, $filename, $input, $logger, %options) = @_;

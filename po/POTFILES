@@ -2,7 +2,6 @@
 ../lib/Qgoda/Init/copy.pm
 ../lib/Qgoda/Init/node.pm
 ../lib/Qgoda/Migrator/Jekyll/LiquidConverter.pm
-../lib/Qgoda/Migrator/Jekyll/LiquidParser.pm
 ../lib/Qgoda/Migrator/Jekyll.pm
 ../lib/Qgoda/Repository/Fetcher/Git.pm
 ../lib/Qgoda/Repository/Fetcher/File.pm

@@ -12,6 +12,10 @@ NEWS
 README.md
 README.pod
 dist.ini
+lib/LocaleData/de/LC_MESSAGES/qgoda.mo
+lib/LocaleData/de_CH/LC_MESSAGES/qgoda.mo
+lib/LocaleData/en/LC_MESSAGES/qgoda.mo
+lib/LocaleData/en_GB/LC_MESSAGES/qgoda.mo
 lib/Qgoda.pm
 lib/Qgoda/Analyzer.pm
 lib/Qgoda/Artefact.pm
@@ -67,7 +71,12 @@ perlcritic.rc
 po/Makefile
 po/PACKAGE
 po/POTFILES
+po/autofix.pl
+po/autofix.sh
 po/de.po
+po/de_CH.po
+po/en.po
+po/en_GB.po
 po/qgoda.pot
 qgoda
 t/TestSite.pm
