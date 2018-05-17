@@ -2,7 +2,7 @@
 
 # Add more languages here!  Beware that this is a makefile snippet and
 # you have to adhere to make syntax.
-LINGUAS = en en_GB de de_CH de_AT
+LINGUAS = en en_GB de de_CH 
 
 # Textdomain for our package.
 TEXTDOMAIN = qgoda

@@ -64,7 +64,7 @@ msgstr "Option „--force“ zweimal angegeben, wertvolle Dateien werden übersc
 
 #: ../lib/Qgoda/Init/copy.pm:59
 msgid "but will preserve precious files, give '--force' twice to overwrite"
-msgstr "aber wertvolle Dateien werden bewahrt (zweimal „--force” erzwingt Überschreiben)"
+msgstr "aber wertvolle Dateien werden bewahrt (zweimal „--force“ erzwingt Überschreiben)"
 
 #: ../lib/Qgoda/Init/copy.pm:63
 msgid "will preserve files, use '--force' to overwrite"
@@ -1213,7 +1213,7 @@ msgstr "Datei „{filename}“ wurde geändert"
 
 #: ../lib/Qgoda.pm:743
 msgid "start rebuilding site because of file system change"
-msgstr "Neugenerierun der Site wegen Änderungen im Dateisystem"
+msgstr "Neugenerierung der Site wegen Änderungen im Dateisystem"
 
 #: ../lib/Qgoda.pm:786
 #, perl-brace-format
@@ -1234,7 +1234,4 @@ msgstr "Permalink „{permalink}“"
 #, perl-brace-format
 msgid "ignoring '{relpath}': not under version control"
 msgstr "ignoriere „{relpath}“: Nicht unter Versionskontrolle"
-
-#~ msgid "invalid filters '{filters}' (used named arguments)\n"
-#~ msgstr "Ungültige Filter '{filters}' (verwende benannte Argumente!)\n"
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
-"POT-Creation-Date: 2018-05-16 09:00+0300\n"
+"POT-Creation-Date: 2018-05-16 20:36+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -986,7 +986,7 @@ msgstr ""
 
 #: ../lib/Qgoda/Migrator.pm:139
 #, perl-brace-format
-msgid "Error creating file '{file}': {error}!"
+msgid "Error creating file '{filename}': {error}!"
 msgstr ""
 
 #: ../lib/Qgoda/Migrator.pm:161
@@ -1013,14 +1013,10 @@ msgstr ""
 msgid "error including '{path}': {error}.\n"
 msgstr ""
 
-#: ../lib/Template/Plugin/Qgoda.pm:275
+#: ../lib/Template/Plugin/Qgoda.pm:275 ../lib/Template/Plugin/Qgoda.pm:283
+#: ../lib/Template/Plugin/Qgoda.pm:286
 #, perl-brace-format
-msgid "invalid filters '{filters}' (used named arguments)\n"
-msgstr ""
-
-#: ../lib/Template/Plugin/Qgoda.pm:283 ../lib/Template/Plugin/Qgoda.pm:286
-#, perl-brace-format
-msgid "invalid filters '{filters}' (use named arguments)\n"
+msgid "invalid filters '{filters}' (use named arguments!)\n"
 msgstr ""
 
 #: ../lib/Template/Plugin/Qgoda.pm:302
@@ -1036,7 +1032,7 @@ msgstr ""
 #: ../lib/Template/Plugin/Qgoda.pm:316 ../lib/Template/Plugin/Qgoda.pm:320
 #, perl-brace-format
 msgid ""
-"invalid arguments '{args}' for method '{method}()' (use named arguments)\n"
+"invalid arguments '{args}' for method '{method}()' (use named arguments!)\n"
 msgstr ""
 
 #: ../lib/Template/Plugin/Qgoda.pm:483

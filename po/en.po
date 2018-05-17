@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: qgoda 0.1.1\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
-"POT-Creation-Date: 2018-05-16 09:00+0300\n"
+"POT-Creation-Date: 2018-05-16 20:36+0300\n"
 "PO-Revision-Date: 2018-05-14 22:53+0300\n"
 "Last-Translator: Guido Flohr <guido.flohr@cantanea.com>\n"
 "Language-Team: English\n"
@@ -998,8 +998,8 @@ msgstr "Error creating directory “{directory}”: {error}!"
 
 #: ../lib/Qgoda/Migrator.pm:139
 #, perl-brace-format
-msgid "Error creating file '{file}': {error}!"
-msgstr "Error creating file “{file}”: {error}!"
+msgid "Error creating file '{filename}': {error}!"
+msgstr "Error creating file “{filename}”: {error}!"
 
 #: ../lib/Qgoda/Migrator.pm:161
 msgid "Copying all other files as is."
@@ -1025,15 +1025,11 @@ msgstr "Error copying “{file}” to “{dest}”: {error}!\n"
 msgid "error including '{path}': {error}.\n"
 msgstr "error including “{path}”: {error}.\n"
 
-#: ../lib/Template/Plugin/Qgoda.pm:275
+#: ../lib/Template/Plugin/Qgoda.pm:275 ../lib/Template/Plugin/Qgoda.pm:283
+#: ../lib/Template/Plugin/Qgoda.pm:286
 #, perl-brace-format
-msgid "invalid filters '{filters}' (used named arguments)\n"
-msgstr "invalid filters “{filters}” (used named arguments)\n"
-
-#: ../lib/Template/Plugin/Qgoda.pm:283 ../lib/Template/Plugin/Qgoda.pm:286
-#, perl-brace-format
-msgid "invalid filters '{filters}' (use named arguments)\n"
-msgstr "invalid filters “{filters}” (use named arguments)\n"
+msgid "invalid filters '{filters}' (use named arguments!)\n"
+msgstr "invalid filters “{filters}” (use named arguments!)\n"
 
 #: ../lib/Template/Plugin/Qgoda.pm:302
 #, perl-brace-format
@@ -1047,8 +1043,8 @@ msgstr "method “{method}” requires named arguments, not “{args}”"
 
 #: ../lib/Template/Plugin/Qgoda.pm:316 ../lib/Template/Plugin/Qgoda.pm:320
 #, perl-brace-format
-msgid "invalid arguments '{args}' for method '{method}()' (use named arguments)\n"
-msgstr "invalid arguments “{args}” for method “{method}()” (use named arguments)\n"
+msgid "invalid arguments '{args}' for method '{method}()' (use named arguments!)\n"
+msgstr "invalid arguments “{args}” for method “{method}()” (use named arguments!)\n"
 
 #: ../lib/Template/Plugin/Qgoda.pm:483
 msgid "the argument 'location' is mandatory for clone()\n"
