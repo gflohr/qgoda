@@ -29,14 +29,14 @@ use URI;
 use Scalar::Util qw(reftype);
 use JSON qw(encode_json decode_json);
 use Date::Parse qw(str2time);
-use POSIX qw(strftime setlocale LC_ALL );
+use POSIX qw(setlocale LC_ALL);
 use File::Basename;
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
-                   escape_link);
+                   escape_link qstrftime);
 use Qgoda::Builder;
 
 sub new {
@@ -496,7 +496,7 @@ sub clone {
 }
 
 sub strftime {
-    my ($self, $format, $date, $lingua) = @_;
+    my ($self, $format, $date, $lingua, $markup) = @_;
 
     my $time = $date =~ /^[-+]?[1-9][0-9]*$/ ? "$date" : str2time $date;
     $time = $date if !defined $time;
@@ -506,10 +506,11 @@ sub strftime {
     my $saved_locale;    
     if (!empty $lingua) {
         $saved_locale = POSIX::setlocale(LC_ALL);
-        web_set_locale($lingua, 'utf-8') if $lingua;
+        web_set_locale($lingua, 'utf-8');
     }
 
-    my $formatted_date = POSIX::strftime($format, localtime $time);
+    $markup = "sup" if !defined $markup;
+    my $formatted_date = qstrftime $format, $time, $lingua, $markup;
 
     POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
 

@@ -84,8 +84,8 @@ ok $html =~ m{<p>config.title: Lots of €€</p>};
 if ($ENV{AUTHOR_TESTING}) {
     # Requires a German locale being installed.
     ok $html =~ m{<p>month: März</p>};
+    ok $html =~ m{<p>full date: März</p>};
 }
-ok $html =~ m{<p>full date: März</p>};
 ok $html =~ m{<p>37,2 °C am Morgen.</p>};
 
 $site->tearDown;

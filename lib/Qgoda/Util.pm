@@ -41,7 +41,7 @@ use vars qw(@EXPORT_OK);
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
                 canonical purify safe_yaml_load
-                escape_link blength);
+                escape_link blength qstrftime);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -727,6 +727,56 @@ sub blength {
     Encode::_utf8_on($scalar);
 
     return $blength;
+}
+
+sub qstrftime($;$$$) {
+    my ($format, $date, $lingua, $markup) = @_;
+
+    my ($open, $close) = $markup ? ("<$markup>", "</$markup>") : ("", "");
+    my %converters = (
+        de => sub { shift . '.' },
+        en => sub {
+            my ($mday) = @_;
+
+            my $last_digit = ($mday >= 11 && $mday <= 13) ? 0
+                        : substr $mday, -1, 1;
+            if (1 == $last_digit) {
+                return "${mday}${open}st${close}";
+            } elsif (2 == $last_digit) {
+                return "${mday}${open}nd${close}";
+            } elsif (3 == $last_digit) {
+                return "${mday}${open}rd${close}";
+            } else {
+                return "${mday}${open}th${close}";
+            }
+        },
+        fr => sub {
+            my ($mday) = @_;
+
+            if (1 == $mday) {
+                return "${mday}${open}er${close}";
+            } else {
+                shift;
+            }
+        },
+    );
+
+    if (!defined $lingua) {
+        $lingua = POSIX::setlocale(POSIX::LC_TIME()) || '';
+        # FIXME! This will not work under Windows.  But we can use a mapping
+        # tabel from Locale::Util.
+    }
+    $lingua = lc substr $lingua, 0, 2;
+
+    my $handler = $converters{$lingua} || sub { shift };
+
+    my @then = localtime $date;
+    my $mday = $then[3];
+    # The handler will probably never be called more than once.  No need to
+    # cache the result.
+    $format =~ s/\%([#\%])/$1 eq '%' ? '%%' : $handler->($mday)/ge;
+
+    return POSIX::strftime($format, localtime $date);
 }
 
 1;
