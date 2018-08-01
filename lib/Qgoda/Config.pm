@@ -329,11 +329,11 @@ sub checkConfig {
     die __x("'{variable}' must be a list", variable => 'analyzers')
         if exists $self->{analyzers} && !$self->__isArray($self->{analyzers});
     die __x("'{variable}' must be a list", variable => 'po.mdextra')
-        if exists $self->{analyzers} && !$self->__isArray($self->{po}->{mdextra});
+        if exists $self->{po}->{mdextra} && !$self->__isArray($self->{po}->{mdextra});
     die __x("'{variable}' must be a list", variable => 'po.views')
-        if exists $self->{analyzers} && !$self->__isArray($self->{po}->{views});
+        if exists $self->{po}->{views} && !$self->__isArray($self->{po}->{views});
     die __x("'{variable}' must be a list", variable => 'no_scm')
-        if exists $self->{analyzers} && !$self->__isArray($self->{po}->{views});
+        if exists $self->{no_scm} && !$self->__isArray($self->{no_scm});
 
     # Has to be done after everything was read. We need the value of
     # case-sensitive.
