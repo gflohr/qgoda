@@ -159,6 +159,10 @@ sub __fillPathInformation {
     my ($basename, @suffixes) = strip_suffix $filename;
     $asset->{basename} = $basename;
 
+    # For migration from Jekyll sites.
+    $basename =~ s/^[0-9]{4}-[0-9]{2}-[0-9]{2}-//;
+    $asset->{basename_nodate} = $basename;
+
     if (empty $asset->{chain}) {
         my $trigger = $site->getTrigger(@suffixes);
         if (!empty $trigger) {
