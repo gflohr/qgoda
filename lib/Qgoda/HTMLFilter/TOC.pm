@@ -24,8 +24,6 @@ use Qgoda;
 use Qgoda::Util qw(html_escape slugify empty write_file);
 use Locale::TextDomain qw(qgoda);
 
-use base qw(Qgoda::Processor);
-
 sub new {
     my ($class, %args) = @_;
 

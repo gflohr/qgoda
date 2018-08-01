@@ -22,8 +22,6 @@ use strict;
 
 use Qgoda;
 
-use base qw(Qgoda::Processor);
-
 sub new {
     my ($class, %args) = @_;
 
