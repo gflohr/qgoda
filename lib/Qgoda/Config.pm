@@ -414,7 +414,7 @@ sub __compileDefaults {
         if (exists $rule->{values}) {
             if (!$self->__isHash($rule->{values})) {
                 die __x("'{variable}' must be a hash",
-                        variable => 'defaults.value');
+                        variable => 'defaults.values');
             }
         }
 
