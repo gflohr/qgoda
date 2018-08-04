@@ -403,7 +403,7 @@ sub __compileDefaults {
         if (ref $pattern) {
             if (!$self->__isArray($pattern)) {
                 die __x("'{variable}' must be a scalar or a list",
-                        variable => 'defaults.file');
+                        variable => 'defaults.files');
             }
         } else {
             $pattern = [$pattern];
