@@ -1,3 +1,5 @@
+![Travis (.org)](https://img.shields.io/travis/gflohr/qgoda.svg)
+
 # Qgoda
 
 Qgoda (pronounce: yagoda!) is an extensible static site generator.
