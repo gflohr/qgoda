@@ -1,7 +1,7 @@
 [![AUR](https://img.shields.io/aur/license/yaourt.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![Price](https://img.shields.io/badge/price-FREE-0098f7.svg)](https://github.com/gflohr/qgoda/blob/master/LICENSE)
 [![Travis (.org)](https://img.shields.io/travis/gflohr/qgoda.svg)](https://travis-ci.org/gflohr/qgoda)
-[![Twitter Follow](https://img.shields.io/twitter/follow/espadrine.svg?style=social&label=Follow)](https://twitter.com/qgoda_cms)
+[![Twitter Follow](https://img.shields.io/twitter/follow/qgoda_cms.svg?style=social&label=Follow)](https://twitter.com/qgoda_cms)
 
 # Qgoda
 
