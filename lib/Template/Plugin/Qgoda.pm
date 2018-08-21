@@ -530,7 +530,7 @@ sub paginate {
     $data = $self->__sanitizeHashref($data, 'paginate', 1);
     die __"argument '{total}' is mandatory for paginate()\n"
         if empty $data->{total};
-    die __"argument '{total}' cannot be zero paginate()\n"
+    die __"argument '{total}' cannot be zero for paginate()\n"
         if !$data->{total};
 
     use integer;
