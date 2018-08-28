@@ -118,6 +118,9 @@ my %WriteMakefileArgs = (
     "ExtUtils::MakeMaker" => 0
   },
   "DISTNAME" => "Qgoda",
+  "EXE_FILES" => [
+    "bin/qgoda"
+  ],
   "LICENSE" => "gpl",
   "NAME" => "Qgoda",
   "PREREQ_PM" => {

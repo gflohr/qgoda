@@ -11,6 +11,7 @@ Makefile.PL
 NEWS
 README.md
 README.pod
+bin/qgoda
 dist.ini
 lib/LocaleData/de/LC_MESSAGES/qgoda.mo
 lib/LocaleData/de_CH/LC_MESSAGES/qgoda.mo
@@ -78,7 +79,6 @@ po/de_CH.po
 po/en.po
 po/en_GB.po
 po/qgoda.pot
-qgoda
 t/TestSite.pm
 t/author-critic.t
 t/author-pod-syntax.t
