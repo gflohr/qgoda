@@ -185,15 +185,15 @@ sub default {
         processors => {
             chains => {
                 markdown => {
-                    modules => [qw(TT2 Markdown)],
+                    modules => [qw(TT2 Strip Markdown)],
                     suffix => 'html',
                     wrapper => 'html'
                 },
                 html => {
-                    modules => [qw(TT2 HTMLFilter)],
+                    modules => [qw(TT2 Strip HTMLFilter)],
                 },
                 xml => {
-                    modules => [qw(TT2)]
+                    modules => [qw(TT2 Strip)]
                 }
             },
             triggers => {
