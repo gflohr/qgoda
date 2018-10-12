@@ -192,6 +192,9 @@ sub default {
                 html => {
                     modules => [qw(TT2 HTMLFilter)],
                 },
+                xml => {
+                    modules => [qw(TT2)]
+                }
             },
             triggers => {
                 md => 'markdown',
@@ -201,6 +204,7 @@ sub default {
                 mkd => 'markdown',
                 html => 'html',
                 htm => 'html',
+                xml => 'xml',
             },
             options => {
                 Markdown => {},
