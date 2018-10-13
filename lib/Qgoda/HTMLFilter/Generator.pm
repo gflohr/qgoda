@@ -41,8 +41,8 @@ sub end {
     $args{output} =~ /([ \t]*)/;
     my $head_indent = $1;
 
-    my $content = "Qgoda $Qgoda::VERSION (http://www.qgoda.net/)";
-    my $version = qq{<meta name="generator" content="$content" />};
+    my $generator = Qgoda->new->config->{generator};
+    my $version = qq{<meta name="generator" content="$generator" />};
 
     $chunk = $self->{__indent} . "$version\n$head_indent$chunk";
 

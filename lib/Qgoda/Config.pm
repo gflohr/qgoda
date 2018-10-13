@@ -162,6 +162,7 @@ sub default {
     # Default configuration.
     return {
         title => __"A New Qgoda Powered Site",
+        generator => "Qgoda $Qgoda::VERSION (http://www.qgoda.net/)",
         # FIXME! This should not be configurable.
         srcdir => '.',
         location => '/{directory}/{basename}/{index}{suffix}',
