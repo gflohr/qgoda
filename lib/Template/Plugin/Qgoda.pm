@@ -37,6 +37,7 @@ use Locale::Util qw(web_set_locale);
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
                    escape_link qstrftime);
+use Qgoda::Util::Date;
 use Qgoda::Builder;
 
 sub new {
@@ -674,6 +675,10 @@ sub lrelated {
     $filters->{lingua} = $self->__getAsset->{lingua};
 
     return $self->related($threshold, $filters);
+}
+
+sub time {
+    return Qgoda::Util::Date->newFromEpoch;
 }
 
 1;
