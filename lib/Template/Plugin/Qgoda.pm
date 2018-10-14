@@ -1,4 +1,4 @@
- #! /bin/false
+#! /bin/false
 
 # Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
@@ -382,6 +382,14 @@ sub link {
     return $set->[0]->{permalink};
 }
 
+sub existsLink {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->link(@args);
+}
+
 sub xref {
     my ($self, $variable, $filters) = @_;
 
@@ -401,6 +409,14 @@ sub xref {
     return $set->[0]->{$variable};
 }
 
+sub existsXref {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->xref(@args);
+}
+
 sub llink {
     my ($self, $filters) = @_;
 
@@ -410,6 +426,14 @@ sub llink {
     return $self->link($filters);
 }
 
+sub lexistsLink {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->llink(@args);
+}
+
 sub lxref {
     my ($self, $variable, $filters) = @_;
 
@@ -417,6 +441,14 @@ sub lxref {
     $filters->{lingua} = $self->__getAsset->{lingua};
 
     return $self->xref($variable, $filters);
+}
+
+sub lexistsXref {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->lxref(@args);
 }
 
 sub anchor {
@@ -446,6 +478,14 @@ sub linkPost {
     return $self->link($filters);
 }
 
+sub existsLinkPost {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->linkPost(@args);
+}
+
 sub llinkPost {
     my ($self, $filters) = @_;
 
@@ -453,6 +493,14 @@ sub llinkPost {
     $filters->{lingua} = $self->__getAsset->{lingua};
 
     return $self->linkPost($filters);
+}
+
+sub lexistsLinkPost {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->llinkPost(@args);
 }
 
 sub writeAsset {
