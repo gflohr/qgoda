@@ -79,7 +79,7 @@ sub getErrors {
 }
 
 sub getAssets {
-    sort { $a->{priority} <=> $b->{priority} } values %{shift->{assets}};
+    sort { $b->{priority} <=> $a->{priority} } values %{shift->{assets}};
 }
 
 sub addArtefact {

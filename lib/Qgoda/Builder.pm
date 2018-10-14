@@ -67,7 +67,7 @@ sub build {
     $site->computeRelations;
 
     # 2nd pass, usually HTML.
-    ASSET: foreach my $asset (sort { $a->{priority} <=> $b->{priority} }
+    ASSET: foreach my $asset (sort { $b->{priority} <=> $a->{priority} }
                             $site->getAssets) {
         if ($asset->{virtual}) {
             $logger->debug(__x("not wrapping virtual asset '/{relpath}'",
