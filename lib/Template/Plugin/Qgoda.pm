@@ -1,4 +1,4 @@
- #! /bin/false
+#! /bin/false
 
 # Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
@@ -36,7 +36,7 @@ use Locale::Util qw(web_set_locale);
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
-                   escape_link qstrftime);
+                   escape_link qstrftime slugify);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -679,6 +679,14 @@ sub lrelated {
 
 sub time {
     return Qgoda::Util::Date->newFromEpoch;
+}
+
+sub slugify {
+    my ($self, $text, $locale) = @_;
+
+    $locale = $self->__getAsset->{lingua} if !defined $locale;
+
+    return slugify $text, $locale;
 }
 
 1;
