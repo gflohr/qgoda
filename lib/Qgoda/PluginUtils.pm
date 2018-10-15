@@ -56,15 +56,25 @@ sub load_plugins {
     push @INC, $config->{srcdir};
 
     my $modules_dir = File::Spec->catfile($config->{srcdir}, 'node_modules');
-    my %plugins = map {
-        $_ => {
-            package_dir => File::Spec->catfile($modules_dir, $_),
-            package_json => File::Spec->catfile($modules_dir, $_,
-                                                'package.json'),
+    my %plugins;
+    if (opendir my $dh, 'node_modules') {
+        foreach my $subdir (grep { -e File::Spec->catfile('node_modules',
+                                                          $_, 'package.json') }
+                            grep !/^\./, readdir $dh) {
+            my $package_dir = File::Spec->catfile('node_modules', $subdir);
+            my $package_json = File::Spec->catfile($package_dir, 
+                                                  'package.json');
+            my $package = eval { decode_json read_file $package_json }
+                or next;
+            next if !$package->{qgoda};
+            $plugins{$subdir} = {
+                package_dir => $package_dir,
+                package_json => $package_json,
+            };
         }
-    } @{$config->{plugins} || []};
+    }
     foreach my $name (keys %plugins) {
-        $logger->info(__x("plugin {name} found in configuration.",
+        $logger->info(__x("plugin '{name}' found in 'node_modules'.",
                           name => $name));
     }
 
@@ -95,8 +105,8 @@ sub search_local_plugins($$$) {
 
     my @subdirs = grep {!/^[._]/} readdir DIR;
     foreach my $name (@subdirs) {
-        $logger->info(__x("plugin {name} found in plugin directory.",
-                          name => $name));
+        $logger->info(__x("plugin '{name}' found in '{directory}'.",
+                          name => $name, directory => $plugin_dir));
         my $package_dir = File::Spec->catfile($plugin_dir, $name);
         $plugins->{$name} = {
             package_dir => $package_dir,
