@@ -4,6 +4,7 @@
         - automatic creation of default template
         - use utf8 flag
         - q.anchor() and q.lanchor()
+        - q.existsLink(), q.lexistsLink(), q.existsXref(), q.lexistsXref().
         - calculate related documents based on shared taxonomy values
         - generic html filter interface
         - automatic TOC generation
