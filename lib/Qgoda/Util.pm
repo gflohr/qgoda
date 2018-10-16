@@ -41,7 +41,7 @@ use vars qw(@EXPORT_OK);
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
                 canonical purify safe_yaml_load
-                escape_link blength qstrftime);
+                escape_link blength qstrftime tt2_args_merge);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -777,6 +777,27 @@ sub qstrftime($;$$$) {
     $format =~ s/\%([#\%])/$1 eq '%' ? '%%' : $handler->($mday)/ge;
 
     return POSIX::strftime($format, localtime $date);
+}
+
+sub tt2_args_merge($$$$) {
+    my ($global_args, $global_conf, $local_args, $local_conf) = @_;
+
+    my @args = @$global_args;
+    my %conf = %$global_conf;
+
+    foreach my $arg (@$local_args) {
+        if ($arg =~ /^-(.*)/) {
+            @args = grep { $_ ne $1 } @args;
+        } else {
+            push @args, $arg;
+        }
+    }
+
+    while (my ($key, $value) = each %$local_conf) {
+        $conf{$key} = $value;
+    }
+
+    return \@args, \%conf;
 }
 
 1;
