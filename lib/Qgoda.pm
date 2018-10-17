@@ -123,7 +123,7 @@ sub build {
     my $textdomain = $config->{po}->{textdomain};
     my $locale_dir = File::Spec->catfile($config->{srcdir}, 'LocaleData');
     Locale::gettext_dumb::bindtextdomain($textdomain, $locale_dir);
-    if (!empty $config->{po}->{textdomain} && $config->{po}->{refresh}) {
+    if (!empty $config->{po}->{textdomain} && $config->{po}->{reload}) {
         eval {
             # Delete the cached translations so that changes are immediately
             # visible.
