@@ -143,7 +143,7 @@ sub build {
 
     my $site = $self->getSite;
     my $modified = scalar keys %{$site->getModified};
-    
+
     if (($modified + $deleted) && !empty $config->{paths}->{timestamp}) {
         my $timestamp_file = File::Spec->catfile($config->{srcdir},
                                                  $config->{paths}->{timestamp});

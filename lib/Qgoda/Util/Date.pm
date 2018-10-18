@@ -238,4 +238,10 @@ sub rfc822_local {
                    $time[5] + 1900, $time[2], $time[1], $time[0], $tz);
 }
 
+sub TO_JSON {
+    my ($self) = @_;
+
+    return $self->ISOString;
+}
+
 1;

@@ -680,17 +680,22 @@ sub sprintf {
 sub encodeJSON {
     my ($self, $data, @flags) = @_;
 
+    my $options = {};
+    if (ref $flags[-1] && 'HASH' eq ref $flags[-1]) {
+        $options = pop @flags;
+    }
+
     my %flags = (utf8 => 1);
     my %supported = map { $_ => 1 } qw(ascii latin1 utf8 pretty indent
                                        space_before space_after relaxed
                                        canonical allow_nonref allow_unknown
-                                       allow_blessed convert_blessed 
-                                       max_depth max_size);
+                                       allow_blessed convert_blessed);
     foreach my $flag (@flags) {
         my $negated = $flag =~ s/^-//;
         if (!exists $supported{$flag}) {
             warn __x("the flag '{flag}' is not supported by encodeJSON().\n",
                      flag => $flag);
+            next;
         }
         if ($negated) {
             delete $flags{$flag};
@@ -702,6 +707,15 @@ sub encodeJSON {
     my $json = JSON->new;
     foreach my $flag (keys %flags) {
         $json->$flag;
+    }
+    my %allowed_options = map { $_ =>  1 } qw(max_depth max_size);
+    foreach my $option (keys %$options) {
+        if (!exists $supported{$option}) {
+            warn __x("the option '{option}' is not supported by encodeJSON().\n",
+                     option => $option);
+            next;
+        }
+        $json->$option($options->{$option});
     }
 
     return $json->encode($data);

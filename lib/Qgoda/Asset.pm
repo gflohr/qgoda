@@ -59,7 +59,12 @@ sub getOrigin {
 sub dump {
     my ($self) = @_;
 
-    %{$self};
+    return %$self;
 }
 
+sub TO_JSON {
+    my ($self) = @_;
+
+    return {%$self};
+}
 1;
