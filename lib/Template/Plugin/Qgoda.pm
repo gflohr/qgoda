@@ -27,7 +27,7 @@ use File::Spec;
 use Cwd;
 use URI;
 use Scalar::Util qw(reftype);
-use JSON qw(encode_json decode_json);
+use JSON 2.0 qw(encode_json decode_json);
 use Date::Parse qw(str2time);
 use POSIX qw(setlocale LC_ALL);
 use File::Basename;
@@ -675,6 +675,36 @@ sub sprintf {
     my ($self, $fmt, @args) = @_;
 
     return sprintf $fmt, @args;
+}
+
+sub encodeJSON {
+    my ($self, $data, @flags) = @_;
+
+    my %flags = (utf8 => 1);
+    my %supported = map { $_ => 1 } qw(ascii latin1 utf8 pretty indent
+                                       space_before space_after relaxed
+                                       canonical allow_nonref allow_unknown
+                                       allow_blessed convert_blessed 
+                                       max_depth max_size);
+    foreach my $flag (@flags) {
+        my $negated = $flag =~ s/^-//;
+        if (!exists $supported{$flag}) {
+            warn __x("the flag '{flag}' is not supported by encodeJSON().\n",
+                     flag => $flag);
+        }
+        if ($negated) {
+            delete $flags{$flag};
+        } else {
+            $flags{$flag} = 1;
+        }
+    }
+
+    my $json = JSON->new;
+    foreach my $flag (keys %flags) {
+        $json->$flag;
+    }
+
+    return $json->encode($data);
 }
 
 sub loadJSON {
