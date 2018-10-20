@@ -238,6 +238,38 @@ sub rfc822_local {
                    $time[5] + 1900, $time[2], $time[1], $time[0], $tz);
 }
 
+# Date and time in XML schema format. For performance reasons, this is always
+# in GMT.
+sub xmlschema {
+    my ($self) = @_;
+
+    my @time = gmtime $$self;
+
+    return sprintf('%04u-%02u-%02uT%02u:%02u:%02u+0000',
+                   $time[5] + 1900, $time[4], $time[3], $time[2], $time[1],
+                   $time[0]);
+}
+
+# This is the same as xmlschema() above but takes some effort to use the real
+# timezone of the server. This is mostly a waste of time and not needed, see
+# https://stackoverflow.com/a/52787169/5464233 for details.
+sub xmlschema_local {
+    my ($self) = @_;
+
+    my @time = localtime $$self;
+
+    use integer;
+
+    my $tz_offset = (Time::Local::timegm(@time) - $$self) / 60;
+    my $tz = sprintf('%s%02u%02u',
+                     $tz_offset < 0 ? '-' : '+',
+                     $tz_offset / 60, $tz_offset % 60);
+
+    return sprintf('%04u-%02u-%02uT%02u:%02u:%02u%s',
+                   $time[5] + 1900, $time[4], $time[3], $time[2], $time[1],
+                   $time[0], $tz);
+}
+
 sub TO_JSON {
     my ($self) = @_;
 
