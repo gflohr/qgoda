@@ -31,6 +31,7 @@ use Qgoda::Util::Translate qw(get_masters);
 use Qgoda::CLI;
 use Qgoda::Splitter;
 
+use Locale::XGettext '0.4';
 use base qw(Locale::XGettext);
 
 sub readFile {
