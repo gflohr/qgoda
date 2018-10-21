@@ -217,7 +217,7 @@ sub rfc822 {
 # This is the same as rfc822() above but takes some effort to use the real
 # timezone of the server. This is mostly a waste of time and not needed, see
 # https://stackoverflow.com/a/52787169/5464233 for details.
-sub rfc822_local {
+sub rfc822Local {
     my ($self) = @_;
 
     my @time = localtime $$self;
@@ -238,9 +238,27 @@ sub rfc822_local {
                    $time[5] + 1900, $time[2], $time[1], $time[0], $tz);
 }
 
-# Date and time in XML schema format. For performance reasons, this is always
+# Date in W3C format in GMT.
+sub w3c {
+    my ($self) = @_;
+
+    my @time = gmtime $$self;
+
+    return sprintf('%04u-%02u-%02u', $time[5] + 1900, $time[4], $time[3]);
+}
+
+# Date in W3C format in local time.
+sub w3cLocal {
+    my ($self, $short) = @_;
+
+    my @time = localtime $$self;
+
+    return sprintf('%04u-%02u-%02u', $time[5] + 1900, $time[4], $time[3]);
+}
+
+# Date and time in W3C format. For performance reasons, this is always
 # in GMT.
-sub xmlschema {
+sub w3cWithTime {
     my ($self) = @_;
 
     my @time = gmtime $$self;
@@ -250,11 +268,11 @@ sub xmlschema {
                    $time[0]);
 }
 
-# This is the same as xmlschema() above but takes some effort to use the real
+# This is the same as w3cWithTime() above but takes some effort to use the real
 # timezone of the server. This is mostly a waste of time and not needed, see
 # https://stackoverflow.com/a/52787169/5464233 for details.
-sub xmlschema_local {
-    my ($self) = @_;
+sub w3cWithTimeLocal {
+    my ($self, $short) = @_;
 
     my @time = localtime $$self;
 
