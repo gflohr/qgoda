@@ -84,6 +84,7 @@ t/author-critic.t
 t/author-pod-syntax.t
 t/collect_defaults.t
 t/default-view.t
+t/encode_json.t
 t/flatten2hash.t
 t/interpolate.t
 t/js_unescape.t
