@@ -36,7 +36,7 @@ use Qgoda::Site;
 
 use base 'Qgoda::Command';
 
-my $seed_repo = 'file://' . $ENV{HOME} . '/perl/Template-Plugin-Gettext-Seed';
+my $seed_repo = 'https://github.com/gflohr/Template-Plugin-Gettext-Seed';
 
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
