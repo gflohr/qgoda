@@ -90,7 +90,8 @@ github repositories for examples:
     * https://github.com/gflohr/qgoda-essential
     * https://github.com/gflohr/qgoda-minimal
 * [Star qgoda's github repository](https://github.com/gflohr/qgoda/stargazers).  This will also push up
-Qgoda (and Perl and Template Toolkit) on the staticgen.com.
+Qgoda (and Perl and Template Toolkit) on Netlify's
+[staticgen.com](https://www.staticgen.com/).
 
 ## Copyright
 
