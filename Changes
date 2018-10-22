@@ -1,6 +1,27 @@
 {{$NEXT}}
+        - not translatable areas in markdown files are now enclosed inside
+          <qgoda-no-xgettext>...</qgoda-no-xgettext>
+        - translatable blocks in markdown files are now enclosed inside
+          <qgoda-xgettext>...</qgoda-xgettext>
+        - the i18n seed repo is now the official one (not file:///...)
+        - new template functions for W3C and RFC822 date and time formats
+        - yeoman generator (work in progress), see
+          https://www.npmjs.com/package/generator-qgoda
+        - plug-ins present in ./node_modules are automatically loaded
+        - asset priority is now honored in all generation rounds
+        - the generator meta tag is now configurable in config.generator
+        - added "Strip" to the default processor chains for discarding
+          leading and trailing whitespace from the generated files
+        - a new "xml" processor chain, defaults to ['TT2', 'Strip']
+        - non-standard strftime extension '#%' for the ordinal day
+          of the months (1st in English, 2eme in French, 3. in German),
+          PRs for other languages welcome
+        - new location placeholder "basename_nodate" which strips of
+          leading YYYY-MM-DD- from the basename for Jekyll migration
         - fixed issues:
           * https://github.com/gflohr/qgoda/issues/32
+          * https://github.com/gflohr/qgoda/issues/44
+          * https://github.com/gflohr/qgoda/issues/49
 
 v0.9.2 - 2018-05-17
         - content translation with PO files and gettext workflow
