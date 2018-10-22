@@ -489,6 +489,9 @@ sub slugify($;$) {
     # are condensed into one.
     $slug =~ s/[\x00-\x2c\x2f\x3a-\x5e\x60\x7b-\x7f]/-/g;
     $slug =~ s/--+/-/g;
+    $slug =~ s/^-//;
+    $slug =~ s/-$//;
+    $slug = '-' if !length $slug;
 
     return $slug;
 }
