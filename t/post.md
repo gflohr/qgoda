@@ -31,8 +31,8 @@ tab.
 This paragraph is separated
 by multiple lines.
 
-<!--XGETTEXT-BLOCK-->
+<qgoda:xgettext-block>
 This is a block of lines.
 
 And it should not be disrupted.
-<!--XGETTEXT-BLOCK-->
+</qgoda:xgettext-block>

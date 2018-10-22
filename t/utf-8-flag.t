@@ -32,7 +32,7 @@ use Qgoda::Util qw(read_file);
 use Qgoda::CLI;
 
 my $content = <<EOF;
-<!--QGODA-NO-XGETTEXT-->[% USE q = Qgoda %]<!--/QGODA-NO-XGETTEXT-->
+<qgoda:no-xgettext>[% USE q = Qgoda %]</qgoda:no-xgettext>
 
 config.title: [% config.title %]
 
