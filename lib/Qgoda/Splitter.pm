@@ -48,8 +48,7 @@ sub new {
             }
         }
     }
-   
-   $DB::single = 1;
+    
     my $body = read_body $path, '';
     if (!defined $body) {
         my $error = $! ? $! : __"no body found";
@@ -59,9 +58,9 @@ sub new {
 
     my @first =  grep { !empty } split /
                 (
-                <qgoda:xgettext>(?:.*?)<\/qgoda:xgettext>
+                <!--QGODA-XGETTEXT-->(?:.*?)<!--\/QGODA-XGETTEXT-->
                 |
-                <qgoda:no-xgettext>(?:.*?)<\/qgoda:no-xgettext>
+                <!--QGODA-NO-XGETTEXT-->(?:.*?)<!--\/QGODA-NO-XGETTEXT-->
                 |
                 [ \011-\015]*
                 \n
@@ -88,13 +87,13 @@ sub new {
     my @entries;
     foreach my $chunk (@chunks) {
         if ($chunk =~ /[^ \011-\015]+$/) {
-            if ($chunk =~ /^<qgoda:xgettext>(.*?)<\/qgoda:xgettext>$/s) {
+            if ($chunk =~ /^<!--QGODA-XGETTEXT-->(.*?)<!--\/QGODA-XGETTEXT-->$/s) {
                 push @entries, {
                     text => $1,
                     lineno => $lineno,
                     type => 'block',
                 }
-            } elsif ($chunk =~ /^<qgoda:no-xgettext>(.*?)<\/qgoda:no-xgettext>$/s) {
+            } elsif ($chunk =~ /^<!--QGODA-NO-XGETTEXT-->(.*?)<!--\/QGODA-NO-XGETTEXT-->$/s) {
                 push @entries, {
                     text => $1,
                     lineno => $lineno,
@@ -177,13 +176,13 @@ sub reassemble {
         if ('whitespace' eq $entry->{type}) {
             $output .= $entry->{text};
         } elsif ('block' eq $entry->{type}) {
-            $output .= "<qgoda:xgettext>"
+            $output .= "<!--QGODA-XGETTEXT-->"
                 . $callback->($entry->{text})
-                . "</qgoda:xgettext>";
+                . "<!--/QGODA-XGETTEXT-->";
         } elsif ('exclude' eq $entry->{type}) {
-            $output .= "<qgoda:no-xgettext>"
+            $output .= "<!--QGODA-NO-XGETTEXT-->"
                 . $callback->($entry->{text})
-                . "</qgoda:no-xgettext>";
+                . "<!--/QGODA-NO-XGETTEXT-->";
         } else {
             $output .= $callback->($entry->{text});
         }
