@@ -95,8 +95,10 @@ t/perl_identifier.t
 t/post-meta.t
 t/post.md
 t/release-cpan-changes.t
+t/slugify.t
 t/sort_by.t
 t/splitter.t
+t/strftime.t
 t/strip_suffix.t
 t/tt2-args-merge.t
 t/unmarkup.t

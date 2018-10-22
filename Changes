@@ -18,6 +18,11 @@
           PRs for other languages welcome
         - new location placeholder "basename_nodate" which strips of
           leading YYYY-MM-DD- from the basename for Jekyll migration
+        - more documentation on http://www.qgoda.net/:
+          * Defaults
+          * Filters
+          * Multilanguage
+        - about 30 % of the web site is translated to German
         - fixed issues:
           * https://github.com/gflohr/qgoda/issues/32
           * https://github.com/gflohr/qgoda/issues/44
