@@ -1,8 +1,4 @@
 {{$NEXT}}
-        - not translatable areas in markdown files are now enclosed inside
-          <qgoda-no-xgettext>...</qgoda-no-xgettext>
-        - translatable blocks in markdown files are now enclosed inside
-          <qgoda-xgettext>...</qgoda-xgettext>
         - the i18n seed repo is now the official one (not file:///...)
         - new template functions for W3C and RFC822 date and time formats
         - yeoman generator (work in progress), see
