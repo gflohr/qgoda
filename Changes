@@ -1,4 +1,8 @@
 {{$NEXT}}
+        - fixed issues:
+          * https://github.com/gflohr/qgoda/issues/32
+
+v0.9.2 - 2018-05-17
         - content translation with PO files and gettext workflow
         - Dockerfile thanks to Dominic Sonntag
         - automatic creation of default template
