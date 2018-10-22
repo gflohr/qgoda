@@ -7,7 +7,7 @@ Multiple lines
 in one
 paragraph.
 
-<qgoda:xgettext>
+<qgoda-xgettext>
 Block
 
 with
@@ -15,13 +15,13 @@ with
 embedded
 
 new lines.
-</qgoda:xgettext>
+</qgoda-xgettext>
 
-<qgoda:no-xgettext>
+<qgoda-no-xgettext>
 ```perl
 my $qgoda = Qgoda->new;
 ```
-</qgoda:no-xgettext>
+</qgoda-no-xgettext>
 
 Empty lines above should be ignored.
 

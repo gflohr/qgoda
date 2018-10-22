@@ -59,9 +59,9 @@ sub new {
 
     my @first =  grep { !empty } split /
                 (
-                <qgoda:xgettext>(?:.*?)<\/qgoda:xgettext>
+                <qgoda-xgettext>(?:.*?)<\/qgoda-xgettext>
                 |
-                <qgoda:no-xgettext>(?:.*?)<\/qgoda:no-xgettext>
+                <qgoda-no-xgettext>(?:.*?)<\/qgoda-no-xgettext>
                 |
                 [ \011-\015]*
                 \n
@@ -88,13 +88,13 @@ sub new {
     my @entries;
     foreach my $chunk (@chunks) {
         if ($chunk =~ /[^ \011-\015]+$/) {
-            if ($chunk =~ /^<qgoda:xgettext>(.*?)<\/qgoda:xgettext>$/s) {
+            if ($chunk =~ /^<qgoda-xgettext>(.*?)<\/qgoda-xgettext>$/s) {
                 push @entries, {
                     text => $1,
                     lineno => $lineno,
                     type => 'block',
                 }
-            } elsif ($chunk =~ /^<qgoda:no-xgettext>(.*?)<\/qgoda:no-xgettext>$/s) {
+            } elsif ($chunk =~ /^<qgoda-no-xgettext>(.*?)<\/qgoda-no-xgettext>$/s) {
                 push @entries, {
                     text => $1,
                     lineno => $lineno,
@@ -177,13 +177,13 @@ sub reassemble {
         if ('whitespace' eq $entry->{type}) {
             $output .= $entry->{text};
         } elsif ('block' eq $entry->{type}) {
-            $output .= "<qgoda:xgettext>"
+            $output .= "<qgoda-xgettext>"
                 . $callback->($entry->{text})
-                . "</qgoda:xgettext>";
+                . "</qgoda-xgettext>";
         } elsif ('exclude' eq $entry->{type}) {
-            $output .= "<qgoda:no-xgettext>"
+            $output .= "<qgoda-no-xgettext>"
                 . $callback->($entry->{text})
-                . "</qgoda:no-xgettext>";
+                . "</qgoda-no-xgettext>";
         } else {
             $output .= $callback->($entry->{text});
         }
