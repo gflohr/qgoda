@@ -55,4 +55,14 @@ properties:
     index:
         description: "Basename of a file that is considered to be the index document of a directory, defaults to 'index'."
         type: string
+    latency:
+        descriptions: "Number of seconds to wait until a rebuild is triggered after a file system change in watch mode, defaults to 0.5 s."
+        # FIXME! Change that to number or better fix yaml2json.  Then add minimum: 0 to avoid negative numbers.
+        type: string 
+    linguas:
+        description: "List of language identifiers complying to RFC4647 section 2.1 but without any asterisk (*) characters."
+        type: array
+        items:
+            type: string
+            pattern: "[a-zA-Z]{1,8}(-[a-zA-z0-9]{8})?"
 
