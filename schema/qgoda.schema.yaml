@@ -22,3 +22,8 @@ properties:
                         type: string
                 values:
                     type: object
+    exclude:
+        description: "List of file name patterns that should be ignored for building the site (default: empty)"
+        type: array
+        items:
+            type: string
