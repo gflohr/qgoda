@@ -1,0 +1,7 @@
+{
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "http://www.qgoda.net/qgoda.schema.json",
+        "title": "Configuration",
+        "description": "A Qgoda Configuration",
+        "type": "Object"
+}
