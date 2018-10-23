@@ -14,4 +14,9 @@ properties:
         description: Default values, see https://www.qgoda.net/en/defaults
         type: array
         items:
-            type: array
+            type: object
+            properties:
+                files:
+                    type: array
+                values:
+                    type: object

@@ -109,7 +109,7 @@ sub new {
 
     my $self = bless $config, $class;
 
-    eval { $self->checkConfig($self) };
+    eval { $self->checkConfig($self, $args{raw}) };
     if ($@) {
         $logger->fatal(__x("{filename}: {error}",
                            filename => $filename, error => $@));
@@ -248,7 +248,7 @@ sub default {
 
 # Consistency check.
 sub checkConfig {
-    my ($self, $config) = @_;
+    my ($self, $config, $raw) = @_;
 
     die __"invalid format (not a hash)\n"
         unless ($self->__isHash($config));
@@ -342,7 +342,8 @@ sub checkConfig {
 
     # Has to be done after everything was read. We need the value of
     # case-sensitive.
-    $self->{defaults} = $self->__compileDefaults($self->{defaults});
+    $self->{defaults} = $self->__compileDefaults($self->{defaults})
+        unless $raw;
 
     return $self;
 }

@@ -367,13 +367,13 @@ sub config {
 sub dumpConfig {
     my ($self) = @_;
 
-    # Make a shallow copy so that we unbless the reference.
-    my %config = %{$self->config};
-    foreach my $key (grep { /^__q_/ } keys %config) {
-        delete $config{$key};
+    # We need our own copy so that we can mess around with it.
+    my $config = Qgoda::Config->new(raw => 1);
+    foreach my $key (grep { /^__q_/ } keys %$config) {
+        delete $config->{$key};
     }
 
-    print YAML::XS::Dump(\%config);
+    print YAML::XS::Dump($config);
 
     return $self;
 }
