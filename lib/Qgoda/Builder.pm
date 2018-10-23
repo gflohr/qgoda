@@ -117,7 +117,10 @@ sub readAssetContent {
     } elsif (!empty $asset->{master}) {
         return translate_body $asset;
     } else {
-        my $placeholder = Qgoda->new->config->{front_matter_placeholder};
+        my $chain = $asset->{chain};
+        my $config = Qgoda->new->config;
+        my $placeholder = $config->{'front-matter-placeholder'}->{$chain}
+                          || $config->{'front-matter-placeholder'}->{'*'};
         return read_body($asset->getPath, $placeholder);
     }
 }

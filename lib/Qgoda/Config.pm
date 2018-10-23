@@ -136,7 +136,7 @@ sub new {
         if $includedir !~ m{^\.\./};
 
     my @config_exclude = @{$config->{exclude} || []};
-    my @config_exclude_watch = @{$config->{exclude_watch} || $config->{exclude} || []};
+    my @config_exclude_watch = @{$config->{'exclude-watch'} || $config->{exclude} || []};
 
     push @exclude, @config_exclude;
     push @exclude_watch, @config_exclude_watch;
@@ -242,7 +242,9 @@ sub default {
             msgfmt => 'msgfmt',
             msgmerge => 'msgmerge',
         },
-        front_matter_placeholder => "[% '' %]\n",
+        'front-matter-placeholder' => {
+            '*' => "[% '' %]\n"
+        },
     };
 }
 

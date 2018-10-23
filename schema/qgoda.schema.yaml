@@ -28,7 +28,14 @@ properties:
                     description: "Values that should be set for matching files."
                     type: object
     exclude:
-        description: "List of file name patterns that should be ignored for building the site (default: empty)"
+        description: "List of additional file name patterns that should be ignored for building the site (default: empty)"
         type: array
         items:
             type: string
+    exclude-watch:
+        description: "List of additional file name patterns that should be ignored when changed in watch mode (default: empty)"
+        type: array
+        items:
+            type: string
+    front-matter-placeholder:
+        description: "An object of valid chain names."
