@@ -1,4 +1,4 @@
---- !!perl/hash:Qgoda::Config
+---
 analyzers:
 - GuidedTour
 case-sensitive: false

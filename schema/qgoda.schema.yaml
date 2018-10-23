@@ -17,6 +17,8 @@ properties:
             type: object
             properties:
                 files:
-                    type: array
+                    type: [array, string]
+                    items:
+                        type: string
                 values:
                     type: object
