@@ -18,10 +18,18 @@
 
 use strict;
 
+BEGIN {
+    my $test_dir = __FILE__;
+    $test_dir =~ s/[-a-z0-9]+\.t$//i;
+    unshift @INC, $test_dir;
+}
+
+use TestSite;
 use Test::More;
 use File::Basename qw(dirname);
 use File::Spec;
 
+use Qgoda::CLI;
 use Qgoda::Splitter;
 use Qgoda::Util qw(read_file);
 
@@ -73,5 +81,20 @@ is $entries[3]->{comment}, $expected, 'translator comment';
 
 $expected = 'my';
 is $entries[3]->{msgctxt}, $expected, 'message context';
+
+# Test that the generated files do not contain any traces of the xgettext
+# markers.
+my $site = TestSite->new(name => 'splitter',
+                         assets => {
+                             'master.md' => {
+                                 title => 'Splitter Test',
+                                 content => read_file $master_md,
+                             }
+                         });
+ok (Qgoda::CLI->new(['build'])->dispatch);
+ok -e '_site/master/index.html';
+my $generated = read_file '_site/master/index.html';
+ok $generated !~ /qgoda-xgettext/;
+ok $generated !~ /qgoda-no-xgettext/;
 
 done_testing;
