@@ -264,6 +264,7 @@ sub __startHelpers {
 sub __startHelper {
     my ($self, $helper, $args) = @_;
 
+$DB::single = 1;
     $args ||= [];
     $args = [$helper] if !@$args;
     my $logger = $self->logger;

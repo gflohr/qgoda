@@ -43,3 +43,8 @@ properties:
     generator:
         description: "Value for the generator meta tag in generated pages, defaults to 'Qgoda vX.X.X (http://www.qgoda.net)'"
         type: string
+    helpers:
+        description: "Key-value pairs of command identifiers and the command to run in parallel, when running in watch mode. Default: empty."
+        # FIXME! We should describe that the values of the object must either
+        # either be a string or an array. But how, when the keys are arbitrary.
+        type: object
