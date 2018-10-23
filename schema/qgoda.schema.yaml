@@ -46,5 +46,10 @@ properties:
     helpers:
         description: "Key-value pairs of command identifiers and the command to run in parallel, when running in watch mode. Default: empty."
         # FIXME! We should describe that the values of the object must either
-        # either be a string or an array. But how, when the keys are arbitrary.
+        # either be a string or an array. But how, when the keys are arbitrary?
+        # Answer: With patternProperties!
         type: object
+    index:
+        description: "Basename of a file that is considered to be the index document of a directory, defaults to 'index'."
+        type: string
+
