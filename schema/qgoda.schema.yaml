@@ -38,4 +38,5 @@ properties:
         items:
             type: string
     front-matter-placeholder:
-        description: "An object of valid chain names."
+        description: "An object of valid chain names or '*' that give the frontmatter placeholder string for each configured processor chain."
+        type: object
