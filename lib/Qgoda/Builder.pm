@@ -142,7 +142,7 @@ sub saveArtefact {
     }
 
     my $write_file = 1;
-    if ($config->{compare_output}) {
+    if ($config->{'compare-output'}) {
         my @stat = stat $path;
         if (@stat) {
             if ($stat[7] == blength $asset->{content}) {

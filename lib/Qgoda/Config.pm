@@ -26,7 +26,7 @@ use Cwd;
 use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
-
+use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase 
                    safe_yaml_load);
 
@@ -168,7 +168,7 @@ sub default {
         location => '/{directory}/{basename}/{index}{suffix}',
         permalink => '{significant-path}',
         index => 'index',
-        'case-sensitive' => 0,
+        'case-sensitive' => false,
         view => 'default.html',
         latency => 0.5,
         exclude => [],
@@ -181,7 +181,7 @@ sub default {
             site => '_site',
             timestamp => '_timestamp',
         },
-        compare_output => 1,
+        'compare-output' => true,
         helpers => {},
         processors => {
             chains => {
@@ -415,7 +415,7 @@ sub __compileDefaults {
         }
 
         $pattern = File::Globstar::ListMatch->new($pattern,
-                                                  $self->{'case-insensitive'});
+                                                  !$self->{'case-sensitive'});
         if (exists $rule->{values}) {
             if (!$self->__isHash($rule->{values})) {
                 die __x("'{variable}' must be a hash",

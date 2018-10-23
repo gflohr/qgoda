@@ -4,10 +4,10 @@ check: qgoda.schema.json default-config.json
 	ajv -s qgoda.schema.json -d default-config.json
 
 qgoda.schema.json: qgoda.schema.yaml
-	yaml2json $< >$@
+	yaml2json $< >$@ || rm $@
 
 default-config.json: default-config.yaml
-	jq . $< >$@
+	yaml2json $< >$@ || rm $@
 
 clean:
 	rm -f .*.swp *.json

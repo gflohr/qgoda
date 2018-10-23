@@ -1,6 +1,6 @@
 ---
-case-sensitive: 0
-compare_output: 1
+case-sensitive: false
+compare_output: true
 defaults: []
 exclude: []
 exclude_watch: []

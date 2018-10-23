@@ -5,5 +5,13 @@ description: A Qgoda Configuration
 type: object
 properties:
     case-sensitive:
-        description: Should a case-sensitive file system be assumed?
+        description: "Should a case-sensitive file system be assumed (default: false)"
         type: boolean
+    compare-output:
+        description: "Should existing output files be read and compared to the new version to avoid updating timestamps (default: true)"
+        type: boolean
+    defaults:
+        description: Default values, see https://www.qgoda.net/en/defaults
+        type: array
+        items:
+            type: array

@@ -41,6 +41,9 @@ use IPC::Signal;
 use POSIX qw(:sys_wait_h);
 use Template::Plugin::Gettext 0.6;
 use List::Util 1.45 qw(uniq);
+use YAML::XS 0.67;
+use boolean;
+$YAML::XS::Boolean = 'boolean';
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -370,7 +373,6 @@ sub dumpConfig {
         delete $config{$key};
     }
 
-    require YAML::XS;
     print YAML::XS::Dump(\%config);
 
     return $self;
