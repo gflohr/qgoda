@@ -70,3 +70,20 @@ properties:
         type: array
         items:
             type: string
+    paths:
+        description: "Configurable paths."
+        type: object
+        properties:
+            plugins:
+                description: "Directory for plug-ins, default '_plugins'."
+                type: string
+            po: 
+                description: "Directory for po files and other i18n related files, default '_po'."
+                type: string
+            site: 
+                description: "Directory where to store rendered files, defaults to absolute path of '_site'."
+                type: string
+            timestamp:
+                description: "Name of the timestamp file containing the seconds since the epoch since the last write of the site, defults to '_timestamp'."
+                type: string
+        views: "Directory where view templates are searched, defaults to '_views'."
