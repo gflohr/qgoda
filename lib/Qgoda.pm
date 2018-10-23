@@ -264,7 +264,6 @@ sub __startHelpers {
 sub __startHelper {
     my ($self, $helper, $args) = @_;
 
-$DB::single = 1;
     $args ||= [];
     $args = [$helper] if !@$args;
     my $logger = $self->logger;
@@ -890,12 +889,12 @@ sub __initNoSCMPatterns {
     my ($self) = @_;
 
     my $config = $self->config;
-    my $no_scm = $config->{no_scm};
+    my $no_scm = $config->{'no-scm'};
 
     return $no_scm if blessed $no_scm;
 
     require File::Globstar::ListMatch;
-    return $config->{no_scm} = 
+    return $config->{'no-scm'} = 
             File::Globstar::ListMatch->new($no_scm,
                                            $config->{'case-insensitive'});
 }

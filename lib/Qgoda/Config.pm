@@ -173,7 +173,7 @@ sub default {
         latency => 0.5,
         exclude => [],
         exclude_watch => [],
-        no_scm => [],
+        'no-scm' => [],
         paths => {
             views => '_views',
             plugins => '_plugins',
@@ -339,8 +339,8 @@ sub checkConfig {
         if exists $self->{po}->{mdextra} && !$self->__isArray($self->{po}->{mdextra});
     die __x("'{variable}' must be a list", variable => 'po.views')
         if exists $self->{po}->{views} && !$self->__isArray($self->{po}->{views});
-    die __x("'{variable}' must be a list", variable => 'no_scm')
-        if exists $self->{no_scm} && !$self->__isArray($self->{no_scm});
+    die __x("'{variable}' must be a list", variable => 'no-scm')
+        if exists $self->{'no-scm'} && !$self->__isArray($self->{'no-scm'});
 
     # Has to be done after everything was read. We need the value of
     # case-sensitive.

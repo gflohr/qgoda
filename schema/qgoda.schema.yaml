@@ -65,4 +65,8 @@ properties:
         items:
             type: string
             pattern: "[a-zA-Z]{1,8}(-[a-zA-z0-9]{8})?"
-
+    no-scm:
+        description: "List of additional file name patterns that should be processed in scm mode, even when not under version control (default: empty)"
+        type: array
+        items:
+            type: string
