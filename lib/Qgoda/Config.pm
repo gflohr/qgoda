@@ -235,7 +235,7 @@ sub default {
             'copyright-holder' => __"Set config.po.copyright-holder in _config.yaml",
             'msgid-bugs-address' => __"Set config.po.msgid-bugs-address in _config.yaml",
             qgoda => 'qgoda',
-            refresh => 0,
+            refresh => false,
             xgettext => 'xgettext',
             'xgettext-tt2' => 'xgettext-tt2',
             msgfmt => 'msgfmt',

@@ -98,28 +98,24 @@ paths:
   views: _views
 permalink: '{significant-path}'
 po:
-  copyright_holder: cantanea EOOD <http://www.cantanea.com/>
-  from_code: utf-8
+  copyright-holder: cantanea EOOD <http://www.cantanea.com/>
   mdextra:
   - /_includes/**
   msgfmt: msgfmt
-  msgid_bugs_address: Guido Flohr <guido.flohr@cantanea.com>
+  msgid-bugs-address: Guido Flohr <guido.flohr@cantanea.com>
   msgmerge: msgmerge
   qgoda:
   - perl
   - -I/Users/guido/perl/qgoda/lib
   - /Users/guido/perl/qgoda/bin/qgoda
-  refresh: 0
-  reload: 1
+  reload: true
   textdomain: net.qgoda.www
   tt2:
   - _views
-  views:
-  - /_views/**
   - '!/_views/raw'
   - '!/_views/functions/**'
   xgettext: xgettext
-  xgettext_tt2: xgettext-tt2
+  xgettext-tt2: xgettext-tt2
 processors:
   chains:
     html:

@@ -93,3 +93,55 @@ properties:
     permalink:
         description: "Template string for permalinks, defaults to '{significant-path}'."
         type: string
+    po:
+        description: "Variables for internationalization (i18n) and the translation workflow."
+        type: object
+        additionalProperties: false
+        properties:
+            copyright-holder:
+                description: "Copyright information for the original content."
+                type: string
+            mdextra:
+                description: "List of file name patterns for additional markdown files to translate."
+                type: array
+                items:
+                    type: string
+            msgfmt:
+                description: "The msgfmt command (or an array of the program name plus arguments), defaults to 'msgfmt'."
+                type: [array, string]
+                items:
+                    type: string
+            msgid-bugs-address:
+                description: "Where to report translation problems with the original strings."
+                type: string
+            msgmerge:
+                description: "The msgmerge command (or an array of the program name plus arguments), defaults to 'msgmerge'."
+                type: [array, string]
+                items:
+                    type: string
+            qgoda:
+                description: "The qgoda command (or an array of the program name plus arguments), defaults to 'qgoda'."
+                type: [array, string]
+                items:
+                    type: string
+            reload:
+                description: "Whether to throw away the translation before every rebuild, defaults to false."
+                type: boolean
+            textdomain:
+                description: "An identifier for the translation catalog (textdomain), defaults to 'messages'."
+                type: string
+            tt2:
+                description: "A list of file name patterns or one single pattern, where translatable templates for the Template Toolkit version 2 are stored, defaults to '_views'."
+                types: [string, array]
+                items:
+                    type: string
+            xgettext:
+                description: "The xgettext command (or an array of the program name plus arguments), defaults to 'xgettext'."
+                type: [array, string]
+                items:
+                    type: string
+            xgettext-tt2:
+                description: "The xgettext-tt2 command (or an array of the program name plus arguments), defaults to 'xgettext-tt2'."
+                type: [array, string]
+                items:
+                    type: string
