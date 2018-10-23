@@ -65,6 +65,9 @@ properties:
         items:
             type: string
             pattern: "[a-zA-Z]{1,8}(-[a-zA-z0-9]{8})?"
+    location:
+        description: "Template string for output location, defaults to '/{directory}/{basename}/{index}{suffix}'."
+        type: string
     no-scm:
         description: "List of additional file name patterns that should be processed in scm mode, even when not under version control (default: empty)"
         type: array
@@ -87,3 +90,6 @@ properties:
                 description: "Name of the timestamp file containing the seconds since the epoch since the last write of the site, defults to '_timestamp'."
                 type: string
         views: "Directory where view templates are searched, defaults to '_views'."
+    permalink:
+        description: "Template string for permalinks, defaults to '{significant-path}'."
+        type: string
