@@ -14,13 +14,18 @@ properties:
         description: Default values, see https://www.qgoda.net/en/defaults
         type: array
         items:
+            description: "A list of objects with properties 'files' and 'values', default: empty"
             type: object
+            required: ["files", "values"]
+            additionalProperties: false
             properties:
                 files:
+                    description: "Either one single file name pattern or a list of file name patterns.  Files that match will receive the values specified."
                     type: [array, string]
                     items:
                         type: string
                 values:
+                    description: "Values that should be set for matching files."
                     type: object
     exclude:
         description: "List of file name patterns that should be ignored for building the site (default: empty)"
