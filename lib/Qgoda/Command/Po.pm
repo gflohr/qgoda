@@ -201,7 +201,7 @@ EOF
 Where to send msgid bug reports?
 EOF
     chomp $msgid_bugs_address_comment;
-    my $msgid_bugs_address = $po_config->{msgid_bugs_address};
+    my $msgid_bugs_address = $po_config->{'msgid-bugs-address'};
     $msgid_bugs_address = __"Please set MSGID_BUGS_ADDRESS in 'PACKAGE'"
         if empty $msgid_bugs_address;
     
@@ -209,7 +209,7 @@ EOF
 Initial copyright holder added to pot and po files.
 EOF
     chomp $copyright_holder_comment;
-    my $copyright_holder = $po_config->{copyright_holder};
+    my $copyright_holder = $po_config->{'copyright-holder'};
     $copyright_holder = __"Please set COPYRIGHT_HOLDER in 'PACKAGE'"
         if empty $copyright_holder;
 
@@ -631,9 +631,9 @@ sub __makePOT {
     my @cmd = ($self->__expandCommand($po_config->{xgettext}),
                "--output=$pox", "--from-code=utf-8",
                "--add-comments=TRANSLATORS:", "--files-from=PLFILES",
-               "--copyright-holder='$po_config->{copyright_holder}'",
+               "--copyright-holder='$po_config->{'copyright-holder'}'",
                "--force-po",
-               "--msgid-bugs-address='$po_config->{msgid_bugs_address}'",
+               "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'",
                @options);
     $self->__fatalCommand(@cmd);
     $logger->info(__x("unlink '{filename}'", filename => $pot));
@@ -645,9 +645,9 @@ sub __makePOT {
     @cmd = ($self->__expandCommand($po_config->{qgoda}), "xgettext",
                "--output=$pox", "--from-code=utf-8",
                "--add-comments=TRANSLATORS:", "--files-from=MDPOTFILES",
-               "--copyright-holder='$po_config->{copyright_holder}'",
+               "--copyright-holder='$po_config->{'copyright-holder'}'",
                "--force-po",
-               "--msgid-bugs-address='$po_config->{msgid_bugs_address}'");
+               "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'");
     $self->__fatalCommand(@cmd);
     $logger->info(__x("unlink '{filename}'", filename => $pot));
     unlink $pot;
@@ -658,9 +658,9 @@ sub __makePOT {
     @cmd = ($self->__expandCommand($po_config->{xgettext_tt2}),
                "--output=$pox", "--from-code=utf-8",
                "--add-comments=TRANSLATORS:", "--files-from=POTFILES",
-               "--copyright-holder='$po_config->{copyright_holder}'",
+               "--copyright-holder='$po_config->{'copyright-holder'}'",
                "--force-po",
-               "--msgid-bugs-address='$po_config->{msgid_bugs_address}'");
+               "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'");
     $self->__fatalCommand(@cmd);
     $logger->info(__x("unlink '{filename}'", filename => $pot));
     unlink $pot;
@@ -887,13 +887,13 @@ The first value is assumed to be the base language of your site.
 
 Your site's textdomain, for example C<com.example.www>.
 
-=item B<po.msgid_bugs_address>
+=item B<po.msgid_bugs-address>
 
 An email address or web site for issuing errors in translatable strings.
 Translators will use that address for reporting problems with translating
 your site.  See below for an example.
 
-=item B<po.copyright_holder>
+=item B<po.copyright-holder>
 
 The copyright holder that should be put into the header of the master
 translation file F<TEXTDOMAIN.pot>.
