@@ -40,6 +40,7 @@ lib/Qgoda/Init.pm
 lib/Qgoda/Init/config.pm
 lib/Qgoda/Init/copy.pm
 lib/Qgoda/Init/node.pm
+lib/Qgoda/JavaScript/Environment.pm
 lib/Qgoda/Locale/XGettext.pm
 lib/Qgoda/Logger.pm
 lib/Qgoda/Migrator.pm
@@ -62,12 +63,14 @@ lib/Qgoda/Repository/Fetcher.pm
 lib/Qgoda/Repository/Fetcher/File.pm
 lib/Qgoda/Repository/Fetcher/Git.pm
 lib/Qgoda/Repository/Fetcher/LWP.pm
+lib/Qgoda/Schema.pm
 lib/Qgoda/Site.pm
 lib/Qgoda/Splitter.pm
 lib/Qgoda/Util.pm
 lib/Qgoda/Util/Date.pm
 lib/Qgoda/Util/Translate.pm
 lib/Template/Plugin/Qgoda.pm
+lib/package.json
 perlcritic.rc
 po/Makefile
 po/PACKAGE

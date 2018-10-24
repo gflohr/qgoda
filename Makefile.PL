@@ -18,10 +18,81 @@
 
 package MY;
 
+use strict;
+
 use IO::Handle;
+use Cwd qw(abs_path);
+use File::Spec;
 
 sub postamble {
     my ($self) = @_;
+
+	my @post;
+
+	# Try to find either yarn or npm in $PATH.
+	my $preferred_package_manager = $ENV{QGODA_PACKAGE_MANAGER} || '';
+	my $package_manager;
+	my $here = abs_path;
+	my $libdir = File::Spec->catdir($here, 'lib');
+	chdir $libdir || die "cannot cd to '$libdir': $!";
+	if ($preferred_package_manager ne 'npm') {
+		my $pm = $ENV{QGODA_YARN} || 'yarn';
+		print "Trying '$pm install' for loading JavaScript modules.\n";
+		my @cmd = ($pm, 'install');
+		if (0 == system @cmd) {
+			$package_manager = 'yarn';
+		} else {
+			print STDERR "system '@cmd' failed: ";
+			if ($? == -1) {
+				print STDERR "failed to execute: $!\n";
+			} elsif ($? & 127) {
+				printf STDERR "child died with signal %d, %s coredump\n",
+					($? & 127), ($? & 128) ? 'with' : 'without';
+			} else {
+				printf STDERR "child exited with value %d\n", $? >> 8;
+			}
+		}
+	}
+
+	if (!$package_manager && $preferred_package_manager ne 'yarn') {
+		my $pm = $ENV{QGODA_NPM} || 'npm';
+		print "Trying '$pm install' for loading JavaScript modules.\n";
+		my @cmd = ($pm, 'install');
+		if (0 == system @cmd) {
+			$package_manager = 'npm';
+		} else {
+			print STDERR "system '@cmd' failed: ";
+			if ($? == -1) {
+				print STDERR "failed to execute: $!\n";
+			} elsif ($? & 127) {
+				printf STDER "child died with signal %d, %s coredump\n",
+					($? & 127), ($? & 128) ? 'with' : 'without';
+			} else {
+				printf STDERR "child exited with value %d\n", $? >> 8;
+			}
+		}
+	}
+
+	if (!$package_manager) {
+		die <<'EOF';
+Neither a working 'yarn' or 'npm' installation was found on your system!
+You can try to build Qgoda again after setting one of the following
+environment variables:
+
+	QGODA_PACKAGE_MANAGER:
+		Either 'yarn' or 'npm' if you want to force usage of
+		of the two.  Leave empty if you want to try both.
+	QGODA_YARN:
+		Path to a working 'yarn' or empty if you want to use
+		the 'yarn' command in your $PATH.
+	QGODA_NPM:
+		Path to a working 'npm' or empty if you want to use
+		the 'npm' command in your $PATH.
+
+EOF
+	}
+
+	chdir $here or die "cannot cd to '$here': $!";
 
     if (-e 'maintainer.mk') {
         open my $fh, '<', 'maintainer.mk'
@@ -31,6 +102,12 @@ sub postamble {
     }
 
     return join "\n", @post;
+}
+
+sub __yarnInstall {
+	my ($self) = @_;
+
+	return;
 }
 
 sub install {
@@ -45,7 +122,7 @@ sub install {
             return $inner;
         }
 
-        return qq{"$innner"};
+        return qq{"$inner"};
     };
 
     unless ($ENV{QGODA_NO_INSTALL_CHECK}) {
@@ -130,6 +207,7 @@ my %WriteMakefileArgs = (
     "AnyEvent::Loop" => 0,
     "Archive::Extract" => 0,
     "Carp" => 0,
+    "Cpanel::JSON::XS" => 0,
     "Cwd" => 0,
     "Data::Dumper" => 0,
     "Data::Walk" => "2.00",
@@ -158,6 +236,7 @@ my %WriteMakefileArgs = (
     "IPC::Signal" => 0,
     "Inline" => 0,
     "JSON" => "2.0",
+    "JavaScript::DukTape::XS" => 0,
     "LWP::UserAgent" => 0,
     "List::Util" => "1.45",
     "Locale::Messages" => 0,
@@ -188,8 +267,9 @@ my %WriteMakefileArgs = (
     "URI::file" => 0,
     "URI::http" => 0,
     "YAML" => 0,
-    "YAML::XS" => 0,
+    "YAML::XS" => "0.67",
     "base" => 0,
+    "boolean" => 0,
     "integer" => 0,
     "overload" => 0,
     "strict" => 0,
@@ -213,6 +293,7 @@ my %FallbackPrereqs = (
   "AnyEvent::Loop" => 0,
   "Archive::Extract" => 0,
   "Carp" => 0,
+  "Cpanel::JSON::XS" => 0,
   "Cwd" => 0,
   "Data::Dumper" => 0,
   "Data::Walk" => "2.00",
@@ -241,6 +322,7 @@ my %FallbackPrereqs = (
   "IPC::Signal" => 0,
   "Inline" => 0,
   "JSON" => "2.0",
+  "JavaScript::DukTape::XS" => 0,
   "LWP::UserAgent" => 0,
   "List::Util" => "1.45",
   "Locale::Messages" => 0,
@@ -272,8 +354,9 @@ my %FallbackPrereqs = (
   "URI::file" => 0,
   "URI::http" => 0,
   "YAML" => 0,
-  "YAML::XS" => 0,
+  "YAML::XS" => "0.67",
   "base" => 0,
+  "boolean" => 0,
   "integer" => 0,
   "overload" => 0,
   "strict" => 0,

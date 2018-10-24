@@ -36,14 +36,16 @@ sub config {
 		properties => {
 			'case-sensitive' => {
 				description => __"Should a case-sensitive file system be "
-				               . "assumed (default => false)",
-				type => 'boolean'
+				               . "assumed.",
+				type => 'boolean',
+				default => false
 			},
 			'compare-output' => {
 				description => __"Should existing output files be read and "
 				               . "compared to the new version to avoid "
 				               . "updating timestamps (default => true)",
-				type => 'boolean'
+				type => 'boolean',
+				default => true
 			},
 			defaults => {
 				description => __"Default values, see "
@@ -57,7 +59,7 @@ sub config {
 					additionalProperties => false,
 					properties => {
 						files => {
-							description => "Either one single file name "
+							description => __"Either one single file name "
 							               . "pattern or a list of file name "
 							               . "patterns.  Files that match will "
 							               . "receive the values specified.",
@@ -67,7 +69,7 @@ sub config {
 							}
 						},
 						values => {
-							description => "Values that should be set for "
+							description => __"Values that should be set for "
 							               + "matching files.",
 							type => 'object',
 						}
@@ -76,21 +78,22 @@ sub config {
 			},
 			exclude => {
 				description => __"List of additional file name patterns that "
-				               . "should be ignored for building the site "
-				               . "(default: empty).",
+				               . "should be ignored for building the site.",
 				type => 'array',
 				items => {
 					type => 'string'
-				}
+				},
+				default => []
 			},
 			'exclude-watch' => {
 				description => __"List of additional file name patterns that "
-				               . "should be ignored when changed in watch mode "
-				               . "(default => empty)",
+				               . "should be ignored when changed in watch "
+				               . "mode.",
 				type => 'array',
 				items => {
 					type => 'string'
-				}
+				},
+				default => []
 			},
 			'front-matter-placeholder' => {
 				description => __"An object of valid chain names or '*' that "
@@ -118,23 +121,25 @@ sub config {
 							type => 'string'
 						}
 					}
-				}
+				},
+				default => {}
 			},
 			index => {
-				description => "Basename of a file that is considered to be "
-				               . "the index document of a directory, defaults "
-				               . "to 'index'.",
-				type => 'string'
+				description => __"Basename of a file that is considered to be "
+				               . "the index document of a directory.",
+				type => 'string',
+				default => 'index'
 			},
 			latency => {
 				descriptions => "Number of seconds to wait until a rebuild "
 				                . "is triggered after a file system change in "
-				                . "watch mode, defaults to 0.5 s.",
+				                . "watch mode.",
 				type => 'number',
-				minimum => 0
+				minimum => 0,
+				default => 0.5
 			},
 			linguas => {
-				description => "List of language identifiers complying to "
+				description => __"List of language identifiers complying to "
 				               . "RFC4647 section 2.1 but without any asterisk "
 				               . "(*) characters.",
 				type => 'array',
@@ -144,72 +149,75 @@ sub config {
 				}
 			},
 			location => {
-				description => "Template string for output location, "
-				               . "defaults to "
-				               . "'/{directory}/{basename}/{index}{suffix}'.",
-				type => 'string'
+				description => __"Template string for output location."
+				type => 'string',
+				default => '/{directory}/{basename}/{index}{suffix}'
 			},
 			'no-scm' => {
-				description => "List of additional file name patterns that "
+				description => __"List of additional file name patterns that "
 				               . "should be processed in scm mode, even when "
-				               . "not under version control (default => empty)",
+				               . "not under version control",
 				type => 'array',
 				items => {
 					type => 'string'
-				}
+				},
+				default => []
 			},
 			paths => {
-				description => "Configurable paths.",
+				description => __"Configurable paths.",
 				type => 'object',
 				properties => {
 					plugins => {
-						description => "Directory for plug-ins, default "
-						               . "'_plugins'.",
-						type => 'string'
+						description => __"Directory for plug-ins.",
+						type => 'string',
+						default => '_plugins'
 					},
 					po => {
-						description => "Directory for po files and other i18n "
-						               . "related files, default '_po'.",
-						type => 'string'
+						description => __"Directory for po files and other i18n "
+						               . "related files.",
+						type => 'string',
+						default => '_po'
 					},
 					site => {
-						description => "Directory where to store rendered "
-						               . "files, defaults to absolute path of "
+						description => __"Directory where to store rendered "
+						               . "files, defaults to absolute path to "
 						               . "'_site'.",
 						type => 'string'
+						# Default has to be determined at run-time.
 					},
 					timestamp => {
-						description => "Name of the timestamp file containing "
+						description => __"Name of the timestamp file containing "
 						               . "the seconds since the epoch since "
-						               . "the last write of the site, defults "
-						               . "to '_timestamp'.",
-						type => 'string'
+						               . "the last write of the site.",
+						type => 'string',
+						default => '_timestamp'
 					},
 					views => {
-						description => "Directory where view templates are "
-						               . "searched, defaults to '_views'.",
-						type => 'string'
+						description => __"Directory where view templates are "
+						               . "searched.",
+						type => 'string',
+						default => '_views',
 					}
 				}
 			},
 			permalink => {
-				description => "Template string for permalinks, defaults to "
-				               . "'{significant-path}'.",
-				type => 'string'
+				description => __"Template string for permalinks."
+				type => 'string',
+				default => '{significant-path}'
 			},
 			po => {
-				description => "Variables for internationalization (i18n) and "
+				description => __"Variables for internationalization (i18n) and "
 				               . "the translation workflow.",
 				type => 'object',
 				additionalProperties => false,
 				properties => {
 					'copyright-holder' => {
-						description => "Copyright information for the original "
+						description => __"Copyright information for the original "
 						               . "content.",
 						type => 'string'
 					},
 					mdextra => {
-						description => "List of file name patterns for "
+						description => __"List of file name patterns for "
 						               . "additional markdown files to "
 						               . "translate.",
 						type => 'array',
@@ -218,7 +226,7 @@ sub config {
 						}
 					},
 					msgfmt => {
-						description => "The msgfmt command (or an array of "
+						description => __"The msgfmt command (or an array of "
 						               . "the program name plus arguments), "
 						               . "defaults to 'msgfmt'.",
 						type => ['array', 'string'],
@@ -227,12 +235,12 @@ sub config {
 						}
 					},
 					'msgid-bugs-address' => {
-						description => "Where to report translation problems "
+						description => __"Where to report translation problems "
 						               . "with the original strings.",
 						type => 'string'
 					},
 					msgmerge => {
-						description => "The msgmerge command (or an array of "
+						description => __"The msgmerge command (or an array of "
 						               . "the program name plus arguments), "
 						               . "defaults to 'msgmerge'.",
 						type => [qw(array string)],
@@ -241,7 +249,7 @@ sub config {
 						}
 					},
 					qgoda => {
-						description => "The qgoda command (or an array of the "
+						description => __"The qgoda command (or an array of the "
 						               . "program name plus arguments), "
 						               . "defaults to 'qgoda'.",
 						type => [qw(array string)],
@@ -250,7 +258,7 @@ sub config {
 						}
 					},
 					reload => {
-						description => "Whether to throw away the "
+						description => __"Whether to throw away the "
 						               . "translation before every rebuild, "
 						               . "defaults to false.",
 						type => 'boolean'
@@ -365,8 +373,15 @@ sub config {
 				type => 'string'
 				# Pattern (value) will be set at runtime.
 			},
+			title => {
+				description => __"The title of the site. It has no"
+				               . "particular semantics",
+				default => __"A new Qgoda Powered Site",
+			}
 			view => {
-				description => __"The default value for the view template."
+				description => __"The default value for the view template.",
+				default => 'default.html',
+				minLength => 1,
 			}
 		}
 	}
