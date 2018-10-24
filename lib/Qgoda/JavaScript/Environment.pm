@@ -21,7 +21,7 @@ package Qgoda::JavaScript::Environment;
 use strict;
 
 use Qgoda::Util qw(empty);
-use JavaScript::DukTape::XS;
+use JavaScript::Duktape::XS;
 use Cpanel::JSON::XS qw(decode_json);
 use File::Spec;
 use File::Basename qw(dirname);
@@ -31,7 +31,7 @@ sub new {
 	my ($class, @global_paths) = @_;
 
 	my $self = {
-		__global => [@global_paths]
+		__global => [map { "$_/node_modules" } @global_paths]
 	};
 
 	my $module_resolve = sub {
@@ -45,30 +45,43 @@ sub new {
 		my ($filename) = @_;
 
 		return $self->__moduleLoad($filename);
-	}
+	};
+
+	$self->{__vm} = JavaScript::Duktape::XS->new;
+	$self->{__vm}->set(perl_module_resolve => $module_resolve);
+	$self->{__vm}->set(perl_module_load => $module_load);
 
 	bless $self, $class;
+}
+
+sub run {
+	my ($self, $code) = @_;
+
+	warn "CODE: $code";
+
+	return $self->{__vm}->eval($code);
 }
 
 sub __moduleResolve {
 	my ($self, $module, $path) = @_;
 
+	# FIXME! Do we have to implement a cache or does Duktape do that for us?
 	$path = '' if !defined $path;
 	$path = '' if $module =~ m{^/};
 	$path = dirname $path if '' ne $path;
 
 	if ($module =~ m{^\.{0,2}/}) {
-		my $resolved = eval { load_as_file "$path/$module" };
+		my $resolved = eval { $self->__loadAsFile("$path/$module") };
 		$@ or return $resolved;
-		$resolved = eval { load_as_directory "$path/$module" };
+		$resolved = eval { $self->__loadAsDirectory("$path/$module") };
 		$@ or return $resolved;
 	}
 
-	my $resolved = eval { load_node_modules $module, $path};
+	my $resolved = eval { $self->__loadNodeModules($module, $path) };
 	$@ or return $resolved;
 
-	js_error __x("Cannot find module '{module}'!\n", 
-				 module => $module);
+	$self->__jsError(__x("Cannot find module '{module}'!\n",
+	                     module => $module));
 }
 
 sub __moduleLoad {
@@ -123,7 +136,7 @@ sub __normalize {
 sub __jsError {
 	my ($self, $error) = @_;
 
-	#warn $error;
+	warn $error;
 	die $error;
 }
 
@@ -151,9 +164,8 @@ sub __loadAsFile {
 sub __loadAsIndex {
 	my ($self, $name) = @_;
 
-	return "$name/index.js" if is_file "$name/index.js";
-	# FIXME! Can we mark the file?
-	return "$name/index.json" if is_file "$name/index.json";
+	return "$name/index.js" if $self->__isFile("$name/index.js");
+	return "$name/index.json" if $self->__isFile("$name/index.json");
 
 	die;
 }
@@ -174,12 +186,12 @@ sub __loadAsDirectory {
 		my $main = $package->{main};
 		$main = '' if !defined $main;
 		$main = "$name/$main";
-		my $resolved = eval { return load_as_file $main };
+		my $resolved = eval { $self->__loadAsFile($main) };
 		$@ or return $resolved;
-		return load_as_index $main;
+		return $self->__loadAsIndex($main);
 	}
 
-	return load_as_index $name;
+	return $self->__loadAsIndex($name);
 }
 
 sub __nodeModulesPath {
@@ -188,7 +200,7 @@ sub __nodeModulesPath {
 	$start = '.' if empty $start;
 	my @parts = split /\//, $start;
 	my $i = -1 + @parts;
-	my @dirs;
+	my @dirs = @{$self->{__global}};
 	while ($i >= 0) {
 		if ('node_modules' eq $parts[$i]) {
 			--$i;
@@ -202,25 +214,17 @@ sub __nodeModulesPath {
 }
 
 sub __loadNodeModules {
-	my ($module, $path) = @_;
+	my ($self, $module, $path) = @_;
 
-	my @dirs = node_modules_path($path);
+	my @dirs = $self->__nodeModulesPath($path);
 	foreach my $dir (@dirs) {
-		my $resolved = eval { load_as_file "$dir/$module" };
+		my $resolved = eval { $self->__loadAsFile("$dir/$module") };
 		$@ or return $resolved;
-		$resolved = eval { load_as_directory "$dir/$module" };
+		$resolved = eval { $self->__loadAsDirectory("$dir/$module") };
 		$@ or return $resolved;
 	}
 
 	die;
 }
 
-__END__
-open my $fh, '<', 'index.js' or die;
-my $code = join '', <$fh>;
-my $vm = JavaScript::Duktape::XS->new;
-$vm->set(perl_module_resolve => \&module_resolve);
-$vm->set(perl_module_load => \&module_load);
-my $result = $vm->eval($code);
-use Data::Dumper;
-warn Dumper $result;
+1;
