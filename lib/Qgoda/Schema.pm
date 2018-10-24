@@ -292,6 +292,81 @@ sub config {
 						}
 					}
 				}
+			},
+			processors => {
+				description => __"The processors to use for generating "
+				                 . "content.",
+				additionalProperties => false,
+				properties => {
+					chains => {
+						description => __"The processor chains.",
+						patternProperties => {
+							'[_a-zA-z][a-zA-Z0-9]*' => {
+								description => __"Properties of one processor "
+								                 . " chain."
+								type => 'object',
+								addititionalProperties => false,
+								properties => {
+									modules => {
+										description => __"The module names.",
+										type => 'array'
+										# The possible values are filled at
+										# run-time.
+									},
+									suffix => {
+										description => __"An optional suffix "
+										                 . "if different from "
+														 . "original filename.",
+										type => string,
+										minLength => 1,
+									},
+									wrapper => {
+
+									}
+								}
+							}
+						}
+					},
+					options => {
+						description => __"Additional options for the"
+						                 " processor plug-ins",
+						additionalProperties => false,
+						properties => {
+							# Must/can be filled at runtime.
+						}
+					},
+					triggers => {
+						description => __"Filename extenders that trigger a "
+						               . " particular chain if not specified"
+						               . " in front matter or defaults.",
+						patternProperties => {
+							'.+' => {
+								description => __"The filename extender.",
+								type => 'string'
+							}
+						}
+					}
+				},
+			},
+			scm => {
+				description => __"Source code management (SCM) that is in "
+				               . "use. If present, only files that are under",
+							   . "version control and those matching 'no-scm'"
+							   . "are processed. Currently only git is "
+							   . "supported."
+				type => 'string',
+				pattern => '^git$'
+			},
+			srcdir => {
+				description => __"The source directory for all assets. Do "
+				               . "not set that variable yourself! It will be "
+							   . "overwritten at runtime with the absolute "
+							   . "path to the current directory.",
+				type => 'string'
+				# Pattern (value) will be set at runtime.
+			},
+			view => {
+				description => __"The default value for the view template."
 			}
 		}
 	}
