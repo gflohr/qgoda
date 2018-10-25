@@ -28,10 +28,15 @@ use File::Basename qw(dirname);
 use Locale::TextDomain qw(qgoda);
 
 sub new {
-	my ($class, @global_paths) = @_;
+	my ($class, %args) = @_;
+
+	my $global = delete $args{global};
+	$global = [$global] if defined $global;
+	my @global = @{$global || []};
+	my $exchange = empty $args{exchange} ? '__perl__' : delete $args{exchange};
 
 	my $self = {
-		__global => [map { "$_/node_modules" } @global_paths]
+		__global => [map { "$_/node_modules" } @global],
 	};
 
 	my $module_resolve = sub {
@@ -44,12 +49,40 @@ sub new {
 	my $module_load = sub {
 		my ($filename) = @_;
 
+		#warn "Loading $filename\n";
 		return $self->__moduleLoad($filename);
 	};
 
+	# Our exchange buffer with the JavaScript world.
+	my $perl = {};
 	$self->{__vm} = JavaScript::Duktape::XS->new;
 	$self->{__vm}->set(perl_module_resolve => $module_resolve);
 	$self->{__vm}->set(perl_module_load => $module_load);
+
+	my $no_console = delete $args{'no_console'};
+	unless ($no_console) {
+		$perl->{modules}->{console} = {
+			log => sub {
+				print shift, "\n";
+			},
+			error => sub {
+				print STDERR shift, "\n";
+			},
+			warn => sub {
+				print STDERR shift, "\n";
+			}
+		};
+
+		$self->{__vm}->set(console => {});
+	}
+
+	# All code that wants to call back into Perl must run after thie line.
+	$self->{__vm}->set($exchange, $perl);
+
+	unless ($no_console) {
+		require 'Qgoda/JavaScript/console.js';
+		$self->{__vm}->eval(Qgoda::JavaScript::console->code);
+	}
 
 	bless $self, $class;
 }
@@ -57,9 +90,11 @@ sub new {
 sub run {
 	my ($self, $code) = @_;
 
-	warn "CODE: $code";
-
 	return $self->{__vm}->eval($code);
+}
+
+sub vm {
+	shift->{__vm};
 }
 
 sub __moduleResolve {
@@ -87,7 +122,6 @@ sub __moduleResolve {
 sub __moduleLoad {
 	my ($self, $filename) = @_;
 
-	#warn "Loading $filename\n";
 	open my $fh, '<', $filename
 		or $self->__jsError(__x("error reading '{filename}': {err}\n",
 		                        filename => $filename, err => $!));
@@ -136,7 +170,7 @@ sub __normalize {
 sub __jsError {
 	my ($self, $error) = @_;
 
-	warn $error;
+	#warn $error;
 	die $error;
 }
 
@@ -150,13 +184,13 @@ sub __loadAsFile {
 	my ($self, $name) = @_;
 
 	my $filename = $name;
-	return $filename if is_file $filename;
+	return $filename if $self->__isFile($filename);
 	$filename = "$name.js";
-	return $filename if is_file $filename;
+	return $filename if $self->__isFile($filename);
 	# FIXME! Try to mark $filename as json.  That's safer than looking
 	# at the extender;
 	$filename = "$name.json";
-	return $filename if is_file $filename;
+	return $filename if $self->__isFile($filename);
 
 	die;
 }
@@ -175,7 +209,7 @@ sub __loadAsDirectory {
 
 	# Load as directory.
 	my $package_json = join '/', $name, 'package.json';
-	if (is_file $package_json) {
+	if ($self->__isFile($package_json)) {
 		open my $fh, '<', $package_json
 				or die;
 		
