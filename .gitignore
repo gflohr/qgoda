@@ -1,6 +1,12 @@
 .*.swp
 *~
 
+# Use your own one.
+/.vimrc
+
+# Mac OS X
+.DS_Store
+
 # Eclipse
 /.project
 /.includepath
