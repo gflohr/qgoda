@@ -96,5 +96,6 @@ ok -e '_site/master/index.html';
 my $generated = read_file '_site/master/index.html';
 ok $generated !~ /qgoda-xgettext/;
 ok $generated !~ /qgoda-no-xgettext/;
+$site->tearDown;
 
 done_testing;
