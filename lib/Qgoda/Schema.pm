@@ -107,7 +107,7 @@ sub config {
 				description => __"An object of valid chain names or '*' that "
 				               . "give the frontmatter placeholder string "
 				               . "for each configured processor chain.",
-				type => 'object',
+				type => 'string',
 				default => "[% '' %]\n"
 			},
 			generator => {
@@ -390,10 +390,23 @@ sub config {
 						description => __"Additional options for the"
 						               . " processor plug-ins",
 						additionalProperties => false,
-						default => {},
-						properties => {
-							# Must/can be filled at runtime.
-						}
+						type => 'object',
+						default => {
+							HTMLFilter => [
+								'AnchorTarget',
+								'Generator',
+								'CleanUp',
+								{
+									'TOC' => {
+										'content-tag' => 'qgoda-content',
+										'toc-tag' => 'qgoda-toc',
+										start => 2,
+										end => 6,
+										template => 'components/toc.html'
+									}
+								}
+							]
+						},
 					},
 					triggers => {
 						description => __"Filename extenders that trigger a "
