@@ -36,7 +36,7 @@ sub new {
 	my $exchange = empty $args{exchange} ? '__perl__' : delete $args{exchange};
 
 	my $self = {
-		__global => [map { "$_/node_modules" } @global],
+		__global => [@global],
 	};
 
 	my $module_resolve = sub {

@@ -43,7 +43,7 @@ use Template::Plugin::Gettext 0.6;
 use List::Util 1.45 qw(uniq);
 use YAML::XS 0.67;
 use boolean;
-$YAML::XS::Boolean = 'boolean';
+$YAML::XS::Boolean = 'JSON::PP';
 
 use Qgoda::Logger;
 use Qgoda::Config;
@@ -922,6 +922,20 @@ sub buildOptions {
     my ($self) = @_;
 
     return %{$self->{__build_options} || {}};
+}
+
+sub nodeModules {
+	my ($volume, $directories, undef) = File::Spec->splitpath(__FILE__);
+
+	my @dirs = File::Spec->splitdir($directories);
+	if (File::Spec->file_name_is_absolute(__FILE__)) {
+		unshift @dirs, '';
+	}
+
+	my $path = join '/', @dirs, 'node_modules';
+	$path =~ s{(.)//+}{$1/}g;
+
+	return $path;
 }
 
 1;
