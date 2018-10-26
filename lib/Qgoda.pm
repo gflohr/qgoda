@@ -23,7 +23,7 @@ use strict;
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
-$VERSION = '0.9.2';
+$VERSION = '0.9.3';
 
 use Locale::TextDomain qw(qgoda);
 use Locale::Messages;

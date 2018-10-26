@@ -34,15 +34,16 @@ sub config {
 	# FIXME! Fill in the variable parts.
 	return {
 		'$schema' => 'http://json-schema.org/draft-07/schema#',
-		'$id' => 'http://www.qgoda.net/schema/'
-		         . $QGODA::VERSION . '/config.schema.json',
+		'$id' => 'http://www.qgoda.net/schema/Qgoda/v'
+		         . $Qgoda::VERSION
+				 . '/config.schema.json',
 		title => __"Configuration",
 		description => __"A Qgoda Configuration",
 		type => 'object',
 		properties => {
 			'case-sensitive' => {
-				description => __"Should a case-sensitive file system be "
-				               . "assumed.",
+				description => __"Set to true if a case-sensitive file system "
+				               . "shoud be assumed.",
 				type => 'boolean',
 				default => false
 			},
@@ -389,6 +390,7 @@ sub config {
 						description => __"Additional options for the"
 						               . " processor plug-ins",
 						additionalProperties => false,
+						default => {},
 						properties => {
 							# Must/can be filled at runtime.
 						}
@@ -397,6 +399,16 @@ sub config {
 						description => __"Filename extenders that trigger a "
 						               . " particular chain if not specified"
 						               . " in front matter or defaults.",
+						default => {
+							    htm => 'html',
+								html => 'html',
+								md => 'markdown',
+								mdown => 'markdown',
+								mdwn => 'markdown',
+								mkd => 'markdown',
+								mkdn => 'markdown',
+								xml => 'xml'
+						},
 						patternProperties => {
 							'.+' => {
 								description => __"The filename extender.",
@@ -408,8 +420,8 @@ sub config {
 			},
 			scm => {
 				description => __"Source code management (SCM) that is in "
-				               . "use. If present, only files that are under"
-							   . "version control and those matching 'no-scm'"
+				               . "use. If present, only files that are under "
+							   . "version control and those matching 'no-scm' "
 							   . "are processed. Currently only git is "
 							   . "supported.",
 				type => 'string',

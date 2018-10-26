@@ -137,6 +137,7 @@ EOF
   build                       build site and exit
   watch                       build, then watch for changes and build on demand
   config                      dump the current configuration and exit
+  schema                      dump the configuration JSON schema and exit
   init                        initialize a new qgoda site
   dump                        dump the site structure as JSON (implies --quiet)
   markdown                    process Markdown

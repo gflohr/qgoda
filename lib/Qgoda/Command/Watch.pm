@@ -51,7 +51,7 @@ qgoda watch - Build a qgoda site and watch for changes
 
 =head1 SYNOPSIS
 
-qgoda watch [<global options>] [--dry-run]
+qgoda watch [<global options>] [--drafts][--future][--dry-run][--help]
 
 Try 'qgoda --help' for a description of global options.
 

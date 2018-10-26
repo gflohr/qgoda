@@ -24,10 +24,9 @@ use Qgoda;
 
 use base 'Qgoda::Command';
 
-sub _getDefaults { processor => 'Markdown' }
+sub _getDefaults {}
 
-sub _getOptionSpecs {
-}
+sub _getOptionSpecs {}
 
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
@@ -49,7 +48,7 @@ qgoda config - Dump the Qgoda configuration
 
 =head1 SYNOPSIS
 
-qgoda config [<global options>]
+qgoda [<global options>] config [--help]
 
 Try 'qgoda --help' for a description of global options.
 
