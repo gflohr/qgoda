@@ -41,6 +41,8 @@ lib/Qgoda/Init/config.pm
 lib/Qgoda/Init/copy.pm
 lib/Qgoda/Init/node.pm
 lib/Qgoda/JavaScript/Environment.pm
+lib/Qgoda/JavaScript/Filter.pm
+lib/Qgoda/JavaScript/console.js
 lib/Qgoda/Locale/XGettext.pm
 lib/Qgoda/Logger.pm
 lib/Qgoda/Migrator.pm
@@ -90,6 +92,8 @@ t/default-view.t
 t/encode_json.t
 t/flatten2hash.t
 t/interpolate.t
+t/javascript-console.t
+t/javascript-environment.t
 t/js_unescape.t
 t/locate_repo.t
 t/master.md
