@@ -21,7 +21,7 @@ package Qgoda::Command::Schema;
 use strict;
 
 use YAML::XS;
-use JSON qw(encode_json);
+use JSON;
 use Data::Dumper;
 use Storable qw(nfreeze);
 use Locale::TextDomain qw(qgoda);
@@ -50,7 +50,7 @@ sub _run {
 	if ('yaml' eq $options{format}) {
 		print Dump($schema);
 	} elsif ('json' eq $options{format}) {
-		print encode_json($schema);
+		print JSON->new->canonical->encode($schema);
 	} elsif ('perl' eq $options{format}) {
 		print Dumper($schema);
 	} elsif ('storable' eq $options{format}) {
@@ -102,6 +102,16 @@ dumped with L<Storable>::nfreeze().  The latter is binary!
 The default format is "json". If you plan to read and understand the output,
 consider using "yaml" instead.
 
+Alternatively, pipe the output of "qgoda schema" through L<jq(1)>:
+
+	qgoda schema | jq .
+
+Or into a readable file:
+
+	qgoda schema | jq . >filename.json
+
+Do not omit the dot ("."), it is important!
+
 =item -h, --help
 
 Show this help page and exit.
@@ -116,7 +126,7 @@ for every possible constellation.
 =head1 SEE ALSO
 
 qgoda(1), L<https://json-schema.org/>, L<https://www.json.org/>,
-L<http://yaml.org/>, L<Data::Dumper>, L<Storable>, perl(1)
+L<http://yaml.org/>, L<Data::Dumper>, L<Storable>, jq(1), perl(1)
 
 =head1 QGODA
 
