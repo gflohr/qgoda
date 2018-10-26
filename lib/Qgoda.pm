@@ -928,9 +928,7 @@ sub nodeModules {
 	my ($volume, $directories, undef) = File::Spec->splitpath(__FILE__);
 
 	my @dirs = File::Spec->splitdir($directories);
-	if (File::Spec->file_name_is_absolute(__FILE__)) {
-		unshift @dirs, '';
-	}
+	pop @dirs > 1 && $dirs[-1] == '';
 
 	my $path = join '/', @dirs, 'node_modules';
 	$path =~ s{(.)//+}{$1/}g;
