@@ -72,7 +72,9 @@ lib/Qgoda/Util.pm
 lib/Qgoda/Util/Date.pm
 lib/Qgoda/Util/Translate.pm
 lib/Template/Plugin/Qgoda.pm
+lib/package-lock.json
 lib/package.json
+lib/yarn.lock
 perlcritic.rc
 po/Makefile
 po/PACKAGE

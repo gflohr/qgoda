@@ -20,10 +20,14 @@ package Qgoda::Schema;
 
 use strict;
 
-use boolean;
 use Locale::TextDomain qw(qgoda);
+use Cwd;
+use JSON::PP;
 
 use Qgoda;
+
+use constant true => $JSON::PP::true;
+use constant false => $JSON::PP::false;
 
 sub config {
 	# FIXME! Fill in the variable parts.
@@ -52,6 +56,7 @@ sub config {
 				description => __"Default values, see "
 				               . "http://www.qgoda.net/en/docs/defaults",
 				type => 'array',
+				default => [],
 				items => {
 					description => __"A list of objects with properties "
 					               . "'files' and 'values', default => empty",
@@ -71,7 +76,7 @@ sub config {
 						},
 						values => {
 							description => __"Values that should be set for "
-							               + "matching files.",
+							               . "matching files.",
 							type => 'object',
 						}
 					}
@@ -100,14 +105,15 @@ sub config {
 				description => __"An object of valid chain names or '*' that "
 				               . "give the frontmatter placeholder string "
 				               . "for each configured processor chain.",
-				type => 'object'
+				type => 'object',
+				default => "[% '' %]\n"
 			},
 			generator => {
-				description => __x("Value for the generator meta tag in "
-				               . "generated pages, defaults to 'Qgoda "
-				               . "v{version} (http => //www.qgoda.net)'",
+				description => __"Value for the generator meta tag in "
+				               . "generated pages.",
+				type => 'string',
+				default => __x("Qgoda v{version} (http://www.qgoda.net)",
 				               version => $Qgoda::VERSION),
-				type => 'string'
 			},
 			helpers => {
 				description => __"Key-value pairs of command identifiers and "
@@ -167,6 +173,8 @@ sub config {
 			paths => {
 				description => __"Configurable paths.",
 				type => 'object',
+				required => [qw(plugins po site timestamp views)],
+				default => {},
 				properties => {
 					plugins => {
 						description => __"Directory for plug-ins.",
@@ -183,8 +191,8 @@ sub config {
 						description => __"Directory where to store rendered "
 						               . "files, defaults to absolute path to "
 						               . "'_site'.",
-						type => 'string'
-						# Default has to be determined at run-time.
+						type => 'string',
+						site => Cwd::abs_path('')
 					},
 					timestamp => {
 						description => __"Name of the timestamp file containing "
@@ -211,11 +219,14 @@ sub config {
 				               . "the translation workflow.",
 				type => 'object',
 				additionalProperties => false,
+				default => {},
 				properties => {
 					'copyright-holder' => {
 						description => __"Copyright information for the original "
 						               . "content.",
-						type => 'string'
+						type => 'string',
+						default => __x("Set {variable} in '_config.yaml'.",
+						               variable => 'config.po.copyright-holder')
 					},
 					mdextra => {
 						description => __"List of file name patterns for "
@@ -224,7 +235,8 @@ sub config {
 						type => 'array',
 						items => {
 							type => 'string'
-						}
+						},
+						default => []
 					},
 					msgfmt => {
 						description => __"The msgfmt command (or an array of "
@@ -233,12 +245,15 @@ sub config {
 						type => ['array', 'string'],
 						items => {
 							type => 'string'
-						}
+						},
+						default => 'msgfmt'
 					},
 					'msgid-bugs-address' => {
 						description => __"Where to report translation problems "
 						               . "with the original strings.",
-						type => 'string'
+						type => 'string',
+						default => __x("Set {variable} in '_config.yaml'.",
+						               variable => 'config.po.msgid-bugs-address')
 					},
 					msgmerge => {
 						description => __"The msgmerge command (or an array of "
@@ -247,7 +262,8 @@ sub config {
 						type => [qw(array string)],
 						items => {
 							type => 'string'
-						}
+						},
+						default => 'msgmerge'
 					},
 					qgoda => {
 						description => __"The qgoda command (or an array of the "
@@ -256,19 +272,22 @@ sub config {
 						type => [qw(array string)],
 						items => {
 							type => 'string'
-						}
+						},
+						default => 'qgoda',
 					},
 					reload => {
 						description => __"Whether to throw away the "
 						               . "translation before every rebuild, "
 						               . "defaults to false.",
-						type => 'boolean'
+						type => 'boolean',
+						default => false
 					},
 					textdomain => {
 						description => __"An identifier for the translation "
 						                . "catalog (textdomain), defaults to "
 						                . "'messages'.",
-						type => 'string'
+						type => 'string',
+						default => 'messages'
 					},
 					tt2 => {
 						description => __"A list of file name patterns or one "
@@ -280,6 +299,8 @@ sub config {
 						items => {
 							type => 'string'
 						}
+						# Default value will be set after parsing, if still
+						# empty. See https://github.com/epoberezkin/ajv/issues/681
 					},
 					xgettext => {
 						description => __"The xgettext command (or an array of "
@@ -288,7 +309,8 @@ sub config {
 						type => [qw(array string)],
 						items => {
 							type => 'string'
-						}
+						},
+						default => 'xgettext'
 					},
 					'xgettext-tt2' => {
 						description => __"The xgettext-tt2 command (or an "
@@ -298,7 +320,8 @@ sub config {
 						type => [qw(array string)],
 						items => {
 							type => 'string'
-						}
+						},
+						default => 'xgettext-tt2'
 					}
 				}
 			},
