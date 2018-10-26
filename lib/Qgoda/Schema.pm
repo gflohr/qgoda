@@ -158,7 +158,7 @@ sub config {
 				}
 			},
 			location => {
-				description => __"Template string for output location.",
+				description => __"Template string for the output location.",
 				type => 'string',
 				default => '/{directory}/{basename}/{index}{suffix}'
 			},
@@ -352,7 +352,7 @@ sub config {
 						patternProperties => {
 							'[_a-zA-z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
-								                 . " chain.",
+								                 . "chain.",
 								type => 'object',
 								addititionalProperties => false,
 								required => ['modules'],
@@ -436,12 +436,12 @@ sub config {
 				const => Cwd::abs_path()
 			},
 			title => {
-				description => __"The title of the site. It has no"
+				description => __"The title of the site. It has no "
 				               . "particular semantics",
 				default => __"A new Qgoda Powered Site",
 			},
 			view => {
-				description => __"The default value for the view template.",
+				description => __"The default view template to use.",
 				default => 'default.html',
 				minLength => 1,
 			}
