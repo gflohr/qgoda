@@ -215,8 +215,6 @@ sub config {
 				type => 'string',
 				default => '{significant-path}'
 			},
-			# Error! compare with old default configuration! There are a lot
-			# of defaults missing!
 			po => {
 				description => __"Variables for internationalization (i18n) and "
 				               . "the translation workflow.",
@@ -332,19 +330,39 @@ sub config {
 				description => __"The processors to use for generating "
 				                 . "content.",
 				additionalProperties => false,
+				default => {},
+				required => ['chains', 'options', 'triggers'],
 				properties => {
 					chains => {
 						description => __"The processor chains.",
+						default => {
+							html => {
+								modules => ['TT2', 'Strip', 'HTMLFilter']
+							},
+							markdown => {
+								modules => ['TT2', 'Strip', 'Markdown'],
+								suffix => 'html',
+								wrapper => 'html'
+							},
+							xml => {
+								modules => ['TT2', 'Strip']
+							}
+						},
 						patternProperties => {
 							'[_a-zA-z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
 								                 . " chain.",
 								type => 'object',
 								addititionalProperties => false,
+								required => ['modules'],
 								properties => {
 									modules => {
 										description => __"The module names.",
-										type => 'array'
+										type => 'array',
+										items => {
+											type => 'string'
+										},
+										#minLength => 1
 										# The possible values are filled at
 										# run-time.
 									},
@@ -353,10 +371,15 @@ sub config {
 										                 . "if different from "
 														 . "original filename.",
 										type => 'string',
-										minLength => 1,
+										#minLength => 1,
 									},
 									wrapper => {
-
+										description => __"An optional wrapper "
+										               . "for a second run.",
+										type => 'string',
+										#minLength => 1
+										# The possible values are filled at
+										# run-time.
 									}
 								}
 							}
@@ -390,15 +413,15 @@ sub config {
 							   . "are processed. Currently only git is "
 							   . "supported.",
 				type => 'string',
-				pattern => '^git$'
+				const => 'git'
 			},
 			srcdir => {
 				description => __"The source directory for all assets. Do "
 				               . "not set that variable yourself! It will be "
 							   . "overwritten at runtime with the absolute "
 							   . "path to the current directory.",
-				type => 'string'
-				# Pattern (value) will be set at runtime.
+				type => 'string',
+				const => Cwd::abs_path()
 			},
 			title => {
 				description => __"The title of the site. It has no"
