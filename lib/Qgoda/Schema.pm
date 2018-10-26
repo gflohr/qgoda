@@ -23,6 +23,7 @@ use strict;
 use Locale::TextDomain qw(qgoda);
 use Cwd;
 use JSON::PP;
+use File::Spec;
 
 use Qgoda;
 
@@ -192,7 +193,7 @@ sub config {
 						               . "files, defaults to absolute path to "
 						               . "'_site'.",
 						type => 'string',
-						site => Cwd::abs_path('')
+						default => File::Spec->catdir(Cwd::abs_path(''), '_site')
 					},
 					timestamp => {
 						description => __"Name of the timestamp file containing "
@@ -214,6 +215,8 @@ sub config {
 				type => 'string',
 				default => '{significant-path}'
 			},
+			# Error! compare with old default configuration! There are a lot
+			# of defaults missing!
 			po => {
 				description => __"Variables for internationalization (i18n) and "
 				               . "the translation workflow.",
