@@ -191,8 +191,8 @@ sub config {
 					},
 					site => {
 						description => __"Directory where to store rendered "
-						               . "files, defaults to absolute path to "
-						               . "'_site'.",
+						               . "files, defaults to the absolute path "
+									   . "to '_site' in the current directory.",
 						type => 'string',
 						default => File::Spec->catdir(Cwd::abs_path(''), '_site')
 					},
@@ -437,7 +437,7 @@ sub config {
 			},
 			title => {
 				description => __"The title of the site. It has no "
-				               . "particular semantics",
+				               . "particular semantics.",
 				default => __"A new Qgoda Powered Site",
 			},
 			view => {
