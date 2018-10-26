@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Qgoda::Schemas;
+package Qgoda::Schema;
 
 use strict;
 
@@ -26,9 +26,10 @@ use Locale::TextDomain qw(qgoda);
 use Qgoda;
 
 sub config {
+	# FIXME! Fill in the variable parts.
 	return {
-		'$schema' => 'http => //json-schema.org/draft-07/schema#',
-		'$id' => 'http => //www.qgoda.net/schema/'
+		'$schema' => 'http://json-schema.org/draft-07/schema#',
+		'$id' => 'http://www.qgoda.net/schema/'
 		         . $QGODA::VERSION . '/config.schema.json',
 		title => __"Configuration",
 		description => __"A Qgoda Configuration",
@@ -149,7 +150,7 @@ sub config {
 				}
 			},
 			location => {
-				description => __"Template string for output location."
+				description => __"Template string for output location.",
 				type => 'string',
 				default => '/{directory}/{basename}/{index}{suffix}'
 			},
@@ -201,7 +202,7 @@ sub config {
 				}
 			},
 			permalink => {
-				description => __"Template string for permalinks."
+				description => __"Template string for permalinks.",
 				type => 'string',
 				default => '{significant-path}'
 			},
@@ -311,7 +312,7 @@ sub config {
 						patternProperties => {
 							'[_a-zA-z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
-								                 . " chain."
+								                 . " chain.",
 								type => 'object',
 								addititionalProperties => false,
 								properties => {
@@ -325,7 +326,7 @@ sub config {
 										description => __"An optional suffix "
 										                 . "if different from "
 														 . "original filename.",
-										type => string,
+										type => 'string',
 										minLength => 1,
 									},
 									wrapper => {
@@ -337,7 +338,7 @@ sub config {
 					},
 					options => {
 						description => __"Additional options for the"
-						                 " processor plug-ins",
+						               . " processor plug-ins",
 						additionalProperties => false,
 						properties => {
 							# Must/can be filled at runtime.
@@ -358,10 +359,10 @@ sub config {
 			},
 			scm => {
 				description => __"Source code management (SCM) that is in "
-				               . "use. If present, only files that are under",
+				               . "use. If present, only files that are under"
 							   . "version control and those matching 'no-scm'"
 							   . "are processed. Currently only git is "
-							   . "supported."
+							   . "supported.",
 				type => 'string',
 				pattern => '^git$'
 			},
@@ -377,7 +378,7 @@ sub config {
 				description => __"The title of the site. It has no"
 				               . "particular semantics",
 				default => __"A new Qgoda Powered Site",
-			}
+			},
 			view => {
 				description => __"The default value for the view template.",
 				default => 'default.html',
@@ -386,3 +387,5 @@ sub config {
 		}
 	}
 };
+
+1;
