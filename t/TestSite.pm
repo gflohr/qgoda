@@ -88,7 +88,7 @@ sub __setupConfig {
 		unlink '_config.yaml';
 		return $self;
 	} elsif (ref $self->{config}) {
-        $yaml = YAML::XS::Dumper($self->{confg});
+        $yaml = YAML::XS::Dump($self->{confg});
     } else {
         $yaml = $self->{config};
     }
