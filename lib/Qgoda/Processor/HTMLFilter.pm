@@ -41,13 +41,17 @@ sub new {
     );
 
     my $count = 0;
+	$DB::single = 1;
     foreach my $spec (@plug_ins) {
         ++$count;
-        if (!ref $spec || 'ARRAY' ne reftype $spec) {
-            $spec = [$spec];
-        }
+		my ($name, $args);
+        if (!ref $spec || 'HASH' ne reftype $spec) {
+			$name = $spec;
+			$args = {};
+        } else {
+			($name, $args) = %{$spec};
+		}
 
-        my ($name, @args) = @{$spec};
         if (empty $name) {
             die __x("{class}: filter specification #{count}:"
                     . " empty plug-in name",
@@ -61,12 +65,19 @@ sub new {
                     name => $name);
         }
 
+		if (!ref $args || 'HASH' ne reftype $args) {
+			die __x("{class}: filter specification #{count} ({name}):"
+			        . " use named arguments!",
+					class => $class, count => $count,
+					name => $name);
+		}
+
         $name = 'Qgoda::HTMLFilter::' . $name;
 
         my $module = class2module $name;
         require $module;
 
-        my $plug_in = $name->new(@args);
+        my $plug_in = $name->new(%$args);
         push @{$handlers{declaration}}, $plug_in
             if $plug_in->can('declaration');
         push @{$handlers{start}}, $plug_in
