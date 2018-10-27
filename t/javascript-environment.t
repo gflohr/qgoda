@@ -20,10 +20,13 @@ use strict;
 
 use Test::More;
 
+use Qgoda;
 use Qgoda::JavaScript::Environment;
 use YAML::XS 0.67;
 
-my $env = Qgoda::JavaScript::Environment->new(global => 'lib');
+my $q = Qgoda->new({quiet => 1, log_stderr => 1});
+my $node_modules = $q->nodeModules;
+my $env = Qgoda::JavaScript::Environment->new(global => $node_modules);
 my $input = <<'EOF';
 foo: '1'
 bar: 'false'
