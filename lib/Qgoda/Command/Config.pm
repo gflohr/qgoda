@@ -35,7 +35,7 @@ sub _run {
     delete $global_options->{verbose};
     $global_options->{log_stderr} = 1;
 
-    Qgoda->new($global_options)->dumpConfig;
+    Qgoda->new($global_options)->printConfig;
 
     return $self;
 }

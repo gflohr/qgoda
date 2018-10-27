@@ -191,13 +191,6 @@ sub __compileDefaults {
 
         $pattern = File::Globstar::ListMatch->new($pattern,
                                                   !$self->{'case-sensitive'});
-        if (exists $rule->{values}) {
-            if (!$self->__isHash($rule->{values})) {
-                die __x("'{variable}' must be a hash",
-                        variable => 'defaults.values');
-            }
-        }
-
         push @defaults, [$pattern, $rule->{values} || {}];
     }
 

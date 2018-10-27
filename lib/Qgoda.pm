@@ -376,9 +376,17 @@ sub dumpConfig {
         delete $config{$key};
     }
 
-    print YAML::XS::Dump(\%config);
+    return YAML::XS::Dump(\%config);
+}
 
-    return $self;
+sub printConfig {
+	my ($self) = @_;
+
+	my $config = $self->dumpConfig;
+
+	print $config;
+
+	return $self;
 }
 
 sub migrate {
