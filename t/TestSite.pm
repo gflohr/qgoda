@@ -65,6 +65,7 @@ sub setup {
 
 	my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
 	$self->{rootdir} = $rootdir;
+    $self->tearDown if -e $self->{rootdir};
 	mkdir $rootdir;
 	chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
 
