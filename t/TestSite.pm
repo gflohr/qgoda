@@ -25,114 +25,128 @@ use File::Path;
 use File::Find;
 use File::Globstar::ListMatch;
 use YAML::XS;
+use Cwd;
 
+use Qgoda;
 use Qgoda::Util qw(empty write_file);
 
+BEGIN {
+	# Make @INC absolute.
+	foreach my $path (@INC) {
+		if (!File::Spec->file_name_is_absolute($path)) {
+			$path = Cwd::abs_path($path);
+		}
+	}
+}
+
 sub new {
-    my ($class, %options) = @_;
+	my ($class, %options) = @_;
 
-    if (empty $options{name}) {
-        require Carp;
-        Carp::croak("The option 'name' is mandatory");
-    }
+	if (empty $options{name}) {
+		require Carp;
+		Carp::croak("The option 'name' is mandatory");
+	}
 
-    my $self = bless \%options, $class;
-    $self->setup;
+	my $self = bless \%options, $class;
+	$self->setup;
 
-    return $self;
+	return $self;
 }
 
 sub setup {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my ($volume, $directory) = File::Spec->splitpath(__FILE__);
+	my ($volume, $directory) = File::Spec->splitpath(__FILE__);
 
-    my $repodir = File::Spec->catpath($volume, $directory, '..');
-    $repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
-    $self->{repodir} = $repodir;
-    chdir $repodir or die "cannot chdir to '$repodir': $!\n";
+	my $repodir = File::Spec->catpath($volume, $directory, '..');
+	$repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
+	$self->{repodir} = $repodir;
+	chdir $repodir or die "cannot chdir to '$repodir': $!\n";
 
-    my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
-    $self->{rootdir} = $rootdir;
-    mkdir $rootdir;
-    chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
+	my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
+	$self->{rootdir} = $rootdir;
+	mkdir $rootdir;
+	chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
 
-    $self->__setupConfig;
-    $self->__setupFiles;
-    $self->__setupAssets;
+	Qgoda->reset;
+	Qgoda->new({quiet => 1, log_stderr => 1});
 
-    return $self;
+	$self->__setupConfig;
+	$self->__setupFiles;
+	$self->__setupAssets;
+
+	return $self;
 }
 
 sub __setupConfig {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    if (empty $self->{config}) {
-        unlink '_config.yaml';
-        return $self;
-    }
+	if (empty $self->{config}) {
+		unlink '_config.yaml';
+		return $self;
+	}
 
-    my $yaml = YAML::XS::Dump($self->{config});
-    write_file '_config.yaml', $yaml or die;
+	my $yaml = YAML::XS::Dump($self->{config});
+	write_file '_config.yaml', $yaml or die;
 
-    return $self;
+	return $self;
 }
 
 sub __setupAssets {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    foreach my $relpath (keys %{$self->{assets} || {}}) {
-        my $asset = $self->{assets}->{$relpath};
-        my $content = delete $asset->{content};
-        if ($asset->{raw}) {
-            write_file $relpath, $content
-                or die "cannot write '$relpath': $!";
-        } else {
-            my $data = YAML::XS::Dump($asset);
-            $data .= "---\n$content";
-            write_file $relpath, $data
-                or die "cannot write '$relpath': $!";
-        }
-    }
+	foreach my $relpath (keys %{$self->{assets} || {}}) {
+		my $asset = $self->{assets}->{$relpath};
+		my $content = delete $asset->{content};
+		if ($asset->{raw}) {
+			write_file $relpath, $content
+				or die "cannot write '$relpath': $!";
+		} else {
+			my $data = YAML::XS::Dump($asset);
+			$data .= "---\n$content";
+			write_file $relpath, $data
+				or die "cannot write '$relpath': $!";
+		}
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __setupFiles {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    foreach my $relpath (keys %{$self->{files} || {}}) {
-        my $content = $self->{files}->{$relpath};
-        write_file $relpath, $content
-            or die "cannot write '$relpath': $!";
-    }
+	foreach my $relpath (keys %{$self->{files} || {}}) {
+		my $content = $self->{files}->{$relpath};
+		write_file $relpath, $content
+			or die "cannot write '$relpath': $!";
+	}
 
-    return $self;
+	return $self;
 }
 
 sub tearDown {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    chdir $self->{repodir} or die "cannot chdir to '$self->{repodir}': $!\n";
+	chdir $self->{repodir} or die "cannot chdir to '$self->{repodir}': $!\n";
 
-    my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
-    File::Find::finddepth({
-        wanted => sub {
-            my $rel = File::Spec->abs2rel($File::Find::name, $self->{rootdir});
+	my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
+	File::Find::finddepth({
+		wanted => sub {
+			my $rel = File::Spec->abs2rel($File::Find::name, $self->{rootdir});
 
-            return if '.' eq $rel;
-            return if $matcher->match($rel);
+			return if '.' eq $rel;
+			return if $matcher->match($rel);
 
-            if (-d $File::Find::name) {
-                rmdir $File::Find::name;
-            } else {
-                unlink $File::Find::name;
-            }
-        },
-    }, $self->{rootdir});
-    rmdir $self->{rootdir};
+			if (-d $File::Find::name) {
+				rmdir $File::Find::name;
+			} else {
+				unlink $File::Find::name;
+			}
+		},
+	}, $self->{rootdir});
+	rmdir $self->{rootdir};
 
-    return $self;
+	return $self;
 }
 
 1;

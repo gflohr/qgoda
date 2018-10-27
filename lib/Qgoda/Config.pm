@@ -136,14 +136,18 @@ sub new {
         push @exclude, quotestar $outdir, 1;
         push @exclude_watch, quotestar $outdir, 1;
     }
-    $self->{__q_exclude} = File::Globstar::ListMatch->new(
-        \@exclude,
-        ignoreCase => !$self->{'case-sensitive'}
-    );
-    $self->{__q_exclude_watch} = File::Globstar::ListMatch->new(
-        \@exclude_watch,
-        ignoreCase => !$self->{'case-sensitive'}
-    );
+	unless ($args{raw}) {
+		$self->{__q_exclude} = File::Globstar::ListMatch->new(
+			\@exclude,
+			ignoreCase => !$self->{'case-sensitive'}
+		);
+		$self->{__q_exclude_watch} = File::Globstar::ListMatch->new(
+			\@exclude_watch,
+			ignoreCase => !$self->{'case-sensitive'}
+		);
+
+		$self->__compileDefaults;
+	}
 
     return $self;
 }

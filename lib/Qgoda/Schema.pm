@@ -389,7 +389,6 @@ sub config {
 					options => {
 						description => __"Additional options for the"
 						               . " processor plug-ins",
-						additionalProperties => false,
 						type => 'object',
 						default => {
 							HTMLFilter => [
@@ -447,6 +446,17 @@ sub config {
 							   . "path to the current directory.",
 				type => 'string',
 				const => Cwd::abs_path()
+			},
+			taxonomies => {
+				description => __"Key/value pairs of taxonomy names and their "
+				               . "respective weights for the computation "
+							   . "of relatedness.",
+				type => 'object',
+				default => {
+					categories => 3,
+					links => 1,
+					tags => 2
+				}
 			},
 			title => {
 				description => __"The title of the site. It has no "

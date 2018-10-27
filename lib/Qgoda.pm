@@ -29,12 +29,13 @@ use Locale::TextDomain qw(qgoda);
 use Locale::Messages;
 use Locale::gettext_dumb;
 use File::Find;
+use Cwd;
 use Scalar::Util qw(reftype blessed);
 use AnyEvent;
 use AnyEvent::Loop;
 use AnyEvent::Filesys::Notify;
 use AnyEvent::Handle;
-use File::Basename qw(fileparse);
+use File::Basename qw(fileparse dirname);
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use IPC::Signal;
@@ -57,6 +58,11 @@ use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
 
+# This effectively prevents inheritance, unless the module that inherits
+# is also a top-level package.  But we must be able to locate the
+# node_modules directory.
+my $install_dir = Cwd::abs_path(dirname __FILE__);
+
 sub new {
     return $qgoda if $qgoda;
 
@@ -77,6 +83,10 @@ sub new {
     $self->{__load_plugins} = 1;
 
     return $qgoda;
+}
+
+sub reset {
+	undef $qgoda;
 }
 
 sub setSite {
@@ -111,7 +121,7 @@ sub build {
 
     $logger->info(__"start building site");
 
-    chdir $self->{__config}->{srcdir}
+    chdir $config->{srcdir}
         or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
                               dir => $config->{srcdir},
                               error => $!));
@@ -372,9 +382,6 @@ sub dumpConfig {
 
     # Poor man's Data::Structure::unbless().
     my %config = %$config;
-    foreach my $key (grep { /^__q_/ } keys %config) {
-        delete $config{$key};
-    }
 
     return YAML::XS::Dump(\%config);
 }
@@ -933,15 +940,9 @@ sub buildOptions {
 }
 
 sub nodeModules {
-	my ($volume, $directories, undef) = File::Spec->splitpath(__FILE__);
+	my ($self) = @_;
 
-	my @dirs = File::Spec->splitdir($directories);
-	pop @dirs > 1 && $dirs[-1] == '';
-
-	my $path = join '/', @dirs, 'node_modules';
-	$path =~ s{(.)//+}{$1/}g;
-
-	return $path;
+    return join '/', $install_dir, 'node_modules';
 }
 
 1;

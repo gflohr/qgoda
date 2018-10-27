@@ -27,15 +27,15 @@ BEGIN {
 use TestSite;
 use Test::More;
 
-use Qgoda::CLI;
+use Qgoda;
 
 my $site = TestSite->new(name => 'config-round-trip');
-my $config = Qgoda::CLI->new(['config'])->dispatch;
+my $config = Qgoda->dumpConfig;
 ok $config;
 $site->tearDown;
 
 $site = TestSite->new(name => 'config-round-trip', config => $config);
-my $config2 = Qgoda::CLI->new(['config'])->dispatch;
+my $config2 = Qgoda->dumpConfig;
 ok $config2;
 is_deeply $config2, $config;
 $site->tearDown;
