@@ -89,7 +89,8 @@ sub new {
 	require 'Qgoda/JavaScript/config.js';
 	my $code = Qgoda::JavaScript::config->code;
 	my $node_modules = $q->nodeModules;
-	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules);
+	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules,
+	                                             no_console => 1);
 	my $schema = Qgoda::Schema->config;
 	$js->vm->set(schema => $schema);
 	$js->vm->set(input => $yaml);

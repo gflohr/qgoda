@@ -81,12 +81,17 @@ sub setup {
 sub __setupConfig {
 	my ($self) = @_;
 
+    my $yaml;
+ 
 	if (empty $self->{config}) {
 		unlink '_config.yaml';
 		return $self;
-	}
+	} elsif (ref $self->{config}) {
+        $yaml = YAML::XS::Dumper($self->{confg});
+    } else {
+        $yaml = $self->{config};
+    }
 
-	my $yaml = YAML::XS::Dump($self->{config});
 	write_file '_config.yaml', $yaml or die;
 
 	return $self;
