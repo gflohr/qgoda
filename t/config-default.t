@@ -49,7 +49,8 @@ compare-output: true
 defaults: []
 exclude: []
 exclude-watch: []
-front-matter-placeholder: "[% '' %]\\n"
+front-matter-placeholder:
+    '*': "[% '' %]\\n"
 generator: Qgoda v0.9.3 (http://www.qgoda.net)
 helpers: {}
 index: index

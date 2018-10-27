@@ -107,8 +107,10 @@ sub config {
 				description => __"An object of valid chain names or '*' that "
 				               . "give the frontmatter placeholder string "
 				               . "for each configured processor chain.",
-				type => 'string',
-				default => "[% '' %]\n"
+				type => 'object',
+				default => {
+					'*' => "[% '' %]\n"
+				}
 			},
 			generator => {
 				description => __"Value for the generator meta tag in "
