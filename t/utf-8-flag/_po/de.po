@@ -1,0 +1,14 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgctxt "month"
+msgid "March"
+msgstr "März"
+
+msgctxt "title"
+msgid "Hello, world!"
+msgstr "Hallo, Welt!"
+
+msgid "98.96 °F in the morning."
+msgstr "37,2 °C am Morgen."
