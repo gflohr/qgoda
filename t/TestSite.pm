@@ -73,11 +73,16 @@ sub setup {
 	$self->__setupFiles;
 	$self->__setupAssets;
 
-	Qgoda->reset;
-	Qgoda->new({quiet => 1, log_stderr => 1});
+	eval {
+		Qgoda->reset;
+		Qgoda->new({quiet => 1, log_stderr => 1});
+	};
+	$self->{__exception} = $@;
 
 	return $self;
 }
+
+sub exception { shift->{__exception} }
 
 sub __setupConfig {
 	my ($self) = @_;

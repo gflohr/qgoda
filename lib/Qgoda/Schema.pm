@@ -393,20 +393,18 @@ sub config {
 						               . " processor plug-ins",
 						type => 'object',
 						default => {
-							HTMLFilter => [
-								'AnchorTarget',
-								'Generator',
-								'CleanUp',
-								{
-									'TOC' => {
-										'content-tag' => 'qgoda-content',
-										'toc-tag' => 'qgoda-toc',
-										start => 2,
-										end => 6,
-										template => 'components/toc.html'
-									}
-								}
-							]
+							HTMLFilter => {
+								TOC => {
+									'content-tag' => 'qgoda-content',
+									'toc-tag' => 'qgoda-toc',
+									start => 2,
+									end => 6,
+									template => 'components/toc.html'
+								},
+							},
+							AnchorTarget => {},
+							Generator => {},
+							CleanUp => {},
 						},
 					},
 					triggers => {

@@ -34,7 +34,6 @@ use Qgoda::Config;
 use constant true => $JSON::PP::true;
 use constant false => $JSON::PP::false;
 
-$DB::single = 1;
 my $site = TestSite->new(name => 'config-default');
 my $config = Qgoda->dumpConfig;
 ok $config;
