@@ -29,7 +29,7 @@ use Qgoda::Util qw(empty perl_class class2module);
 use base qw(Qgoda::Processor);
 
 sub new {
-    my ($class, @plug_ins) = @_;
+    my ($class, %plug_ins) = @_;
 
     my %handlers = (
         declaration => [],
@@ -40,35 +40,20 @@ sub new {
         process => [],
     );
 
-    my $count = 0;
-    foreach my $spec (@plug_ins) {
-        ++$count;
-		my ($name, $args);
-        if (!ref $spec || 'HASH' ne reftype $spec) {
-			$name = $spec;
-			$args = {};
-        } else {
-			($name, $args) = %{$spec};
-		}
-
-        if (empty $name) {
-            die __x("{class}: filter specification #{count}:"
-                    . " empty plug-in name",
-                    class => $class, count => $count);
-        }
+    # FIXME! Sort this by 'order'!
+    foreach my $name (keys %plug_ins) {
+        my $args = $plug_ins{$name};
 
         if (!perl_class $name) {
-            die __x("{class}: filter specification #{count}:"
+            die __x("{class}: filter specification:"
                     . " illegal plug-in name '{name}'",
-                    class => $class, count => $count,
-                    name => $name);
+                    class => $class, name => $name);
         }
 
 		if (!ref $args || 'HASH' ne reftype $args) {
-			die __x("{class}: filter specification #{count} ({name}):"
+			die __x("{class}: filter specification for plug-in '{name}':"
 			        . " use named arguments!",
-					class => $class, count => $count,
-					name => $name);
+					class => $class, name => $name);
 		}
 
         $name = 'Qgoda::HTMLFilter::' . $name;
