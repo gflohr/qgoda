@@ -3,6 +3,6 @@ perl:
   - "5.28"
   - "5.26"
   - "5.24"
-  - "5.14"
+  - "5.18"
 env:
   - AUTHOR_TESTING=1 QGODA_NO_INSTALL_CHECK=1

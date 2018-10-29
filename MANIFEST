@@ -29,6 +29,7 @@ lib/Qgoda/Command/Dump.pm
 lib/Qgoda/Command/Init.pm
 lib/Qgoda/Command/Markdown.pm
 lib/Qgoda/Command/Po.pm
+lib/Qgoda/Command/Schema.pm
 lib/Qgoda/Command/Watch.pm
 lib/Qgoda/Command/Xgettext.pm
 lib/Qgoda/Config.pm
@@ -42,6 +43,7 @@ lib/Qgoda/Init/copy.pm
 lib/Qgoda/Init/node.pm
 lib/Qgoda/JavaScript/Environment.pm
 lib/Qgoda/JavaScript/Filter.pm
+lib/Qgoda/JavaScript/config.js
 lib/Qgoda/JavaScript/console.js
 lib/Qgoda/Locale/XGettext.pm
 lib/Qgoda/Logger.pm
@@ -90,6 +92,8 @@ t/TestSite.pm
 t/author-critic.t
 t/author-pod-syntax.t
 t/collect_defaults.t
+t/config-default.t
+t/config-round-trip.t
 t/default-view.t
 t/encode_json.t
 t/flatten2hash.t

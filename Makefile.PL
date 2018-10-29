@@ -184,7 +184,7 @@ EOF
 use strict;
 use warnings;
 
-
+use 5.018;
 
 use ExtUtils::MakeMaker;
 
@@ -199,6 +199,7 @@ my %WriteMakefileArgs = (
     "bin/qgoda"
   ],
   "LICENSE" => "gpl",
+  "MIN_PERL_VERSION" => "5.018",
   "NAME" => "Qgoda",
   "PREREQ_PM" => {
     "AnyEvent" => 0,
@@ -237,6 +238,7 @@ my %WriteMakefileArgs = (
     "IPC::Signal" => 0,
     "Inline" => 0,
     "JSON" => "2.0",
+    "JSON::PP" => 0,
     "JavaScript::Duktape::XS" => 0,
     "LWP::UserAgent" => 0,
     "List::Util" => "1.45",
@@ -271,6 +273,7 @@ my %WriteMakefileArgs = (
     "YAML::XS" => "0.67",
     "base" => 0,
     "boolean" => 0,
+    "constant" => 0,
     "integer" => 0,
     "overload" => 0,
     "strict" => 0,
@@ -324,6 +327,7 @@ my %FallbackPrereqs = (
   "IPC::Signal" => 0,
   "Inline" => 0,
   "JSON" => "2.0",
+  "JSON::PP" => 0,
   "JavaScript::Duktape::XS" => 0,
   "LWP::UserAgent" => 0,
   "List::Util" => "1.45",
@@ -359,6 +363,7 @@ my %FallbackPrereqs = (
   "YAML::XS" => "0.67",
   "base" => 0,
   "boolean" => 0,
+  "constant" => 0,
   "integer" => 0,
   "overload" => 0,
   "strict" => 0,
