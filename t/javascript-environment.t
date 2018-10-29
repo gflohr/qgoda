@@ -75,6 +75,16 @@ $expected = {
 	baz => 1
 };
 my $config = $env->vm->get('config');
+# There are problems with Perl 5.18 and the distinction between strings
+# and numbers. But since we don't rely on that, we just ignore these
+# problems.
+foreach my $key (keys %$config) {
+    $config->{$key} = "$config->{$key}" if $config->{$key} =~ /^[0-9]+$/;
+}
+foreach my $key (keys %$expected) {
+    $expected->{$key} = "$expected->{$key}"
+        if $expected->{$key} =~ /^[0-9]+$/;
+}
 is_deeply $config, $expected;
 
 $YAML::XS::Boolean = 'JSON::PP';
