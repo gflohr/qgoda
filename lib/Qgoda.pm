@@ -20,6 +20,11 @@ package Qgoda;
 
 use strict;
 
+# FIXME! This assumes that we are a top-level package. Instead,
+# inpect also __PACKAGE__ and adjust the directory accordingly.
+use File::Basename qw(fileparse dirname);
+my $install_dir = Cwd::abs_path(dirname __FILE__);
+
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
@@ -35,7 +40,6 @@ use AnyEvent;
 use AnyEvent::Loop;
 use AnyEvent::Filesys::Notify;
 use AnyEvent::Handle;
-use File::Basename qw(fileparse dirname);
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use IPC::Signal;
@@ -57,11 +61,6 @@ use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
-
-# This effectively prevents inheritance, unless the module that inherits
-# is also a top-level package.  But we must be able to locate the
-# node_modules directory.
-my $install_dir = Cwd::abs_path(dirname __FILE__);
 
 sub new {
     return $qgoda if $qgoda;
