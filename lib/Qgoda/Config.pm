@@ -41,6 +41,7 @@ sub new {
     my $q = Qgoda->new;
     my $logger = $q->logger('config');
 
+	$logger->info(__"Reading configuration");
     my $filename;
     if (!empty $args{filename}) {
         $filename = $args{filename};
@@ -98,6 +99,23 @@ sub new {
 	$js->vm->set(filename => $filename);
 	$js->vm->set(local_filename => $local_filename);
 	$js->run($code);
+
+	my $exchange = $js->vm->get('__perl__');
+	my $invalid = $exchange->{output}->{errors};
+	if ($invalid) {
+		my ($filename, $errors) = @$invalid;
+		my $msg = '';
+		foreach my $error (@$errors) {
+			$msg .= "$filename: config$error->{dataPath}: ";
+			$msg .= "$error->{message}\n";
+			my $params = $error->{params};
+			foreach my $param (keys %$params) {
+				$msg .= "\t$param: $params->{$param}\n";
+			}
+		}
+
+		die $msg;
+	}
 
 	my $config = $js->vm->get('config');
 

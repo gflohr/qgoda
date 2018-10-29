@@ -54,7 +54,10 @@ sub new {
 	};
 
 	# Our exchange buffer with the JavaScript world.
-	my $perl = {};
+	my $perl = {
+		output => {}
+	};
+
 	$self->{__vm} = JavaScript::Duktape::XS->new;
 	$self->{__vm}->set(perl_module_resolve => $module_resolve);
 	$self->{__vm}->set(perl_module_load => $module_load);
