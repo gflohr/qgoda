@@ -30,18 +30,23 @@ my $stdout = tie *STDOUT, 'MyConsole';
 my $stderr = tie *STDERR, 'MyConsole';
 
 $env->run("console.log('log')");
-is $stdout->buffer, "'log'\n";
+is $stdout->buffer, "log\n";
 
 $env->run("console.error('error')");
-is $stderr->buffer, "'error'\n";
+is $stderr->buffer, "error\n";
 
 $env->run("console.warn('warn')");
-is $stderr->buffer, "'warn'\n";
+is $stderr->buffer, "warn\n";
 
 # Test that objects are not just stringified but pretty printed.
-
 $env->run("console.log({number: 2304})");
 is $stdout->buffer, "{number: 2304}\n";
+
+$env->run("console.log('this and that')");
+is $stdout->buffer, "this and that\n";
+
+$env->run("console.log('this', 'and', 'that')");
+is $stdout->buffer, "this and that\n";
 
 done_testing;
 
