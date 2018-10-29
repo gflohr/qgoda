@@ -403,10 +403,10 @@ sub config {
 									end => 6,
 									template => 'components/toc.html'
 								},
+								AnchorTarget => {},
+								Generator => {},
+								CleanUp => {},
 							},
-							AnchorTarget => {},
-							Generator => {},
-							CleanUp => {},
 						},
 					},
 					triggers => {

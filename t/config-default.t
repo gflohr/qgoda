@@ -95,10 +95,10 @@ processors:
       - TT2
       - Strip
   options:
-    AnchorTarget: {}
-    Generator: {}
-    CleanUp: {}
     HTMLFilter:
+      AnchorTarget: {}
+      Generator: {}
+      CleanUp: {}
       TOC:
         content-tag: qgoda-content
         end: 6
