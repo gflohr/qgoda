@@ -41,7 +41,6 @@ sub new {
     );
 
     my $count = 0;
-	$DB::single = 1;
     foreach my $spec (@plug_ins) {
         ++$count;
 		my ($name, $args);
