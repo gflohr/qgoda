@@ -74,12 +74,14 @@ sub config {
 							type => [qw(array string)],
 							items => {
 								type => 'string'
-							}
+							},
+							default => []
 						},
 						values => {
 							description => __"Values that should be set for "
 							               . "matching files.",
 							type => 'object',
+							default => {}
 						}
 					}
 				}

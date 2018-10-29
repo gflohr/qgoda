@@ -165,7 +165,7 @@ sub new {
 			ignoreCase => !$self->{'case-sensitive'}
 		);
 
-		$self->__compileDefaults;
+		$self->{defaults} = $self->__compileDefaults($self->{defaults});
 	}
 
     return $self;
@@ -201,19 +201,16 @@ sub __compileDefaults {
     my @defaults;
     foreach my $rule (@$rules) {
         my $pattern = $rule->{files};
-        $pattern = '*' if empty $pattern;
-
-        if (ref $pattern) {
-            if (!$self->__isArray($pattern)) {
-                die __x("'{variable}' must be a scalar or a list",
-                        variable => 'defaults.files');
-            }
-        } else {
-            $pattern = [$pattern];
-        }
+		# FIXME! This should be done by ajv?
+		if (empty $pattern) {
+			$pattern = ['*'];
+		} elsif (!ref $pattern) {
+			$pattern = [$pattern];
+		}
 
         $pattern = File::Globstar::ListMatch->new($pattern,
                                                   !$self->{'case-sensitive'});
+		# Same here.. The default {} should be inserted by ajv.
         push @defaults, [$pattern, $rule->{values} || {}];
     }
 

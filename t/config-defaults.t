@@ -66,15 +66,17 @@ $site = TestSite->new(name => 'config-defaults',
 	config => {
 		processors => {
 			options => {
-				AnchorTargets => {
-					foobar => 42
+				HTMLFilter => {
+					TOC => {
+						# This is normally 2.
+						start => 3
+					}
 				}
 			}
 		}
 	}
 );
 $got = Qgoda->new->config->{processors};
-$DB::single = 1;
 is_deeply $got, $expected, 'individually overwrite deeply nested property';
 
 #$site->tearDown;
