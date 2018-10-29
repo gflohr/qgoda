@@ -69,12 +69,12 @@ sub setup {
 	mkdir $rootdir;
 	chdir $rootdir or die "cannot chdir to '$rootdir': $!\n";
 
-	Qgoda->reset;
-	Qgoda->new({quiet => 1, log_stderr => 1});
-
 	$self->__setupConfig;
 	$self->__setupFiles;
 	$self->__setupAssets;
+
+	Qgoda->reset;
+	Qgoda->new({quiet => 1, log_stderr => 1});
 
 	return $self;
 }
