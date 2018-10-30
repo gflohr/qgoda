@@ -131,7 +131,7 @@ sub new {
     $config->{paths}->{site} = Cwd::abs_path($config->{paths}->{site});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
-		if !exists $config->{po}->{tt2};
+		if 0 == @{$config->{po}->{tt2}};
 
 	# This outsmarts the default options for JSON schema.
 	my $processor_options = $schema->{properties}

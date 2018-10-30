@@ -180,6 +180,7 @@ sub config {
 				description => __"Configurable paths.",
 				type => 'object',
 				required => [qw(plugins po site timestamp views)],
+				additionalProperties => false,
 				default => {},
 				properties => {
 					plugins => {
@@ -298,12 +299,13 @@ sub config {
 						                . "templates for the Template Toolkit "
 						                . "version 2 are stored, defaults to "
 						                . "'_views'.",
-						types => 'array',
+						type => 'array',
 						items => {
 							type => 'string'
-						}
+						},
 						# Default value will be set after parsing, if still
 						# empty. See https://github.com/epoberezkin/ajv/issues/681
+						default => []
 					},
 					xgettext => {
 						description => __"The 'xgettext' command or an array of "

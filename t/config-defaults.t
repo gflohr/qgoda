@@ -129,7 +129,24 @@ ok ref $got->{'exclude-watch'};
 is ((reftype $got->{'exclude-watch'}), 'ARRAY');
 is $got->{'exclude-watch'}->[0], '*.bak';
 
-# FIXME! Check that config.po.tt2 is filled correctly but can be overridden!
+ok ref $got->{po}->{tt2};
+is ((reftype $got->{po}->{tt2}), 'ARRAY');
+is $got->{po}->{tt2}->[0], '_my_views';
+
+# Test that po->{tt2} is initialized to main view directory.
+$site = TestSite->new(name => 'config-defaults',
+	config => {
+		paths => {
+			views => '_your_views'
+		}
+	}
+);
+$got = Qgoda->new->rawConfig;
+is ((reftype $got->{po}->{tt2}), 'ARRAY');
+ok ref $got->{po}->{tt2};
+is ((reftype $got->{po}->{tt2}), 'ARRAY');
+is $got->{po}->{tt2}->[0], '_your_views';
+
 $site->tearDown;
 
 done_testing;
