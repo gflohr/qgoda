@@ -10,11 +10,6 @@ Qgoda (pronounce: yagoda!) is an extensible static site generator.
 
 ![Qgoda Logo](https://raw.githubusercontent.com/gflohr/qgoda-site/master/images/github/banner.jpeg)
 
-*Important!* Qgoda is unstable at the moment. If you want to use
-it from sources, please checkout the version
-9d005c0c6f4d0245b6b1720d5054ac08220a12c9 until the current
-issues are fixed.
-
 ## Description
 
 Qgoda is considered feature-complete and ready for beta testing.
