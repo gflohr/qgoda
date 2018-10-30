@@ -114,7 +114,7 @@ sub __setupAssets {
 			write_file $relpath, $content
 				or die "cannot write '$relpath': $!";
 		} else {
-			my $data = YAML::XS::Dump($asset);
+			my $data = keys %$asset ? YAML::XS::Dump($asset) : "---\n";
 			$data .= "---\n$content";
 			write_file $relpath, $data
 				or die "cannot write '$relpath': $!";
