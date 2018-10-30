@@ -140,6 +140,8 @@ EOF
   schema                      dump the configuration JSON schema and exit
   init                        initialize a new qgoda site
   dump                        dump the site structure as JSON (implies --quiet)
+  javascript                  evaluate JavaScript code
+  js                          same as "javascript" above
   markdown                    process Markdown
   xgettext                    extract translatable strings from Markdown
                               files

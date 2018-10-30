@@ -30,13 +30,14 @@ use Locale::TextDomain qw(qgoda);
 sub new {
 	my ($class, %args) = @_;
 
-	my $global = delete $args{global};
+	my $global = $args{global};
 	$global = [$global] if defined $global;
 	my @global = @{$global || []};
-	my $exchange = empty $args{exchange} ? '__perl__' : delete $args{exchange};
+	my $exchange = empty $args{exchange} ? '__perl__' : $args{exchange};
 
 	my $self = {
 		__global => [@global],
+		__exchange_name => $exchange,
 	};
 
 	my $module_resolve = sub {
@@ -58,21 +59,41 @@ sub new {
 		output => {}
 	};
 
-	$self->{__vm} = JavaScript::Duktape::XS->new;
+	$self->{__vm} = JavaScript::Duktape::XS->new(
+		{
+			save_messages => $args{no_output}
+		}
+	);
 	$self->{__vm}->set(perl_module_resolve => $module_resolve);
 	$self->{__vm}->set(perl_module_load => $module_load);
 
-	my $no_console = delete $args{'no_console'};
+	my $no_console = $args{'no_console'};
+	$self->{__jsout} = '';
+	$self->{__jserr} - '';
+	$self->{__no_output} = $args{'no_output'};
+
 	unless ($no_console) {
 		$perl->{modules}->{console} = {
 			log => sub {
-				print shift, "\n";
+				if ($args{no_output}) {
+					$self->{__jsout} .= shift . "\n";
+				} else {
+					print shift . "\n";
+				}
 			},
 			error => sub {
-				print STDERR shift, "\n";
+				if ($args{no_output}) {
+					$self->{__jserr} .= shift . "\n";
+				} else {
+					print STDERR shift . "\n";
+				}
 			},
 			warn => sub {
-				print STDERR shift, "\n";
+				if ($args{no_output}) {
+					$self->{__jserr} .= shift . "\n";
+				} else {
+					print STDERR shift . "\n";
+				}
 			}
 		};
 
@@ -81,6 +102,7 @@ sub new {
 
 	# All code that wants to call back into Perl must run after thie line.
 	$self->{__vm}->set($exchange, $perl);
+	$self->{__exchange} = $perl;
 
 	unless ($no_console) {
 		require 'Qgoda/JavaScript/console.js';
@@ -90,10 +112,48 @@ sub new {
 	bless $self, $class;
 }
 
+sub exchange {
+	my ($self, $key, $value) = @_;
+
+	my $exchange = $self->{__vm}->get($self->{__exchange_name}) or return;
+
+	if (@_ > 2) {
+		$exchange->{$key} = $value;
+		$self->{__vm}->set($self->{__exchange_name}, $exchange);
+	}
+	
+	return $exchange->{$key};
+}
+
 sub run {
 	my ($self, $code) = @_;
 
-	return $self->{__vm}->eval($code);
+	if ($self->{__no_output}) {
+		my $q = Qgoda->new;
+		$self->{__jsout} = '';
+		$self->{__jserr} = '';
+		$self->{__vm}->reset_msgs;
+	}
+	
+	my $retval = $self->{__vm}->eval($code);
+
+	if ($self->{__no_output}) {
+		my $stdout = $self->{__jsout};
+		$stdout = '' if empty $stdout;
+		my $vm_stdout = $self->{__vm}->get_msgs->{stdout};
+		$vm_stdout = '' if empty $vm_stdout;
+
+		my $stderr = $self->{__jserr};
+		$stderr = '' if empty $stderr;
+		my $vm_stderr = $self->{__vm}->get_msgs->{stderr};
+		$vm_stderr = '' if empty $vm_stderr;
+
+		my $q = Qgoda->new;
+		$q->jsout($stdout . $vm_stdout);
+		$q->jserr($stderr . $vm_stderr);
+	}
+
+	return $retval;
 }
 
 sub vm {

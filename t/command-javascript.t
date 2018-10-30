@@ -1,0 +1,96 @@
+#! /usr/bin/env perl # -*- perl -*-
+
+# Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>,
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use strict;
+
+BEGIN {
+    my $test_dir = __FILE__;
+    $test_dir =~ s/[-a-z0-9]+\.t$//i;
+    unshift @INC, $test_dir;
+}
+
+use TestSite;
+use Test::More;
+use Storable qw(freeze thaw);
+
+use Qgoda::CLI;
+
+my $hello = "console.log('Hello, world!')\n";
+my $echo = "console.log(__perl__.input)\n";
+my $input_json = qq{{"foo":"bar"}};
+my $input_yaml = <<EOF;
+---
+foo: 'bar'
+EOF
+my $input_pm = <<'EOF';
+$VAR1 = {
+          'foo' => 'bar'
+        };
+EOF
+my $input_storable = freeze { foo => 'bar' };
+
+my $site = TestSite->new(name => 'command-javascript',
+                         files => {
+                             'hello.js' => $hello,
+                             'echo.js' => $echo,
+                             'input.json' => $input_json,
+                             'input.yaml' => $input_yaml,
+                             'input.pm' => $input_pm,
+                             'input.storable' => $input_storable
+                         });
+
+ok -e './hello.js';
+ok -e './echo.js';
+ok -e './input.json';
+ok -e './input.yaml';
+ok -e './input.pm';
+ok -e './input.storable';
+
+my $stdout;
+
+ok (Qgoda::CLI->new(['js', '--no-output', './hello.js'])->dispatch);
+$stdout = Qgoda->new->jsout;
+is $stdout, "Hello, world!\n";
+
+ok (Qgoda::CLI->new(['js',
+                     '--no-output',
+                     '--input', './input.json',
+                     './echo.js'])->dispatch);
+$stdout = Qgoda->new->jsout;
+is $stdout, "{foo: 'bar'}\n";
+
+# Lower case format.
+ok (Qgoda::CLI->new(['js',
+                     '--no-output',
+                     '--input-format', 'json',
+                     '--input', './input.json',
+                     './echo.js'])->dispatch);
+$stdout = Qgoda->new->jsout;
+is $stdout, "{foo: 'bar'}\n";
+
+ok (Qgoda::CLI->new(['js',
+                     '--no-output',
+                     '--input-format', 'JSON',
+                     '--input-data', $input_json, 
+                     './echo.js'])->dispatch);
+$stdout = Qgoda->new->jsout;
+is $stdout, "{foo: 'bar'}\n";
+
+$site->tearDown;
+
+done_testing;

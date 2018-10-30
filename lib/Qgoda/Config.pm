@@ -90,7 +90,7 @@ sub new {
 	require 'Qgoda/JavaScript/config.js';
 	my $code = Qgoda::JavaScript::config->code;
 	my $node_modules = $q->nodeModules;
-	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules);
+	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules, no_console => 1);
 	my $schema = Qgoda::Schema->config;
 	$js->vm->set(schema => $schema);
 	$js->vm->set(input => $yaml);
@@ -104,13 +104,19 @@ sub new {
 	if ($invalid) {
 		my ($filename, $errors) = @$invalid;
 		my $msg = '';
-		foreach my $error (@$errors) {
-			$msg .= "$filename: config$error->{dataPath}: ";
-			$msg .= "$error->{message}\n";
-			my $params = $error->{params};
-			foreach my $param (keys %$params) {
-				$msg .= "\t$param: $params->{$param}\n";
+		if (ref $errors) {
+			foreach my $error (@$errors) {
+				$msg .= __x("{filename}: CONFIG{dataPath}: ",
+				             filename => $filename,
+							 dataPath => $error->{dataPath});
+				$msg .= "$error->{message}\n";
+				my $params = $error->{params};
+				foreach my $param (keys %$params) {
+					$msg .= "\t$param: $params->{$param}\n";
+				}
 			}
+		} else {
+			$msg = "$filename: $errors\n";
 		}
 
 		die $msg;
@@ -126,6 +132,13 @@ sub new {
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
 		if !exists $config->{po}->{tt2};
+
+	# This outsmarts the default options for JSON schema.
+	my $processor_options = $schema->{properties}
+	                        ->{processors}->{properties}
+                            ->{options}->{default};
+	$config->{processors}->{options} =
+			merge_data $processor_options, $config->{processors}->{options};
 
     my @exclude = (
         '/_*',
