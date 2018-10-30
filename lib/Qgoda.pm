@@ -23,7 +23,7 @@ use strict;
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
 use File::Basename qw(fileparse dirname);
-my $install_dir = Cwd::abs_path(dirname __FILE__);
+my $package_dir = File::Spec->catdir(Cwd::abs_path(dirname __FILE__), 'Qgoda');
 
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
@@ -947,7 +947,7 @@ sub buildOptions {
 sub nodeModules {
 	my ($self) = @_;
 
-    return join '/', $install_dir, 'node_modules';
+    return join '/', $package_dir, 'node_modules';
 }
 
 sub jsout {

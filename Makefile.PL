@@ -29,11 +29,12 @@ sub postamble {
 
 	my @post;
 
+$DB::single = 1;
 	# Try to find either yarn or npm in $PATH.
 	my $preferred_package_manager = $ENV{QGODA_PACKAGE_MANAGER} || '';
 	my $package_manager;
 	my $here = abs_path;
-	my $libdir = File::Spec->catdir($here, 'lib');
+	my $libdir = File::Spec->catdir($here, 'lib', 'Qgoda');
 	chdir $libdir || die "cannot cd to '$libdir': $!";
 	if ($preferred_package_manager ne 'npm') {
 		my $pm = $ENV{QGODA_YARN} || 'yarn';

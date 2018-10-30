@@ -206,8 +206,9 @@ B<DATA>.  The data format is determined by I<--input-format>.
 =item I<-g|--global=DIRECTORY>
 
 Prepend B<DIRECTORY> to the list of global directories to search for
-JavaScript modules.  The default is the Qgoda installation directory, that
-is the directory where F<Qgoda.pm> is installed.
+JavaScript modules.  The default is the Qgoda package directory, that
+is the same path where F<Qgoda.pm> is installed but without the trailing
+F<.pm>.
 
 The B<DIRECTORY> should be specified I<without> the trailing F<node_modules>.
 

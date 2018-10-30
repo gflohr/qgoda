@@ -27,6 +27,8 @@ lib/Qgoda/Command/Build.pm
 lib/Qgoda/Command/Config.pm
 lib/Qgoda/Command/Dump.pm
 lib/Qgoda/Command/Init.pm
+lib/Qgoda/Command/Javascript.pm
+lib/Qgoda/Command/Js.pm
 lib/Qgoda/Command/Markdown.pm
 lib/Qgoda/Command/Po.pm
 lib/Qgoda/Command/Schema.pm
@@ -73,10 +75,10 @@ lib/Qgoda/Splitter.pm
 lib/Qgoda/Util.pm
 lib/Qgoda/Util/Date.pm
 lib/Qgoda/Util/Translate.pm
+lib/Qgoda/package-lock.json
+lib/Qgoda/package.json
+lib/Qgoda/yarn.lock
 lib/Template/Plugin/Qgoda.pm
-lib/package-lock.json
-lib/package.json
-lib/yarn.lock
 perlcritic.rc
 po/Makefile
 po/PACKAGE
@@ -92,7 +94,10 @@ t/TestSite.pm
 t/author-critic.t
 t/author-pod-syntax.t
 t/collect_defaults.t
+t/command-javascript.t
 t/config-default.t
+t/config-defaults.t
+t/config-invalid.t
 t/config-round-trip.t
 t/default-view.t
 t/encode_json.t
