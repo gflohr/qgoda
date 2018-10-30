@@ -171,6 +171,7 @@ sub new {
     $context->define_vmethod(hash => kebapSnake => $kebap_snake);
     $context->define_vmethod(hash => kebapCamel => $kebap_camel);
     $context->define_vmethod(hash => quoteValues => $quote_values);
+	$context->define_vmethod(hash => vmap => $vmap);
 
     my $self = {
         __context => $context
