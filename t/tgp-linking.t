@@ -1,0 +1,110 @@
+#! /usr/bin/env perl # -*- perl -*-
+
+# Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>,
+# all rights reserved.
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+use strict;
+
+BEGIN {
+    my $test_dir = __FILE__;
+    $test_dir =~ s/[-a-z0-9]+\.t$//i;
+    unshift @INC, $test_dir;
+}
+
+use TestSite;
+use Test::More;
+
+use Qgoda::CLI;
+use Qgoda::Util qw(read_file);
+
+my %assets;
+my $num_docs = 10;
+
+foreach my $count (1 .. $num_docs) {
+	my $count0 = sprintf '%02u', $count;
+	$assets{"en/post-$count0.md"} = {
+		title => "English #$count0",
+		lingua => 'en',
+		type => 'post',
+		content => 'Good morning!',
+		name => "post-$count0",
+	};
+	$assets{"fi/post-$count0.md"} = {
+		title => "Suomalainen #$count0",
+		lingua => 'fi',
+		type => 'post',
+		content => 'Hyvää huomenta!',
+		name => "post-$count0",
+	};
+	$assets{"en/reply-$count0.md"} = {
+		title => "English #$count0",
+		lingua => 'en',
+		type => 'reply',
+		content => 'Good morning, too!',
+		name => "post-$count0",
+	};
+	$assets{"fi/reply-$count0.md"} = {
+		title => "Suomalainen #$count0",
+		lingua => 'fi',
+		type => 'reply',
+		content => 'Huomenta huomenta!',
+		name => "post-$count0",
+	};
+}
+
+my $num_posts_en = <<EOF;
+[%- q.llistPosts.size -%]
+EOF
+$assets{"en/num-posts.md"} = {
+	lingua => 'en',
+	type => 'listing',
+	content => $num_posts_en,
+	priority => -9999
+};
+
+my $site = TestSite->new(
+	name => 'tgp-linking',
+	assets => \%assets,
+	files => {
+		'_views/default.html' => "[% asset.content %]"
+	},
+	config => {
+		defaults => [
+			{
+				files => '/en',
+				values => { lingua => 'en' },
+			},
+			{
+				files => '/fi',
+				values => { lingua => 'fi' },
+			},
+		]
+	}
+);
+
+ok (Qgoda::CLI->new(['build'])->dispatch);
+
+foreach my $count (1 .. $num_docs) {
+	my $count0 = sprintf '%02u', $count;
+	ok -e "./_site/en/post-$count0/index.html";
+	ok -e "./_site/fi/post-$count0/index.html";
+	ok -e "./_site/en/reply-$count0/index.html";
+	ok -e "./_site/fi/reply-$count0/index.html";
+}
+
+$site->tearDown;
+
+done_testing;
