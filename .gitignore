@@ -1,6 +1,9 @@
 .*.swp
 *~
 
+# Devel::Cover
+/cover_db
+
 # Use your own one.
 /.vimrc
 
