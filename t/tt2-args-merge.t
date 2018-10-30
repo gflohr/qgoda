@@ -29,7 +29,6 @@ my ($args, $conf) = tt2_args_merge \@args, \%conf, ['baz'], { baz => 3};
 is_deeply $args, [qw(foo bar baz)];
 is_deeply $conf, { foo => 1, bar => 2, baz => 3};
 
-$DB::single = 1;
 ($args, $conf) = tt2_args_merge \@args, \%conf, ['-bar'], { foo => 2304};
 
 is_deeply $args, [qw(foo)];
