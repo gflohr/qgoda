@@ -20,8 +20,11 @@ use strict;
 
 use Test::More;
 
+use Qgoda;
 use Qgoda::JavaScript::Environment;
 use YAML::XS 0.67;
+
+Qgoda->new({quiet => 1, log_stderr => 1});
 
 # Test that console.log() and console.err() can use tied Perl streams.
 my $env = Qgoda::JavaScript::Environment->new(global => 'lib');
@@ -29,24 +32,33 @@ my $env = Qgoda::JavaScript::Environment->new(global => 'lib');
 my $stdout = tie *STDOUT, 'MyConsole';
 my $stderr = tie *STDERR, 'MyConsole';
 
-$env->run("console.log('log')");
-is $stdout->buffer, "log\n";
+eval {
+	$env->run("console.log('log')");
+	is $stdout->buffer, "log\n";
 
-$env->run("console.error('error')");
-is $stderr->buffer, "error\n";
+	$env->run("console.error('error')");
+	is $stderr->buffer, "error\n";
 
-$env->run("console.warn('warn')");
-is $stderr->buffer, "warn\n";
+	$env->run("console.warn('warn')");
+	is $stderr->buffer, "warn\n";
 
-# Test that objects are not just stringified but pretty printed.
-$env->run("console.log({number: 2304})");
-is $stdout->buffer, "{number: 2304}\n";
+	# Test that objects are not just stringified but pretty printed.
+	$env->run("console.log({number: 2304})");
+	is $stdout->buffer, "{number: 2304}\n";
 
-$env->run("console.log('this and that')");
-is $stdout->buffer, "this and that\n";
+	$env->run("console.log('this and that')");
+	is $stdout->buffer, "this and that\n";
 
-$env->run("console.log('this', 'and', 'that')");
-is $stdout->buffer, "this and that\n";
+	$env->run("console.log('this', 'and', 'that')");
+	is $stdout->buffer, "this and that\n";
+};
+
+untie *STDOUT;
+untie *STDERR;
+
+if ($@) {
+	die $@;
+}
 
 done_testing;
 

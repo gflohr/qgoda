@@ -128,8 +128,9 @@ sub exchange {
 sub run {
 	my ($self, $code) = @_;
 
+	my $q = Qgoda->new;
+	
 	if ($self->{__no_output}) {
-		my $q = Qgoda->new;
 		$self->{__jsout} = '';
 		$self->{__jserr} = '';
 		$self->{__vm}->reset_msgs;
@@ -152,6 +153,8 @@ sub run {
 		$q->jsout($stdout . $vm_stdout);
 		$q->jserr($stderr . $vm_stderr);
 	}
+
+	$q->jsreturn($self->{__vm}->get($self->{__exchange_name} . '.return'));
 
 	return $retval;
 }

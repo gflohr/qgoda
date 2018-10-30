@@ -71,7 +71,7 @@ sub config {
 							               . "pattern or a list of file name "
 							               . "patterns.  Files that match will "
 							               . "receive the values specified.",
-							type => [qw(array string)],
+							type => 'array',
 							items => {
 								type => 'string'
 							},

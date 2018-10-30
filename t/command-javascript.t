@@ -30,8 +30,9 @@ use Storable qw(freeze thaw);
 
 use Qgoda::CLI;
 
-my $hello = "console.log('Hello, world!')\n";
-my $echo = "console.log(__perl__.input)\n";
+my $hello_js = "console.log('Hello, world!')\n";
+my $echo_js = "console.log(__perl__.input)\n";
+my $return_js = "__perl__.return = 'Hello, world!'";
 my $input_json = qq{{"foo":"bar"}};
 my $input_yaml = <<EOF;
 ---
@@ -46,8 +47,9 @@ my $input_storable = freeze { foo => 'bar' };
 
 my $site = TestSite->new(name => 'command-javascript',
                          files => {
-                             'hello.js' => $hello,
-                             'echo.js' => $echo,
+                             'hello.js' => $hello_js,
+                             'echo.js' => $echo_js,
+							 'return.js' => $return_js,
                              'input.json' => $input_json,
                              'input.yaml' => $input_yaml,
                              'input.pm' => $input_pm,
@@ -56,6 +58,7 @@ my $site = TestSite->new(name => 'command-javascript',
 
 ok -e './hello.js';
 ok -e './echo.js';
+ok -e './return.js';
 ok -e './input.json';
 ok -e './input.yaml';
 ok -e './input.pm';
@@ -90,6 +93,12 @@ ok (Qgoda::CLI->new(['js',
                      './echo.js'])->dispatch);
 $stdout = Qgoda->new->jsout;
 is $stdout, "{foo: 'bar'}\n";
+
+ok (Qgoda::CLI->new(['js',
+                     '--no-output',
+                     './return.js'])->dispatch);
+my $jsreturn= Qgoda->new->jsreturn;
+is $jsreturn, 'Hello, world!';
 
 $site->tearDown;
 

@@ -373,8 +373,8 @@ sub config {
     shift->{__config};
 }
 
-sub dumpConfig {
-    my ($self) = @_;
+sub rawConfig {
+	my ($self) = @_;
 
     # We need our own copy so that we can mess around with it.
     my $config = Qgoda::Config->new(raw => 1);
@@ -382,7 +382,13 @@ sub dumpConfig {
     # Poor man's Data::Structure::unbless().
     my %config = %$config;
 
-    return YAML::XS::Dump(\%config);
+	return \%config;
+}
+
+sub dumpConfig {
+    my ($self) = @_;
+
+    return YAML::XS::Dump($self->rawConfig);
 }
 
 sub printConfig {
@@ -966,6 +972,16 @@ sub jserr {
 	}
 
 	$self->{__jserr} = $jserr;
+}
+
+sub jsreturn {
+	my ($self, $value) = @_;
+
+	if (@_ > 1) {
+		$self->{__jsreturn} = $value;
+	}
+
+	return $self->{__jsreturn};
 }
 
 1;

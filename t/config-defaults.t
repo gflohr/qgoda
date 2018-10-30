@@ -26,11 +26,11 @@ BEGIN {
 
 use TestSite;
 use Test::More;
+use Storable qw(dclone);
+use Scalar::Util qw(reftype);
 
 use Qgoda::Config;
 use Qgoda::Schema;
-use Storable qw(dclone);
-
 use constant true => $JSON::PP::true;
 use constant false => $JSON::PP::false;
 
@@ -96,14 +96,38 @@ $site = TestSite->new(name => 'config-defaults',
             tt2 => '_my_views',
             xgettext => 'xgettext',
             'xgettext-tt2' => 'xgettext-tt2'
-        }
-    }
+        },
+		defaults => [
+			{
+				files => '/fi',
+				values => { lingua => 'fi' }
+			}
+		],
+		exclude => '*.bak',
+		'exclude-watch' => '*.bak',
+	}
 );
 
-$got = Qgoda->new->config;
+$got = Qgoda->new->rawConfig;
 is_deeply $got->{helpers}->{make}, ['make'];
 is_deeply $got->{helpers}->{yarn}, ['yarn', 'start'];
 is_deeply $got->{po}->{msgfmt}, ['msgfmt'];
+
+ok $got->{defaults}->[0];
+ok ref $got->{defaults}->[0];
+ok ref $got->{defaults}->[0]->{files};
+is ((reftype $got->{defaults}->[0]->{files}), 'ARRAY');
+is '/fi', $got->{defaults}->[0]->{files}->[0]; 
+
+ok $got->{exclude};
+ok ref $got->{exclude};
+is ((reftype $got->{exclude}), 'ARRAY');
+is $got->{exclude}->[0], '*.bak';
+
+ok $got->{'exclude-watch'};
+ok ref $got->{'exclude-watch'};
+is ((reftype $got->{'exclude-watch'}), 'ARRAY');
+is $got->{'exclude-watch'}->[0], '*.bak';
 
 # FIXME! Check that config.po.tt2 is filled correctly but can be overridden!
 $site->tearDown;
