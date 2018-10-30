@@ -139,6 +139,11 @@ sub new {
                             ->{options}->{default};
 	$config->{processors}->{options} =
 			merge_data $processor_options, $config->{processors}->{options};
+	my $processor_chains = $schema->{properties}
+	                        ->{processors}->{properties}
+                            ->{chains}->{default};
+	$config->{processors}->{chains} =
+			merge_data $processor_chains, $config->{processors}->{chains};
 
     my @exclude = (
         '/_*',
