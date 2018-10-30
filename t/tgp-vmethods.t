@@ -67,7 +67,7 @@ my $vmap_scalar = <<EOF;
 EOF
 
 my $site = TestSite->new(
-	name => 'template-plugin-qgoda',
+	name => 'tgp-vmethods',
 	assets => {
 		'vmap-array.md' => {content => $vmap_array},
 		'vmap-hash.md' => {content => $vmap_hash},
