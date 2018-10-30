@@ -244,7 +244,7 @@ sub w3c {
 
     my @time = gmtime $$self;
 
-    return sprintf('%04u-%02u-%02u', $time[5] + 1900, $time[4], $time[3]);
+    return sprintf('%04u-%02u-%02u', $time[5] + 1900, $time[4] + 1, $time[3]);
 }
 
 # Date in W3C format in local time.
@@ -253,7 +253,7 @@ sub w3cLocal {
 
     my @time = localtime $$self;
 
-    return sprintf('%04u-%02u-%02u', $time[5] + 1900, $time[4], $time[3]);
+    return sprintf('%04u-%02u-%02u', $time[5] + 1900, $time[4] + 1, $time[3]);
 }
 
 # Date and time in W3C format. For performance reasons, this is always
@@ -264,7 +264,7 @@ sub w3cWithTime {
     my @time = gmtime $$self;
 
     return sprintf('%04u-%02u-%02uT%02u:%02u:%02u+0000',
-                   $time[5] + 1900, $time[4], $time[3], $time[2], $time[1],
+                   $time[5] + 1900, $time[4] + 1, $time[3], $time[2], $time[1],
                    $time[0]);
 }
 
@@ -284,7 +284,7 @@ sub w3cWithTimeLocal {
                      $tz_offset / 60, $tz_offset % 60);
 
     return sprintf('%04u-%02u-%02uT%02u:%02u:%02u%s',
-                   $time[5] + 1900, $time[4], $time[3], $time[2], $time[1],
+                   $time[5] + 1900, $time[4] + 1, $time[3], $time[2], $time[1],
                    $time[0], $tz);
 }
 
