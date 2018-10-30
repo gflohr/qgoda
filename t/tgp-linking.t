@@ -75,6 +75,16 @@ $assets{"en/num-posts.md"} = {
 	priority => -9999
 };
 
+my $num_posts_fi = <<EOF;
+[%- q.llistPosts.size -%]
+EOF
+$assets{"fi/num-posts.md"} = {
+	lingua => 'fi',
+	type => 'listing',
+	content => $num_posts_fi,
+	priority => -9999
+};
+
 my $site = TestSite->new(
 	name => 'tgp-linking',
 	assets => \%assets,
@@ -96,6 +106,9 @@ my $site = TestSite->new(
 );
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
+
+ok -e "./_site/en/num-posts/index.html";
+ok -e "./_site/fi/num-posts/index.html";
 
 foreach my $count (1 .. $num_docs) {
 	my $count0 = sprintf '%02u', $count;
