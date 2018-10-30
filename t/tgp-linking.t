@@ -31,7 +31,7 @@ use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
 
 my %assets;
-my $num_docs = 10;
+my $num_docs = 13;
 
 foreach my $count (1 .. $num_docs) {
 	my $count0 = sprintf '%02u', $count;
@@ -66,6 +66,7 @@ foreach my $count (1 .. $num_docs) {
 }
 
 my $num_posts_en = <<EOF;
+[%- USE q = Qgoda -%]
 [%- q.llistPosts.size -%]
 EOF
 $assets{"en/num-posts.md"} = {
@@ -76,6 +77,7 @@ $assets{"en/num-posts.md"} = {
 };
 
 my $num_posts_fi = <<EOF;
+[%- USE q = Qgoda -%]
 [%- q.llistPosts.size -%]
 EOF
 $assets{"fi/num-posts.md"} = {
@@ -107,9 +109,6 @@ my $site = TestSite->new(
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
-ok -e "./_site/en/num-posts/index.html";
-ok -e "./_site/fi/num-posts/index.html";
-
 foreach my $count (1 .. $num_docs) {
 	my $count0 = sprintf '%02u', $count;
 	ok -e "./_site/en/post-$count0/index.html";
@@ -118,6 +117,12 @@ foreach my $count (1 .. $num_docs) {
 	ok -e "./_site/fi/reply-$count0/index.html";
 }
 
-$site->tearDown;
+ok -e './_site/en/num-posts/index.html';
+is ((read_file './_site/en/num-posts/index.html'), "<p>$num_docs</p>");
+
+ok -e './_site/fi/num-posts/index.html';
+is ((read_file './_site/fi/num-posts/index.html'), "<p>$num_docs</p>");
+
+#$site->tearDown;
 
 done_testing;
