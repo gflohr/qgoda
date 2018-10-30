@@ -6,3 +6,7 @@ perl:
   - "5.18"
 env:
   - AUTHOR_TESTING=1 QGODA_NO_INSTALL_CHECK=1
+before_install:
+  - cpanm --notest Devel::Cover::Report::Coveralls
+after_success:
+  - cover -test -report coveralls
