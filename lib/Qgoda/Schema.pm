@@ -129,7 +129,7 @@ sub config {
 				additionalProperties => false,
 				patternProperties => {
 					'.+' => {
-						type => [qw(array string)],
+						type => 'array',
 						items => {
 							type => 'string'
 						}
