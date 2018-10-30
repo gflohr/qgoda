@@ -944,6 +944,30 @@ sub nodeModules {
     return join '/', $install_dir, 'node_modules';
 }
 
+sub jsout {
+	my ($self, $jsout) = @_;
+
+	if (@_ == 1) {
+		$jsout = $self->{__jsout};
+		$jsout = '' if empty $jsout;
+		return $jsout;
+	}
+
+	$self->{__jsout} = $jsout;
+}
+
+sub jserr {
+	my ($self, $jserr) = @_;
+
+	if (@_ == 1) {
+		$jserr = $self->{__jserr};
+		$jserr = '' if empty $jserr;
+		return $jserr;
+	}
+
+	$self->{__jserr} = $jserr;
+}
+
 1;
 
 =head1 NAME

@@ -66,16 +66,16 @@ permalink: '{significant-path}'
 po:
   copyright-holder: Set config.po.copyright-holder in '_config.yaml'.
   mdextra: []
-  msgfmt: msgfmt
+  msgfmt: [msgfmt]
   msgid-bugs-address: Set config.po.msgid-bugs-address in '_config.yaml'.
-  msgmerge: msgmerge
-  qgoda: qgoda
+  msgmerge: [msgmerge]
+  qgoda: [qgoda]
   reload: false
   textdomain: messages
   tt2:
   - _views
-  xgettext: xgettext
-  xgettext-tt2: xgettext-tt2
+  xgettext: [xgettext]
+  xgettext-tt2: [xgettext-tt2]
 processors:
   chains:
     html:

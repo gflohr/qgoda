@@ -38,7 +38,7 @@ my $site = TestSite->new(name => 'config-defaults',
 my $x = $site->exception;
 ok $x, 'invalid configuration should throw exception';
 is $x, <<EOF;
-_config.yaml: config.po: should NOT have additional properties
+_config.yaml: CONFIG.po: should NOT have additional properties
 	additionalProperty: views
 EOF
 

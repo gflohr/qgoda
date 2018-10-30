@@ -30,6 +30,7 @@ use Cwd;
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
 
+my $repodir;
 BEGIN {
 	# Make @INC absolute.
 	foreach my $path (@INC) {
@@ -37,6 +38,9 @@ BEGIN {
 			$path = Cwd::abs_path($path);
 		}
 	}
+    my ($volume, $directory) = File::Spec->splitpath(__FILE__);
+	$repodir = File::Spec->catpath($volume, $directory, '..');
+	$repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
 }
 
 sub new {
@@ -58,9 +62,6 @@ sub setup {
 
 	my ($volume, $directory) = File::Spec->splitpath(__FILE__);
 
-	my $repodir = File::Spec->catpath($volume, $directory, '..');
-	$repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
-	$self->{repodir} = $repodir;
 	chdir $repodir or die "cannot chdir to '$repodir': $!\n";
 
 	my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
@@ -138,7 +139,7 @@ sub __setupFiles {
 sub tearDown {
 	my ($self) = @_;
 
-	chdir $self->{repodir} or die "cannot chdir to '$self->{repodir}': $!\n";
+	chdir $repodir or die "cannot chdir to '$repodir': $!\n";
 
 	my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
 	File::Find::finddepth({

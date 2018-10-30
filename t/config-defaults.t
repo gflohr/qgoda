@@ -53,7 +53,6 @@ $site = TestSite->new(name => 'config-defaults',
 $got = Qgoda->new->config->{paths};
 delete $got->{site};
 is_deeply $got, $expected, 'replace simple key in top-level object';
-$site->tearDown;
 
 my $schema = Qgoda::Schema->config->{properties}->{processors}->{properties};
 $expected = {
@@ -77,8 +76,36 @@ $site = TestSite->new(name => 'config-defaults',
 	}
 );
 $got = Qgoda->new->config->{processors};
-is_deeply $got, $expected, 'individually overwrite deeply nested property';
+is_deeply $got, $expected,
+          'individually overwrite deeply nested processor option';
 
-#$site->tearDown;
+# FIXME! Test the above with config.processors.chains and
+# config.processors.triggers!
+
+# Test that all commands are coerced into arrays.
+$site = TestSite->new(name => 'config-defaults',
+    config => {
+        helpers => {
+            make => 'make',
+            yarn => [qw(yarn start)]
+        },
+        po => {
+            msgfmt => 'msgfmt',
+            msgmerge => 'msgmerge',
+            qgoda => 'qgoda',
+            tt2 => '_my_views',
+            xgettext => 'xgettext',
+            'xgettext-tt2' => 'xgettext-tt2'
+        }
+    }
+);
+
+$got = Qgoda->new->config;
+is_deeply $got->{helpers}->{make}, ['make'];
+is_deeply $got->{helpers}->{yarn}, ['yarn', 'start'];
+is_deeply $got->{po}->{msgfmt}, ['msgfmt'];
+
+# FIXME! Check that config.po.tt2 is filled correctly but can be overridden!
+$site->tearDown;
 
 done_testing;

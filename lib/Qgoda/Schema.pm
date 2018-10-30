@@ -245,14 +245,13 @@ sub config {
 						default => []
 					},
 					msgfmt => {
-						description => __"The msgfmt command (or an array of "
-						               . "the program name plus arguments), "
-						               . "defaults to 'msgfmt'.",
-						type => ['array', 'string'],
+						description => __"The 'msgfmt' command or an array of "
+						               . "the program name plus arguments.",
+						type => 'array',
 						items => {
 							type => 'string'
 						},
-						default => 'msgfmt'
+						default => ['msgfmt']
 					},
 					'msgid-bugs-address' => {
 						description => __"Where to report translation problems "
@@ -262,24 +261,22 @@ sub config {
 						               variable => 'config.po.msgid-bugs-address')
 					},
 					msgmerge => {
-						description => __"The msgmerge command (or an array of "
-						               . "the program name plus arguments), "
-						               . "defaults to 'msgmerge'.",
-						type => [qw(array string)],
+						description => __"The 'msgmerge' command(or an array of "
+						               . "the program name plus arguments.",
+						type => 'array',
 						items => {
 							type => 'string'
 						},
-						default => 'msgmerge'
+						default => ['msgmerge']
 					},
 					qgoda => {
-						description => __"The qgoda command (or an array of the "
-						               . "program name plus arguments), "
-						               . "defaults to 'qgoda'.",
-						type => [qw(array string)],
+						description => __"The 'qgoda' command or an array of the "
+						               . "program name plus arguments.",
+						type => 'array',
 						items => {
 							type => 'string'
 						},
-						default => 'qgoda',
+						default => ['qgoda'],
 					},
 					reload => {
 						description => __"Whether to throw away the "
@@ -301,7 +298,7 @@ sub config {
 						                . "templates for the Template Toolkit "
 						                . "version 2 are stored, defaults to "
 						                . "'_views'.",
-						types => [qw(array string)],
+						types => 'array',
 						items => {
 							type => 'string'
 						}
@@ -309,25 +306,23 @@ sub config {
 						# empty. See https://github.com/epoberezkin/ajv/issues/681
 					},
 					xgettext => {
-						description => __"The xgettext command (or an array of "
-						               . "the program name plus arguments), "
-						               . "defaults to 'xgettext'.",
-						type => [qw(array string)],
+						description => __"The 'xgettext' command or an array of "
+						               . "the program name plus arguments.",
+						type => 'array',
 						items => {
 							type => 'string'
 						},
-						default => 'xgettext'
+						default => ['xgettext']
 					},
 					'xgettext-tt2' => {
-						description => __"The xgettext-tt2 command (or an "
+						description => __"The 'xgettext-tt2' command or an "
 						               . "array of the program name plus "
-						               . "arguments), defaults to "
-						               . "'xgettext-tt2'.",
-						type => [qw(array string)],
+						               . "arguments.",
+						type => 'array',
 						items => {
 							type => 'string'
 						},
-						default => 'xgettext-tt2'
+						default => ['xgettext-tt2']
 					}
 				}
 			},
