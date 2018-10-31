@@ -49,7 +49,7 @@ sub _getOptionSpecs {
 sub _run {
     my ($self, $args, $global_options, %options) = @_;
 
-	my $q = Qgoda->new;
+	my $q = Qgoda->new({quiet => 1, log_stderr => 1});
 
 	if (!empty $options{input} && !empty $options{input_data}) {
 		die __"The options '--input' and '--input-format' are mutually "
