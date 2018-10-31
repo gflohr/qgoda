@@ -31,3 +31,7 @@
 # Dist::Zilla
 /.build
 /Qgoda-v*
+
+# JavaScript
+/lib/Qgoda/node_modules
+/lib/Qgoda/yarn-error.log
