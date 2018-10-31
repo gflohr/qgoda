@@ -51,6 +51,12 @@ eval {
 
 	$env->run("console.log('this', 'and', 'that')");
 	is $stdout->buffer, "this and that\n";
+
+	my $obj = <<EOF;
+{abc: 1, cde: 2, nested1: [1, 2, 3, { foo: 'bar' }]}
+EOF
+	$env->run("console.log($obj)");
+	is $stdout->buffer, $obj;
 };
 
 untie *STDOUT;
@@ -67,39 +73,39 @@ package MyConsole;
 use strict;
 
 sub TIEHANDLE {
-    bless { __buffer => '' }, shift;
+	bless { __buffer => '' }, shift;
 }
 
 sub WRITE {
-    my ($self, $buffer, $length, $offset) = @_;
+	my ($self, $buffer, $length, $offset) = @_;
 
-    $length ||= length $buffer;
-    $offset ||= 0;
-    my $chunk = substr $buffer, $offset, $length;
+	$length ||= length $buffer;
+	$offset ||= 0;
+	my $chunk = substr $buffer, $offset, $length;
 
-    $self->{__buffer} .= $chunk;
+	$self->{__buffer} .= $chunk;
 
-    return length $chunk;
+	return length $chunk;
 }
 
 sub PRINT {
-    my ($self, @chunks) = @_;
+	my ($self, @chunks) = @_;
 
-    return $self->WRITE (join $,, @chunks);
+	return $self->WRITE (join $,, @chunks);
 }
 
 sub CLOSE {
-    shift;
+	shift;
 }
 
 sub UNTIE {
-    shift->CLOSE;
+	shift->CLOSE;
 }
 
 sub buffer {
 	my ($self) = @_;
 
-    my $buffer = $self->{__buffer};
+	my $buffer = $self->{__buffer};
 	$self->{__buffer} = '';
 
 	return $buffer;
