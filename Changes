@@ -1,46 +1,66 @@
 {{$NEXT}}
-        - the i18n seed repo is now the official one (not file:///...)
-        - new template functions for W3C and RFC822 date and time formats
-        - yeoman generator (work in progress), see
-          https://www.npmjs.com/package/generator-qgoda
-        - plug-ins present in ./node_modules are automatically loaded
-        - asset priority is now honored in all generation rounds
-        - the generator meta tag is now configurable in config.generator
-        - added "Strip" to the default processor chains for discarding
-          leading and trailing whitespace from the generated files
-        - a new "xml" processor chain, defaults to ['TT2', 'Strip']
-        - non-standard strftime extension '#%' for the ordinal day
-          of the months (1st in English, 2eme in French, 3. in German),
-          PRs for other languages welcome
-        - new location placeholder "basename_nodate" which strips of
-          leading YYYY-MM-DD- from the basename for Jekyll migration
-        - more documentation on http://www.qgoda.net/:
-          * Defaults
-          * Filters
-          * Multilanguage
-        - about 30 % of the web site is translated to German
-        - fixed issues:
-          * https://github.com/gflohr/qgoda/issues/32
-          * https://github.com/gflohr/qgoda/issues/44
-          * https://github.com/gflohr/qgoda/issues/49
+    - Configuration validation is now using a JSON schema
+      (try "qgoda schema").
+    - Validator is Ajv (https://ajv.js.org/), JSON schema version
+      "draft_07".  The validator is called with "coerceTypes" set
+      to "array", and "useDefaults".  That means that a lone string
+      value is automatically coerced into an array, where needed
+    - Replaced the underscore with a hyphen in all config variables,
+      so that "exclude_watch" is now for example "exclude-watch".
+    - New commands "qgoda schema", "qgoda javascript", and "qgoda js"
+      (which is an alias for "qgoda javascript").
+    - Gradually increasing test coverage (displayed on github page
+      https://github.com/gflohr/qgoda).
+	- The i18n seed repo is now the official one (not file:///...).
+	- New date functions for W3C and RFC822 date and time formats
+      (try asset.date.w3c, asset.date.rfc822, asset.date.w3cLocal,
+      and asset.date.rfc822Local)
+	- yeoman generator (work in progress), see
+	  https://www.npmjs.com/package/generator-qgoda.
+	- Plug-ins present in ./node_modules are automatically loaded.
+	- Asset priority is now honored in all generation rounds.
+	- The generator meta tag is now configurable in config.generator.
+	- Added "Strip" to the default processor chains for discarding
+	  leading and trailing whitespace from the generated files,
+      useful for XML output.
+	- A new "xml" processor chain, defaults to ['TT2', 'Strip']
+	- Non-standard strftime extension '#%' for the ordinal day
+	  of the month (1st in English, 2eme in French, 3. in German),
+	  PRs for other languages are welcome.
+	- New location placeholder "basename_nodate" which strips of
+	  leading YYYY-MM-DD- from the basename for Jekyll migration
+	- More documentation on http://www.qgoda.net/:
+	  * Defaults
+	  * Filters
+	  * Multilanguage
+	- About 30 % of the web site is translated to German.
+	- Fixed issues:
+	  * https://github.com/gflohr/qgoda/issues/32
+	  * https://github.com/gflohr/qgoda/issues/44
+	  * https://github.com/gflohr/qgoda/issues/49
+      And tons of others that have not been reported.
 
 v0.9.2 - 2018-05-17
-        - content translation with PO files and gettext workflow
-        - Dockerfile thanks to Dominic Sonntag
-        - automatic creation of default template
-        - use utf8 flag
-        - q.anchor() and q.lanchor()
-        - q.existsLink(), q.lexistsLink(), q.existsXref(), q.lexistsXref().
-        - calculate related documents based on shared taxonomy values
-        - generic html filter interface
-        - automatic TOC generation
-        - virtual assets
-        - pluggable analyzers
-        - version control mode (only git supported at the moment)
-        - drafts mode
-        - do not process future documents (unless requested)
-        - inverted semantics for "priority"
-        - q.vmap()
+	- Content translation with PO files and gettext workflow.
+	- Dockerfile thanks to Dominic Sonntag.
+	- Automatic creation of default template.
+	- Use utf8 flag. :(
+	- New plug-in methods q.anchor() and q.lanchor().
+	- New plug-in methods q.existsLink(), q.lexistsLink(),
+      q.existsXref(), q.lexistsXref().
+	- Calculate related documents based on shared taxonomy values.
+	- Generic html filter interface.
+	- Automatic TOC generation.
+	- Virtual assets (assets with property "virtual" set to a truth
+      value are not rendered).
+	- Pluggable analyzers.
+	- Version control mode (only git supported at the moment).  If
+      "config.scm" is set to "git", only files under version control
+      are processed.
+	- Drafts mode, enabled by setting asset property "draft" to 1.
+	- Do not process future documents (unless requested)
+	- Inverted semantics for "priority"
+	- New vmethod q.vmap().
 
 v0.9.0 - 2017-12-08
-        - First alpha version (github only)
+	- First alpha version (github only).
