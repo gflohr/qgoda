@@ -29,7 +29,6 @@ sub postamble {
 
 	my @post;
 
-$DB::single = 1;
 	# Try to find either yarn or npm in $PATH.
 	my $preferred_package_manager = $ENV{QGODA_PACKAGE_MANAGER} || '';
 	my $package_manager;
