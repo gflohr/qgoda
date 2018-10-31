@@ -95,6 +95,7 @@ t/author-critic.t
 t/author-pod-syntax.t
 t/collect_defaults.t
 t/command-javascript.t
+t/command-po.t
 t/config-default.t
 t/config-defaults.t
 t/config-invalid.t
@@ -118,8 +119,11 @@ t/sort_by.t
 t/splitter.t
 t/strftime.t
 t/strip_suffix.t
+t/tgp-linking.t
+t/tgp-vmethods.t
 t/tt2-args-merge.t
 t/unmarkup.t
 t/utf-8-flag.t
 t/utf-8-flag/LocaleData/de/LC_MESSAGES/messages.mo
 t/utf-8-flag/_po/de.po
+t/util-date.t

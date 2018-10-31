@@ -29,7 +29,6 @@ sub postamble {
 
 	my @post;
 
-$DB::single = 1;
 	# Try to find either yarn or npm in $PATH.
 	my $preferred_package_manager = $ENV{QGODA_PACKAGE_MANAGER} || '';
 	my $package_manager;
@@ -282,7 +281,8 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
-    "Test::More" => 0
+    "Test::More" => 0,
+    "Time::Local" => 0
   },
   "VERSION" => "v0.9.3",
   "test" => {
@@ -356,6 +356,7 @@ my %FallbackPrereqs = (
   "Text::Markdown::Hoedown" => 0,
   "Text::Unidecode" => 0,
   "Time::HiRes" => 0,
+  "Time::Local" => 0,
   "URI" => 0,
   "URI::Escape" => 0,
   "URI::file" => 0,

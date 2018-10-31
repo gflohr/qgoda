@@ -4,7 +4,7 @@
     - Validator is Ajv (https://ajv.js.org/), JSON schema version
       "draft_07".  The validator is called with "coerceTypes" set
       to "array", and "useDefaults".  That means that a lone string
-      value is automatically coerced into an array, where needed
+      value is automatically coerced into an array, where needed.
     - Replaced the underscore with a hyphen in all config variables,
       so that "exclude_watch" is now for example "exclude-watch".
     - New commands "qgoda schema", "qgoda javascript", and "qgoda js"
@@ -19,6 +19,9 @@
 	  https://www.npmjs.com/package/generator-qgoda.
 	- Plug-ins present in ./node_modules are automatically loaded.
 	- Asset priority is now honored in all generation rounds.
+    - Configuration variable "front_matter_placeholder" is now
+      "front-matter-placeholder" and an object.  The keys are the
+      chain name, and the value is the placeholder as a string.
 	- The generator meta tag is now configurable in config.generator.
 	- Added "Strip" to the default processor chains for discarding
 	  leading and trailing whitespace from the generated files,
