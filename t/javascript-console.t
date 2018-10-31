@@ -53,7 +53,7 @@ eval {
 	is $stdout->buffer, "this and that\n";
 
 	my $obj = <<EOF;
-{abc: 1, cde: 2, nested1: [1, 2, 3, { foo: 'bar' }]}
+{abc: 1, cde: 2, nested1: [1, 2, 3, {foo: 'bar'}]}
 EOF
 	$env->run("console.log($obj)");
 	is $stdout->buffer, $obj;
