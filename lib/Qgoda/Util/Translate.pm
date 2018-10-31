@@ -157,6 +157,9 @@ sub get_masters {
     my ($self) = @_;
 
     my $qgoda = Qgoda->new;
+    # For translations we always want all files.
+    $qgoda->buildOptions(drafts => 1, future => 1);
+    
     $qgoda->initPlugins;
     $qgoda->initAnalyzers;
     my $config = $qgoda->config;

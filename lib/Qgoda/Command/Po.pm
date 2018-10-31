@@ -886,7 +886,7 @@ The first value is assumed to be the base language of your site.
 
 Your site's textdomain, for example C<com.example.www>.
 
-=item B<po.msgid_bugs-address>
+=item B<po.msgid-bugs-address>
 
 An email address or web site for issuing errors in translatable strings.
 Translators will use that address for reporting problems with translating

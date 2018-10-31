@@ -939,7 +939,11 @@ sub versionControlled {
 }
 
 sub buildOptions {
-    my ($self) = @_;
+    my ($self, %options) = @_;
+
+    if (%options) {
+        $self->{__build_options} = {%options};
+    }
 
     return %{$self->{__build_options} || {}};
 }
