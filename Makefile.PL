@@ -39,17 +39,15 @@ my $is_git = -e '.git';
 my $qgoda_dir = File::Spec->catdir('lib', 'Qgoda');
 my $package_json = File::Spec->catfile($qgoda_dir, 'package.json');
 my $node_modules = File::Spec->catdir($qgoda_dir, 'node_modules');
-my $node_modules_dep;
+my $npm_installed = File::Spec->catfile($qgoda_dir, 'npm_installed');
 
 # Determine whether to use yarn, npm, or something user supplied.
 my $npm;
 if (empty $ENV{QGODA_PACKAGE_MANAGER}) {
 	if (check_for_pm 'yarn') {
 		$npm = ('yarn');
-		$node_modules_dep = File::Spec->catfile($qgoda_dir, 'yarn.lock');
 	} elsif (check_for_pm 'npm') {
 		$npm = 'npm';
-		$node_modules_dep = File::Spec->catfile($qgoda_dir, 'package-lock.json');
 	} else {
 		die <<'EOF';
 *** error: Neither a working 'yarn' or 'npm' installation was found on your
@@ -65,17 +63,6 @@ EOF
 	if ($npm =~ s{([ "])}{\\$1}g) {
 		$npm = qq{"$npm"};
 	}
-
-	# We cannot be sure whether this is yarn or npm.  So we add both as
-	# a dependency which would means that the task is run every
-	# time that make is invoked. But since this will normally only
-	# happen during an installation we simply ignore that little
-	# inefficiency.
-	$node_modules_dep = join(
-		' ',
-		File::Spec->catfile($qgoda_dir, 'yarn.lock'),
-		File::Spec->catfile($qgoda_dir, 'package-lock.json'),
-	);
 }
 
 my $package_lock_warning = '';
@@ -124,28 +111,17 @@ QGODA_DIR = $qgoda_dir
 NPM = $npm
 PACKAGE_JSON = $package_json
 NODE_MODULES = $node_modules
-TO_INST_PM += \$(NODE_MODULES)
+NPM_INSTALLED = $npm_installed
 
 .PHONY: js_to_blib
 
-$node_modules_dep: \$(PACKAGE_JSON) \$(NODE_MODULES)
-
-npm_install: $node_modules_dep
+\$(NPM_INSTALLED): \$(PACKAGE_JSON)
 	${package_lock_warning}cd \$(QGODA_DIR) && \\
 	\$(NPM) install && \\
-	\$(TOUCH) \$@
-EOF
+	\$(TOUCH) npm_installed
 
-	push @post, <<'EOF';
-$(NODE_MODULES):
-	$(NOECHO) $(ECHO) Will download JavaScript dependencies with $(NPM). ;\
-	$(ECHO) Giving you 10 seconds to cancel the installation ... ;\
-	$(ABSPERLRUN) -e "autoflush STDOUT, 1; foreach (1 .. 10) {print '.'; sleep 1}" ;\
-	$(ECHO) " installing JavaScript dependencies"
-	$(NOECHO) $(ABSPERLRUN) -e "mkdir '$@'"
-
-js_to_blib: $(FIRST_MAKEFILE) $(TO_INST_PM)
-	$(NOECHO) $(ABSPERLRUN) JS_TO_BLIB "$(INST_LIB)/auto" $(PERM_DIR) 2304
+js_to_blib: \$(FIRST_MAKEFILE) $npm_installed
+	\$(NOECHO) \$(ABSPERLRUN) JS_TO_BLIB "\$(INST_LIB)/auto" \$(PERM_DIR) 2304
 EOF
 
 	if (-e 'maintainer.mk') {
@@ -239,7 +215,7 @@ sub pm_to_blib {
 
 	# Make pm_to_blib depend on our phony js_to_blib target.
 	my $code = $self->SUPER::pm_to_blib(@_);
-	$code =~ s/^(pm_to_blib.*)/$1 js_to_blib/m;
+	$code =~ s{^(pm_to_blib.*)}{$1 js_to_blib lib/Qgoda/npm_installed}m;
 
 	return $code;
 }
@@ -247,11 +223,11 @@ sub pm_to_blib {
 sub realclean {
 	my ($self) = @_;
 
-	my $npm_install = File::Spec->catfile('$(QGODA_DIR)', 'npm_install');
+	my $npm_installed = File::Spec->catfile('$(QGODA_DIR)', 'npm_installed');
 	my $node_modules = File::Spec->catdir('$(QGODA_DIR)', 'node_modules');
 	my $code = $self->SUPER::realclean(@_);
 	$code =~ s/[ \t\r\n]*$/\n/;
-	$code .= "\t\- \$(RM_F) $npm_install\n";
+	$code .= "\t\- \$(RM_F) $npm_installed\n";
 	$code .= "\t\- \$(RM_RF) $node_modules\n";
 
 	return $code;
