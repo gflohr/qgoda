@@ -26,3 +26,8 @@ allow = refs
 
 ; FIXME! Currently needed in lib/Qgoda/Plugger/Inline.pm.
 [-BuiltinFunctions::ProhibitStringyEval]
+
+; False positive?
+; No need to argue because it will be changed anyway with
+; https://github.com/gflohr/qgoda/issues/69
+[-Modules::RequireBarewordIncludes]
