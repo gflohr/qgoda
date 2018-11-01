@@ -87,7 +87,8 @@ sub new {
         }
 	}
 
-	require 'Qgoda/JavaScript/config.js';
+    my $jsfile = 'Qgoda/JavaScript/config.js';
+	require $jsfile;
 	my $code = Qgoda::JavaScript::config->code;
 	my $node_modules = $q->nodeModules;
 	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules, no_console => 1);
