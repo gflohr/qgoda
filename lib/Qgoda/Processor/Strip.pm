@@ -36,7 +36,7 @@ sub new {
 sub process {
     my ($self, $content, $asset, $filename) = @_;
 
-    my $trailing_newline = 1 if $content =~ /\n$/;
+    my $trailing_newline = $content =~ /\n$/ : ? 1 : undef;
     $content =~ s/^[ \011-\015]+//;
     $content =~ s/[ \011-\015]+$//;
     $content .= "\n" if $trailing_newline;
