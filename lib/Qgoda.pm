@@ -30,7 +30,7 @@ use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
 $VERSION = '0.9.3';
 
-use Locale::TextDomain qw(qgoda);
+use Locale::TextDomain 1.30 qw(qgoda);
 use Locale::Messages;
 use Locale::gettext_dumb;
 use File::Find;
