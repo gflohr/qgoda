@@ -1,4 +1,11 @@
 {{$NEXT}}
+    - Require libintl-perl 1.30, because of
+      https://github.com/gflohr/libintl-perl/issues/4.
+    - Issues fixed:
+      * https://github.com/gflohr/qgoda/issues/73
+      * https://github.com/gflohr/qgoda/issues/72
+
+v0.9.3 - 2018-11-01
     - Configuration validation is now using a JSON schema
       (try "qgoda schema").
     - Validator is Ajv (https://ajv.js.org/), JSON schema version
