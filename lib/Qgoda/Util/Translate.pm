@@ -20,7 +20,7 @@ package Qgoda::Util::Translate;
 
 use strict;
 
-use Locale::TextDomain qw(qgoda);
+use Locale::TextDomain 1.30 qw(qgoda);
 use Locale::gettext_dumb;
 use Storable qw(dclone);
 use Scalar::Util qw(reftype);
@@ -54,9 +54,10 @@ sub __translate_property {
 
     my $stash = Template::Stash->new({});
     foreach my $key (keys %$hash) {
-        $stash->set($key,
-                    Locale::gettext_dumb::dpgettext($textdomain, $key,
-                                                    $hash->{$key}));
+        my $trans = Locale::gettext_dumb::dpgettext($textdomain, $key,
+                                                    $hash->{$key});
+        Encode::_utf8_on($trans);
+        $stash->set($key, $trans);
     }
 
     my $translated = $stash->get($property);
@@ -147,7 +148,9 @@ sub translate_body {
         my ($msgid) = @_;
 
         # FIXME! Strip off comment!
-        return Locale::gettext_dumb::dgettext($textdomain, $msgid);
+        my $trans = Locale::gettext_dumb::dgettext($textdomain, $msgid);
+        Encode::_utf8_on($trans);
+        return $trans;
     };
 
     return $splitter->reassemble($translate);
