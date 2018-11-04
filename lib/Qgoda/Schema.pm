@@ -144,7 +144,7 @@ sub config {
 				default => 'index'
 			},
 			latency => {
-				descriptions => "Number of seconds to wait until a rebuild "
+				descriptions => __"Number of seconds to wait until a rebuild "
 				                . "is triggered after a file system change in "
 				                . "watch mode.",
 				type => 'number',
@@ -160,6 +160,14 @@ sub config {
 					type => 'string',
 					pattern => "[a-zA-Z]{1,8}(-[a-zA-z0-9]{8})?"
 				}
+			},
+			'link-score' => {
+				descriptions => __"By which value should two assets be "
+								. "considered more related if they link to "
+								. "to each other.",
+				type => 'number',
+				minimum => 0,
+				default => 5
 			},
 			location => {
 				description => __"Template string for the output location.",

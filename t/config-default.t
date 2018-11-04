@@ -54,6 +54,7 @@ generator: Qgoda v0.9.3 (http://www.qgoda.net/)
 helpers: {}
 index: index
 latency: 0.5
+link-score: 1
 location: /{directory}/{basename}/{index}{suffix}
 no-scm: []
 paths:

@@ -346,7 +346,7 @@ sub computeRelations {
     }
 
     # Second pass.  Add values for links between assets.
-    my $link_score = $config->{link_score};
+    my $link_score = $config->{'link-score'};
     if ($link_score) {
         foreach my $permalink (keys %permalinks) {
             my $asset = $permalinks{$permalink};
@@ -367,7 +367,7 @@ sub computeRelations {
         }
     }
 
-    # Third passs.  Evaluate common taxonmy values.
+    # Third passs.  Evaluate common taxonomy values.
     foreach my $name (keys %taxonomies) {
         my $taxonomy = $taxonomies{$name};
         my $score = $taxonomies->{$name} or next;
