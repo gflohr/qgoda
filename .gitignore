@@ -30,6 +30,7 @@
 
 # Dist::Zilla
 /.build
+/Qgoda-*
 /Qgoda-v*
 
 # JavaScript
