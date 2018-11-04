@@ -41,7 +41,8 @@ use vars qw(@EXPORT_OK);
                 slugify html_escape unmarkup globstar trim
                 flatten2hash is_archive archive_extender collect_defaults
                 canonical purify safe_yaml_load
-                escape_link blength qstrftime tt2_args_merge);
+                escape_link blength qstrftime tt2_args_merge
+                set_utf8_flag);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -801,6 +802,40 @@ sub tt2_args_merge($$$$) {
     }
 
     return \@args, \%conf;
+}
+
+# Set utf-8 flag recursively. Who would have thought that I would ever do
+# such an ugly thing?
+sub set_utf8_flag {
+    my ($data) = @_;
+
+    my $wanted = sub {
+        if (ref $_) {
+            my $obj = $_;
+            if ('HASH' eq reftype $obj) {
+                foreach my $key (keys %$obj) {
+                    my $value = delete $obj->{$key};
+                    Encode::_utf8_on($key);
+                    $obj->{$key} = $value;
+
+                    $value = $obj->{$key};
+                    if (defined $value && !ref $value) {
+                        Encode::_utf8_on($obj->{$key});
+                    }
+                }
+            } elsif ('ARRAY' eq reftype $obj) {
+                foreach my $item (@$obj) {
+                    if (defined $item && !ref $item) {
+                        Encode::_utf8_on($item);
+                    }
+                }
+            }
+        }
+    };
+
+    walk $wanted, $data;
+
+    return $data;
 }
 
 1;
