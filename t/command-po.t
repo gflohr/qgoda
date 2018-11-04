@@ -51,7 +51,7 @@ my $site = TestSite->new(
 			lingua => 'en',
 			date => $next_year
 		},
-		'de-normal..md' => {
+		'de-normal.md' => {
 			lingua => 'de',
 			master => './en-normal.md',
 		},
