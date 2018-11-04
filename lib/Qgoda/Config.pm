@@ -28,7 +28,7 @@ use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
 use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase 
-                   safe_yaml_load set_utf8_flag);
+                   safe_yaml_load);
 use Qgoda::JavaScript::Environment;
 use Qgoda::Schema;
 
@@ -41,7 +41,6 @@ sub new {
     my $q = Qgoda->new;
     my $logger = $q->logger('config');
 
-	$logger->info(__"Reading configuration");
     my $filename;
     if (!empty $args{filename}) {
         $filename = $args{filename};
@@ -123,7 +122,7 @@ sub new {
 		die $msg;
 	}
 
-	my $config = set_utf8_flag $js->vm->get('config');
+	my $config = $js->vm->get('config');
 
     my $self = bless $config, $class;
 
