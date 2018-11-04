@@ -186,7 +186,6 @@ sub processAsset {
 
     my $content = $self->readAssetContent($asset, $site);
     $asset->{content} = $content;
-    Encode::_utf8_on($asset->{content}) if !$asset->{raw};
     my @processors = $qgoda->getProcessors($asset);
     foreach my $processor (@processors) {
         my $short_name = ref $processor;

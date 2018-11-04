@@ -101,7 +101,7 @@ sub read_body($$) {
     my ($filename, $placeholder) = @_;
 
     my $fh = IO::File->new;
-    open $fh, "<", $filename or return;
+    open $fh, "<:encoding(UTF-8)", $filename or return;
 
     undef $!;
     my $first_line = <$fh>;
