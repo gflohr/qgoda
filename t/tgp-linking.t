@@ -123,6 +123,6 @@ is ((read_file './_site/en/num-posts/index.html'), "<p>$num_docs</p>");
 ok -e './_site/fi/num-posts/index.html';
 is ((read_file './_site/fi/num-posts/index.html'), "<p>$num_docs</p>");
 
-#$site->tearDown;
+$site->tearDown;
 
 done_testing;

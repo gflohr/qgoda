@@ -36,4 +36,4 @@
 # JavaScript
 /lib/Qgoda/node_modules
 /lib/Qgoda/yarn-error.log
-/lib/Qgoda/npm_install
+/lib/Qgoda/npm_installed
