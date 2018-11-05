@@ -28,7 +28,7 @@ my $package_dir = File::Spec->catdir(Cwd::abs_path(dirname __FILE__), 'Qgoda');
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
 @EXPORT = qw($VERSION);
-$VERSION = '0.9.3';
+$VERSION = '0.9.4';
 
 use Locale::TextDomain 1.30 qw(qgoda);
 use Locale::Messages;

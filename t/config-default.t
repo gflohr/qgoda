@@ -50,7 +50,7 @@ exclude: []
 exclude-watch: []
 front-matter-placeholder:
     '*': "[% '' %]\\n"
-generator: Qgoda v0.9.3 (http://www.qgoda.net/)
+generator: Qgoda v0.9.4 (http://www.qgoda.net/)
 helpers: {}
 index: index
 latency: 0.5
