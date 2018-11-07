@@ -410,12 +410,13 @@ sub xref {
     return $set->[0]->{$variable};
 }
 
-sub existsXref {
-    my ($self, @args) = @_;
+sub xrefPost {
+    my ($self, $variable, $filters) = @_;
+    
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{type} = 'post';
 
-    local $SIG{__WARN__} = sub {};
-
-    return $self->xref(@args);
+    return $self->xref($variable, $filters);
 }
 
 sub llink {
@@ -442,6 +443,15 @@ sub lxref {
     $filters->{lingua} = $self->__getAsset->{lingua};
 
     return $self->xref($variable, $filters);
+}
+
+sub lxrefPost {
+    my ($self, $variable, $filters) = @_;
+
+    $filters = $self->__sanitizeFilters($filters);
+    $filters->{type} = 'post';
+
+    return $self->lxref($variable, $filters);
 }
 
 sub lexistsXref {
@@ -580,8 +590,8 @@ sub paginate {
     $data = $self->__sanitizeHashref($data, 'paginate', 1);
     die __"argument '{total}' is mandatory for paginate()\n"
         if empty $data->{total};
-    die __"argument '{total}' cannot be zero for paginate()\n"
-        if !$data->{total};
+    die __"argument '{total}' must be positive for paginate()\n"
+        if $data->{total} <= 0;
 
     use integer;
 
@@ -772,6 +782,10 @@ sub lrelated {
 
 sub time {
     return Qgoda::Util::Date->newFromEpoch;
+}
+
+sub json {
+    return JSON->new->allow_blessed->convert_blessed->utf8;
 }
 
 1;
