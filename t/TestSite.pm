@@ -26,6 +26,7 @@ use File::Find;
 use File::Globstar::ListMatch;
 use YAML::XS;
 use Cwd;
+use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
@@ -116,6 +117,7 @@ sub __setupAssets {
 		} else {
 			my $data = keys %$asset ? YAML::XS::Dump($asset) : "---\n";
 			$data .= "---\n$content";
+			Encode::_utf8_on($data);
 			write_file $relpath, $data
 				or die "cannot write '$relpath': $!";
 		}
