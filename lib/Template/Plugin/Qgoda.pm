@@ -865,10 +865,6 @@ sub time {
     return Qgoda::Util::Date->newFromEpoch;
 }
 
-sub json {
-    return JSON->new->allow_blessed->convert_blessed->utf8;
-}
-
 1;
 
 =head1 NAME
