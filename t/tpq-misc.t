@@ -89,6 +89,18 @@ my $paginate_last = <<EOF;
 [%- q.encodeJSON(p) %]
 EOF
 
+my $paginate_missing_total = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(start => 40) -%]
+[%- q.encodeJSON(p) %]
+EOF
+
+my $paginate_negative_total = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(total => -2304, start => 40) -%]
+[%- q.encodeJSON(p) %]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -100,6 +112,16 @@ my $site = TestSite->new(
 		'paginate.html' => {content => $paginate, chain => 'xml'},
 		'paginate20.html' => {content => $paginate20, chain => 'xml'},
 		'paginate-last.html' => {content => $paginate_last, chain => 'xml'},
+		'paginate-missing-total.html' =>
+			{
+				content => $paginate_missing_total, 
+				chain => 'xml'
+			},
+		'paginate-negative-total.html' =>
+			{
+				content => $paginate_negative_total, 
+				chain => 'xml'
+			},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -203,6 +225,14 @@ $expected->{previous_link} = 'index-4.html';
 $expected->{next_link} = undef;
 $expected->{next_location} = undef;
 is_deeply($p, $expected);
+
+ok -e '_site/paginate-missing-total/index.html';
+$json = read_file '_site/paginate-missing-total/index.html';
+like $json, $invalid;
+
+ok -e '_site/paginate-negative-total/index.html';
+$json = read_file '_site/paginate-negative-total/index.html';
+like $json, $invalid;
 
 $site->tearDown;
 
