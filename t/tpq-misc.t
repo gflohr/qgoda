@@ -80,7 +80,13 @@ EOF
 my $paginate20 = <<EOF;
 [%- USE q = Qgoda -%]
 [%- p = q.paginate(total => 48, start => 20) -%]
-[%- q.encodeJSON(p, 'invalid flag', invalid => 'option') %]
+[%- q.encodeJSON(p) %]
+EOF
+
+my $paginate_last = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(total => 48, start => 40) -%]
+[%- q.encodeJSON(p) %]
 EOF
 
 my $site = TestSite->new(
@@ -93,6 +99,7 @@ my $site = TestSite->new(
 		'load-json-invalid.md' => {content => $load_json_invalid},
 		'paginate.html' => {content => $paginate, chain => 'xml'},
 		'paginate20.html' => {content => $paginate20, chain => 'xml'},
+		'paginate-last.html' => {content => $paginate_last, chain => 'xml'},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -144,8 +151,8 @@ my $expected_default = {
 	total_pages => 5,
 	next_link => 'index-2.html',
 	previous_link => undef,
-	tabindexes => [ -1, 0, 0, 0 ],
-	tabindices => [ -1, 0, 0, 0 ],
+	tabindexes => [ -1, 0, 0, 0, 0 ],
+	tabindices => [ -1, 0, 0, 0, 0 ],
 	start => 0,
 	next_start => 10,
 	next_location => '/paginate/index-2.html',
@@ -174,12 +181,27 @@ ok $p, $@;
 $expected = dclone $expected_default;
 $expected->{start} = 20;
 $expected->{next_start} = 30;
-$expected->{tabindexes} = $expected->{tabindices} = [0, 0, -1, 0];
+$expected->{tabindexes} = $expected->{tabindices} = [0, 0, -1, 0, 0];
 $expected->{page} = 3;
 $expected->{page0} = 2;
 $expected->{previous_link} = 'index-2.html';
 $expected->{next_link} = 'index-4.html';
 $expected->{next_location} = '/paginate20/index-4.html';
+is_deeply($p, $expected);
+
+ok -e '_site/paginate-last/index.html';
+$json = read_file '_site/paginate-last/index.html';
+$p = eval { decode_json $json };
+ok $p, $@;
+$expected = dclone $expected_default;
+$expected->{start} = 40;
+$expected->{next_start} = undef;
+$expected->{tabindexes} = $expected->{tabindices} = [0, 0, 0, 0, -1];
+$expected->{page} = 5;
+$expected->{page0} = 4;
+$expected->{previous_link} = 'index-4.html';
+$expected->{next_link} = undef;
+$expected->{next_location} = undef;
 is_deeply($p, $expected);
 
 $site->tearDown;

@@ -721,7 +721,7 @@ sub paginate {
     $previous_page = $links[$previous_page - 1] if defined $previous_page;
     $next_page = $links[$next_page - 1] if defined $next_page;
 
-    my @tabindexes = (0) x $#links;
+    my @tabindexes = (0) x @links;
     $tabindexes[$page0] = -1;
     $tabindexes[0] = -1 if !defined $previous_page;
 
