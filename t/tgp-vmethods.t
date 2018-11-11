@@ -80,6 +80,13 @@ my $kebap_camel = <<EOF;
 [%- css.fooBar %]_[% css.barBaz -%]
 EOF
 
+my $quote_values = <<EOF;
+[%- USE q = Qgoda -%]
+[%- hash = {'quotes' => '"quoted"' 'amp' => 'Acme & Sons'} -%]
+[%- hash = hash.quoteValues -%]
+[%- hash.quotes %]:[% hash.amp -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tgp-vmethods',
 	assets => {
@@ -88,6 +95,7 @@ my $site = TestSite->new(
 		'vmap-scalar.md' => {content => $vmap_scalar},
 		'kebap-snake.md' => {content => $kebap_snake},
 		'kebap-camel.md' => {content => $kebap_camel},
+		'quote-values.md' => {content => $quote_values},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]"
@@ -112,6 +120,10 @@ is ((read_file '_site/kebap-snake/index.html'),
 ok -e '_site/kebap-camel/index.html';
 is ((read_file '_site/kebap-camel/index.html'),
     '<p>1_2</p>', 'kebapCamel');
+
+ok -e '_site/quote-values/index.html';
+is ((read_file '_site/quote-values/index.html'),
+    '<p>"&quot;quoted&quot;":"Acme &amp; Sons"</p>', 'quoteValues');
 
 $site->tearDown;
 
