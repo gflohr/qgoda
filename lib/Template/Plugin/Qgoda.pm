@@ -757,6 +757,7 @@ sub taxonomyValues {
 sub ltaxonomyValues {
     my ($self, $taxonomy, $filters) = @_;
 
+$DB::single = 1;
     $filters = $self->__sanitizeFilters($filters);
     $filters->{lingua} = $self->__getAsset->{lingua};
 
@@ -772,6 +773,7 @@ sub sprintf {
 sub encodeJSON {
     my ($self, $data, @flags) = @_;
 
+$DB::single = 1;
     my $options = {};
     if (ref $flags[-1] && 'HASH' eq ref $flags[-1]) {
         $options = pop @flags;
