@@ -50,21 +50,47 @@ my $load_json = <<EOF;
 [%- data.number -%]
 EOF
 
+my $load_json_absolute = <<EOF;
+[%- USE q = Qgoda -%]
+[%- data = q.loadJSON('/data/number.json') -%]
+[%- data.number -%]
+EOF
+
+my $load_json_updir = <<EOF;
+[%- USE q = Qgoda -%]
+[%- data = q.loadJSON('../_site/data/number.json') -%]
+[%- data.number -%]
+EOF
+
+my $load_json_invalid = <<EOF;
+[%- USE q = Qgoda -%]
+[%- data = q.loadJSON('data/number.invalid') -%]
+[%- data.number -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
 		'bust-cache.md' => {content => $bust_cache},
 		'load-json.md' => {content => $load_json},
+		'load-json-absolute.md' => {content => $load_json_absolute},
+		'load-json-updir.md' => {content => $load_json_updir},
+		'load-json-invalid.md' => {content => $load_json_invalid},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
 		'styles.css' => '// Test styles',
 		'styles2.css' => '// Test styles',
 		'data/number.json' => '{"number":"2304"}',
+		'data/invalid.json' => '{"number":}',
 	}
 );
 
-ok (Qgoda::CLI->new(['build'])->dispatch);
+# Temporarily close stderr while building the site.
+open my $olderr, '>&STDERR' or die "cannot dup stderr: $!";
+close STDERR;
+ok(Qgoda::CLI->new(['build'])->dispatch);
+open STDERR, '>&', $olderr;
 
 ok -e '_site/bust-cache/index.html';
 my $bust_cache_content = read_file '_site/bust-cache/index.html';
@@ -79,6 +105,20 @@ like ($bust_cache_content, qr{<p>/styles\.css\?foo=1\&amp;[0-9]+</p>},
 
 ok -e '_site/load-json/index.html';
 is ((read_file '_site/load-json/index.html'), '<p>2304</p>', 'loadJSON');
+
+my $invalid = qr/^\[\% '' \%\]/;
+
+# Absolute paths are not allowed.
+ok -e '_site/load-json-absolute/index.html';
+like ((read_file '_site/load-json-absolute/index.html'), $invalid,
+      'loadJSON absolute');
+
+ok -e '_site/load-json-updir/index.html';
+like ((read_file '_site/load-json-updir/index.html'), $invalid,
+      'loadJSON updir');
+
+ok -e '_site/load-json-invalid/index.html';
+is ((read_file '_site/load-json-invalid/index.html'), '', 'loadJSON invalid');
 
 $site->tearDown;
 
