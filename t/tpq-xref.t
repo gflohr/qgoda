@@ -77,6 +77,8 @@ lxref: [% q.lxref('title', name = 'about' type = 'page') %]
 
 xrefPost: [% q.xrefPost('title', name = 'greeting' lingua = asset.lingua) %]
 
+lxrefPost: [% q.lxrefPost('title', name = 'greeting') %]
+
 broken xref: [% q.xref('title', name = 'gone' type = 'page' lingua = asset.lingua) %]
 
 non-existing xref: [% q.xref('karma', name = 'about' type = 'page' lingua = asset.lingua) %]
@@ -126,6 +128,7 @@ my $xref_en_content = read_file './_site/en/xref/index.html';
 like $xref_en_content, qr{<p>xref: About This Site</p>}, 'xref en';
 like $xref_en_content, qr{<p>lxref: About This Site</p>}, 'lxref en';
 like $xref_en_content, qr{<p>xrefPost: English Greeting</p>}, 'xrefPost en';
+like $xref_en_content, qr{<p>lxrefPost: English Greeting</p>}, 'lxrefPost en';
 like $xref_en_content, qr{<p>broken xref: </p>}, 'broken xref en';
 like $xref_en_content, qr{<p>non-existing xref:</p>}, 'non-existing xref en';
 
@@ -135,6 +138,7 @@ Encode::_utf8_on($xref_de_content);
 like $xref_de_content, qr{<p>xref: Über diese Site</p>}, 'xref de';
 like $xref_de_content, qr{<p>lxref: Über diese Site</p>}, 'lxref de';
 like $xref_de_content, qr{<p>xrefPost: Deutsche Begrüßung</p>}, 'xrefPost de';
+like $xref_de_content, qr{<p>lxrefPost: Deutsche Begrüßung</p>}, 'lxrefPost de';
 like $xref_de_content, qr{<p>broken xref: </p>}, 'broken xref de';
 like $xref_de_content, qr{<p>non-existing xref:</p>}, 'non-existing xref de';
 
