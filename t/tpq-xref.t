@@ -79,6 +79,14 @@ xrefPost: [% q.xrefPost('title', name = 'greeting' lingua = asset.lingua) %]
 
 lxrefPost: [% q.lxrefPost('title', name = 'greeting') %]
 
+existsXref: [% q.existsXref('title', name = 'about' type = 'page' lingua = asset.lingua) %]
+
+lexistsXref: [% q.lexistsXref('title', name = 'about' type = 'page') %]
+
+existsXrefPost: [% q.existsXrefPost('title', name = 'greeting' lingua = asset.lingua) %]
+
+lexistsXrefPost: [% q.lexistsXrefPost('title', name = 'greeting') %]
+
 broken xref: [% q.xref('title', name = 'gone' type = 'page' lingua = asset.lingua) %]
 
 non-existing xref: [% q.xref('karma', name = 'about' type = 'page' lingua = asset.lingua) %]
@@ -129,6 +137,10 @@ like $xref_en_content, qr{<p>xref: About This Site</p>}, 'xref en';
 like $xref_en_content, qr{<p>lxref: About This Site</p>}, 'lxref en';
 like $xref_en_content, qr{<p>xrefPost: English Greeting</p>}, 'xrefPost en';
 like $xref_en_content, qr{<p>lxrefPost: English Greeting</p>}, 'lxrefPost en';
+like $xref_en_content, qr{<p>existsXref: About This Site</p>}, 'existsXref en';
+like $xref_en_content, qr{<p>lexistsXref: About This Site</p>}, 'lexistsXref en';
+like $xref_en_content, qr{<p>existsXrefPost: English Greeting</p>}, 'existsXrefPost en';
+like $xref_en_content, qr{<p>lexistsXrefPost: English Greeting</p>}, 'lexistsXrefPost en';
 like $xref_en_content, qr{<p>broken xref: </p>}, 'broken xref en';
 like $xref_en_content, qr{<p>non-existing xref:</p>}, 'non-existing xref en';
 
@@ -140,6 +152,10 @@ like $xref_de_content, qr{<p>lxref: Über diese Site</p>}, 'lxref de';
 like $xref_de_content, qr{<p>xrefPost: Deutsche Begrüßung</p>}, 'xrefPost de';
 like $xref_de_content, qr{<p>lxrefPost: Deutsche Begrüßung</p>}, 'lxrefPost de';
 like $xref_de_content, qr{<p>broken xref: </p>}, 'broken xref de';
+like $xref_de_content, qr{<p>existsXref: Über diese Site</p>}, 'existsXref de';
+like $xref_de_content, qr{<p>lexistsXref: Über diese Site</p>}, 'lexistsXref de';
+like $xref_de_content, qr{<p>existsXrefPost: Deutsche Begrüßung</p>}, 'existsXrefPost de';
+like $xref_de_content, qr{<p>lexistsXrefPost: Deutsche Begrüßung</p>}, 'lexistsXrefPost de';
 like $xref_de_content, qr{<p>non-existing xref:</p>}, 'non-existing xref de';
 
 $site->tearDown;

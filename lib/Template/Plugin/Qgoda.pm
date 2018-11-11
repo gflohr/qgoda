@@ -418,6 +418,14 @@ sub xref {
     return $set->[0]->{$variable};
 }
 
+sub existsXref {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->xref(@args);
+}
+
 sub xrefPost {
     my ($self, $variable, $filters) = @_;
     
@@ -425,6 +433,14 @@ sub xrefPost {
     $filters->{type} = 'post';
 
     return $self->xref($variable, $filters);
+}
+
+sub existsXrefPost {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->xrefPost(@args);
 }
 
 sub llink {
@@ -468,6 +484,14 @@ sub lexistsXref {
     local $SIG{__WARN__} = sub {};
 
     return $self->lxref(@args);
+}
+
+sub lexistsXrefPost {
+    my ($self, @args) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->lxrefPost(@args);
 }
 
 sub anchor {
