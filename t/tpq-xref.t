@@ -90,6 +90,8 @@ lexistsXrefPost: [% q.lexistsXrefPost('title', name = 'greeting') %]
 broken xref: [% q.xref('title', name = 'gone' type = 'page' lingua = asset.lingua) %]
 
 non-existing xref: [% q.xref('karma', name = 'about' type = 'page' lingua = asset.lingua) %]
+
+ambiguous xref: [% q.existsXref('title', lingua = asset.lingua type= 'post') %]
 EOF
 $assets{"en/xref.md"} = {
 	type => 'listing',
@@ -142,7 +144,8 @@ like $xref_en_content, qr{<p>lexistsXref: About This Site</p>}, 'lexistsXref en'
 like $xref_en_content, qr{<p>existsXrefPost: English Greeting</p>}, 'existsXrefPost en';
 like $xref_en_content, qr{<p>lexistsXrefPost: English Greeting</p>}, 'lexistsXrefPost en';
 like $xref_en_content, qr{<p>broken xref: </p>}, 'broken xref en';
-like $xref_en_content, qr{<p>non-existing xref:</p>}, 'non-existing xref en';
+like $xref_en_content, qr{<p>non-existing xref: </p>}, 'non-existing xref en';
+like $xref_en_content, qr{<p>ambiguous xref:[^<]+</p>}, 'ambiguous xref en';
 
 ok -e './_site/de/xref/index.html';
 my $xref_de_content = read_file './_site/de/xref/index.html';
@@ -156,7 +159,8 @@ like $xref_de_content, qr{<p>existsXref: Über diese Site</p>}, 'existsXref de';
 like $xref_de_content, qr{<p>lexistsXref: Über diese Site</p>}, 'lexistsXref de';
 like $xref_de_content, qr{<p>existsXrefPost: Deutsche Begrüßung</p>}, 'existsXrefPost de';
 like $xref_de_content, qr{<p>lexistsXrefPost: Deutsche Begrüßung</p>}, 'lexistsXrefPost de';
-like $xref_de_content, qr{<p>non-existing xref:</p>}, 'non-existing xref de';
+like $xref_de_content, qr{<p>non-existing xref: </p>}, 'non-existing xref de';
+like $xref_de_content, qr{<p>ambiguous xref:[^<]+</p>}, 'ambiguous xref de';
 
 $site->tearDown;
 
