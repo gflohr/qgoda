@@ -677,7 +677,7 @@ sub paginate {
     use integer;
 
     my $start = $data->{start} || 0;
-    my $total = $data->{total} || return {};
+    my $total = $data->{total};
     my $per_page = $data->{per_page} || 10;
     my $page0 = $start / $per_page;
     my $page = $page0 + 1;

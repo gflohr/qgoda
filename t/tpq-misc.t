@@ -101,6 +101,12 @@ my $paginate_negative_total = <<EOF;
 [%- q.encodeJSON(p) %]
 EOF
 
+my $paginate_per_page_9 = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(total => 43, start => 18, per_page => 9) -%]
+[%- q.encodeJSON(p) %]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -122,6 +128,11 @@ my $site = TestSite->new(
 				content => $paginate_negative_total, 
 				chain => 'xml'
 			},
+		'paginate-per-page-9.html' =>
+			{
+				content => $paginate_per_page_9,
+				chain => 'xml'
+			}
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -234,6 +245,24 @@ ok -e '_site/paginate-negative-total/index.html';
 $json = read_file '_site/paginate-negative-total/index.html';
 like $json, $invalid;
 
-$site->tearDown;
+
+ok -e '_site/paginate-per-page-9/index.html';
+$json = read_file '_site/paginate-per-page-9/index.html';
+$p = eval { decode_json $json };
+ok $p, $@;
+$expected = dclone $expected_default;
+$expected->{start} = 18;
+$expected->{per_page} = 9;
+$expected->{total_pages} = 5;
+$expected->{tabindexes} = $expected->{tabindices} = [0, 0, -1, 0, 0];
+$expected->{page} = 3;
+$expected->{page0} = 2;
+$expected->{next_link} = 'index-4.html';
+$expected->{previous_link} = 'index-2.html';
+$expected->{next_location} = '/paginate-per-page-9/index-4.html';
+$expected->{next_start} = 27;
+is_deeply($p, $expected);
+
+#$site->tearDown;
 
 done_testing;
