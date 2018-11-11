@@ -111,7 +111,7 @@ $assets{"fi/num.md"} = {
 };
 
 my $site = TestSite->new(
-	name => 'tgp-listings',
+	name => 'tpq-listings',
 	assets => \%assets,
 	files => {
 		'_views/default.html' => "[% asset.content %]"

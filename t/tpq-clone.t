@@ -30,34 +30,44 @@ use Test::More;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
 
-my $with_include = <<EOF;
+my $with_clone = <<EOF;
 [%- USE q = Qgoda -%]
-[%- q.include('_includes/other.md', asset, extra => '04') -%]
-EOF
-
-my $include = <<EOF;
----
-title: other
----
-included [% asset.overlay %][% asset.extra %]
+count: [% asset.count %]
+[%- IF asset.start < 3 -%]
+[%- location = '/clones/index-' _ asset.count _ '.html' -%]
+[%- q.clone(location = location start = asset.start + 1 count = asset.count + 1) -%]
+[%- END -%]
 EOF
 
 my $site = TestSite->new(
-	name => 'tgp-include',
+	name => 'tpq-clone',
 	assets => {
-		'with-include.md' => {content => $with_include, overlay => 23},
+		'with-clone.md' => {content => $with_clone, count => 2304},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
-		'_includes/other.md' => $include,
 	}
 );
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
-ok -e '_site/with-include/index.html';
-is ((read_file '_site/with-include/index.html'), 
-    '<p>included 2304</p>', 'include');
+ok -e '_site/with-clone/index.html';
+is ((read_file '_site/with-clone/index.html'), 
+    '<p>count: 2304</p>', 'clone');
+
+ok -e '_site/clones/index-2304.html';
+is ((read_file '_site/clones/index-2304.html'), 
+    '<p>count: 2305</p>', 'clone 2304');
+
+ok -e '_site/clones/index-2305.html';
+is ((read_file '_site/clones/index-2305.html'), 
+    '<p>count: 2306</p>', 'clone 2305');
+
+ok -e '_site/clones/index-2306.html';
+is ((read_file '_site/clones/index-2306.html'), 
+    '<p>count: 2307</p>', 'clone 2306');
+
+ok ! -e '_site/clones/index-2307.html';
 
 $site->tearDown;
 

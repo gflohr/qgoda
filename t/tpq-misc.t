@@ -30,44 +30,44 @@ use Test::More;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
 
-my $with_clone = <<EOF;
+my $bust_cache = <<EOF;
 [%- USE q = Qgoda -%]
-count: [% asset.count %]
-[%- IF asset.start < 3 -%]
-[%- location = '/clones/index-' _ asset.count _ '.html' -%]
-[%- q.clone(location = location start = asset.start + 1 count = asset.count + 1) -%]
-[%- END -%]
+
+[% q.bustCache('/styles.css') %]
+
+[% q.bust_cache('/styles2.css') %]
+
+relative: [% q.bustCache('styles.css') %]
+
+not-there: [% q.bustCache('not-there.css') %]
+
+[% q.bustCache('/styles.css?foo=1') %]
 EOF
 
 my $site = TestSite->new(
-	name => 'tgp-clone',
+	name => 'tpq-misc',
 	assets => {
-		'with-clone.md' => {content => $with_clone, count => 2304},
+		'bust-cache.md' => {content => $bust_cache},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
+		'styles.css' => '// Test styles',
+		'styles2.css' => '// Test styles',
 	}
 );
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
-ok -e '_site/with-clone/index.html';
-is ((read_file '_site/with-clone/index.html'), 
-    '<p>count: 2304</p>', 'clone');
-
-ok -e '_site/clones/index-2304.html';
-is ((read_file '_site/clones/index-2304.html'), 
-    '<p>count: 2305</p>', 'clone 2304');
-
-ok -e '_site/clones/index-2305.html';
-is ((read_file '_site/clones/index-2305.html'), 
-    '<p>count: 2306</p>', 'clone 2305');
-
-ok -e '_site/clones/index-2306.html';
-is ((read_file '_site/clones/index-2306.html'), 
-    '<p>count: 2307</p>', 'clone 2306');
-
-ok ! -e '_site/clones/index-2307.html';
+ok -e '_site/bust-cache/index.html';
+my $bust_cache_content = read_file '_site/bust-cache/index.html';
+like ($bust_cache_content, qr{<p>/styles\.css\?[0-9]+</p>}, 'bustCache');
+like ($bust_cache_content, qr{<p>/styles2\.css\?[0-9]+</p>}, 'bust_cache');
+like ($bust_cache_content, qr{<p>relative: styles\.css</p>},
+      'bustCache relative');
+like ($bust_cache_content, qr{<p>not-there: not-there\.css</p>},
+      'bustCache non existing');
+like ($bust_cache_content, qr{<p>/styles\.css\?foo=1\&amp;[0-9]+</p>},
+      'bustCache with query parameter');
 
 $site->tearDown;
 

@@ -33,16 +33,28 @@ use Qgoda::Util qw(read_file);
 my %assets;
 
 $assets{"en/greeting.md"} = {
-	title => "English Post",
+	title => "English Greeting",
 	type => 'post',
 	content => 'Good morning!',
 	name => "greeting",
 };
 $assets{"de/begruessung.md"} = {
-	title => "Deutsches posting",
+	title => "Deutsche Begrüßung",
 	type => 'post',
 	content => 'Guten Morgen!',
 	name => "greeting",
+};
+$assets{"en/bye.md"} = {
+	title => "English Bye",
+	type => 'post',
+	content => 'Good bye!',
+	name => "bye",
+};
+$assets{"de/verabscheidung.md"} = {
+	title => "Deutsche Verabschiedung",
+	type => 'post',
+	content => 'Tschüss!',
+	name => "bye",
 };
 $assets{"en/about.md"} = {
 	title => "About This Site",
@@ -66,6 +78,12 @@ llink: [% q.llink(name = 'about' type = 'page') %]
 linkPost: [% q.linkPost(name = 'greeting' lingua = asset.lingua) %]
 
 llinkPost: [% q.llinkPost(name = 'greeting') %]
+
+existsLink: [% q.existsLink(name = 'about' type = 'page' lingua = asset.lingua) %]
+
+broken link: [% q.existsLink(name = 'broken' type = 'page' lingua = asset.lingua) %]
+
+ambiguous link: [% q.existsLink(type = 'post' lingua = asset.lingua) %]
 EOF
 $assets{"en/links.md"} = {
 	type => 'listing',
@@ -79,7 +97,7 @@ $assets{"de/links.md"} = {
 };
 
 my $site = TestSite->new(
-	name => 'tgp-links',
+	name => 'tpq-links',
 	assets => \%assets,
 	files => {
 		'_views/default.html' => "[% asset.content %]"
@@ -113,13 +131,15 @@ like $links_en_content, qr{<p>link: /en/about/</p>}, 'link en';
 like $links_en_content, qr{<p>llink: /en/about/</p>}, 'llink en';
 like $links_en_content, qr{<p>linkPost: /en/greeting/</p>}, 'linkPost en';
 like $links_en_content, qr{<p>llinkPost: /en/greeting/</p>}, 'llinkPost en';
+like $links_en_content, qr{<p>existsLink: /en/greeting/</p>}, 'existsLink';
 
 ok -e './_site/de/links/index.html';
-my $links_en_content = read_file './_site/de/links/index.html';
-like $links_en_content, qr{<p>link: /de/ueber/</p>}, 'link en';
-like $links_en_content, qr{<p>llink: /de/ueber/</p>}, 'llink en';
-like $links_en_content, qr{<p>linkPost: /de/begruessung/</p>}, 'linkPost en';
-like $links_en_content, qr{<p>llinkPost: /de/begruessung/</p>}, 'llinkPost en';
+my $links_de_content = read_file './_site/de/links/index.html';
+like $links_de_content, qr{<p>link: /de/ueber/</p>}, 'link en';
+like $links_de_content, qr{<p>llink: /de/ueber/</p>}, 'llink en';
+like $links_de_content, qr{<p>linkPost: /de/begruessung/</p>}, 'linkPost en';
+like $links_de_content, qr{<p>llinkPost: /de/begruessung/</p>}, 'llinkPost en';
+like $links_de_content, qr{<p>existsLink: /de/begruessung/</p>}, 'existsLink';
 
 $site->tearDown;
 

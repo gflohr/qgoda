@@ -88,7 +88,7 @@ my $quote_values = <<EOF;
 EOF
 
 my $site = TestSite->new(
-	name => 'tgp-vmethods',
+	name => 'tpq-vmethods',
 	assets => {
 		'vmap-array.md' => {content => $vmap_array},
 		'vmap-hash.md' => {content => $vmap_hash},

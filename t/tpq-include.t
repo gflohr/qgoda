@@ -30,44 +30,34 @@ use Test::More;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
 
-my $bust_cache = <<EOF;
+my $with_include = <<EOF;
 [%- USE q = Qgoda -%]
+[%- q.include('_includes/other.md', asset, extra => '04') -%]
+EOF
 
-[% q.bustCache('/styles.css') %]
-
-[% q.bust_cache('/styles2.css') %]
-
-relative: [% q.bustCache('styles.css') %]
-
-not-there: [% q.bustCache('not-there.css') %]
-
-[% q.bustCache('/styles.css?foo=1') %]
+my $include = <<EOF;
+---
+title: other
+---
+included [% asset.overlay %][% asset.extra %]
 EOF
 
 my $site = TestSite->new(
-	name => 'tgp-misc',
+	name => 'tpq-include',
 	assets => {
-		'bust-cache.md' => {content => $bust_cache},
+		'with-include.md' => {content => $with_include, overlay => 23},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
-		'styles.css' => '// Test styles',
-		'styles2.css' => '// Test styles',
+		'_includes/other.md' => $include,
 	}
 );
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
-ok -e '_site/bust-cache/index.html';
-my $bust_cache_content = read_file '_site/bust-cache/index.html';
-like ($bust_cache_content, qr{<p>/styles\.css\?[0-9]+</p>}, 'bustCache');
-like ($bust_cache_content, qr{<p>/styles2\.css\?[0-9]+</p>}, 'bust_cache');
-like ($bust_cache_content, qr{<p>relative: styles\.css</p>},
-      'bustCache relative');
-like ($bust_cache_content, qr{<p>not-there: not-there\.css</p>},
-      'bustCache non existing');
-like ($bust_cache_content, qr{<p>/styles\.css\?foo=1\&amp;[0-9]+</p>},
-      'bustCache with query parameter');
+ok -e '_site/with-include/index.html';
+is ((read_file '_site/with-include/index.html'), 
+    '<p>included 2304</p>', 'include');
 
 $site->tearDown;
 
