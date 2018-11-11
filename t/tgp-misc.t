@@ -36,6 +36,12 @@ my $bust_cache = <<EOF;
 [% q.bustCache('/styles.css') %]
 
 [% q.bust_cache('/styles2.css') %]
+
+relative: [% q.bustCache('styles.css') %]
+
+not-there: [% q.bustCache('not-there.css') %]
+
+[% q.bustCache('/styles.css?foo=1') %]
 EOF
 
 my $site = TestSite->new(
@@ -56,6 +62,12 @@ ok -e '_site/bust-cache/index.html';
 my $bust_cache_content = read_file '_site/bust-cache/index.html';
 like ($bust_cache_content, qr{<p>/styles\.css\?[0-9]+</p>}, 'bustCache');
 like ($bust_cache_content, qr{<p>/styles2\.css\?[0-9]+</p>}, 'bust_cache');
+like ($bust_cache_content, qr{<p>relative: styles\.css</p>},
+      'bustCache relative');
+like ($bust_cache_content, qr{<p>not-there: not-there\.css</p>},
+      'bustCache non existing');
+like ($bust_cache_content, qr{<p>/styles\.css\?foo=1\&amp;[0-9]+</p>},
+      'bustCache with query parameter');
 
 $site->tearDown;
 

@@ -202,7 +202,7 @@ sub bustCache {
 
     my($scheme, $authority, $path, $query, $fragment) =
         $uri =~ m|(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?|o;
-    return if !defined $path;
+    return $uri if !defined $path;
 
     require Qgoda;
     my $srcdir = Qgoda->new->config->{srcdir};
