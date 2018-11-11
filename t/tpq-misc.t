@@ -107,6 +107,12 @@ my $paginate_per_page_9 = <<EOF;
 [%- q.encodeJSON(p) %]
 EOF
 
+my $paginate_filename = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(total => 48, stem => 'page', extender => '.xml') -%]
+[%- q.encodeJSON(p) %]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -132,7 +138,12 @@ my $site = TestSite->new(
 			{
 				content => $paginate_per_page_9,
 				chain => 'xml'
-			}
+			},
+		'paginate-filename.html' =>
+			{
+				content => $paginate_filename,
+				chain => 'xml'
+			},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -263,6 +274,23 @@ $expected->{next_location} = '/paginate-per-page-9/index-4.html';
 $expected->{next_start} = 27;
 is_deeply($p, $expected);
 
-#$site->tearDown;
+ok -e '_site/paginate-filename/index.html';
+$json = read_file '_site/paginate-filename/index.html';
+$p = eval { decode_json $json };
+ok $p, $@;
+$expected = dclone $expected_default;
+$expected->{next_link} = 'page-2.xml';
+$expected->{next_location} = '/paginate-filename/page-2.xml';
+$expected->{links} = [
+	'page.xml',
+	'page-2.xml',
+	'page-3.xml',
+	'page-4.xml',
+	'page-5.xml',
+];
+
+is_deeply($p, $expected);
+
+$site->tearDown;
 
 done_testing;
