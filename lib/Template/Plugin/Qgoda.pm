@@ -498,7 +498,18 @@ sub anchor {
     my ($self, $filters) = @_;
 
     my $href = escape_link $self->link($filters);
+    return '' if empty $href;
     my $title = html_escape $self->xref(title => $filters);
+
+    return qq{<a href="$href">$title</a>};
+}
+
+sub anchorPost {
+    my ($self, $filters) = @_;
+
+    my $href = escape_link $self->linkPost($filters);
+    return '' if empty $href;
+    my $title = html_escape $self->xrefPost(title => $filters);
 
     return qq{<a href="$href">$title</a>};
 }
@@ -507,9 +518,52 @@ sub lanchor {
     my ($self, $filters) = @_;
 
     my $href = escape_link $self->llink($filters);
+    return '' if empty $href;
     my $title = html_escape $self->lxref(title => $filters);
 
     return qq{<a href="$href">$title</a>};
+}
+
+sub lanchorPost {
+    my ($self, $filters) = @_;
+
+    my $href = escape_link $self->llinkPost($filters);
+    return '' if empty $href;
+    my $title = html_escape $self->lxrefPost(title => $filters);
+
+    return qq{<a href="$href">$title</a>};
+}
+
+sub existsAnchor {
+    my ($self, $filters) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->anchor($filters);
+}
+
+sub existsAnchorPost {
+    my ($self, $filters) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->anchorPost($filters);
+}
+
+sub lexistsAnchor {
+    my ($self, $filters) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->lanchor($filters);
+}
+
+sub lexistsAnchorPost {
+    my ($self, $filters) = @_;
+
+    local $SIG{__WARN__} = sub {};
+
+    return $self->lanchorPost($filters);
 }
 
 sub linkPost {
