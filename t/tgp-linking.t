@@ -32,6 +32,7 @@ use Qgoda::Util qw(read_file);
 
 my %assets;
 my $num_docs = 13;
+my $num = 28;
 
 foreach my $count (1 .. $num_docs) {
 	my $count0 = sprintf '%02u', $count;
@@ -73,6 +74,17 @@ $assets{"en/num-posts.md"} = {
 	lingua => 'en',
 	type => 'listing',
 	content => $num_posts_en,
+	priority => -9998
+};
+
+my $num_en = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.llist.size -%]
+EOF
+$assets{"en/num.md"} = {
+	lingua => 'en',
+	type => 'listing',
+	content => $num_en,
 	priority => -9999
 };
 
@@ -84,6 +96,17 @@ $assets{"fi/num-posts.md"} = {
 	lingua => 'fi',
 	type => 'listing',
 	content => $num_posts_fi,
+	priority => -9998
+};
+
+my $num_fi = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.llist.size -%]
+EOF
+$assets{"fi/num.md"} = {
+	lingua => 'fi',
+	type => 'listing',
+	content => $num_fi,
 	priority => -9999
 };
 
@@ -122,6 +145,12 @@ is ((read_file './_site/en/num-posts/index.html'), "<p>$num_docs</p>");
 
 ok -e './_site/fi/num-posts/index.html';
 is ((read_file './_site/fi/num-posts/index.html'), "<p>$num_docs</p>");
+
+ok -e './_site/en/num/index.html';
+is ((read_file './_site/en/num/index.html'), "<p>$num</p>");
+
+ok -e './_site/fi/num/index.html';
+is ((read_file './_site/fi/num/index.html'), "<p>$num</p>");
 
 $site->tearDown;
 
