@@ -195,7 +195,7 @@ sub __getConfig {
     shift->{__context}->stash->{config};
 }
 
-sub bust_cache {
+sub bustCache {
     my ($self, $uri) = @_;
 
     return $uri if $uri !~ m{^/};
@@ -214,6 +214,14 @@ sub bust_cache {
     } else {
         return "$uri?$stat[9]"
     }
+}
+
+sub bust_cache {
+    my ($self, $uri) = @_;
+
+    warn __"bust_cache() is deprecated! Use bustCache() instead!\n";
+
+    return $self->bustCache($self, $uri);
 }
 
 sub include {
