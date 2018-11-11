@@ -43,7 +43,7 @@ included [% asset.overlay %][% asset.extra %]
 EOF
 
 my $site = TestSite->new(
-	name => 'tgp-misc',
+	name => 'tgp-include',
 	assets => {
 		'with-include.md' => {content => $with_include, overlay => 23},
     },
