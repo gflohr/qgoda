@@ -81,6 +81,12 @@ llinkPost: [% q.llinkPost(name = 'greeting') %]
 
 existsLink: [% q.existsLink(name = 'about' type = 'page' lingua = asset.lingua) %]
 
+lexistsLink: [% q.lexistsLink(name = 'about' type = 'page') %]
+
+existsLinkPost: [% q.existsLinkPost(name = 'greeting' lingua = asset.lingua) %]
+
+lexistsLinkPost: [% q.lexistsLinkPost(name = 'greeting') %]
+
 broken link: [% q.existsLink(name = 'broken' type = 'page' lingua = asset.lingua) %]
 
 ambiguous link: [% q.existsLink(type = 'post' lingua = asset.lingua) %]
@@ -131,7 +137,12 @@ like $links_en_content, qr{<p>link: /en/about/</p>}, 'link en';
 like $links_en_content, qr{<p>llink: /en/about/</p>}, 'llink en';
 like $links_en_content, qr{<p>linkPost: /en/greeting/</p>}, 'linkPost en';
 like $links_en_content, qr{<p>llinkPost: /en/greeting/</p>}, 'llinkPost en';
-like $links_en_content, qr{<p>existsLink: /en/greeting/</p>}, 'existsLink';
+like $links_en_content, qr{<p>existsLink: /en/about/</p>}, 'existsLink';
+like $links_en_content, qr{<p>existsLinkPost: /en/greeting/</p>}, 'existsLinkPost';
+like $links_en_content, qr{<p>lexistsLink: /en/about/</p>}, 'lexistsLink';
+like $links_en_content, qr{<p>lexistsLinkPost: /en/greeting/</p>}, 'lexistsLinkPost';
+like $links_en_content, qr{<p>broken link: </p>}, 'broken link';
+like $links_en_content, qr{<p>ambiguous link: /en/[a-z]+/</p>}, 'ambiguous link';
 
 ok -e './_site/de/links/index.html';
 my $links_de_content = read_file './_site/de/links/index.html';
@@ -139,7 +150,12 @@ like $links_de_content, qr{<p>link: /de/ueber/</p>}, 'link en';
 like $links_de_content, qr{<p>llink: /de/ueber/</p>}, 'llink en';
 like $links_de_content, qr{<p>linkPost: /de/begruessung/</p>}, 'linkPost en';
 like $links_de_content, qr{<p>llinkPost: /de/begruessung/</p>}, 'llinkPost en';
-like $links_de_content, qr{<p>existsLink: /de/begruessung/</p>}, 'existsLink';
+like $links_de_content, qr{<p>existsLink: /de/ueber/</p>}, 'existsLink';
+like $links_de_content, qr{<p>existsLinkPost: /de/begruessung/</p>}, 'existsLinkPost';
+like $links_de_content, qr{<p>lexistsLink: /de/ueber/</p>}, 'lexistsLink';
+like $links_de_content, qr{<p>lexistsLinkPost: /de/begruessung/</p>}, 'lexistsLinkPost';
+like $links_de_content, qr{<p>broken link: </p>}, 'broken link';
+like $links_de_content, qr{<p>ambiguous link: /de/[a-z]+/</p>}, 'ambiguous link';
 
 $site->tearDown;
 
