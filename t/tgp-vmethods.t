@@ -73,6 +73,13 @@ my $kebap_snake = <<EOF;
 [%- css.foo_bar %]_[% css.bar_baz -%]
 EOF
 
+my $kebap_camel = <<EOF;
+[%- USE q = Qgoda -%]
+[%- css = {'foo-bar' => 1 'bar-baz' => 2} -%]
+[%- css = css.kebapCamel -%]
+[%- css.fooBar %]_[% css.barBaz -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tgp-vmethods',
 	assets => {
@@ -80,6 +87,7 @@ my $site = TestSite->new(
 		'vmap-hash.md' => {content => $vmap_hash},
 		'vmap-scalar.md' => {content => $vmap_scalar},
 		'kebap-snake.md' => {content => $kebap_snake},
+		'kebap-camel.md' => {content => $kebap_camel},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]"
@@ -101,6 +109,10 @@ ok -e '_site/kebap-snake/index.html';
 is ((read_file '_site/kebap-snake/index.html'),
     '<p>1_2</p>', 'kebapSnake');
 
-#$site->tearDown;
+ok -e '_site/kebap-camel/index.html';
+is ((read_file '_site/kebap-camel/index.html'),
+    '<p>1_2</p>', 'kebapCamel');
+
+$site->tearDown;
 
 done_testing;
