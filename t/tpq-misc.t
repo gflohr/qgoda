@@ -27,6 +27,9 @@ BEGIN {
 use TestSite;
 use Test::More;
 
+use JSON;
+use Storable qw(dclone);
+
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
 
@@ -68,6 +71,18 @@ my $load_json_invalid = <<EOF;
 [%- data.number -%]
 EOF
 
+my $paginate = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(total => 48) -%]
+[%- q.encodeJSON(p, 'invalid flag', invalid => 'option') %]
+EOF
+
+my $paginate20 = <<EOF;
+[%- USE q = Qgoda -%]
+[%- p = q.paginate(total => 48, start => 20) -%]
+[%- q.encodeJSON(p, 'invalid flag', invalid => 'option') %]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -76,6 +91,8 @@ my $site = TestSite->new(
 		'load-json-absolute.md' => {content => $load_json_absolute},
 		'load-json-updir.md' => {content => $load_json_updir},
 		'load-json-invalid.md' => {content => $load_json_invalid},
+		'paginate.html' => {content => $paginate, chain => 'xml'},
+		'paginate20.html' => {content => $paginate20, chain => 'xml'},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -119,6 +136,51 @@ like ((read_file '_site/load-json-updir/index.html'), $invalid,
 
 ok -e '_site/load-json-invalid/index.html';
 is ((read_file '_site/load-json-invalid/index.html'), '', 'loadJSON invalid');
+
+my $expected_default = {
+	per_page => 10,
+	page => 1,
+	page0 => 0,
+	total_pages => 5,
+	next_link => 'index-2.html',
+	previous_link => undef,
+	tabindexes => [ -1, 0, 0, 0 ],
+	tabindices => [ -1, 0, 0, 0 ],
+	start => 0,
+	next_start => 10,
+	next_location => '/paginate/index-2.html',
+	links => [
+		'index.html',
+		'index-2.html',
+		'index-3.html',
+		'index-4.html',
+		'index-5.html'
+	]
+};
+
+my ($json, $p, $expected);
+
+ok -e '_site/paginate/index.html';
+$json = read_file '_site/paginate/index.html';
+$p = eval { decode_json $json };
+ok $p, $@;
+$expected = dclone $expected_default;
+is_deeply($p, $expected);
+
+ok -e '_site/paginate20/index.html';
+$json = read_file '_site/paginate20/index.html';
+$p = eval { decode_json $json };
+ok $p, $@;
+$expected = dclone $expected_default;
+$expected->{start} = 20;
+$expected->{next_start} = 30;
+$expected->{tabindexes} = $expected->{tabindices} = [0, 0, -1, 0];
+$expected->{page} = 3;
+$expected->{page0} = 2;
+$expected->{previous_link} = 'index-2.html';
+$expected->{next_link} = 'index-4.html';
+$expected->{next_location} = '/paginate20/index-4.html';
+is_deeply($p, $expected);
 
 $site->tearDown;
 
