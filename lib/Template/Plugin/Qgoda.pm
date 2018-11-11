@@ -587,11 +587,6 @@ sub strftime {
     return $formatted_date;
 }
 
-sub try {
-    require Carp;
-    Carp::croak("q.try is now invalid");
-}
-
 sub paginate {
     my ($self, $data) = @_;
 
