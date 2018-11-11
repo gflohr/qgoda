@@ -71,39 +71,29 @@ $assets{"de/ueber.md"} = {
 
 my $links = <<EOF;
 [%- USE q = Qgoda -%]
-link: [% q.link(name = 'about' type = 'page' lingua = asset.lingua) %]
+xref: [% q.xref('title', name = 'about' type = 'page' lingua = asset.lingua) %]
 
-llink: [% q.llink(name = 'about' type = 'page') %]
+lxref: [% q.lxref('title', name = 'about' type = 'page') %]
 
-linkPost: [% q.linkPost(name = 'greeting' lingua = asset.lingua) %]
+xrefPost: [% q.xrefPost('title', name = 'greeting' lingua = asset.lingua) %]
 
-llinkPost: [% q.llinkPost(name = 'greeting') %]
+broken xref: [% q.xref('title', name = 'gone' type = 'page' lingua = asset.lingua) %]
 
-existsLink: [% q.existsLink(name = 'about' type = 'page' lingua = asset.lingua) %]
-
-lexistsLink: [% q.lexistsLink(name = 'about' type = 'page') %]
-
-existsLinkPost: [% q.existsLinkPost(name = 'greeting' lingua = asset.lingua) %]
-
-lexistsLinkPost: [% q.lexistsLinkPost(name = 'greeting') %]
-
-broken link: [% q.existsLink(name = 'broken' type = 'page' lingua = asset.lingua) %]
-
-ambiguous link: [% q.existsLink(type = 'post' lingua = asset.lingua) %]
+non-existing xref: [% q.xref('karma', name = 'about' type = 'page' lingua = asset.lingua) %]
 EOF
-$assets{"en/links.md"} = {
+$assets{"en/xref.md"} = {
 	type => 'listing',
 	content => $links,
 	priority => -9999
 };
-$assets{"de/links.md"} = {
+$assets{"de/xref.md"} = {
 	type => 'listing',
 	content => $links,
 	priority => -9999
 };
 
 my $site = TestSite->new(
-	name => 'tpq-links',
+	name => 'tpq-xref',
 	assets => \%assets,
 	files => {
 		'_views/default.html' => "[% asset.content %]"
@@ -128,34 +118,25 @@ ok -e "./_site/en/greeting/index.html";
 ok -e "./_site/de/begruessung/index.html";
 ok -e "./_site/en/about/index.html";
 ok -e "./_site/de/ueber/index.html";
-ok -e "./_site/en/links/index.html";
-ok -e "./_site/de/links/index.html";
+ok -e "./_site/en/xref/index.html";
+ok -e "./_site/de/xref/index.html";
 
-ok -e './_site/en/links/index.html';
-my $links_en_content = read_file './_site/en/links/index.html';
-like $links_en_content, qr{<p>link: /en/about/</p>}, 'link en';
-like $links_en_content, qr{<p>llink: /en/about/</p>}, 'llink en';
-like $links_en_content, qr{<p>linkPost: /en/greeting/</p>}, 'linkPost en';
-like $links_en_content, qr{<p>llinkPost: /en/greeting/</p>}, 'llinkPost en';
-like $links_en_content, qr{<p>existsLink: /en/about/</p>}, 'existsLink';
-like $links_en_content, qr{<p>existsLinkPost: /en/greeting/</p>}, 'existsLinkPost';
-like $links_en_content, qr{<p>lexistsLink: /en/about/</p>}, 'lexistsLink';
-like $links_en_content, qr{<p>lexistsLinkPost: /en/greeting/</p>}, 'lexistsLinkPost';
-like $links_en_content, qr{<p>broken link: </p>}, 'broken link';
-like $links_en_content, qr{<p>ambiguous link: /en/[a-z]+/</p>}, 'ambiguous link';
+ok -e './_site/en/xref/index.html';
+my $xref_en_content = read_file './_site/en/xref/index.html';
+like $xref_en_content, qr{<p>xref: About This Site</p>}, 'xref en';
+like $xref_en_content, qr{<p>lxref: About This Site</p>}, 'lxref en';
+like $xref_en_content, qr{<p>xrefPost: English Greeting</p>}, 'xrefPost en';
+like $xref_en_content, qr{<p>broken xref: </p>}, 'broken xref en';
+like $xref_en_content, qr{<p>non-existing xref:</p>}, 'non-existing xref en';
 
-ok -e './_site/de/links/index.html';
-my $links_de_content = read_file './_site/de/links/index.html';
-like $links_de_content, qr{<p>link: /de/ueber/</p>}, 'link en';
-like $links_de_content, qr{<p>llink: /de/ueber/</p>}, 'llink en';
-like $links_de_content, qr{<p>linkPost: /de/begruessung/</p>}, 'linkPost en';
-like $links_de_content, qr{<p>llinkPost: /de/begruessung/</p>}, 'llinkPost en';
-like $links_de_content, qr{<p>existsLink: /de/ueber/</p>}, 'existsLink';
-like $links_de_content, qr{<p>existsLinkPost: /de/begruessung/</p>}, 'existsLinkPost';
-like $links_de_content, qr{<p>lexistsLink: /de/ueber/</p>}, 'lexistsLink';
-like $links_de_content, qr{<p>lexistsLinkPost: /de/begruessung/</p>}, 'lexistsLinkPost';
-like $links_de_content, qr{<p>broken link: </p>}, 'broken link';
-like $links_de_content, qr{<p>ambiguous link: /de/[a-z]+/</p>}, 'ambiguous link';
+ok -e './_site/de/xref/index.html';
+my $xref_de_content = read_file './_site/de/xref/index.html';
+Encode::_utf8_on($xref_de_content);
+like $xref_de_content, qr{<p>xref: Über diese Site</p>}, 'xref de';
+like $xref_de_content, qr{<p>lxref: Über diese Site</p>}, 'lxref de';
+like $xref_de_content, qr{<p>xrefPost: Deutsche Begrüßung</p>}, 'xrefPost de';
+like $xref_de_content, qr{<p>broken xref: </p>}, 'broken xref de';
+like $xref_de_content, qr{<p>non-existing xref:</p>}, 'non-existing xref de';
 
 $site->tearDown;
 
