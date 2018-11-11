@@ -32,7 +32,10 @@ use Qgoda::Util qw(read_file);
 
 my $bust_cache = <<EOF;
 [%- USE q = Qgoda -%]
-[%- q.bustCache('/styles.css') -%]
+
+[% q.bustCache('/styles.css') %]
+
+[% q.bust_cache('/styles2.css') %]
 EOF
 
 my $site = TestSite->new(
@@ -42,15 +45,17 @@ my $site = TestSite->new(
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
-		'styles.css' => '// Test styles'
+		'styles.css' => '// Test styles',
+		'styles2.css' => '// Test styles',
 	}
 );
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
 ok -e '_site/bust-cache/index.html';
-like ((read_file '_site/bust-cache/index.html'), 
-    qr{^<p>/styles\.css\?[0-9]+</p>$}, 'bustCache');
+my $bust_cache_content = read_file '_site/bust-cache/index.html';
+like ($bust_cache_content, qr{<p>/styles\.css\?[0-9]+</p>}, 'bustCache');
+like ($bust_cache_content, qr{<p>/styles2\.css\?[0-9]+</p>}, 'bust_cache');
 
 $site->tearDown;
 

@@ -221,7 +221,7 @@ sub bust_cache {
 
     warn __"bust_cache() is deprecated! Use bustCache() instead!\n";
 
-    return $self->bustCache($self, $uri);
+    return $self->bustCache($uri);
 }
 
 sub include {
