@@ -238,26 +238,28 @@ sub __include {
     my $relpath = File::Spec->abs2rel($path, $srcdir);
     my $asset = Qgoda::Asset->new($path, $relpath);
 
-    if ($overlay) {
-        my %overlay = %$overlay;
-        delete $overlay{path};
-        delete $overlay{relpath};
-        delete $overlay{reldir};
-        delete $overlay{view};
-        delete $overlay{chain};
-        delete $overlay{wrapper};
-        merge_data $asset, \%overlay;
-    }
+    my %overlay = %$overlay;
+    delete $overlay{path};
+    delete $overlay{relpath};
+    delete $overlay{reldir};
+    delete $overlay{view};
+    delete $overlay{chain};
+    delete $overlay{wrapper};
+    merge_data $asset, \%overlay;
 
-    $q->analyzeAssets([$asset], $extra);
-    $q->locateAsset($asset);
+    eval {
+        $q->analyzeAssets([$asset], $extra);
+        $q->locateAsset($asset);
 
-    my $builders = $q->getBuilders;
-    my $site = $q->getSite;
-    foreach my $builder (@{$builders}) {
-        $builder->processAsset($asset, $site);
-        $builder->wrapAsset($asset, $site);
-    }
+        my $builders = $q->getBuilders;
+        my $site = $q->getSite;
+        foreach my $builder (@{$builders}) {
+            $builder->processAsset($asset, $site);
+            $builder->wrapAsset($asset, $site);
+        }
+    };
+    die __x("Error including '{path}': {error}\n",
+            path => $_path, error => $@) if $@;
 
     return $asset;
 }
@@ -585,11 +587,9 @@ sub lexistsLinkPost {
     return $self->llinkPost(@args);
 }
 
-sub writeAsset {
+sub __writeAsset {
     my ($self, $path, $overlay, $extra) = @_;
 
-    die "usage: writeAsset(PATH, OVERLAY, KEY = VALUE, ...\n"
-        if empty $path || empty $overlay;
     $overlay = $self->__sanitizeHashref($overlay, 'include');
     $extra = $self->__sanitizeHashref($extra, 'include', 1);
 
@@ -623,7 +623,7 @@ sub clone {
     $extra->{relpath} = $asset->getRelpath;
     $extra->{path} = $asset->getPath;
     $extra->{parent} = $parent;
-    return $self->writeAsset($asset->getRelpath, $asset, $extra);
+    return $self->__writeAsset($asset->getRelpath, $asset, $extra);
 }
 
 sub strftime {
