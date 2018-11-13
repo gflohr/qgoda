@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.9.4 - 2018-11-04
     - Require libintl-perl 1.30, because of
       https://github.com/gflohr/libintl-perl/issues/4.
     - Issues fixed:

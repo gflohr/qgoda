@@ -232,3 +232,7 @@ Written by Guido Flohr (http://www.guido-flohr.net/).
 }
 
 1;
+
+=head1 NAME
+
+Qgoda::CLI - Qgoda command-line dispatcher.

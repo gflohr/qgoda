@@ -253,7 +253,6 @@ my %WriteMakefileArgs = (
     "AnyEvent::Handle" => 0,
     "AnyEvent::Loop" => 0,
     "Archive::Extract" => 0,
-    "Carp" => 0,
     "Cpanel::JSON::XS" => 0,
     "Cwd" => 0,
     "Data::Dumper" => 0,
@@ -327,10 +326,11 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
+    "Carp" => 0,
     "Test::More" => 0,
     "Time::Local" => 0
   },
-  "VERSION" => "0.9.4",
+  "VERSION" => "0.9.5",
   "test" => {
     "TESTS" => "t/*.t"
   }
