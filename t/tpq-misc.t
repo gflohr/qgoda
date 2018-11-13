@@ -113,6 +113,12 @@ my $paginate_filename = <<EOF;
 [%- q.encodeJSON(p) %]
 EOF
 
+my $time = <<EOF;
+[%- USE q = Qgoda -%]
+[%- date = q.time -%]
+[%- date -%]:[%- date.w3c -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -144,7 +150,12 @@ my $site = TestSite->new(
 				content => $paginate_filename,
 				chain => 'xml'
 			},
-    },
+		'time.html' => 
+			{
+				content => $time,
+				chain => 'xml'
+			}
+	},
 	files => {
 		'_views/default.html' => "[% asset.content %]",
 		'styles.css' => '// Test styles',
@@ -157,7 +168,9 @@ my $site = TestSite->new(
 # Temporarily close stderr while building the site.
 open my $olderr, '>&STDERR' or die "cannot dup stderr: $!";
 close STDERR;
+my $started = time;
 ok(Qgoda::CLI->new(['build'])->dispatch);
+my $finished = time;
 open STDERR, '>&', $olderr;
 
 ok -e '_site/bust-cache/index.html';
@@ -288,8 +301,16 @@ $expected->{links} = [
 	'page-4.xml',
 	'page-5.xml',
 ];
-
 is_deeply($p, $expected);
+
+ok -e '_site/time/index.html';
+my $output = read_file '_site/time/index.html';
+like $output, qr/^([0-9]+):(.+)$/;
+my ($epoch, $w3c) = split /:/, $output;
+ok $epoch >= $started, "epoch after start time: $epoch <=> $started";
+ok $epoch <= $finished, "epoch before end time: $epoch <=> $finished";
+my @time = gmtime $epoch;
+is $w3c, sprintf '%04u-%02u-%02u', $time[5] + 1900, $time[4] + 1, $time[3];
 
 $site->tearDown;
 
