@@ -179,20 +179,8 @@ sub new {
     bless $self, $class;
 }
 
-sub __getContext {
-    shift->{__context};
-}
-
-sub __getStash {
-    shift->{__context}->stash;
-}
-
 sub __getAsset {
     shift->{__context}->stash->{asset};
-}
-
-sub __getConfig {
-    shift->{__context}->stash->{config};
 }
 
 sub bustCache {
