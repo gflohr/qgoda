@@ -57,7 +57,8 @@ use Qgoda::Asset;
 use Qgoda::Analyzer;
 use Qgoda::Builder;
 use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
-                   collect_defaults purify perl_class class2module);
+                   collect_defaults purify perl_class class2module trim
+                   read_file);
 use Qgoda::PluginUtils qw(load_plugins);
 
 my $qgoda;
@@ -227,13 +228,6 @@ sub watch {
 
     my $logger = $self->{__logger};
 
-    #eval { require AnyEvent::Filesys::Notify };
-    #if ($@) {
-    #    $logger->error($@);
-    #    $logger->fatal(__("You have to install AnyEvent::Filesys::Notify"
-    #                      . " in order to use the watch functionality"));
-    #}
-
     eval {
         # An initial build failure is fatal.
         $self->build(%options);
@@ -241,6 +235,8 @@ sub watch {
         my $config = $self->{__config};
 
         $self->__startHelpers($config->{helpers});
+
+        $self->{__stop} = AnyEvent->condvar;
 
         $logger->debug(__x("waiting for changes in '{dir}'",
                            dir => $config->{srcdir}));
@@ -252,10 +248,25 @@ sub watch {
             filter => sub { $self->__filesysChangeFilter(@_) },
         );
 
-        AnyEvent::Loop::run;
-    };
+        my $reason = $self->{__stop}->recv;
+        $reason = __"no reason given!" if empty $reason;
 
+        $logger->info(__x("terminating on demand: {reason}",
+                          reason => $reason));
+    };
     $logger->fatal($@) if $@;
+
+    return $self;
+}
+
+sub stop {
+    my ($self, $reason) = @_;
+
+    if ($self->{__stop}) {
+        $self->{__stop}->send($reason);
+    } else {
+        die $reason;
+    }
 }
 
 sub __startHelpers {
@@ -738,6 +749,19 @@ sub __filesysChangeFilter {
     my ($self, $filename) = @_;
 
     my $config = $self->{__config};
+
+    if ($filename =~ /_stop$/ && -e $filename) {
+        my $srcdir = $config->{paths}->{srcdir};
+        my $relpath = File::Spec->abs2rel($filename, $srcdir);
+        if ('_stop' eq $relpath) {
+            my $reason = read_file $filename;
+            unlink $filename;
+            $self->stop(trim $reason);
+        }
+        return;
+    }
+
+    return if $self->{__stop};
 
     if ($config->ignorePath($filename, 1)) {
         my $logger = $self->{__logger};
