@@ -58,14 +58,6 @@ my $vmap_hash = <<EOF;
 [%- END -%]
 EOF
 
-my $vmap_scalar = <<EOF;
-[%- USE q = Qgoda -%]
-[%- haystack = 'does not work' -%]
-[%- FOR value IN haystack.vmap('needle') -%]
-[%- value -%]
-[%- END -%]
-EOF
-
 my $kebap_snake = <<EOF;
 [%- USE q = Qgoda -%]
 [%- css = {'foo-bar' => 1 'bar-baz' => 2} -%]
@@ -92,7 +84,6 @@ my $site = TestSite->new(
 	assets => {
 		'vmap-array.md' => {content => $vmap_array},
 		'vmap-hash.md' => {content => $vmap_hash},
-		'vmap-scalar.md' => {content => $vmap_scalar},
 		'kebap-snake.md' => {content => $kebap_snake},
 		'kebap-camel.md' => {content => $kebap_camel},
 		'quote-values.md' => {content => $quote_values},
@@ -109,9 +100,6 @@ is ((read_file '_site/vmap-array/index.html'), '<p>2304</p>', 'vmap array');
 
 ok -e '_site/vmap-hash/index.html';
 is ((read_file '_site/vmap-hash/index.html'), '<p>2304</p>', 'vmap hash');
-
-ok -e '_site/vmap-scalar/index.html';
-is ((read_file '_site/vmap-scalar/index.html'), '', 'vmap scalar');
 
 ok -e '_site/kebap-snake/index.html';
 is ((read_file '_site/kebap-snake/index.html'),

@@ -123,11 +123,9 @@ sub new {
         my @keys;
         if ('ARRAY' eq reftype $objs) {
             @keys = (0 .. $#$objs);
-        } elsif ('HASH' eq reftype $objs) {
+        } else {
             # Make it deterministic.
             @keys = sort keys %$objs;
-        } else {
-            return [];
         }
 
         my $stash = Template::Stash->new({objs => $objs});
