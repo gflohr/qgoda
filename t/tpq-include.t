@@ -36,16 +36,10 @@ my $with_include = <<EOF;
 EOF
 
 my $include = <<EOF;
----
-title: other
----
 included [% asset.overlay %][% asset.extra %]
 EOF
 
 my $no_path = <<EOF;
----
-title: no path
----
 [% USE q = Qgoda %]
 before
 [% q.include %]
@@ -53,12 +47,16 @@ after
 EOF
 
 my $no_overlay = <<EOF;
----
-title: no overlay
----
 [% USE q = Qgoda %]
 before
 [% q.include('_includes/other.md') %]
+after
+EOF
+
+my $not_existing = <<EOF;
+[% USE q = Qgoda %]
+before
+[% q.include('_includes/not-there.md', asset, extra = '1234') %]
 after
 EOF
 
@@ -67,11 +65,12 @@ my $site = TestSite->new(
 	assets => {
 		'with-include.md' => {content => $with_include, overlay => 23},
 		'no-path.md' => {content => $no_path},
-		'no-overlay.md' => {content => $no_overlay}
+		'no-overlay.md' => {content => $no_overlay},
+		'not-there.md' => {content => $not_existing},
+		'_includes/other.md' => {content => $include},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
-		'_includes/other.md' => $include,
 	}
 );
 
@@ -93,6 +92,9 @@ like ((read_file '_site/no-path/index.html'), $invalid, 'no path');
 ok -e '_site/no-overlay/index.html';
 like ((read_file '_site/no-overlay/index.html'), $invalid, 'no overlay');
 
-$site->tearDown;
+ok -e '_site/not-there/index.html';
+like ((read_file '_site/not-there/index.html'), $invalid, 'not found');
+
+#$site->tearDown;
 
 done_testing;
