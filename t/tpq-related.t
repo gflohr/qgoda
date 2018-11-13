@@ -48,6 +48,16 @@ $assets{"en/football.md"} = {
 	threshold => 0,
 	filters => {},
 };
+$assets{"de/fussball.md"} = {
+	title => "Fußball",
+	type => 'post',
+	content => $football,
+	name => "football",
+	tags => ['Ballsportarten', 'Mannschaftssportarten'],
+	categories => ['Sport'],
+	threshold => 0,
+	filters => {},
+};
 
 my $tennis = <<EOF;
 [% USE q = Qgoda %]
@@ -64,6 +74,16 @@ $assets{"en/tennis.md"} = {
 	threshold => 4,
 	filters => { type => 'post' },
 };
+$assets{"de/tennis.md"} = {
+	title => "Tennis",
+	type => 'post',
+	content => $tennis,
+	name => "tennis",
+	tags => ['Ballsportarten', 'Einzelsportarten'],
+	categories => ['Sport'],
+	threshold => 4,
+	filters => { type => 'post' },
+};
 
 my $long_jump = <<EOF;
 [% USE q = Qgoda %]
@@ -76,6 +96,16 @@ $assets{"en/long-jump.md"} = {
 	name => "long-jump",
 	tags => ['athletics', 'individual sport'],
 	categories => ['Sports'],
+	threshold => 0,
+	filters => { type => 'post' },
+};
+$assets{"de/weitsprung.md"} = {
+	title => "Weitsprung",
+	type => 'post',
+	content => $long_jump,
+	name => "long-jump",
+	tags => ['Leichtathletik', 'Einzelsportarten'],
+	categories => ['Sport'],
 	threshold => 0,
 	filters => { type => 'post' },
 };
@@ -95,10 +125,20 @@ $assets{"en/fava.md"} = {
 	threshold => 0,
 	filters => {}
 };
+$assets{"de/fava.md"} = {
+	title => "Fava",
+	type => 'recipe',
+	content => $fava,
+	name => 'fava',
+	tags => ['vegan', 'Vorspeise', 'griechisch'],
+	categories => ['Kochen'],
+	threshold => 0,
+	filters => {}
+};
 
 my $view = <<'EOF';
 [%- USE q = Qgoda -%]
-[%- FOREACH doc IN q.related(asset.threshold, asset.filters) %]
+[%- FOREACH doc IN q.lrelated(asset.threshold, asset.filters) %]
 [% doc.permalink %] ([% q.relation(doc) %])
 [%- END -%]
 
@@ -137,7 +177,18 @@ $expected = <<EOF;
 /en/fava/ (1)
 EOF
 chomp $expected;
-is $rendered, $expected;
+is $rendered, $expected, '/en/football/';
+
+ok -e './_site/de/fussball/index.html';
+$rendered = read_file './_site/de/fussball/index.html';
+Encode::_utf8_on($rendered);
+$expected = <<EOF;
+/de/tennis/ (6)
+/de/weitsprung/ (3)
+/de/fava/ (1)
+EOF
+chomp $expected;
+is $rendered, $expected, '/de/fussball/';
 
 ok -e './_site/en/tennis/index.html';
 $rendered = read_file './_site/en/tennis/index.html';
@@ -147,7 +198,17 @@ $expected = <<EOF;
 /en/long-jump/ (5)
 EOF
 chomp $expected;
-is $rendered, $expected;
+is $rendered, $expected, '/en/tennis/';
+
+ok -e './_site/de/tennis/index.html';
+$rendered = read_file './_site/de/tennis/index.html';
+Encode::_utf8_on($rendered);
+$expected = <<EOF;
+/de/fussball/ (6)
+/de/weitsprung/ (5)
+EOF
+chomp $expected;
+is $rendered, $expected, '/de/tennis/';
 
 ok -e './_site/en/long-jump/index.html';
 $rendered = read_file './_site/en/long-jump/index.html';
@@ -157,7 +218,17 @@ $expected = <<EOF;
 /en/football/ (3)
 EOF
 chomp $expected;
-is $rendered, $expected;
+is $rendered, $expected, '/en/long-jump/';
+
+ok -e './_site/de/weitsprung/index.html';
+$rendered = read_file './_site/de/weitsprung/index.html';
+Encode::_utf8_on($rendered);
+$expected = <<EOF;
+/de/tennis/ (5)
+/de/fussball/ (3)
+EOF
+chomp $expected;
+is $rendered, $expected, '/de/weitsprung/';
 
 ok -e './_site/en/fava/index.html';
 $rendered = read_file './_site/en/fava/index.html';
@@ -168,7 +239,18 @@ $expected = <<EOF;
 /en/tennis/ (1)
 EOF
 chomp $expected;
-is $rendered, $expected;
+is $rendered, $expected, '/en/fava/';
+
+ok -e './_site/de/fava/index.html';
+$rendered = read_file './_site/de/fava/index.html';
+Encode::_utf8_on($rendered);
+$expected = <<EOF;
+/de/fussball/ (1)
+/de/tennis/ (1)
+/de/weitsprung/ (1)
+EOF
+chomp $expected;
+is $rendered, $expected, '/de/fava/';
 
 $site->tearDown;
 

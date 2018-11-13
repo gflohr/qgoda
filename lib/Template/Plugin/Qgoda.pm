@@ -857,6 +857,7 @@ sub related {
         grep { $related->{$_} >= $threshold }
         keys %{$asset->{related}};
 
+
     $filters = $self->__sanitizeFilters($filters);
 
     return $site->filter(\@related, %$filters);
