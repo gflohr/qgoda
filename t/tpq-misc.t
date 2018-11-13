@@ -189,7 +189,7 @@ like ($bust_cache_content, qr{<p>/styles\.css\?[0-9]+</p>}, 'bustCache');
 like ($bust_cache_content, qr{<p>/styles2\.css\?[0-9]+</p>}, 'bust_cache');
 like ($bust_cache_content, qr{<p>relative: styles\.css</p>},
       'bustCache relative');
-like ($bust_cache_content, qr{<p>not-there: not-there\.css</p>},
+like ($bust_cache_content, qr{<p>not-there: /not-there\.css</p>},
       'bustCache non existing');
 like ($bust_cache_content, qr{<p>/styles\.css\?foo=1\&amp;[0-9]+</p>},
       'bustCache with query parameter');
