@@ -773,7 +773,6 @@ sub sprintf {
 sub encodeJSON {
     my ($self, $data, @flags) = @_;
 
-$DB::single = 1;
     my $options = {};
     if (ref $flags[-1] && 'HASH' eq ref $flags[-1]) {
         $options = pop @flags;
@@ -842,14 +841,23 @@ sub related {
     my ($self, $threshold, $filters) = @_;
 
     my $asset = $self->__getAsset;
-    my @related = map { $_->[0] } 
-                  sort { $b->[1] <=> $a->[1] }
-                  grep { $_->[1] >= $threshold } 
-                  @{$asset->{related}};
+
+    my $related = $asset->{related};
+    my $site = Qgoda->new->getSite;
+    my $sort_by = sub {
+        if ($related->{$a} != $related->{$b}) {
+            return $related->{$b} <=> $related->{$a};
+        } else {
+            return $a cmp $b;
+        }
+    };
+
+    my @related = map { $site->getAssetByRelpath($_) }
+        sort $sort_by
+        grep { $related->{$_} >= $threshold }
+        keys %{$asset->{related}};
 
     $filters = $self->__sanitizeFilters($filters);
-
-    my $site = Qgoda->new->getSite;
 
     return $site->filter(\@related, %$filters);
 }
@@ -861,6 +869,14 @@ sub lrelated {
     $filters->{lingua} = $self->__getAsset->{lingua};
 
     return $self->related($threshold, $filters);
+}
+
+sub relation {
+    my ($self, $other) = @_;
+
+    my $asset = $self->__getAsset;
+
+    return $asset->{related}->{$other->{relpath}};
 }
 
 sub time {

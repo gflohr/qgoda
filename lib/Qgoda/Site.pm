@@ -317,9 +317,9 @@ sub computeRelations {
     # First pass. Get permalinks.
     my %locations;
     my %permalinks;
+    my %relpaths;
     my $taxonomies = Qgoda->new->config->{taxonomies};
     my %taxonomies;
-    my %links;
 
     my %related;
 
@@ -329,10 +329,7 @@ sub computeRelations {
         my $permalink = $asset->{permalink};
         $locations{$asset->{location}} = $asset;
         $permalinks{$permalink} = $asset;
-
-        foreach my $link (@{$asset->{links}}) {
-            $links{$link}->{$permalink} = $asset;
-        }
+        $relpaths{$asset->{relpath}} = $asset;
 
         foreach my $key (keys %$taxonomies) {
             next if !exists $asset->{$key};
@@ -340,7 +337,7 @@ sub computeRelations {
             @values = @{$values[0]}
                 if ref $values[0] && 'ARRAY' eq reftype $values[0];
             foreach my $value (@values) {
-                $taxonomies{$key}->{$value}->{$permalink} = 1;
+                $taxonomies{$key}->{$value}->{$asset->{relpath}} = 1;
             }
         }
     }
@@ -348,8 +345,8 @@ sub computeRelations {
     # Second pass.  Add values for links between assets.
     my $link_score = $config->{'link-score'};
     if ($link_score) {
-        foreach my $permalink (keys %permalinks) {
-            my $asset = $permalinks{$permalink};
+        foreach my $relpath (keys %relpaths) {
+            my $asset = $self->{__relpaths}->{$relpath};
             my $links = $asset->{links};
             foreach my $link (@$links) {
                 my $target;
@@ -360,8 +357,10 @@ sub computeRelations {
                 }
 
                 if ($target && $target != $asset) {
-                    $related{$permalink}->{$target->{permalink}} += $link_score;
-                    $related{$target->{permalink}}->{$permalink} += $link_score;
+                    my $relpath1 = $asset->{relpath};
+                    my $relpath2 = $target->{relpath};
+                    $related{$relpath1}->{$relpath2} += $link_score;
+                    $related{$relpath2}->{$relpath1} += $link_score;
                 }
             }
         }
@@ -372,32 +371,27 @@ sub computeRelations {
         my $taxonomy = $taxonomies{$name};
         my $score = $taxonomies->{$name} or next;
         foreach my $value (keys %$taxonomy) {
-            my $permalinks = $taxonomy->{$value};
-            my @permalinks = keys %$permalinks;
-            my $current = shift @permalinks;
-            while (@permalinks) {
-                foreach my $permalink (@permalinks) {
-                    $related{$current}->{$permalink} += $score;
-                    $related{$permalink}->{$current} += $score;
+            my $relpaths = $taxonomy->{$value};
+            my @relpaths = keys %$relpaths;
+            my $current = shift @relpaths;
+            while (@relpaths) {
+                foreach my $relpath (@relpaths) {
+                    $related{$current}->{$relpath} += $score;
+                    $related{$relpath}->{$current} += $score;
                 }
-                $current = shift @permalinks;
+                $current = shift @relpaths;
             }
         }
     }
 
-    foreach my $permalink (keys %related) {
-        my $peers = $related{$permalink};
+    foreach my $relpath (keys %related) {
+        my $asset = $relpaths{$relpath};
+        my $peers = $related{$relpath};
 
         # Delete relation with itself.
-        delete $peers->{$permalink};
+        delete $peers->{$relpath};
 
-        # Sort by relevance and replace score with asset-score pair.
-        # FIXME! Turn that into a hash instead?
-        my @related = 
-            map { [$permalinks{$_}, $peers->{$_}] }
-            sort { $peers->{$a} <=> $peers->{$b} } keys %{$peers};
-        
-        $permalinks{$permalink}->{related} = \@related;
+        $asset->{related} = $peers;
     }
 
     return $self
