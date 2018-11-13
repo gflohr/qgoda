@@ -40,10 +40,10 @@ use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
+my $black_hole = sub {};
+
 sub new {
     my ($class, $context) = @_;
-
-    return $class if ref $class;
 
     my $get_values = sub {
         my ($assets, @fields) = @_;
@@ -382,7 +382,7 @@ sub link {
 sub existsLink {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->link(@args);
 }
@@ -397,7 +397,7 @@ sub xref {
         my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
         warn "broken xref($json)\n";
-    } if (@$set > 1) {
+    } elsif (@$set > 1) {
         my $json = encode_json($filters);
         $json =~ s{.(.*).}{$1};
         warn "ambiguous xref($json)\n";
@@ -409,7 +409,7 @@ sub xref {
 sub existsXref {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->xref(@args);
 }
@@ -426,7 +426,7 @@ sub xrefPost {
 sub existsXrefPost {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->xrefPost(@args);
 }
@@ -443,7 +443,7 @@ sub llink {
 sub lexistsLink {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->llink(@args);
 }
@@ -469,7 +469,7 @@ sub lxrefPost {
 sub lexistsXref {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->lxref(@args);
 }
@@ -477,7 +477,7 @@ sub lexistsXref {
 sub lexistsXrefPost {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->lxrefPost(@args);
 }
@@ -525,7 +525,7 @@ sub lanchorPost {
 sub existsAnchor {
     my ($self, $filters) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->anchor($filters);
 }
@@ -533,7 +533,7 @@ sub existsAnchor {
 sub existsAnchorPost {
     my ($self, $filters) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->anchorPost($filters);
 }
@@ -541,7 +541,7 @@ sub existsAnchorPost {
 sub lexistsAnchor {
     my ($self, $filters) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->lanchor($filters);
 }
@@ -549,7 +549,7 @@ sub lexistsAnchor {
 sub lexistsAnchorPost {
     my ($self, $filters) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->lanchorPost($filters);
 }
@@ -566,7 +566,7 @@ sub linkPost {
 sub existsLinkPost {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->linkPost(@args);
 }
@@ -583,7 +583,7 @@ sub llinkPost {
 sub lexistsLinkPost {
     my ($self, @args) = @_;
 
-    local $SIG{__WARN__} = sub {};
+    local $SIG{__WARN__} = $black_hole;
 
     return $self->llinkPost(@args);
 }

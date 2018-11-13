@@ -23,6 +23,26 @@ use Template;
 use Test::More tests => 5;
 
 my $assets = {
+    strings => [
+        { value => 'bazoo' },
+        { value => 'bar' },
+        { value => 'foo' },
+        { value => 'Appleseed' },
+        { value => 'John' },
+        { value => 'Jane' },
+        { value => 'baz' },
+        { value => 'baz' },
+        { value => 'Acme' },
+        { value => 'Doe' },
+    ],
+    numbers => [
+        { value => 48 },
+        { value => 2304 },
+        { value => 48 },
+        { value => 13 },
+        { value => 13 },
+        { value => 12345679 },
+    ],
     months => [
         {
             name => 'January',
@@ -128,10 +148,52 @@ my ($in, $out);
 
 $out = '';
 $in = <<EOF;
-[% USE Qgoda %]
-[% FOREACH month IN  months.sortBy('name') %]
-[%- month.name %]
-[% END %]
+[%- USE Qgoda -%]
+[%- FOREACH string IN strings.sortBy('value') %]
+[%- string.value %]
+[% END -%]
+EOF
+$tt->process(\$in, $assets, \$out) or die $tt->error;
+is $out, <<EOF;
+Acme
+Appleseed
+Doe
+Jane
+John
+bar
+baz
+baz
+bazoo
+foo
+EOF
+
+$out = '';
+$in = <<EOF;
+[%- USE Qgoda -%]
+[%- FOREACH number IN numbers.nsortBy('value') %]
+[%- number.value %]
+[% END -%]
+EOF
+$tt->process(\$in, $assets, \$out) or die $tt->error;
+is $out, <<EOF;
+13
+13
+48
+48
+2304
+12345679
+EOF
+
+$out = '';
+# We need the assignments to a and b to check whether the selection of an
+# unused variable works.
+$in = <<EOF;
+[%- USE Qgoda -%]
+[%- a = 1 %][% b = 2 -%]
+[%- FOREACH month IN  months.sortBy('name') %]
+[% month.name %]
+[%- END -%]
+
 EOF
 $tt->process(\$in, $assets, \$out) or die $tt->error;
 is $out, <<EOF;
@@ -148,7 +210,6 @@ May
 November
 October
 September
-
 EOF
 
 $out = '';
