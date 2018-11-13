@@ -100,18 +100,18 @@ sub read_body($$) {
     my ($filename, $placeholder) = @_;
 
     my $fh = IO::File->new;
-    open $fh, "<:encoding(UTF-8)", $filename or return;
+    open $fh, "<:encoding(UTF-8)", $filename or die "$!\n";
 
     undef $!;
     my $first_line = <$fh>;
-    return if empty $first_line;
-    return if $first_line !~ /---[ \t]*\n$/o;
+    die __"File is empty!\n" if empty $first_line;
+    die __"File does not begin with '---'!\n" if $first_line !~ /---[ \t]*\n$/o;
     my $lines = 1;
 
     while (1) {
         ++$lines;
         my $line = <$fh>;
-        return if !defined $line;
+        die __"Unterminated front matter!\n" if !defined $line;
         last if $line =~ /---[ \t]*\n$/o;
     }
 
