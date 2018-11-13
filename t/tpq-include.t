@@ -42,10 +42,32 @@ title: other
 included [% asset.overlay %][% asset.extra %]
 EOF
 
+my $no_path = <<EOF;
+---
+title: no path
+---
+[% USE q = Qgoda %]
+before
+[% q.include %]
+after
+EOF
+
+my $no_overlay = <<EOF;
+---
+title: no overlay
+---
+[% USE q = Qgoda %]
+before
+[% q.include('_includes/other.md') %]
+after
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-include',
 	assets => {
 		'with-include.md' => {content => $with_include, overlay => 23},
+		'no-path.md' => {content => $no_path},
+		'no-overlay.md' => {content => $no_overlay}
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -53,11 +75,23 @@ my $site = TestSite->new(
 	}
 );
 
-ok (Qgoda::CLI->new(['build'])->dispatch);
+# Temporarily close stderr while building the site.
+open my $olderr, '>&STDERR' or die "cannot dup stderr: $!";
+close STDERR;
+ok(Qgoda::CLI->new(['build'])->dispatch);
+open STDERR, '>&', $olderr;
 
 ok -e '_site/with-include/index.html';
 is ((read_file '_site/with-include/index.html'), 
     '<p>included 2304</p>', 'include');
+
+my $invalid = qr/^\[\% '' \%\]/;
+
+ok -e '_site/no-path/index.html';
+like ((read_file '_site/no-path/index.html'), $invalid, 'no path');
+
+ok -e '_site/no-overlay/index.html';
+like ((read_file '_site/no-overlay/index.html'), $invalid, 'no overlay');
 
 $site->tearDown;
 

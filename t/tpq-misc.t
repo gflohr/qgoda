@@ -42,7 +42,7 @@ my $bust_cache = <<EOF;
 
 relative: [% q.bustCache('styles.css') %]
 
-not-there: [% q.bustCache('not-there.css') %]
+not-there: [% q.bustCache('/not-there.css') %]
 
 [% q.bustCache('/styles.css?foo=1') %]
 EOF
