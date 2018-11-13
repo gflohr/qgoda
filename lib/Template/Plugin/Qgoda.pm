@@ -757,7 +757,6 @@ sub taxonomyValues {
 sub ltaxonomyValues {
     my ($self, $taxonomy, $filters) = @_;
 
-$DB::single = 1;
     $filters = $self->__sanitizeFilters($filters);
     $filters->{lingua} = $self->__getAsset->{lingua};
 

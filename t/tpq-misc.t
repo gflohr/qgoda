@@ -119,6 +119,11 @@ my $time = <<EOF;
 [%- date -%]:[%- date.w3c -%]
 EOF
 
+my $sprintf = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.sprintf('%x', 8964) -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -153,6 +158,11 @@ my $site = TestSite->new(
 		'time.html' => 
 			{
 				content => $time,
+				chain => 'xml'
+			},
+		'sprintf.html' => 
+			{
+				content => $sprintf,
 				chain => 'xml'
 			}
 	},
@@ -311,6 +321,9 @@ ok $epoch >= $started, "epoch after start time: $epoch <=> $started";
 ok $epoch <= $finished, "epoch before end time: $epoch <=> $finished";
 my @time = gmtime $epoch;
 is $w3c, sprintf '%04u-%02u-%02u', $time[5] + 1900, $time[4] + 1, $time[3];
+
+ok -e '_site/sprintf/index.html';
+is ((read_file '_site/sprintf/index.html'), '2304', 'sprintf');
 
 $site->tearDown;
 
