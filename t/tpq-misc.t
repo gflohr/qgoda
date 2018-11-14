@@ -113,6 +113,21 @@ my $paginate_filename = <<EOF;
 [%- q.encodeJSON(p) %]
 EOF
 
+my $paginate_invalid_noref = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.paginate(2304) -%]
+EOF
+
+my $paginate_invalid_array = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.paginate(['foo', 'bar']) -%]
+EOF
+
+my $paginate_invalid_scalar_ref = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.paginate(asset.date) -%]
+EOF
+
 my $time = <<EOF;
 [%- USE q = Qgoda -%]
 [%- date = q.time -%]
@@ -153,6 +168,21 @@ my $site = TestSite->new(
 		'paginate-filename.html' =>
 			{
 				content => $paginate_filename,
+				chain => 'xml'
+			},
+		'paginate-invalid-noref.html' =>
+			{
+				content => $paginate_invalid_noref,
+				chain => 'xml'
+			},
+		'paginate-invalid-array.html' =>
+			{
+				content => $paginate_invalid_array,
+				chain => 'xml'
+			},
+		'paginate-invalid-scalar-ref.html' =>
+			{
+				content => $paginate_invalid_scalar_ref,
 				chain => 'xml'
 			},
 		'time.html' => 
@@ -312,6 +342,18 @@ $expected->{links} = [
 	'page-5.xml',
 ];
 is_deeply($p, $expected);
+
+ok -e '_site/paginate-invalid-noref/index.html';
+like ((read_file '_site/paginate-invalid-noref/index.html'), $invalid,
+      'paginate called with non-reference');
+
+ok -e '_site/paginate-invalid-array/index.html';
+like ((read_file '_site/paginate-invalid-array/index.html'), $invalid,
+      'paginate called with array');
+
+ok -e '_site/paginate-invalid-scalar-ref/index.html';
+like ((read_file '_site/paginate-invalid-scalar-ref/index.html'), $invalid,
+      'paginate called with scalar reference');
 
 ok -e '_site/time/index.html';
 my $output = read_file '_site/time/index.html';

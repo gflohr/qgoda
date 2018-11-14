@@ -295,9 +295,10 @@ sub __sanitizeHashref {
     if (empty $hashref) {
         if ($optional) {
             return {};
-        } else {
-            die __x("named arguments for '{method}()' are mandatory\n",
-                    method => $method);
+        # Cannot happen at the moment.
+        #} else {
+        #    die __x("named arguments for '{method}()' are mandatory\n",
+        #            method => $method);
         }
     }
 
