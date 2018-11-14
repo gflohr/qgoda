@@ -53,10 +53,12 @@ before
 after
 EOF
 
+# Cwd::abs_path only returns undef if the file is in a non-existing
+# directory. This is important for test coverage.
 my $not_existing = <<EOF;
 [% USE q = Qgoda %]
 before
-[% q.include('_includes/not-there.md', asset, extra = '1234') %]
+[% q.include('_includes/not/there.md', asset, extra = '1234') %]
 after
 EOF
 
