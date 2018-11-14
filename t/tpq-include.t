@@ -62,6 +62,15 @@ before
 after
 EOF
 
+my $include_invalid_template = <<EOF;
+[% USE q = Qgoda %]
+[%- q.include('_includes/invalid.md', asset, extra => '04') -%]
+EOF
+my $invalid_include = <<EOF;
+[% USE q = Qgoda %]
+[% q.list('foo', 'bar', 'baz') %]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-include',
 	assets => {
@@ -69,7 +78,9 @@ my $site = TestSite->new(
 		'no-path.md' => {content => $no_path},
 		'no-overlay.md' => {content => $no_overlay},
 		'not-there.md' => {content => $not_existing},
+		'invalid.md' => {content => $include_invalid_template},
 		'_includes/other.md' => {content => $include},
+		'_includes/invalid.md' => {content => $invalid_include},
     },
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -96,6 +107,9 @@ like ((read_file '_site/no-overlay/index.html'), $invalid, 'no overlay');
 
 ok -e '_site/not-there/index.html';
 like ((read_file '_site/not-there/index.html'), $invalid, 'not found');
+
+ok -e '_site/invalid/index.html';
+like ((read_file '_site/invalid/index.html'), $invalid, 'invalid include');
 
 #$site->tearDown;
 
