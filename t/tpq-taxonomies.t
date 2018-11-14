@@ -115,17 +115,79 @@ virtual: 1
   [% INCLUDE components/listing.html filters = filters %]
 [% END %]
 EOF
-#$assets{'en/tags/index.md'} = {
-#	content => $tag_page,
-#	priority => -9999,
-#	chain => 'xml'
-#};
+$assets{'en/tags/index.md'} = {
+	content => $tag_page,
+	priority => -9999,
+	chain => 'xml'
+};
+$assets{'fi/tags/index.md'} = {
+	content => $tag_page,
+	priority => -9999,
+	chain => 'xml'
+};
+
+my $listing = <<'EOF';
+[%- USE q = Qgoda -%]
+[%- USE gtx = Gettext(config.po.textdomain, asset.lingua) -%]
+[%- posts = q.llistPosts(filters).nsortBy('date').reverse() -%]
+[%- IF posts.size -%]
+  [%- start = asset.start || 0 -%]
+  [%- asset.start = 0 -%]
+  [%- p = q.paginate(start = start total = posts.size per_page = 1) -%]
+  [%- FOREACH post IN posts.splice(p.start, p.per_page) -%]
+  <article class="blog-post">
+    [%- IF post.image -%]
+    <div class="blog-post-image">
+      <a href="[% post.permalink %]">
+      [% post.image %]
+      </a>
+    </div>
+    [%- END -%]
+    <div class="blog-post-body">
+      <h2><a href="[% post.permalink %]">[% post.title | html %]</a></h2>
+      <div class="post-meta">
+        <span><i class="fa fa-clock-o"></i>[% q.strftime(gtx.gettext("%# of %B, %Y"), post.date) %]</span>
+      [%- IF post.comments -%] /
+        <span><i class="fa fa-comment-o"></i> <a href="#">[% post.comments %]</a></span>
+      [%- END -%]
+      </div>
+      <p>[% post.excerpt %]</p>
+      <div class="read-more">
+        <a href="[% post.permalink %]">[% gtx.gettext('more') %]</a>
+      </div>
+    </div>
+  </article>
+  [%- END -%]
+
+  [%- IF p.total_pages > 1 -%]
+  [%- SET page = 0 -%]
+  <div class="blog-post page-nav">
+    <div>
+    [%- IF p.previous_link -%]
+      <div class="pull-left">
+        <a href="[% p.previous_link %]"><i class="fa fa-angle-left"></i>&nbsp;[% gtx.gettext('Newer posts') %]</a>
+      </div>
+    [%- END -%]
+    </div>
+    [%- IF p.next_link -%]
+    <div class="pull-right">
+      <a href="[% p.next_link %]">[% gtx.gettext('Older posts') %]&nbsp;<i class="fa fa-angle-right"></i></a>
+    </div>
+    [%- END -%]
+  </div>
+    [%- IF p.next_start -%]
+      [%- q.clone(location = p.next_location start = p.next_start) -%]
+    [%- END -%]
+  [%- END -%]
+[%- END -%]
+EOF
 
 my $site = TestSite->new(
 	name => 'tpq-taxonomies',
 	assets => \%assets,
 	files => {
-		'_views/default.html' => "[% asset.content %]"
+		'_views/default.html' => "[% asset.content %]",
+		'_views/components/listing.html' => $listing,
 	},
 	config => {
 		defaults => [
@@ -143,7 +205,7 @@ my $site = TestSite->new(
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
-is (scalar $site->findArtefacts, 10);
+is (scalar $site->findArtefacts, 22);
 
 my ($json, $values, $expected);
 
