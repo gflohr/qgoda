@@ -31,7 +31,7 @@ use JSON;
 use Storable qw(dclone);
 
 use Qgoda::CLI;
-use Qgoda::Util qw(read_file);
+use Qgoda::Util qw(read_file qstrftime);
 
 my $bust_cache = <<EOF;
 [%- USE q = Qgoda -%]
@@ -144,6 +144,11 @@ my $sprintf = <<EOF;
 [%- q.sprintf('%x', 8964) -%]
 EOF
 
+my $strftime = <<EOF;
+[%- USE q = Qgoda -%]
+year: [%- q.strftime('%Y', 609322304) -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-misc',
 	assets => {
@@ -195,16 +200,9 @@ my $site = TestSite->new(
 				content => $paginate_invalid_scalar_ref,
 				chain => 'xml'
 			},
-		'time.html' => 
-			{
-				content => $time,
-				chain => 'xml'
-			},
-		'sprintf.html' => 
-			{
-				content => $sprintf,
-				chain => 'xml'
-			}
+		'time.html' => { content => $time, chain => 'xml' },
+		'sprintf.html' => { content => $sprintf, chain => 'xml' },
+		'strftime.html' => { content => $strftime, chain => 'xml' },
 	},
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -379,6 +377,10 @@ is $w3c, sprintf '%04u-%02u-%02u', $time[5] + 1900, $time[4] + 1, $time[3];
 
 ok -e '_site/sprintf/index.html';
 is ((read_file '_site/sprintf/index.html'), '2304', 'sprintf');
+
+ok -e '_site/strftime/index.html';
+like ((read_file '_site/strftime/index.html'), qr/^year: 1989$/m,
+      'regular usage');
 
 $site->tearDown;
 
