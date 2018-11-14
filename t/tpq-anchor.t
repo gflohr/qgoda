@@ -87,6 +87,14 @@ existsAnchorPost: [% q.existsAnchorPost(name = 'greeting' lingua = asset.lingua)
 
 lexistsAnchorPost: [% q.lexistsAnchorPost(name = 'greeting') %]
 
+existsAnchor broken: [% q.existsAnchor(name = 'aboud' type = 'page' lingua = asset.lingua) %]
+
+lexistsAnchor broken: [% q.lexistsAnchor(name = 'aboud' type = 'page') %]
+
+existsAnchorPost broken: [% q.existsAnchorPost(name = 'greetink' lingua = asset.lingua) %]
+
+lexistsAnchorPost broken: [% q.lexistsAnchorPost(name = 'greetink') %]
+
 broken anchor: [% q.anchor(name = 'gone' type = 'page' lingua = asset.lingua) %]
 
 ambiguous anchor: [% q.anchor(lingua = asset.lingua) %]
@@ -158,6 +166,18 @@ like $anchor_en_content,
      qr{<p>lexistsAnchorPost: <a href="/en/greeting/">English Greeting</a></p>},
 	 'lexistsAnchorPost en';
 like $anchor_en_content,
+     qr{<p>existsAnchor broken: </p>},
+	 'existsAnchor broken en';
+like $anchor_en_content,
+     qr{<p>lexistsAnchor broken: </p>},
+	 'lexistsAnchor broken en';
+like $anchor_en_content,
+     qr{<p>existsAnchorPost broken: </p>},
+	 'existsAnchorPost broken en';
+like $anchor_en_content,
+     qr{<p>lexistsAnchorPost broken: </p>},
+	 'lexistsAnchorPost broken en';
+like $anchor_en_content,
      qr{<p>broken anchor: </p>},
 	 'broken anchor en';
 like $anchor_en_content,
@@ -191,6 +211,18 @@ like $anchor_de_content,
 like $anchor_de_content,
      qr{<p>lexistsAnchorPost: <a href="/de/begruessung/">Deutsche Begrüßung</a></p>},
 	 'lexistsAnchorPost de';
+like $anchor_de_content,
+     qr{<p>existsAnchor broken: </p>},
+	 'existsAnchor broken de';
+like $anchor_de_content,
+     qr{<p>lexistsAnchor broken: </p>},
+	 'lexistsAnchor broken de';
+like $anchor_de_content,
+     qr{<p>existsAnchorPost broken: </p>},
+	 'existsAnchorPost broken de';
+like $anchor_de_content,
+     qr{<p>lexistsAnchorPost broken: </p>},
+	 'lexistsAnchorPost broken de';
 like $anchor_de_content,
      qr{<p>broken anchor: </p>},
 	 'broken anchor de';
