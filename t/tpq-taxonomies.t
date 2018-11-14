@@ -93,6 +93,34 @@ $assets{"fi/taxonomies.md"} = {
 	chain => 'xml',
 };
 
+my $tag_page = <<EOF;
+---
+virtual: 1
+---
+[% USE q = Qgoda %]
+
+[% IF !asset.parent %]
+    [% FOREACH tag IN q.ltaxonomyValues('tags') %]
+      [% location = q.sprintf("/%s/tags/%s/index.html",
+                              asset.lingua,
+                              tag.slugify(asset.lingua)) %]
+      [% q.clone(location => location
+                 plocation => location
+                 title => '#' _ tag
+                 tag => tag
+                 start => 0) %]
+    [% END %]
+[% ELSE %]
+  [% filters = { tags = ['icontains', tag] } %]
+  [% INCLUDE components/listing.html filters = filters %]
+[% END %]
+EOF
+#$assets{'en/tags/index.md'} = {
+#	content => $tag_page,
+#	priority => -9999,
+#	chain => 'xml'
+#};
+
 my $site = TestSite->new(
 	name => 'tpq-taxonomies',
 	assets => \%assets,
@@ -114,6 +142,8 @@ my $site = TestSite->new(
 );
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
+
+is (scalar $site->findArtefacts, 10);
 
 my ($json, $values, $expected);
 

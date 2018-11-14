@@ -163,4 +163,18 @@ sub tearDown {
 	return $self;
 }
 
+sub findArtefacts {
+	my ($self, $relpath) = @_;
+
+	my $path = File::Spec->catdir(File::Spec->curdir, '_site');
+	$path = File::Spec->catdir($path, $relpath) if !empty $relpath;
+
+	my @artefacts;
+	File::Find::find({
+		wanted => sub { push @artefacts, $File::Find::name if !-d $_ }
+	}, $path);
+
+	return wantarray ? sort @artefacts : scalar @artefacts;
+}
+
 1;
