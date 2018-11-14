@@ -146,7 +146,9 @@ EOF
 
 my $strftime = <<EOF;
 [%- USE q = Qgoda -%]
-year: [%- q.strftime('%Y', 609322304) -%]
+year from epoch: [%- q.strftime('%Y', 609322304) -%]
+
+year from date: [%- q.strftime('%Y', '1989-04-23') -%]
 EOF
 
 my $site = TestSite->new(
@@ -379,8 +381,12 @@ ok -e '_site/sprintf/index.html';
 is ((read_file '_site/sprintf/index.html'), '2304', 'sprintf');
 
 ok -e '_site/strftime/index.html';
-like ((read_file '_site/strftime/index.html'), qr/^year: 1989$/m,
-      'regular usage');
+like ((read_file '_site/strftime/index.html'), qr/^year from epoch: 1989$/m,
+      'year from epoch');
+
+ok -e '_site/strftime/index.html';
+like ((read_file '_site/strftime/index.html'), qr/^year from date: 1989$/m,
+      'year from date');
 
 $site->tearDown;
 
