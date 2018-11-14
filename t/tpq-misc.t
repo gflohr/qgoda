@@ -390,7 +390,9 @@ like ($strftime_content, qr/^year from date: 1989$/m,
       'year from date');
 like ($strftime_content, qr/^invalid date: 1989-02-30$/m,
       'invalid date');
-like ($strftime_content, qr/^default format: .*Apr.*1989$/m,
+like ($strftime_content, qr/^default format: .*Apr/m,
+      'default format');
+like ($strftime_content, qr/^default format: .*1989/m,
       'default format');
 
 $site->tearDown;
