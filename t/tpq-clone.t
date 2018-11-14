@@ -19,9 +19,9 @@
 use strict;
 
 BEGIN {
-    my $test_dir = __FILE__;
-    $test_dir =~ s/[-a-z0-9]+\.t$//i;
-    unshift @INC, $test_dir;
+	my $test_dir = __FILE__;
+	$test_dir =~ s/[-a-z0-9]+\.t$//i;
+	unshift @INC, $test_dir;
 }
 
 use TestSite;
@@ -39,35 +39,53 @@ count: [% asset.count %]
 [%- END -%]
 EOF
 
+my $without_location = <<EOF;
+[%- USE q = Qgoda -%]
+[%- IF !asset.start -%]
+[%- q.clone(start = asset.start + 1) -%]
+[%- END -%]
+EOF
+
 my $site = TestSite->new(
 	name => 'tpq-clone',
 	assets => {
 		'with-clone.md' => {content => $with_clone, count => 2304},
-    },
+		'without-location.md' => {content => $without_location},
+	},
 	files => {
 		'_views/default.html' => "[% asset.content %]",
 	}
 );
 
-ok (Qgoda::CLI->new(['build'])->dispatch);
+# Temporarily close stderr while building the site.
+open my $olderr, '>&STDERR' or die "cannot dup stderr: $!";
+close STDERR;
+ok(Qgoda::CLI->new(['build'])->dispatch);
+open STDERR, '>&', $olderr;
 
 ok -e '_site/with-clone/index.html';
 is ((read_file '_site/with-clone/index.html'), 
-    '<p>count: 2304</p>', 'clone');
+	'<p>count: 2304</p>', 'clone');
 
 ok -e '_site/clones/index-2304.html';
 is ((read_file '_site/clones/index-2304.html'), 
-    '<p>count: 2305</p>', 'clone 2304');
+	'<p>count: 2305</p>', 'clone 2304');
 
 ok -e '_site/clones/index-2305.html';
 is ((read_file '_site/clones/index-2305.html'), 
-    '<p>count: 2306</p>', 'clone 2305');
+	'<p>count: 2306</p>', 'clone 2305');
 
 ok -e '_site/clones/index-2306.html';
 is ((read_file '_site/clones/index-2306.html'), 
-    '<p>count: 2307</p>', 'clone 2306');
+	'<p>count: 2307</p>', 'clone 2306');
 
 ok ! -e '_site/clones/index-2307.html';
+
+my $invalid = qr/^\[\% '' \%\]/;
+
+ok -e '_site/without-location/index.html';
+like ((read_file '_site/without-location/index.html'), 
+	$invalid, 'missing location');
 
 $site->tearDown;
 
