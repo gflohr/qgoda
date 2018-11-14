@@ -35,6 +35,11 @@ my $with_include = <<EOF;
 [%- q.include('_includes/other.md', asset, extra => '04') -%]
 EOF
 
+my $no_extra = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.include('_includes/no-extra.md', asset) -%]
+EOF
+
 my $include = <<EOF;
 included [% asset.overlay %][% asset.extra %]
 EOF
@@ -75,6 +80,7 @@ my $site = TestSite->new(
 	name => 'tpq-include',
 	assets => {
 		'with-include.md' => {content => $with_include, overlay => 23},
+		'no-extra.md' => {content => $with_include},
 		'no-path.md' => {content => $no_path},
 		'no-overlay.md' => {content => $no_overlay},
 		'not-there.md' => {content => $not_existing},
@@ -96,6 +102,10 @@ open STDERR, '>&', $olderr;
 ok -e '_site/with-include/index.html';
 is ((read_file '_site/with-include/index.html'), 
     '<p>included 2304</p>', 'include');
+
+ok -e '_site/no-extra/index.html';
+is ((read_file '_site/no-extra/index.html'), 
+    '<p>included 04</p>', 'include');
 
 my $invalid = qr/^\[\% '' \%\]/;
 
