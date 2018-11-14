@@ -73,7 +73,7 @@ $assets{"en/page-5.md"} = {
 };
 $assets{"fi/page-5.md"} = {
 	content => 'lokakuu!',
-	tags => ['month'],
+	tags => ['kuukausi'],
 	type => 'page',
 };
 
@@ -222,6 +222,28 @@ $values = eval { decode_json $json };
 ok !$@, $@;
 $expected = ['aamu', 'tervehdys', 'vastaus'];
 is_deeply $values, $expected;
+
+my @en_tags = $site->findArtefacts('en/tags');
+is_deeply \@en_tags, [
+          '_site/en/tags/greeting/index.html',
+		  # FIXME! This is a bug! the page is virtual!
+          '_site/en/tags/index/index.md',
+          '_site/en/tags/month/index.html',
+          '_site/en/tags/morning/index-2.html',
+          '_site/en/tags/morning/index.html',
+          '_site/en/tags/reply/index.html'
+];
+
+my @fi_tags = $site->findArtefacts('fi/tags');
+is_deeply \@fi_tags, [
+          '_site/fi/tags/aamu/index-2.html',
+          '_site/fi/tags/aamu/index.html',
+		  # FIXME! This is a bug! the page is virtual!
+          '_site/fi/tags/index/index.md',
+          '_site/fi/tags/kuukausi/index.html',
+          '_site/fi/tags/tervehdys/index.html',
+          '_site/fi/tags/vastaus/index.html'
+];
 
 $site->tearDown;
 
