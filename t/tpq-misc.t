@@ -31,7 +31,7 @@ use JSON;
 use Storable qw(dclone);
 
 use Qgoda::CLI;
-use Qgoda::Util qw(read_file qstrftime);
+use Qgoda::Util qw(read_file);
 
 my $bust_cache = <<EOF;
 [%- USE q = Qgoda -%]
@@ -147,7 +147,7 @@ EOF
 my $strftime = <<EOF;
 [%- USE q = Qgoda -%]
 year from epoch: [% q.strftime('%Y', 609322304) %]
-year from date: [% q.strftime('%Y', '1989-04-23', 'C') %]
+year from date: [% q.strftime('%Y', '1989-04-23', 'C', 'div') %]
 invalid date: [% q.strftime('%Y', '1989-02-30', 'C') %]
 default format: [% q.strftime('', 609322304, 'C') %]
 EOF
