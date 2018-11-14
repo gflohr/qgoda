@@ -630,7 +630,7 @@ sub strftime {
     my ($self, $format, $date, $lingua, $markup) = @_;
 
     my $time = $date =~ /^[-+]?[1-9][0-9]*$/ ? "$date" : str2time $date;
-    $time = $date if !defined $time;
+    return $date if !defined $time;
 
     $format = '%c' if empty $format;
 
