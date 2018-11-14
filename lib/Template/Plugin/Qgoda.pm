@@ -674,8 +674,6 @@ sub paginate {
     my $location;
     if (!empty $asset->{plocation}) {
         $location = $asset->{plocation};
-    } elsif ($asset->{parent}) {
-        $location = $asset->{parent}->{location};
     } else {
         $location = $asset->{location};
     }
