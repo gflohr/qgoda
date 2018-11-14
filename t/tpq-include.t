@@ -37,7 +37,7 @@ EOF
 
 my $no_extra = <<EOF;
 [%- USE q = Qgoda -%]
-[%- q.include('_includes/no-extra.md', asset) -%]
+[%- q.include('_includes/other.md', asset) -%]
 EOF
 
 my $include = <<EOF;
@@ -80,7 +80,7 @@ my $site = TestSite->new(
 	name => 'tpq-include',
 	assets => {
 		'with-include.md' => {content => $with_include, overlay => 23},
-		'no-extra.md' => {content => $with_include},
+		'no-extra.md' => {content => $no_extra},
 		'no-path.md' => {content => $no_path},
 		'no-overlay.md' => {content => $no_overlay},
 		'not-there.md' => {content => $not_existing},
@@ -105,7 +105,7 @@ is ((read_file '_site/with-include/index.html'),
 
 ok -e '_site/no-extra/index.html';
 is ((read_file '_site/no-extra/index.html'), 
-    '<p>included 04</p>', 'include');
+    '<p>included</p>', 'include');
 
 my $invalid = qr/^\[\% '' \%\]/;
 
