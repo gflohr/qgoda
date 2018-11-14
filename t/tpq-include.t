@@ -111,6 +111,6 @@ like ((read_file '_site/not-there/index.html'), $invalid, 'not found');
 ok -e '_site/invalid/index.html';
 like ((read_file '_site/invalid/index.html'), $invalid, 'invalid include');
 
-#$site->tearDown;
+$site->tearDown;
 
 done_testing;
