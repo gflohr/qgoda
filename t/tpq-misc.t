@@ -147,8 +147,9 @@ EOF
 my $strftime = <<EOF;
 [%- USE q = Qgoda -%]
 year from epoch: [% q.strftime('%Y', 609322304) %]
-year from date: [% q.strftime('%Y', '1989-04-23') %]
-invalid date: [% q.strftime('%Y', '1989-02-30') %]
+year from date: [% q.strftime('%Y', '1989-04-23', 'C') %]
+invalid date: [% q.strftime('%Y', '1989-02-30', 'C') %]
+default format: [% q.strftime('', 609322304, 'C') %]
 EOF
 
 my $site = TestSite->new(
@@ -389,6 +390,8 @@ like ($strftime_content, qr/^year from date: 1989$/m,
       'year from date');
 like ($strftime_content, qr/^invalid date: 1989-02-30$/m,
       'invalid date');
+like ($strftime_content, qr/^default format: .*Apr.*1989$/m,
+      'default format');
 
 $site->tearDown;
 
