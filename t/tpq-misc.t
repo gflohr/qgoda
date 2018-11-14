@@ -118,6 +118,11 @@ my $paginate_invalid_noref = <<EOF;
 [%- q.paginate(2304) -%]
 EOF
 
+my $paginate_invalid_no_data = <<EOF;
+[%- USE q = Qgoda -%]
+[%- q.paginate -%]
+EOF
+
 my $paginate_invalid_array = <<EOF;
 [%- USE q = Qgoda -%]
 [%- q.paginate(['foo', 'bar']) -%]
@@ -168,6 +173,11 @@ my $site = TestSite->new(
 		'paginate-filename.html' =>
 			{
 				content => $paginate_filename,
+				chain => 'xml'
+			},
+		'paginate-invalid-no-data.html' =>
+			{
+				content => $paginate_invalid_no_data,
 				chain => 'xml'
 			},
 		'paginate-invalid-noref.html' =>
@@ -309,7 +319,6 @@ ok -e '_site/paginate-negative-total/index.html';
 $json = read_file '_site/paginate-negative-total/index.html';
 like $json, $invalid;
 
-
 ok -e '_site/paginate-per-page-9/index.html';
 $json = read_file '_site/paginate-per-page-9/index.html';
 $p = eval { decode_json $json };
@@ -342,6 +351,10 @@ $expected->{links} = [
 	'page-5.xml',
 ];
 is_deeply($p, $expected);
+
+ok -e '_site/paginate-invalid-no-data/index.html';
+like ((read_file '_site/paginate-invalid-no-data/index.html'), $invalid,
+      'paginate called without data');
 
 ok -e '_site/paginate-invalid-noref/index.html';
 like ((read_file '_site/paginate-invalid-noref/index.html'), $invalid,

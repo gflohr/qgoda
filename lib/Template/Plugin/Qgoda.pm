@@ -295,6 +295,9 @@ sub __sanitizeHashref {
     if (empty $hashref) {
         if ($optional) {
             return {};
+        } else {
+            die __x("named arguments for '{method}()' are mandatory\n",
+-                    method => $method);
         }
     }
 
@@ -650,7 +653,7 @@ sub strftime {
 sub paginate {
     my ($self, $data) = @_;
 
-    $data = $self->__sanitizeHashref($data, 'paginate', 1);
+    $data = $self->__sanitizeHashref($data, 'paginate');
     die __"argument '{total}' is mandatory for paginate()\n"
         if empty $data->{total};
     die __"argument '{total}' must be positive for paginate()\n"
