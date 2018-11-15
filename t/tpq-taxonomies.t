@@ -240,6 +240,6 @@ is_deeply \@fi_tags, [
           '_site/fi/tags/vastaus/index.html'
 ];
 
-#$site->tearDown;
+$site->tearDown;
 
 done_testing;
