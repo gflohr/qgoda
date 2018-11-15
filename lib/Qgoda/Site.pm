@@ -283,7 +283,7 @@ sub filter {
         if ('=~' eq $op || '!~' eq $op) {
             $value = eval { qr/$value/ };
             die __x("invalid regular expression in filter: {error}",
-                    error => $@);
+                    error => $@) if $@;
         }
         $filter->[0] = $sub;
         $filter->[2] = $value;
