@@ -121,6 +121,18 @@ gt: [% q.list(string = ['gt', 'beer']).vmap('relpath').sort.join(':') %]
 le: [% q.list(string = ['le', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
 
 lt: [% q.list(string = ['lt', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+ieq: [% q.list(string = ['ieq', 'StrawBerry']).vmap('relpath').sort.join(':') %]
+
+ine: [% q.list(string = ['ine', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+ige: [% q.list(string = ['ige', 'beer']).vmap('relpath').sort.join(':') %]
+
+igt: [% q.list(string = ['igt', 'beer']).vmap('relpath').sort.join(':') %]
+
+ile: [% q.list(string = ['ile', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+ilt: [% q.list(string = ['ilt', 'strawberry'], type = 'filter').vmap('relpath').sort.join(':') %]
 EOF
 $assets{'filters.md'} = {
 	content => $filters,
@@ -146,7 +158,10 @@ ok -e '_site/filters/index.html';
 my $filters_result = read_file '_site/filters/index.html';
 
 like $filters_result, qr{<p>default: yl.md</p>}, 'default filter';
-like $filters_result, qr{<p>eq: yu.md</p>}, 'eq filter';
+
+like $filters_result,
+     qr{<p>eq: yu.md</p>},
+     'eq filter';
 like $filters_result,
      qr{<p>ne: bu.md:cl.md:cu.md:gl.md:gu.md:yl.md:yu.md</p>},
      'ne filter';
@@ -162,6 +177,25 @@ like $filters_result,
 like $filters_result,
      qr{<p>lt: bu.md:cu.md:gu.md:yu.md</p>},
      'lt filter';
+
+like $filters_result,
+     qr{<p>ieq: yl.md:yu.md</p>},
+     'ieq filter';
+like $filters_result,
+     qr{<p>ine: cl.md:cu.md:gl.md:gu.md:yl.md:yu.md</p>},
+     'ine filter';
+like $filters_result,
+     qr{<p>ige: bl.md:bu.md:cl.md:cu.md:gl.md:gu.md:yl.md:yu.md</p>},
+     'ige filter';
+like $filters_result,
+     qr{<p>igt: cl.md:cu.md:gl.md:gu.md:yl.md:yu.md</p>},
+     'igt filter';
+like $filters_result,
+     qr{<p>ile: bl.md:bu.md</p>},
+     'ile filter';
+like $filters_result,
+     qr{<p>ilt: bl.md:bu.md:cl.md:cu.md</p>},
+     'ilt filter';
 
 my $invalid = qr/^\[\% '' \%\]/;
 
