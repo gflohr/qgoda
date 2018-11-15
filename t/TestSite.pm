@@ -111,6 +111,7 @@ sub __setupAssets {
 	foreach my $relpath (keys %{$self->{assets} || {}}) {
 		my $asset = $self->{assets}->{$relpath};
 		my $content = delete $asset->{content};
+		$content = '' if !defined $content;
 		if ($asset->{raw}) {
 			write_file $relpath, $content
 				or die "cannot write '$relpath': $!";

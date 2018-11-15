@@ -56,6 +56,68 @@ $assets{'scalar-ref.md'} = {
 	content => $scalar_ref_filter
 };
 
+$assets{'bl.md'} = {
+	number => 6,
+	string => 'beer',
+	array => ['beer', 'wine'],
+	type => 'filter',
+};
+$assets{'cl.md'} = {
+	number => 48,
+	string => 'root',
+	array => ['root', 'math', 'listen'],
+	type => 'filter',
+};
+$assets{'gl.md'} = {
+	number => '13',
+	string => 'tree',
+	array => ['tree', 'nature', 'power'],
+	type => 'filter',
+};
+$assets{'yl.md'} = {
+	number => 2304,
+	string => 'strawberry',
+	array => ['strawberry', 'soft', 'beautiful'],
+	type => 'filter',
+};
+$assets{'bu.md'} = {
+	number => 6,
+	string => 'Beer',
+	array => ['Beer', 'Wine'],
+	type => 'filter',
+};
+$assets{'cu.md'} = {
+	number => 48,
+	string => 'Root',
+	array => ['Root', 'Math', 'Listen'],
+	type => 'filter',
+};
+$assets{'gu.md'} = {
+	number => '13',
+	string => 'Tree',
+	array => ['Tree', 'Nature', 'Power'],
+	type => 'filter',
+};
+$assets{'yu.md'} = {
+	number => 2304,
+	string => 'StrawBerry',
+	array => ['StrawBerry', 'Soft', 'Beautiful'],
+	type => 'filter',
+};
+
+my $filters = <<'EOF';
+[% USE q = Qgoda %]
+
+default: [% q.list(string = 'strawberry').vmap('relpath').sort.join(':') %]
+
+eq: [% q.list(string = ['eq', 'StrawBerry']).vmap('relpath').sort.join(':') %]
+
+ne: [% q.list(string = ['ne', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
+EOF
+$assets{'filters.md'} = {
+	content => $filters,
+};
+
 my $site = TestSite->new(
 	name => 'tpq-include',
 	assets => \%assets,
@@ -69,6 +131,17 @@ open my $olderr, '>&STDERR' or die "cannot dup stderr: $!";
 close STDERR;
 ok(Qgoda::CLI->new(['build'])->dispatch);
 open STDERR, '>&', $olderr;
+
+is (scalar $site->findArtefacts, 12);
+
+ok -e '_site/filters/index.html';
+my $filters_result = read_file '_site/filters/index.html';
+
+like $filters_result, qr{<p>default: yl.md</p>}, 'default filter';
+like $filters_result, qr{<p>eq: yu.md</p>}, 'eq filter';
+like $filters_result,
+     qr{<p>ne: bu.md:cl.md:cu.md:gl.md:gu.md:yl.md:yu.md</p>},
+     'ne filter';
 
 my $invalid = qr/^\[\% '' \%\]/;
 
