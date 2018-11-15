@@ -71,6 +71,12 @@ my $load_json_invalid = <<EOF;
 [%- data.number -%]
 EOF
 
+my $load_json_not_existing = <<EOF;
+[%- USE q = Qgoda -%]
+[%- data = q.loadJSON('data/not-there.json') -%]
+[%- data.number -%]
+EOF
+
 my $paginate = <<EOF;
 [%- USE q = Qgoda -%]
 [%- p = q.paginate(total => 48) -%]
@@ -160,6 +166,7 @@ my $site = TestSite->new(
 		'load-json-absolute.md' => {content => $load_json_absolute},
 		'load-json-updir.md' => {content => $load_json_updir},
 		'load-json-invalid.md' => {content => $load_json_invalid},
+		'load-json-not-existing.md' => {content => $load_json_not_existing},
 		'paginate.html' => {content => $paginate, chain => 'xml'},
 		'paginate20.html' => {content => $paginate20, chain => 'xml'},
 		'paginate-last.html' => {content => $paginate_last, chain => 'xml'},
@@ -251,6 +258,10 @@ like ((read_file '_site/load-json-updir/index.html'), $invalid,
 
 ok -e '_site/load-json-invalid/index.html';
 is ((read_file '_site/load-json-invalid/index.html'), '', 'loadJSON invalid');
+
+ok -e '_site/load-json-not-existing/index.html';
+is ((read_file '_site/load-json-not-existing/index.html'), '',
+    'loadJSON not existing');
 
 my $expected_default = {
 	per_page => 10,

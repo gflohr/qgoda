@@ -785,7 +785,7 @@ sub encodeJSON {
     }
     my %allowed_options = map { $_ =>  1 } qw(max_depth max_size);
     foreach my $option (keys %$options) {
-        if (!exists $supported{$option}) {
+        if (!exists $allowed_options{$option}) {
             warn __x("the option '{option}' is not supported by encodeJSON().\n",
                      option => $option);
             next;
