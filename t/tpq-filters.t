@@ -133,6 +133,18 @@ igt: [% q.list(string = ['igt', 'beer']).vmap('relpath').sort.join(':') %]
 ile: [% q.list(string = ['ile', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
 
 ilt: [% q.list(string = ['ilt', 'strawberry'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+==: [% q.list(number = ['==', '2304']).vmap('relpath').sort.join(':') %]
+
+!=: [% q.list(number = ['!=', '2304'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+&gt;=: [% q.list(number = ['>=', '13']).vmap('relpath').sort.join(':') %]
+
+&gt;: [% q.list(number = ['>', '13']).vmap('relpath').sort.join(':') %]
+
+&lt;=: [% q.list(number = ['<=', '48'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+&lt;: [% q.list(number = ['<', '48'], type = 'filter').vmap('relpath').sort.join(':') %]
 EOF
 $assets{'filters.md'} = {
 	content => $filters,
@@ -196,6 +208,25 @@ like $filters_result,
 like $filters_result,
      qr{<p>ilt: bl.md:bu.md:cl.md:cu.md</p>},
      'ilt filter';
+
+like $filters_result,
+     qr{<p>==: yl.md:yu.md</p>},
+     '== filter';
+like $filters_result,
+     qr{<p>!=: bl.md:bu.md:cl.md:cu.md:gl.md:gu.md</p>},
+     '!= filter';
+like $filters_result,
+     qr{<p>\&gt;=: cl.md:cu.md:gl.md:gu.md:yl.md:yu.md</p>},
+     '>= filter';
+like $filters_result,
+     qr{<p>\&gt;: cl.md:cu.md:yl.md:yu.md</p>},
+     '> filter';
+like $filters_result,
+     qr{<p>\&lt;=: bl.md:bu.md:cl.md:cu.md:gl.md:gu.md</p>},
+     '<= filter';
+like $filters_result,
+     qr{<p>\&lt;: bl.md:bu.md:gl.md:gu.md</p>},
+     '< filter';
 
 my $invalid = qr/^\[\% '' \%\]/;
 
