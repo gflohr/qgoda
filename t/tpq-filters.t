@@ -115,6 +115,12 @@ eq: [% q.list(string = ['eq', 'StrawBerry']).vmap('relpath').sort.join(':') %]
 ne: [% q.list(string = ['ne', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
 
 ge: [% q.list(string = ['ge', 'beer']).vmap('relpath').sort.join(':') %]
+
+gt: [% q.list(string = ['gt', 'beer']).vmap('relpath').sort.join(':') %]
+
+le: [% q.list(string = ['le', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+lt: [% q.list(string = ['lt', 'beer'], type = 'filter').vmap('relpath').sort.join(':') %]
 EOF
 $assets{'filters.md'} = {
 	content => $filters,
@@ -147,6 +153,15 @@ like $filters_result,
 like $filters_result,
      qr{<p>ge: bl.md:cl.md:gl.md:yl.md</p>},
      'ge filter';
+like $filters_result,
+     qr{<p>gt: cl.md:gl.md:yl.md</p>},
+     'gt filter';
+like $filters_result,
+     qr{<p>le: bl.md:bu.md:cu.md:gu.md:yu.md</p>},
+     'le filter';
+like $filters_result,
+     qr{<p>lt: bu.md:cu.md:gu.md:yu.md</p>},
+     'lt filter';
 
 my $invalid = qr/^\[\% '' \%\]/;
 
