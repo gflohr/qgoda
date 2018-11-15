@@ -82,8 +82,8 @@ $assets{'yl.md'} = {
 };
 $assets{'bu.md'} = {
 	number => 6,
-	string => 'Beer',
-	array => ['Beer', 'Wine'],
+	string => 'BEER',
+	array => ['BEER', 'Wine'],
 	type => 'filter',
 };
 $assets{'cu.md'} = {
@@ -94,8 +94,8 @@ $assets{'cu.md'} = {
 };
 $assets{'gu.md'} = {
 	number => '13',
-	string => 'Tree',
-	array => ['Tree', 'Nature', 'Power'],
+	string => 'TREE',
+	array => ['TREE', 'Nature', 'Power'],
 	type => 'filter',
 };
 $assets{'yu.md'} = {
@@ -145,13 +145,17 @@ ilt: [% q.list(string = ['ilt', 'strawberry'], type = 'filter').vmap('relpath').
 &lt;=: [% q.list(number = ['<=', '48'], type = 'filter').vmap('relpath').sort.join(':') %]
 
 &lt;: [% q.list(number = ['<', '48'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+=~: [% q.list(string = ['=~', 'ee']).vmap('relpath').sort.join(':') %]
+
+!~: [% q.list(string = ['!~', 'ee'], type = 'filter').vmap('relpath').sort.join(':') %]
 EOF
 $assets{'filters.md'} = {
 	content => $filters,
 };
 
 my $site = TestSite->new(
-	name => 'tpq-include',
+	name => 'tpq-filters',
 	assets => \%assets,
 	files => {
 		'_views/default.html' => "[% asset.content %]",
@@ -227,6 +231,13 @@ like $filters_result,
 like $filters_result,
      qr{<p>\&lt;: bl.md:bu.md:gl.md:gu.md</p>},
      '< filter';
+
+like $filters_result,
+     qr{<p>=~: bl.md:gl.md</p>},
+     '=~ filter';
+like $filters_result,
+     qr{<p>!~: bu.md:cl.md:cu.md:gu.md:yl.md:yu.md</p>},
+     '=~ filter';
 
 my $invalid = qr/^\[\% '' \%\]/;
 
