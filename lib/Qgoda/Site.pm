@@ -25,6 +25,7 @@ use strict;
 use MIME::Base64 qw(encode_base64);
 use List::Util qw(pairs any);
 use Scalar::Util qw(reftype);
+use Locale::TextDomain qw(qgoda);
 
 use Qgoda::Util qw(canonical empty);
 use Qgoda::Artefact;
@@ -215,7 +216,7 @@ sub filter {
     my %operators = (
         eq    => sub { $_[0] eq $_[1] },
         ne    => sub { $_[0] ne $_[1] },
-        ge    => sub { warn "'$_[0]' ge '$_[1]'?\n"; $_[0] ge $_[1] },
+        ge    => sub { $_[0] ge $_[1] },
         gt    => sub { $_[0] gt $_[1] },
         le    => sub { $_[0] le $_[1] },
         lt    => sub { $_[0] lt $_[1] },
