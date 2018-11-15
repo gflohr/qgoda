@@ -94,9 +94,6 @@ $assets{"fi/taxonomies.md"} = {
 };
 
 my $tag_page = <<EOF;
----
-virtual: 1
----
 [% USE q = Qgoda %]
 
 [% IF !asset.parent %]
@@ -118,12 +115,14 @@ EOF
 $assets{'en/tags/index.md'} = {
 	content => $tag_page,
 	priority => -9999,
-	chain => 'xml'
+	chain => 'xml',
+  virtual => 1
 };
 $assets{'fi/tags/index.md'} = {
 	content => $tag_page,
 	priority => -9999,
-	chain => 'xml'
+	chain => 'xml',
+  virtual => 1
 };
 
 my $listing = <<'EOF';
@@ -205,7 +204,7 @@ my $site = TestSite->new(
 
 ok (Qgoda::CLI->new(['build'])->dispatch);
 
-is (scalar $site->findArtefacts, 22);
+is (scalar $site->findArtefacts, 20);
 
 my ($json, $values, $expected);
 
@@ -226,8 +225,6 @@ is_deeply $values, $expected;
 my @en_tags = $site->findArtefacts('en/tags');
 is_deeply \@en_tags, [
           '_site/en/tags/greeting/index.html',
-		  # FIXME! This is a bug! the page is virtual!
-          '_site/en/tags/index/index.md',
           '_site/en/tags/month/index.html',
           '_site/en/tags/morning/index-2.html',
           '_site/en/tags/morning/index.html',
@@ -238,13 +235,11 @@ my @fi_tags = $site->findArtefacts('fi/tags');
 is_deeply \@fi_tags, [
           '_site/fi/tags/aamu/index-2.html',
           '_site/fi/tags/aamu/index.html',
-		  # FIXME! This is a bug! the page is virtual!
-          '_site/fi/tags/index/index.md',
           '_site/fi/tags/kuukausi/index.html',
           '_site/fi/tags/tervehdys/index.html',
           '_site/fi/tags/vastaus/index.html'
 ];
 
-$site->tearDown;
+#$site->tearDown;
 
 done_testing;

@@ -72,6 +72,7 @@ sub build {
         if ($asset->{virtual}) {
             $logger->debug(__x("not wrapping virtual asset '/{relpath}'",
                                relpath => $asset->getRelpath));
+            next;
         }
 
         my $saved_locale = setlocale(POSIX::LC_ALL());
