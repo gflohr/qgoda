@@ -77,16 +77,18 @@ my $load_json_not_existing = <<EOF;
 [%- data.number -%]
 EOF
 
+# Also pass invalid and valid flags and options for test coverage.
 my $paginate = <<EOF;
 [%- USE q = Qgoda -%]
 [%- p = q.paginate(total => 48) -%]
 [%- q.encodeJSON(p, 'invalid flag', invalid => 'option', max_depth => 99) %]
 EOF
 
+# Pass a non-hash reference for test coverage.
 my $paginate20 = <<EOF;
 [%- USE q = Qgoda -%]
 [%- p = q.paginate(total => 48, start => 20) -%]
-[%- q.encodeJSON(p) %]
+[%- q.encodeJSON(p, [2304]) %]
 EOF
 
 my $paginate_last = <<EOF;
