@@ -67,14 +67,14 @@ EOF
 
 my $load_json_invalid = <<EOF;
 [%- USE q = Qgoda -%]
-[%- data = q.loadJSON('data/number.invalid') -%]
+[%- data = q.loadJSON('data/invalid.json') -%]
 [%- data.number -%]
 EOF
 
 my $paginate = <<EOF;
 [%- USE q = Qgoda -%]
 [%- p = q.paginate(total => 48) -%]
-[%- q.encodeJSON(p, 'invalid flag', invalid => 'option') %]
+[%- q.encodeJSON(p, 'invalid flag', invalid => 'option', max_depth => 99) %]
 EOF
 
 my $paginate20 = <<EOF;
