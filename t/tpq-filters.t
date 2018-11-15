@@ -149,6 +149,10 @@ ilt: [% q.list(string = ['ilt', 'strawberry'], type = 'filter').vmap('relpath').
 =~: [% q.list(string = ['=~', 'ee']).vmap('relpath').sort.join(':') %]
 
 !~: [% q.list(string = ['!~', 'ee'], type = 'filter').vmap('relpath').sort.join(':') %]
+
+contains: [% q.list(array = ['contains', 'beautiful']).vmap('relpath').sort.join(':') %]
+
+icontains: [% q.list(array = ['icontains', 'beautiful']).vmap('relpath').sort.join(':') %]
 EOF
 $assets{'filters.md'} = {
 	content => $filters,
@@ -238,6 +242,13 @@ like $filters_result,
 like $filters_result,
      qr{<p>!~: bu.md:cl.md:cu.md:gu.md:yl.md:yu.md</p>},
      '=~ filter';
+
+like $filters_result,
+     qr{<p>contains: yl.md</p>},
+     'contains filter';
+like $filters_result,
+     qr{<p>icontains: yl.md:yu.md</p>},
+     'icontains filter';
 
 my $invalid = qr/^\[\% '' \%\]/;
 
