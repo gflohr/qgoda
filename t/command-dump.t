@@ -93,6 +93,9 @@ my $perl = eval $stdout->buffer;
 $perl = [sort {$a->{name} cmp $b->{name}} @$perl];
 is_deeply $storable, $json;
 
+eval { Qgoda::CLI->new(['dump', '--output-format', 'python'])->dispatch };
+ok $@;
+
 $site->tearDown;
 
 done_testing;
