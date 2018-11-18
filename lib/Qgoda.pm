@@ -195,11 +195,11 @@ sub dumpAssets {
 }
 
 sub dump {
-    my ($self) = @_;
+    my ($self, %options) = @_;
 
     my $data = [$self->dumpAssets];
 
-    my $format = $self->{__options}->{output_format};
+    my $format = $options{output_format};
     $format = 'JSON' if empty $format;
 
     if ('JSON' eq uc $format) {
