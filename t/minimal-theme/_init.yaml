@@ -1,0 +1,6 @@
+# YAML description for the theme qgoda-minimal.
+_exclude:
+  - /README.md
+_precious:
+  - '*.md'
+title: Qgoda Test Theme
