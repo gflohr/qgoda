@@ -411,44 +411,6 @@ sub printConfig {
 	return $self;
 }
 
-sub migrate {
-    my ($self) = @_;
-
-    my $from = $self->getOption('from_system');
-    die __"The option '--from-system' is mandatory!\n" if empty $from;
-
-    # Check for valid module names.  Yes, you can use an apostrophe as the
-    # separator in Perl but not allowing it here is at our discretion.
-    die __x("Invalid source system name '{software}'", software => $from)
-        unless $from =~ /^[a-z][a-z0-9_]+(?:(?:::|-)[a-z][a-z0-9_]+)*$/i;
-
-    my $module_name = 'Qgoda::Migrator::'  . $from;
-    $module_name =~ s/-/::/g;
-    $module_name = lc $module_name;
-    $module_name = ucfirst $module_name;
-    $module_name =~ s/::(.)/'::' . ucfirst $1/ge;
-
-    my $class_name = $module_name;
-    $module_name =~ s{::}{/}g;
-    $module_name .= '.pm';
-
-    eval {require $module_name};
-    if ($@) {
-        my $error = $@;
-        my $message = __x("Unsupported source system '{software}'!\nTry the"
-                          . " additional option '--verbose' for more"
-                          . " information!\n",
-                          software => $from);
-        $message .= $@ if $self->getOption('verbose');
-        die $message;
-    }
-
-    my $migrator = $class_name->new;
-    $migrator->migrate;
-
-    return $self;
-}
-
 sub init {
     my ($self, $args, %options) = @_;
 
