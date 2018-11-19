@@ -654,9 +654,9 @@ sub paginate {
     my ($self, $data) = @_;
 
     $data = $self->__sanitizeHashref($data, 'paginate');
-    die __"argument '{total}' is mandatory for paginate()\n"
+    die __"argument 'total' is mandatory for paginate()\n"
         if empty $data->{total};
-    die __"argument '{total}' must be positive for paginate()\n"
+    die __"argument 'total' must be positive for paginate()\n"
         if $data->{total} <= 0;
 
     use integer;
