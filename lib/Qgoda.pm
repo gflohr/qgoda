@@ -429,8 +429,8 @@ sub _getProcessors {
     foreach my $module (@names) {
         my $class_name = 'Qgoda::Processor::' . $module;
 
-        if ($self->{__processors}->{$class_name}) {
-            push @processors, $self->{__processors}->{$class_name};
+        if ($self->getProcessor($class_name)) {
+            push @processors, $self->getProcessor($class_name);
             next;
         }
 
