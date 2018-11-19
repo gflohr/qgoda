@@ -89,6 +89,7 @@ is_deeply $storable, $json;
 $stdout = tie *STDOUT, 'MemStream';
 ok (Qgoda::CLI->new(['dump', '--output-format', 'perl'])->dispatch);
 untie *STDOUT;
+my $Qgoda1;
 my $perl = eval $stdout->buffer;
 $perl = [sort {$a->{name} cmp $b->{name}} @$perl];
 is_deeply $storable, $json;
