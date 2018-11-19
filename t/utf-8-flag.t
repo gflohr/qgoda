@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use strict;
+use common::sense;
 
 BEGIN {
     my $test_dir = __FILE__;
@@ -77,6 +77,7 @@ ok -e '_site/en/index.html';
 ok -e '_site/de/index.html';
 
 my $html = read_file '_site/de/index.html' or die;
+Encode::_utf8_on($html);
 
 ok $html =~ m{<title>Hallo, Welt!</title>};
 ok $html =~ m{<h1>Hallo, Welt!</h1>};
