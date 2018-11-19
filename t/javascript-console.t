@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-use strict;
+use common::sense;
 
 use Test::More;
 
@@ -70,7 +70,7 @@ done_testing;
 
 package MyConsole;
 
-use strict;
+use common::sense;
 
 sub TIEHANDLE {
 	bless { __buffer => '' }, shift;

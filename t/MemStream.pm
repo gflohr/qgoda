@@ -18,7 +18,7 @@
 
 package MemStream;
 
-use strict;
+use common::sense;
 
 sub TIEHANDLE {
 	bless { __buffer => '' }, shift;
