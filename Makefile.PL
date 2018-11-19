@@ -328,7 +328,8 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "Carp" => 0,
     "Test::More" => 0,
-    "Time::Local" => 0
+    "Time::Local" => 0,
+    "common::sense" => 0
   },
   "VERSION" => "0.9.5",
   "test" => {
@@ -410,6 +411,7 @@ my %FallbackPrereqs = (
   "YAML::XS" => "0.67",
   "base" => 0,
   "boolean" => 0,
+  "common::sense" => 0,
   "constant" => 0,
   "integer" => 0,
   "overload" => 0,
