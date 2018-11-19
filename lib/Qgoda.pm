@@ -758,12 +758,6 @@ sub __onFilesysChange {
     return $self;
 }
 
-sub getAnalyzers {
-    my ($self) = @_;
-
-    return $self->{__analyzers};
-}
-
 sub getBuilders {
     my ($self) = @_;
 
