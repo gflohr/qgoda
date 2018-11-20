@@ -26,10 +26,12 @@ BEGIN {
 
 use TestSite;
 use Test::More;
-use POSIX qw(strftime);
+use POSIX qw(strftime setlocale LC_ALL);
 use Time::Local;
 
 use Qgoda::Util::Date;
+
+setlocale LC_ALL, 'C';
 
 my $date = Qgoda::Util::Date->new('30 Oct 2018 16:52:34 UTC');
 is $date->epoch, 1540918354;
