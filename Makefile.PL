@@ -275,7 +275,6 @@ my %WriteMakefileArgs = (
     "Git" => 0,
     "HTML::Parser" => 0,
     "HTML::TreeBuilder" => 0,
-    "Hook::LexWrap" => 0,
     "IO::File" => 0,
     "IO::Handle" => 0,
     "IO::Interactive" => 0,
@@ -328,6 +327,7 @@ my %WriteMakefileArgs = (
   },
   "TEST_REQUIRES" => {
     "Carp" => 0,
+    "Git::Repository" => "1.322",
     "Test::More" => 0,
     "Time::Local" => 0
   },
@@ -364,9 +364,9 @@ my %FallbackPrereqs = (
   "Filter::Util::Call" => 0,
   "Getopt::Long" => "2.36",
   "Git" => 0,
+  "Git::Repository" => "1.322",
   "HTML::Parser" => 0,
   "HTML::TreeBuilder" => 0,
-  "Hook::LexWrap" => 0,
   "IO::File" => 0,
   "IO::Handle" => 0,
   "IO::Interactive" => 0,
