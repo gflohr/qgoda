@@ -25,6 +25,7 @@ use POSIX qw(setlocale);
 use Locale::Util qw(web_set_locale);
 use File::Spec;
 
+use Qgoda;
 use Qgoda::Util qw(empty read_file read_body write_file blength);
 use Qgoda::Util::Translate qw(translate_body);
 
@@ -225,6 +226,10 @@ sub wrapAsset {
     my $srcdir = $qgoda->config->{srcdir};
     my $view_dir = $qgoda->config->{paths}->{views};
     my $view_file = File::Spec->join($srcdir, $view_dir, $view);
+    if (-e $view_file && !$qgoda->versionControlled($view_file, 1)) {
+        die __x("view file '{file}' is not under version control.\n",
+                file => $view_file);
+    }
     if (!-e $view_file && 'default.html' eq $view) {
         warn __x("no default view '{file}', creating one with defaults.\n",
                  file => $view_file);
