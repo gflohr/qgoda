@@ -29,7 +29,7 @@ use TestSite;
 use Test::More;
 use File::Path;
 use Cwd;
-use Git::Repository 1.322;
+use Git::Repository 1.321;
 
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);

@@ -8,7 +8,42 @@ RUN apt-get update && apt-get install -y make \
     apt-transport-https \
     gnupg \
     dumb-init \
-    cpanminus
+    cpanminus \
+    libmoo-perl \
+    libanyevent-perl \
+    libwww-perl \
+    libtemplate-perl \
+    libyaml-perl \
+    libfile-copy-recursive-perl \
+    libipc-signal-perl \
+    libcpanel-json-xs-perl \
+    libinline-perl \
+    libdata-walk-perl \
+    libfile-homedir-perl \
+    libarchive-extract-perl \
+    libgit-repository-perl \
+    libtext-markdown-perl \
+    libio-interactive-perl \
+    libjson-perl \
+    libboolean-perl \
+    libtext-unidecode-perl \
+    libtest-deep-perl \
+    libmoox-late-perl \
+    libcapture-tiny-perl \
+    libtest-without-module-perl \
+    libpath-iterator-rule-perl \
+    libtext-glob-perl \
+    libnumber-compare-perl \
+    libtest-filename-perl \
+    libmoox-types-mooselike-perl \
+    libtest-fatal-perl \
+    liblinux-inotify2-perl \
+    libtest-exception-perl \
+    libsub-uplevel-perl \
+    libtest-requires-perl \
+    liblocale-po-perl \
+    libtest-output-perl \
+    libtext-trim-perl
 
 # We need a recent nodejs.
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
@@ -27,3 +62,5 @@ VOLUME /data
 WORKDIR /data
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+RUN rm -rf /root/imperia /root/.cpanm
