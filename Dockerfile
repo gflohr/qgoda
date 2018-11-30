@@ -56,11 +56,15 @@ COPY . /root/qgoda/
 
 WORKDIR /root/qgoda/
 
-RUN cpanm . || true
-
-VOLUME /data
-WORKDIR /data
-
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+RUN cpanm .
 
 RUN rm -rf /root/imperia /root/.cpanm
+
+VOLUME /var/www/qgoda
+
+RUN groupadd qgoda && useradd -r -g qgoda qgoda
+RUN chown -R qgoda:qgoda /var/www/qgoda
+
+WORKDIR /var/www/qgoda
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "qgoda"]
