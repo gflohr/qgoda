@@ -1,7 +1,15 @@
-FROM perl:5.26
+FROM ubuntu:bionic
 MAINTAINER Qgoda (https://github.com/gflohr/qgoda/issues)
 
-RUN apt-get update && apt-get install -y make git curl apt-transport-https gnupg dumb-init
+RUN apt-get update && apt-get install -y make \
+    gcc \
+    git \
+    curl \
+    apt-transport-https \
+    gnupg \
+    dumb-init \
+    cpanminus
+
 # We need a recent nodejs.
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
 RUN apt-get install -y nodejs
@@ -13,9 +21,9 @@ COPY . /root/qgoda/
 
 WORKDIR /root/qgoda/
 
-RUN cpanm .
+RUN cpanm . || true
 
 VOLUME /data
 WORKDIR /data
 
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "qgoda"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
