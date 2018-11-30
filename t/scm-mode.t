@@ -79,7 +79,10 @@ ok !$repo->run(add => 'template-added.md');
 ok !$repo->run(add => 'template-not-added.md');
 ok !$repo->run(add => '_views/default.html');
 
-ok (Qgoda::CLI->new(['build'])->dispatch);
+open my $olderr, '>&STDERR' or die "cannot dup stderr: $!";
+close STDERR;
+ok(Qgoda::CLI->new(['build'])->dispatch);
+open STDERR, '>&', $olderr;
 
 my $invalid = qr/^\[\% '' \%\]/;
 
@@ -91,8 +94,7 @@ ok ! -e '_site/new/index.html';
 ok -e '_site/template-added/index.html';
 is ((read_file '_site/template-added/index.html'), '<p>valid</p>');
 
-ok -e '_site/template-not-added/index.html';
-like ((read_file '_site/template-not-added/index.html'), $invalid);
+ok ! -e '_site/template-not-added/index.html';
 
 $site->tearDown;
 
