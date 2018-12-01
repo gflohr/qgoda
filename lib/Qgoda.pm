@@ -37,7 +37,6 @@ use Cwd;
 use Scalar::Util qw(reftype blessed);
 use AnyEvent;
 use AnyEvent::Loop;
-use AnyEvent::Filesys::Notify;
 use AnyEvent::Handle;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
@@ -59,6 +58,7 @@ use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
                    collect_defaults purify perl_class class2module trim
                    read_file);
 use Qgoda::PluginUtils qw(load_plugins);
+use Qgoda::AnyEvent::Notify;
 
 my $qgoda;
 
@@ -239,7 +239,7 @@ sub watch {
 
         $logger->debug(__x("waiting for changes in '{dir}'",
                            dir => $config->{srcdir}));
-        AnyEvent::Filesys::Notify->new(
+        Qgoda::AnyEvent::Notify->new(
             dirs => [$config->{srcdir}],
             interval => $config->{latency},
             parse_events => 1,

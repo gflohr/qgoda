@@ -18,12 +18,7 @@
 
 use common::sense;
 
-BEGIN {
-    my $test_dir = __FILE__;
-    $test_dir =~ s/[-a-z0-9]+\.t$//i;
-    unshift @INC, $test_dir;
-}
-
+use lib 't';
 use TestSite;
 use Test::More;
 use File::Basename qw(dirname);

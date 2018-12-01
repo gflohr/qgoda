@@ -1,4 +1,19 @@
 {{$NEXT}}
+    - New versioning scheme YY.MM.COUNT.
+    - Replaced nested data structure with simpler structure without
+      cyclic references.
+    - Programmatic stop in watch mode: Drop a file "_stop" and
+      optionally write the reason for the termination into it.
+    - Compatibility with Perl 5.18.
+    - The docker container no longer runs as root but as
+      unpriviliged user qgoda in group qgoda.
+    - The container is now based on an ubuntu image and using the
+      system perl in order to save space and build time.
+    - Increased test coverage to 80 %.
+    - Issues fixed:
+      * https://github.com/gflohr/qgoda/issues/79
+      * https://github.com/gflohr/qgoda/issues/77
+      * https://github.com/gflohr/qgoda/issues/74
 
 0.9.4 - 2018-11-04
     - Require libintl-perl 1.30, because of

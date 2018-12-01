@@ -429,4 +429,16 @@ unless ( eval { ExtUtils::MakeMaker->VERSION('6.63_03') } ) {
 delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
   unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
 
+if ( $^O eq 'linux' ) {
+	$WriteMakefileArgs{PREREQ_PM}{'Linux::Inotify2'} = $FallbackPrereqs{'Linux::Inotify2'} = '1.22';
+}
+
+if ( $^O eq 'darwin' ) {
+	$WriteMakefileArgs{PREREQ_PM}{'Mac::FSEvents'} = $FallbackPrereqs{'Mac::FSEvents'} = '1.22';
+}
+
+if ( $^O =~ /bsd/i ) {
+	$WriteMakefileArgs{PREREQ_PM}{'IO::KQueue'} = $FallbackPrereqs{'IO::KQueue'} = '0.34';
+}
+
 WriteMakefile(%WriteMakefileArgs);
