@@ -722,8 +722,6 @@ sub __filesysChangeFilter {
         return;
     }
 
-    return if $self->{__stop};
-
     if ($config->ignorePath($filename, 1)) {
         my $logger = $self->{__logger};
         $logger->debug(__x("changed file '{filename}' is ignored",
