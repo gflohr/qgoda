@@ -278,7 +278,6 @@ my %WriteMakefileArgs = (
     "IO::File" => 0,
     "IO::Handle" => 0,
     "IO::Interactive" => 0,
-    "IO::KQueue" => 0,
     "IPC::Open3" => 0,
     "IPC::Signal" => 0,
     "Inline" => 0,
@@ -286,7 +285,6 @@ my %WriteMakefileArgs = (
     "JSON::PP" => 0,
     "JavaScript::Duktape::XS" => 0,
     "LWP::UserAgent" => 0,
-    "Linux::Inotify2" => 0,
     "List::Util" => "1.45",
     "Locale::Messages" => 0,
     "Locale::TextDomain" => "1.30",
@@ -294,7 +292,6 @@ my %WriteMakefileArgs = (
     "Locale::XGettext" => "0.7",
     "Locale::gettext_dumb" => 0,
     "MIME::Base64" => 0,
-    "Mac::FSEvents" => 0,
     "POSIX" => 0,
     "Path::Iterator::Rule" => 0,
     "Pod::Perldoc" => 0,
@@ -380,7 +377,6 @@ my %FallbackPrereqs = (
   "IO::File" => 0,
   "IO::Handle" => 0,
   "IO::Interactive" => 0,
-  "IO::KQueue" => 0,
   "IPC::Open3" => 0,
   "IPC::Signal" => 0,
   "Inline" => 0,
@@ -388,7 +384,6 @@ my %FallbackPrereqs = (
   "JSON::PP" => 0,
   "JavaScript::Duktape::XS" => 0,
   "LWP::UserAgent" => 0,
-  "Linux::Inotify2" => 0,
   "List::Util" => "1.45",
   "Locale::Messages" => 0,
   "Locale::TextDomain" => "1.30",
@@ -396,7 +391,6 @@ my %FallbackPrereqs = (
   "Locale::XGettext" => "0.7",
   "Locale::gettext_dumb" => 0,
   "MIME::Base64" => 0,
-  "Mac::FSEvents" => 0,
   "POSIX" => 0,
   "Path::Iterator::Rule" => 0,
   "Pod::Perldoc" => 0,
@@ -452,7 +446,7 @@ if ( $^O eq 'linux' ) {
 }
 
 if ( $^O eq 'darwin' ) {
-	$WriteMakefileArgs{PREREQ_PM}{'Mac::FSEvents'} = $FallbackPrereqs{'Mac::FSEvents'} = '1.22';
+	$WriteMakefileArgs{PREREQ_PM}{'Mac::FSEvents'} = $FallbackPrereqs{'Mac::FSEvents'} = '0.14';
 }
 
 if ( $^O =~ /bsd/i ) {
