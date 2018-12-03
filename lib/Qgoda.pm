@@ -17,7 +17,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package Qgoda;
-$Qgoda::VERSION = '0.9.5';
+$Qgoda::VERSION = '0.9.6';
 use common::sense;
 
 # FIXME! This assumes that we are a top-level package. Instead,

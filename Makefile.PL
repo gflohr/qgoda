@@ -337,7 +337,7 @@ my %WriteMakefileArgs = (
     "autodie" => 0,
     "lib" => 0
   },
-  "VERSION" => "0.9.5",
+  "VERSION" => "0.9.6",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -104,6 +104,6 @@ resources:
   bugtracker: https://github.com/gflohr/qgoda/issues
   homepage: http://www.qgoda.net/
   repository: git://github.com/gflohr/qgoda.git
-version: 0.9.5
+version: 0.9.6
 x_generated_by_perl: v5.28.0
 x_serialization_backend: 'YAML::Tiny version 1.73'
