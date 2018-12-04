@@ -44,7 +44,6 @@ my $black_hole = sub {};
 
 sub new {
     my ($class, $context) = @_;
-warn "right plugin";
 
     my $get_values = sub {
         my ($assets, @fields) = @_;
