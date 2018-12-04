@@ -143,7 +143,9 @@ my $assets = {
     ]
 };
 
-my $tt = Template->new;
+my $tt = Template->new(
+    PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
+);
 my ($in, $out);
 
 $out = '';
