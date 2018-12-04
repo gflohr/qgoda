@@ -1,4 +1,13 @@
 {{$NEXT}}
+    - Issues resolved:
+
+0.9.6 - 2018-12-04
+    0.9.5 was another release to proove Murphy's Law.  Watch mode was
+    broken and is fixed with this release.  Apart from that,
+    AnyEvent::Filesys::Notify was replaced with an equivalent that does not
+    require Moo, and hence produces a lot less dependencies.
+
+0.9.5 - 2018-12-01
     - New versioning scheme YY.MM.COUNT.
     - Replaced nested data structure with simpler structure without
       cyclic references.

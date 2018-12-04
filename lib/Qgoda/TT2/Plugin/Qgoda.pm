@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package Template::Plugin::Qgoda;
+package Qgoda::TT2::Plugin::Qgoda;
 
 use common::sense;
 
@@ -44,6 +44,7 @@ my $black_hole = sub {};
 
 sub new {
     my ($class, $context) = @_;
+warn "right plugin";
 
     my $get_values = sub {
         my ($assets, @fields) = @_;
@@ -870,7 +871,7 @@ sub time {
 
 =head1 NAME
 
-Template::Plugin::Qgoda - Interface to Qgoda from Template Toolkit
+Qgoda::TT2::Qgoda - Interface to Qgoda from Template Toolkit
 
 =head1 SYNOPSIS
 
