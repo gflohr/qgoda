@@ -22,17 +22,18 @@ use Test::More;
 use JSON 2 qw(decode_json);
 
 use Template;
-use Template::Plugin::Qgoda;
 
 my $vars = {
-    data => {
-        foo => 1,
-        bar => 2,
-        baz => 3
-    }
+	data => {
+		foo => 1,
+		bar => 2,
+		baz => 3
+	}
 };
 
-my $tt = Template->new;
+my $tt = Template->new(
+	PLUGIN_BASE => ['Qgoda::TT2::Plugin']
+);
 
 my ($json, $newlines, $round_trip, $template);
 
