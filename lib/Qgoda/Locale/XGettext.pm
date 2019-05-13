@@ -115,8 +115,15 @@ sub __extractFromMaster {
         my $slice = { $key => $master_asset->{$key}};
         my $flat = flatten2hash $slice;
         foreach my $variable (keys %$flat) {
+            my $msgid = $flat->{$variable};
+            if ($variable =~ /(.+)\.[0-9]+$/) {
+                my $root = $1;
+                if (ref $slice->{$root} && 'ARRAY' eq reftype $slice->{$root}) {
+                    $variable = $root;
+                }
+            }
             $self->addEntry(
-                msgid => $flat->{$variable},
+                msgid => $msgid,
                 msgctxt => $variable,
                 reference => $filename . ':' . $splitter->metaLineNumber($key),
             );
