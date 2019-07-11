@@ -78,13 +78,14 @@ sub received_events {
 	my ($sub, $desc, @expected) = @_;
 
 	$cv = AnyEvent->condvar;
+        $cv->begin;
 	$cv->begin for @expected;
 
 	$sub->();
 
 	my $w = AnyEvent->timer(
-		after => 3,
-		cb	=> sub { $cv->send });
+		after => 1,
+		cb	=> sub { $cv->end });
 
 	$cv->recv;
 
