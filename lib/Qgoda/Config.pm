@@ -104,14 +104,14 @@ sub new {
 	if ($invalid) {
 		my ($filename, $errors) = @$invalid;
 		my $msg = '';
-		if (ref $errors) {
+		if (ref $errors && 'ARRAY' eq ref $errors) {
 			foreach my $error (@$errors) {
 				$msg .= __x("{filename}: CONFIG{dataPath}: ",
 				             filename => $filename,
 							 dataPath => $error->{dataPath});
 				$msg .= "$error->{message}\n";
 				my $params = $error->{params};
-				foreach my $param (keys %$params) {
+				foreach my $param (keys %{$params || {}}) {
 					$msg .= "\t$param: $params->{$param}\n";
 				}
 			}
