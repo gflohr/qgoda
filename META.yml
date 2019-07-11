@@ -6,6 +6,7 @@ build_requires:
   AnyEvent::Impl::Perl: '0'
   Data::Dump: '0'
   Git::Repository: '1.321'
+  Locale::PO: '0'
   Test::Exception: '0'
   Test::More: '0'
   Test::Without::Module: '0'

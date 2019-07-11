@@ -76,13 +76,13 @@ lib/Qgoda/Repository/Fetcher/LWP.pm
 lib/Qgoda/Schema.pm
 lib/Qgoda/Site.pm
 lib/Qgoda/Splitter.pm
+lib/Qgoda/TT2/Plugin/Qgoda.pm
 lib/Qgoda/Util.pm
 lib/Qgoda/Util/Date.pm
 lib/Qgoda/Util/Translate.pm
 lib/Qgoda/package-lock.json
 lib/Qgoda/package.json
 lib/Qgoda/yarn.lock
-lib/Template/Plugin/Qgoda.pm
 perlcritic.rc
 po/Makefile
 po/PACKAGE
@@ -105,6 +105,7 @@ t/command-init.t
 t/command-javascript.t
 t/command-po.t
 t/command-watch.t
+t/command-xgettext.t
 t/config-default.t
 t/config-defaults.t
 t/config-invalid.t
@@ -165,3 +166,4 @@ t/utf-8-flag.t
 t/utf-8-flag/LocaleData/de/LC_MESSAGES/messages.mo
 t/utf-8-flag/_po/de.po
 t/util-date.t
+t/various-bugs.t
