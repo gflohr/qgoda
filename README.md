@@ -1,4 +1,4 @@
-[![GPL-3.0](https://img.shields.io/aur/license/yaourt.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Price](https://img.shields.io/badge/price-FREE-0098f7.svg)](https://github.com/gflohr/qgoda/blob/master/LICENSE)
 [![Travis (.org)](https://img.shields.io/travis/gflohr/qgoda.svg)](https://travis-ci.org/gflohr/qgoda)
 [![Coverage Status](https://coveralls.io/repos/github/gflohr/qgoda/badge.svg?branch=master)](https://coveralls.io/github/gflohr/qgoda?branch=master)
