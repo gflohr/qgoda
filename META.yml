@@ -58,7 +58,7 @@ requires:
   Inline: '0'
   JSON: '2.0'
   JSON::PP: '0'
-  JavaScript::Duktape::XS: '0'
+  JavaScript::Duktape::XS: '0.000074'
   LWP::UserAgent: '0'
   List::Util: '1.45'
   Locale::Messages: '0'

@@ -21,11 +21,21 @@ package Qgoda::JavaScript::Environment;
 use strict;
 
 use Qgoda::Util qw(empty);
-use JavaScript::Duktape::XS;
+use JavaScript::Duktape::XS 0.000074;
 use Cpanel::JSON::XS qw(decode_json);
 use File::Spec;
 use File::Basename qw(dirname);
 use Locale::TextDomain qw(qgoda);
+
+BEGIN {
+	if ($JavaScript::Duktape::XS::VERSION ne '0.000074') {
+		die __x("You are using version '{version}' of 'JavaScript::Duktape::XS'"
+		        . " which is too new.  Please downgrade to version 0.000074."
+		        . " See '{url}' for details!\n",
+		        version => $JavaScript::Duktape::XS::VERSION,
+		        url => 'https://github.com/gflohr/qgoda/issues/86');
+	}
+}
 
 sub new {
 	my ($class, %args) = @_;
@@ -121,7 +131,7 @@ sub exchange {
 		$exchange->{$key} = $value;
 		$self->{__vm}->set($self->{__exchange_name}, $exchange);
 	}
-	
+
 	return $exchange->{$key};
 }
 
@@ -129,13 +139,13 @@ sub run {
 	my ($self, $code) = @_;
 
 	my $q = Qgoda->new;
-	
+
 	if ($self->{__no_output}) {
 		$self->{__jsout} = '';
 		$self->{__jserr} = '';
 		$self->{__vm}->reset_msgs;
 	}
-	
+
 	my $retval = $self->{__vm}->eval($code);
 
 	if ($self->{__no_output}) {
@@ -278,7 +288,7 @@ sub __loadAsDirectory {
 	if ($self->__isFile($package_json)) {
 		open my $fh, '<', $package_json
 				or die;
-		
+
 		my $decoder = Cpanel::JSON::XS->new;
    		my $package = join '', <$fh>;
 		$package = $decoder->decode($package);
@@ -296,7 +306,7 @@ sub __loadAsDirectory {
 
 sub __nodeModulesPath {
 	my ($self, $start) = @_;
-	
+
 	$start = '.' if empty $start;
 	my @parts = split /\//, $start;
 	my $i = -1 + @parts;

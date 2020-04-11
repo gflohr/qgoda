@@ -1,6 +1,8 @@
 FROM ubuntu:bionic
 MAINTAINER Qgoda (https://github.com/gflohr/qgoda/issues)
 
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
+
 RUN apt-get update && apt-get install -y make \
     gcc \
     git \
@@ -52,13 +54,22 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
 RUN apt-get update && apt-get install -y yarn
 
+# Newer versions of JavaScript::Duktape::XS do not work.
+WORKDIR /root
+RUN curl -Ss https://cpan.metacpan.org/authors/id/G/GO/GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz \
+		>JavaScript-Duktape-XS-0.000074.tar.gz && \
+	tar xzf JavaScript-Duktape-XS-0.000074.tar.gz && \
+	cd JavaScript-Duktape-XS-0.000074 && \
+	cpanm . && \
+	rm -r /root/JavaScript-Duktape-XS-0.000074
+
 COPY . /root/qgoda/
 
 WORKDIR /root/qgoda/
 
-RUN cpanm .
+RUN cpanm . --notest
 
-RUN rm -rf /root/imperia /root/.cpanm
+RUN rm -rf /root/qgoda /root/.cpanm
 
 VOLUME /var/www/qgoda
 
