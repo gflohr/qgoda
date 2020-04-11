@@ -1,11 +1,22 @@
 {{$NEXT}}
+    - Use AnyEvent::Filesys::Notify again
     - Issues resolved:
+      * https://github.com/gflohr/qgoda/issues/88
+      * https://github.com/gflohr/qgoda/issues/81
+      * https://github.com/gflohr/qgoda/issues/34
 
-0.9.6 - 2018-12-04
-    0.9.5 was another release to proove Murphy's Law.  Watch mode was
-    broken and is fixed with this release.  Apart from that,
-    AnyEvent::Filesys::Notify was replaced with an equivalent that does not
-    require Moo, and hence produces a lot less dependencies.
+0.9.6 - 2018-12-03
+    - New versioning scheme YY.MM.COUNT.
+    - Replaced nested data structure with simpler structure without cyclic references.
+    - Programmatic stop in watch mode: Drop a file "_stop" and optionally write the reason for the termination into it.
+    - Compatibility with Perl 5.18.
+    - The docker container no longer runs as root but as unpriviliged user qgoda in group qgoda.
+    - The container is now based on an ubuntu image and using the system perl in order to save space and build time.
+    - Increased test coverage to 80 %.
+    - Issues fixed:
+      * https://github.com/gflohr/qgoda/issues/79
+      * https://github.com/gflohr/qgoda/issues/77
+      * https://github.com/gflohr/qgoda/issues/74
 
 0.9.5 - 2018-12-01
     - New versioning scheme YY.MM.COUNT.
