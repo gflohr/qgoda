@@ -57,18 +57,13 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
 
 # Newer versions of JavaScript::Duktape::XS do not work.
 WORKDIR /root
-RUN curl -Ss https://cpan.metacpan.org/authors/id/G/GO/GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz \
-		>JavaScript-Duktape-XS-0.000074.tar.gz && \
-	tar xzf JavaScript-Duktape-XS-0.000074.tar.gz && \
-	cd JavaScript-Duktape-XS-0.000074 && \
-	cpanm . && \
-	rm -r /root/JavaScript-Duktape-XS-0.000074
+RUN cpanm GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz
 
 COPY . /root/qgoda/
 
 WORKDIR /root/qgoda/
 
-RUN cpanm . --notest && rm -rf /root/qgoda /root/.cpanm
+RUN cpanm . && rm -rf /root/qgoda /root/.cpanm
 
 VOLUME /data
 

@@ -3,13 +3,10 @@ abstract: 'The Qgoda Static Site Generator'
 author:
   - 'Guido Flohr <guido.flohr@cantanea.com>'
 build_requires:
-  AnyEvent::Impl::Perl: '0'
-  Data::Dump: '0'
+  Carp: '0'
   Git::Repository: '1.321'
   Locale::PO: '0'
-  Test::Exception: '0'
   Test::More: '0'
-  Test::Without::Module: '0'
   Time::Local: '0'
   autodie: '0'
   lib: '0'
@@ -24,10 +21,10 @@ meta-spec:
 name: Qgoda
 requires:
   AnyEvent: '0'
+  AnyEvent::Filesys::Notify: '1.23'
   AnyEvent::Handle: '0'
   AnyEvent::Loop: '0'
   Archive::Extract: '0'
-  Carp: '0'
   Cpanel::JSON::XS: '0'
   Cwd: '0'
   Data::Dumper: '0'
@@ -68,7 +65,6 @@ requires:
   Locale::gettext_dumb: '0'
   MIME::Base64: '0'
   POSIX: '0'
-  Path::Iterator::Rule: '0'
   Pod::Perldoc: '0'
   Scalar::Util: '0'
   Storable: '0'
@@ -105,6 +101,6 @@ resources:
   bugtracker: https://github.com/gflohr/qgoda/issues
   homepage: http://www.qgoda.net/
   repository: git://github.com/gflohr/qgoda.git
-version: 0.9.6
+version: 0.9.7
 x_generated_by_perl: v5.28.0
 x_serialization_backend: 'YAML::Tiny version 1.73'
