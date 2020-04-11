@@ -70,11 +70,10 @@ WORKDIR /root/qgoda/
 
 RUN cpanm . --notest && rm -rf /root/qgoda /root/.cpanm
 
-VOLUME /var/www/qgoda
+VOLUME /data
 
-RUN groupadd qgoda && useradd -r -g qgoda qgoda && \
-	chown -R qgoda:qgoda /var/www/qgoda
+RUN groupadd qgoda && useradd -r -g qgoda qgoda && chown -R qgoda:qgoda /data
 
-WORKDIR /var/www/qgoda
+WORKDIR /data
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "qgoda"]
