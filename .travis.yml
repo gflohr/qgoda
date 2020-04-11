@@ -8,5 +8,7 @@ env:
   - AUTHOR_TESTING=1 QGODA_NO_INSTALL_CHECK=1
 before_install:
   - cpanm --notest Devel::Cover::Report::Coveralls
+  # See https://github.com/gflohr/qgoda/issues/86
+  - cpanm --notest GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz
 after_success:
   - cover -test -report coveralls
