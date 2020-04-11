@@ -45,6 +45,7 @@ use POSIX qw(:sys_wait_h);
 use Template::Plugin::Gettext 0.7;
 use List::Util 1.45 qw(uniq);
 use YAML::XS 0.67;
+use AnyEvent::Filesys::Notify 1.23;
 use boolean;
 $YAML::XS::Boolean = 'JSON::PP';
 
@@ -58,7 +59,6 @@ use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
                    collect_defaults purify perl_class class2module trim
                    read_file);
 use Qgoda::PluginUtils qw(load_plugins);
-use Qgoda::AnyEvent::Notify;
 
 my $qgoda;
 
@@ -239,7 +239,7 @@ sub watch {
 
         $logger->debug(__x("waiting for changes in '{dir}'",
                            dir => $config->{srcdir}));
-        Qgoda::AnyEvent::Notify->new(
+        AnyEvent::Filesys::Notify->new(
             dirs => [$config->{srcdir}],
             interval => $config->{latency},
             parse_events => 1,
@@ -885,7 +885,7 @@ sub __initNoSCMPatterns {
     return $no_scm if blessed $no_scm;
 
     require File::Globstar::ListMatch;
-    return $config->{'no-scm'} = 
+    return $config->{'no-scm'} =
             File::Globstar::ListMatch->new($no_scm,
                                            $config->{'case-insensitive'});
 }
@@ -902,7 +902,7 @@ sub versionControlled {
     return $self if $self->{__version_controlled}->{$key}->{$path};
 
     my $no_scm = $self->__initNoSCMPatterns or return;
-    
+
     $path = File::Spec->rel2abs($path, $self->config->{srcdir});
     return $self if $no_scm->match($path);
 

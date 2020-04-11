@@ -48,11 +48,12 @@ RUN apt-get update && apt-get install -y make \
     libtext-trim-perl
 
 # We need a recent nodejs.
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list
-RUN apt-get update && apt-get install -y yarn
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
+	apt-get install -y nodejs && \
+	curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+	echo "deb https://dl.yarnpkg.com/debian/ stable main" \
+		> /etc/apt/sources.list.d/yarn.list && \
+	apt-get update && apt-get install -y yarn
 
 # Newer versions of JavaScript::Duktape::XS do not work.
 WORKDIR /root
@@ -67,15 +68,12 @@ COPY . /root/qgoda/
 
 WORKDIR /root/qgoda/
 
-RUN cpanm . --notest
+RUN cpanm . --notest && rm -rf /root/qgoda /root/.cpanm
 
-RUN rm -rf /root/qgoda /root/.cpanm
+VOLUME /data
 
-VOLUME /var/www/qgoda
+RUN groupadd qgoda && useradd -r -g qgoda qgoda && chown -R qgoda:qgoda /data
 
-RUN groupadd qgoda && useradd -r -g qgoda qgoda
-RUN chown -R qgoda:qgoda /var/www/qgoda
-
-WORKDIR /var/www/qgoda
+WORKDIR /data
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--", "qgoda"]
