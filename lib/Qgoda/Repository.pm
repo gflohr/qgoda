@@ -147,12 +147,6 @@ sub fetch {
     return ($dir, $tmp);
 }
 
-package URI::git;
-
-use strict;
-
-use base qw(URI::http);
-
 package URI::git_Phttp;
 
 use strict;
