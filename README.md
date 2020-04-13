@@ -96,7 +96,7 @@ Qgoda (and Perl and Template Toolkit) on Netlify's
 
 ## Copyright
 
-Copyright (C) 2016-2018 Guido Flohr <guido.flohr@cantanea.com>, all
+Copyright (C) 2016-2020 Guido Flohr <guido.flohr@cantanea.com>, all
 rights reserved.
 
 Qgoda is available under the terms and conditions of the GNU General

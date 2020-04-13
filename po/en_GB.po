@@ -1,7 +1,7 @@
 # British English translations for qgoda package.
-# Copyright (C) 2016-2018 Guido Flohr <http://www.guido-flohr.net>
+# Copyright (C) 2016-2020 Guido Flohr <http://www.guido-flohr.net>
 # This file is distributed under the same license as the qgoda package.
-# Guido Flohr <guido.flohr@cantanea.com>, 2016-2018.
+# Guido Flohr <guido.flohr@cantanea.com>, 2016-2020.
 #
 msgid ""
 msgstr ""
