@@ -5,7 +5,8 @@
 use strict;
 use warnings;
 
-use ExtUtils::MakeMaker;
+use 5.018;
+use ExtUtils::MakeMaker 7.1101;
 
 #! /bin/false
 
@@ -239,13 +240,14 @@ my %WriteMakefileArgs = (
   "ABSTRACT" => "The Qgoda Static Site Generator",
   "AUTHOR" => "Guido Flohr <guido.flohr\@cantanea.com>",
   "CONFIGURE_REQUIRES" => {
-    "ExtUtils::MakeMaker" => 0
+    "ExtUtils::MakeMaker" => "7.1101"
   },
   "DISTNAME" => "Qgoda",
   "EXE_FILES" => [
     "bin/qgoda"
   ],
   "LICENSE" => "gpl",
+  "MIN_PERL_VERSION" => "5.018",
   "NAME" => "Qgoda",
   "PREREQ_PM" => {
     "AnyEvent" => 0,
@@ -260,7 +262,6 @@ my %WriteMakefileArgs = (
     "Date::Parse" => 0,
     "Encode" => "2.12",
     "Exporter" => 0,
-    "ExtUtils::MakeMaker" => "7.1101",
     "File::Basename" => 0,
     "File::Copy" => 0,
     "File::Copy::Recursive" => 0,
@@ -355,7 +356,6 @@ my %FallbackPrereqs = (
   "Date::Parse" => 0,
   "Encode" => "2.12",
   "Exporter" => 0,
-  "ExtUtils::MakeMaker" => "7.1101",
   "File::Basename" => 0,
   "File::Copy" => 0,
   "File::Copy::Recursive" => 0,

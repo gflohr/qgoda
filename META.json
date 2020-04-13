@@ -16,7 +16,7 @@
    "prereqs" : {
       "configure" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "0"
+            "ExtUtils::MakeMaker" : "7.1101"
          }
       },
       "develop" : {
@@ -40,7 +40,6 @@
             "Date::Parse" : "0",
             "Encode" : "2.12",
             "Exporter" : "0",
-            "ExtUtils::MakeMaker" : "7.1101",
             "File::Basename" : "0",
             "File::Copy" : "0",
             "File::Copy::Recursive" : "0",

@@ -11,7 +11,7 @@ build_requires:
   autodie: '0'
   lib: '0'
 configure_requires:
-  ExtUtils::MakeMaker: '0'
+  ExtUtils::MakeMaker: '7.1101'
 dynamic_config: 1
 generated_by: 'Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010'
 license: gpl
@@ -32,7 +32,6 @@ requires:
   Date::Parse: '0'
   Encode: '2.12'
   Exporter: '0'
-  ExtUtils::MakeMaker: '7.1101'
   File::Basename: '0'
   File::Copy: '0'
   File::Copy::Recursive: '0'
