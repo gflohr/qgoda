@@ -1,4 +1,7 @@
 {{$NEXT}}
+    Manually force version 0.000074 of ExtUtils::Duktape::XS.
+
+0.9.7 - 2020-04-12
     - Use AnyEvent::Filesys::Notify again
     - Issues resolved:
       * https://github.com/gflohr/qgoda/issues/88

@@ -32,6 +32,7 @@ requires:
   Date::Parse: '0'
   Encode: '2.12'
   Exporter: '0'
+  ExtUtils::MakeMaker: '7.1101'
   File::Basename: '0'
   File::Copy: '0'
   File::Copy::Recursive: '0'
@@ -84,7 +85,7 @@ requires:
   URI: '0'
   URI::Escape: '0'
   URI::file: '0'
-  URI::http: '0'
+  URI::git: '0.02'
   YAML: '0'
   YAML::XS: '0.67'
   base: '0'
@@ -101,6 +102,6 @@ resources:
   bugtracker: https://github.com/gflohr/qgoda/issues
   homepage: http://www.qgoda.net/
   repository: git://github.com/gflohr/qgoda.git
-version: 0.9.7
+version: 0.9.8
 x_generated_by_perl: v5.28.0
 x_serialization_backend: 'YAML::Tiny version 1.73'
