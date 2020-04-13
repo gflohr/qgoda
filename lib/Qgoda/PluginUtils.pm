@@ -62,7 +62,7 @@ sub load_plugins {
                                                           $_, 'package.json') }
                             grep !/^\./, readdir $dh) {
             my $package_dir = File::Spec->catfile('node_modules', $subdir);
-            my $package_json = File::Spec->catfile($package_dir, 
+            my $package_json = File::Spec->catfile($package_dir,
                                                   'package.json');
             my $package = eval { decode_json read_file $package_json }
                 or next;
@@ -124,7 +124,8 @@ sub init_plugin($$$) {
 
     my $package_json = $plugin->{package_json};
     my $json = read_file $package_json;
-    $logger->fatal(__x('error reading plugin package file {file}: {error}!',
+    $logger->fatal(__x('error reading plugin package'
+                       . ' file {file}: {error}!',
                        file => $package_json, error => $!))
         if !defined $json;
 
