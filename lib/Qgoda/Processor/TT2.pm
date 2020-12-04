@@ -48,7 +48,8 @@ sub new {
         PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
         RECURSION => 1,
         # Needed for qgoda po pot
-        RELATIVE => 1
+        RELATIVE => 1,
+	ENCODING => 'utf-8'
     );
     my $scm = $config->{scm};
     if (!empty $scm && 'git' eq $scm) {
