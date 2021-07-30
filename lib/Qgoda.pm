@@ -18,7 +18,7 @@
 
 package Qgoda;
 $Qgoda::VERSION = '0.9.7';
-use common::sense;
+use strict;
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.

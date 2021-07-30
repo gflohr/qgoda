@@ -18,7 +18,7 @@
 
 package Qgoda::TT2::Plugin::Qgoda;
 
-use common::sense;
+use strict;
 
 use base qw(Template::Plugin);
 
