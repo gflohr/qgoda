@@ -80,6 +80,7 @@ sub new {
     $self->{__builders} = [Qgoda::Builder->new];
     $self->{__processors} = {};
     $self->{__load_plugins} = 1;
+	$self->{__post_processors} = {};
 
     return $qgoda;
 }
@@ -100,6 +101,8 @@ sub initPlugins {
     my ($self) = @_;
 
     delete $self->{__load_plugins} && load_plugins $qgoda;
+
+	$self->__getPostProcessors;
 
     return $self;
 }
@@ -156,14 +159,23 @@ sub build {
     my $site = $self->getSite;
     my $modified = scalar keys %{$site->getModified};
 
-    if (($modified + $deleted) && !empty $config->{paths}->{timestamp}) {
-        my $timestamp_file = File::Spec->catfile($config->{srcdir},
-                                                 $config->{paths}->{timestamp});
-        if (!write_file($timestamp_file, sprintf "%d\n", time)) {
-                $logger->error(__x("cannot write '{file}': {error}!",
-                               file => $timestamp_file, error => $!));
-        }
-    }
+	if ($modified + $deleted) {
+		foreach my $module (sort keys %{$self->{__post_processors}}) {
+			eval { $self->{__post_processors}->{$module}->postProcess($site) };
+			if ($@) {
+				$logger->error(__x("[Qgoda::PostProcessor::$module]: $@"));
+			}
+		}
+
+		if (!empty $config->{paths}->{timestamp}) {
+			my $timestamp_file = File::Spec->catfile($config->{srcdir},
+													$config->{paths}->{timestamp});
+			if (!write_file($timestamp_file, sprintf "%d\n", time)) {
+					$logger->error(__x("cannot write '{file}': {error}!",
+								file => $timestamp_file, error => $!));
+			}
+		}
+	}
 
     my $num_artefacts = $site->getArtefacts;
     $logger->info(__nx("finished building site with one artefact",
@@ -175,10 +187,10 @@ sub build {
                        $modified,
                        num => $modified));
     if ($deleted) {
-    $logger->info(__nx("one stale artefact has been deleted",
-                       "{num} stale artefacts have been deleted",
-                       $deleted,
-                       num => $deleted));
+		$logger->info(__nx("one stale artefact has been deleted",
+						"{num} stale artefacts have been deleted",
+						$deleted,
+						num => $deleted));
     }
 
     return $self;
@@ -502,6 +514,42 @@ sub getProcessor {
     my ($self, $name) = @_;
 
     return $self->{__processors}->{$name};
+}
+
+sub __getPostProcessors {
+	my ($self) = @_;
+
+	my $processors = $self->config->{'post-processors'}->{modules};
+
+	foreach my $module (@$processors) {
+		my $class_name = 'Qgoda::PostProcessor::' . $module;
+
+		$self->logger->fatal(__x("invalid post-processor name '{processor}'",
+									processor => $module))
+			if !perl_class $class_name;
+
+		my $module_name = class2module $class_name;
+
+		require $module_name;
+		my $options = $self->config->{'post-processors'}->{options};
+		my @options;
+		if (defined $options) {
+			if (ref $options) {
+				if ('HASH' eq reftype $options) {
+					@options = %{$options};
+				} else {
+					@options = @{$options};
+				}
+			} else {
+				@options = $options;
+			}
+		}
+
+		my $processor = $class_name->new(@options);
+		$self->{__post_processors}->{$class_name} = $processor;
+	}
+
+	return $self;
 }
 
 sub scan {
