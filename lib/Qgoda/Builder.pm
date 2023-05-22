@@ -187,7 +187,7 @@ sub processAsset {
     my $template_name = $asset->getRelpath;
 
     my $content = $self->readAssetContent($asset, $site);
-    $asset->{content} = $content;
+    $asset->{content} = $asset->{rawContent} = $content;
     my @processors = $qgoda->getProcessors($asset);
     foreach my $processor (@processors) {
         my $short_name = ref $processor;
