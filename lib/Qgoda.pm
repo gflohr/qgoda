@@ -789,8 +789,8 @@ sub __onFilesysChange {
     my $config = $self->{__config};
 
     foreach my $event (@events) {
-        $logger->debug(__x("file '{filename}' has changed",
-                           filename => $event->{path}));
+        $logger->info(__x("file '{filename}' has changed",
+                          filename => $event->{path}));
         push @files, $event->{path};
     }
 
