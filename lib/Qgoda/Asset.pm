@@ -65,6 +65,8 @@ sub dump {
 sub TO_JSON {
     my ($self) = @_;
 
+    # FIXME! Unbless all blessed objects with purify! Also add purify() as
+    # a method to the Qgoda TT2 plug-in.
     return {%$self};
 }
 1;
