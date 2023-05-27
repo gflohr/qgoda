@@ -27,16 +27,6 @@ use File::Spec;
 use File::Basename qw(dirname);
 use Locale::TextDomain qw(qgoda);
 
-BEGIN {
-	if ($JavaScript::Duktape::XS::VERSION ne '0.000074') {
-		die __x("You are using version '{version}' of 'JavaScript::Duktape::XS'"
-		        . " which is too new.  Please downgrade to version 0.000074."
-		        . " See '{url}' for details!\n",
-		        version => $JavaScript::Duktape::XS::VERSION,
-		        url => 'https://github.com/gflohr/qgoda/issues/86');
-	}
-}
-
 sub new {
 	my ($class, %args) = @_;
 
@@ -71,6 +61,7 @@ sub new {
 
 	$self->{__vm} = JavaScript::Duktape::XS->new(
 		{
+			catch_perl_exceptions => 1,
 			save_messages => $args{no_output}
 		}
 	);
