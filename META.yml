@@ -9,11 +9,12 @@ build_requires:
   Test::More: '0'
   Time::Local: '0'
   autodie: '0'
+  common::sense: '0'
   lib: '0'
 configure_requires:
   ExtUtils::MakeMaker: '7.1101'
 dynamic_config: 1
-generated_by: 'Dist::Zilla version 6.012, CPAN::Meta::Converter version 2.150010'
+generated_by: 'Dist::Zilla version 6.030, CPAN::Meta::Converter version 2.150010'
 license: gpl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -36,7 +37,7 @@ requires:
   File::Copy: '0'
   File::Copy::Recursive: '0'
   File::Find: '0'
-  File::Globstar: '0'
+  File::Globstar: '0.6'
   File::Globstar::ListMatch: '0'
   File::HomeDir: '0'
   File::Path: '0'
@@ -55,7 +56,7 @@ requires:
   Inline: '0'
   JSON: '2.0'
   JSON::PP: '0'
-  JavaScript::Duktape::XS: '== 0.000074'
+  JavaScript::Duktape::XS: '0.000074'
   LWP::UserAgent: '0'
   List::Util: '1.45'
   Locale::Messages: '0'
@@ -64,6 +65,7 @@ requires:
   Locale::XGettext: '0.7'
   Locale::gettext_dumb: '0'
   MIME::Base64: '0'
+  Markdown::Pod: '0.008'
   POSIX: '0'
   Pod::Perldoc: '0'
   Scalar::Util: '0'
@@ -89,7 +91,6 @@ requires:
   YAML::XS: '0.67'
   base: '0'
   boolean: '0'
-  common::sense: '0'
   constant: '0'
   integer: '0'
   overload: '0'
@@ -102,5 +103,6 @@ resources:
   homepage: http://www.qgoda.net/
   repository: git://github.com/gflohr/qgoda.git
 version: 0.9.8
-x_generated_by_perl: v5.28.0
+x_generated_by_perl: v5.34.0
 x_serialization_backend: 'YAML::Tiny version 1.73'
+x_spdx_expression: GPL-3.0-only
