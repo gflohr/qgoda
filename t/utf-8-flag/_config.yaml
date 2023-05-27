@@ -1,0 +1,9 @@
+---
+exclude:
+- /LocaleData
+linguas:
+- en
+- de
+po:
+  textdomain: messages
+title: Lots of €€
