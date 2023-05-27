@@ -40,6 +40,7 @@ sub config {
 		title => __"Configuration",
 		description => __"A Qgoda Configuration",
 		type => 'object',
+		#additionalProperties => false,
 		properties => {
 			'case-sensitive' => {
 				description => __"Set to true if a case-sensitive file system "
@@ -356,14 +357,17 @@ sub config {
 							},
 							xml => {
 								modules => ['TT2', 'Strip']
-							}
+							},
+							raw => {
+								modules => ['TT2', 'Strip']
+							},
 						},
 						patternProperties => {
 							'[_a-zA-z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
 								                 . "chain.",
 								type => 'object',
-								addititionalProperties => false,
+								additionalProperties => false,
 								required => ['modules'],
 								properties => {
 									modules => {
@@ -426,7 +430,8 @@ sub config {
 								mdwn => 'markdown',
 								mkd => 'markdown',
 								mkdn => 'markdown',
-								xml => 'xml'
+								xml => 'raw',
+								json => 'raw',
 						},
 						patternProperties => {
 							'.+' => {
@@ -435,6 +440,42 @@ sub config {
 							}
 						}
 					}
+				},
+			},
+			'post-processors' => {
+				description => __"Modules to run after each build.",
+				additionalProperties => false,
+				default => {},
+				required => ['modules', 'options'],
+				properties => {
+					modules => {
+						description => __"The post-processor modules.",
+						default => {},
+						patternProperties => {
+							'[_a-zA-z][a-zA-Z0-9]*' => {
+								description => __"Properties of one "
+								                 . "post-processor module.",
+								type => 'object',
+								additionalProperties => false,
+								required => ['modules'],
+								properties => {
+									modules => {
+										description => __"The module names.",
+										type => 'array',
+										items => {
+											type => 'string'
+										},
+									},
+								}
+							}
+						}
+					},
+					options => {
+						description => __"Additional options for the"
+						               . " post-processor plug-ins",
+						type => 'object',
+						default => {},
+					},
 				},
 			},
 			scm => {
