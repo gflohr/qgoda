@@ -18,7 +18,7 @@
 
 package TestSite;
 
-use common::sense;
+use strict;
 
 use File::Spec;
 use File::Path;
