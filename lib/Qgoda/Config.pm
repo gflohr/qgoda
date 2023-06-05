@@ -26,8 +26,9 @@ use Cwd;
 use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
+use Encode;
 use boolean;
-use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase 
+use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase
 				   safe_yaml_load);
 use Qgoda::JavaScript::Environment;
 use Qgoda::Schema;
@@ -64,6 +65,7 @@ sub new {
 			$logger->fatal(__x("cannot read '{filename}': {error}",
 							   filename => $filename, error => $!));
 		}
+		Encode::_utf8_on($yaml);
 	}
 
 	my $local_filename;
@@ -84,6 +86,7 @@ sub new {
 			$logger->fatal(__x("cannot read '{filename}': {error}",
 							   filename => $local_filename, error => $!));
 		}
+		Encode::_utf8_on($yaml);
 	}
 
 	my $jsfile = 'Qgoda/JavaScript/config.js';

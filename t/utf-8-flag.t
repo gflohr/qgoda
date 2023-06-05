@@ -22,6 +22,7 @@ use lib 't';
 use TestSite;
 use Test::More;
 use Encode;
+use utf8;
 
 use Qgoda::Util qw(read_file);
 use Qgoda::CLI;
