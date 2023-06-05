@@ -450,7 +450,7 @@ sub config {
 				properties => {
 					modules => {
 						description => __"The post-processor modules.",
-						default => {},
+						default => [],
 						patternProperties => {
 							'[_a-zA-z][a-zA-Z0-9]*' => {
 								description => __"Properties of one "

@@ -72,6 +72,9 @@ po:
   - _views
   xgettext: [xgettext]
   xgettext-tt2: [xgettext-tt2]
+post-processors:
+  modules: []
+  options: {}
 processors:
   chains:
     html:
@@ -86,6 +89,10 @@ processors:
       - Markdown
       suffix: html
       wrapper: html
+    raw:
+      modules:
+      - TT2
+      - Strip
     xml:
       modules:
       - TT2
@@ -104,12 +111,13 @@ processors:
   triggers:
     htm: html
     html: html
+    json: raw
     md: markdown
     mdown: markdown
     mdwn: markdown
     mkd: markdown
     mkdn: markdown
-    xml: xml
+    xml: raw
 srcdir: $srcdir
 taxonomies:
   categories: 3
