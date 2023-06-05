@@ -445,28 +445,21 @@ sub config {
 			'post-processors' => {
 				description => __"Modules to run after each build.",
 				additionalProperties => false,
-				default => {},
+				default => {
+					modules => [],
+					options => {},
+				},
 				required => ['modules', 'options'],
 				properties => {
 					modules => {
 						description => __"The post-processor modules.",
 						default => [],
+						type => 'array',
 						patternProperties => {
-							'[_a-zA-z][a-zA-Z0-9]*' => {
-								description => __"Properties of one "
+							'[_a-zA-Z][_a-zA-Z0-9]*(::[_a-zA-Z][_a-zA-Z0-9]*)*' => {
+								description => __"Name of one "
 								                 . "post-processor module.",
-								type => 'object',
-								additionalProperties => false,
-								required => ['modules'],
-								properties => {
-									modules => {
-										description => __"The module names.",
-										type => 'array',
-										items => {
-											type => 'string'
-										},
-									},
-								}
+								type => 'string',
 							}
 						}
 					},
