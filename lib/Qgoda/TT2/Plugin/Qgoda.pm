@@ -162,11 +162,13 @@ sub new {
     };
 
     my $shuffle = sub {
-        return [List::Util::shuffle(@{$_[0])];
+        my ($list) = @_;
+        return [List::Util::shuffle(@$list)];
     };
 
     my $sample = sub {
-        return [List::Util::sample($_[0], @{$_[1])];
+	my ($list, $size) = @_;
+        return [List::Util::sample($size, @$list)];
     };
 
 
