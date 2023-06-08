@@ -30,7 +30,7 @@ use Scalar::Util qw(reftype);
 use JSON 2.0 qw(encode_json decode_json);
 use Date::Parse qw(str2time);
 use POSIX qw(setlocale LC_ALL);
-use File::Basename;
+use File::Basename qw();
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
 
@@ -161,6 +161,15 @@ sub new {
         };
     };
 
+    my $shuffle = sub {
+        return [List::Util::shuffle(@{$_[0])];
+    };
+
+    my $sample = sub {
+        return [List::Util::sample($_[0], @{$_[1])];
+    };
+
+
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
     $context->define_vmethod(list => vmap => $vmap);
@@ -169,7 +178,9 @@ sub new {
     $context->define_vmethod(hash => kebapSnake => $kebap_snake);
     $context->define_vmethod(hash => kebapCamel => $kebap_camel);
     $context->define_vmethod(hash => quoteValues => $quote_values);
-	$context->define_vmethod(hash => vmap => $vmap);
+    $context->define_vmethod(hash => vmap => $vmap);
+    $context->define_vmethod(list => shuffle => $shuffle);
+    $context->define_vmethod(list => sample => $sample);
 
     my $self = {
         __context => $context
@@ -677,7 +688,7 @@ sub paginate {
     } else {
         $location = $asset->{location};
     }
-    my $basename = basename $location;
+    my $basename = File::Basename::basename($location);
 
     $basename =~ m{(.*?)(\..+)?$};
     $stem = $1 if empty $stem;
@@ -686,7 +697,7 @@ sub paginate {
     my ($next_start, $next_location);
     if ($page < $total_pages) {
         $next_start = $start + $per_page;
-        $next_location = dirname $location;
+        $next_location = File::Basename::dirname($location);
         $next_location .= "/${stem}-" . ($page + 1) . $extender;
     }
 
@@ -864,6 +875,24 @@ sub relation {
 
 sub time {
     return Qgoda::Util::Date->newFromEpoch;
+}
+
+sub basename {
+    my ($self, $filename, @suffixlist) = @_;
+
+    return File::Basename::basename($filename, @suffixlist);
+}
+
+sub dirname {
+    my ($self, $filename) = @_;
+
+    return File::Basename::dirname($filename);
+}
+
+sub fileparse {
+    my ($self, $filename) = @_;
+
+    return [File::Basename::fileparse($filename, qr/\.[^.]*/)];
 }
 
 1;
