@@ -203,6 +203,8 @@ sub processAsset {
         my %postmeta = $processors[-1]->postMeta($asset->{content}, $asset,
                                                  $site);
         $asset->{excerpt} = $postmeta{excerpt} if empty $asset->{excerpt};
+        $asset->{excerpt_html} = $postmeta{excerpt_html}
+            if empty $asset->{excerpt_html};
         $asset->{content_body} = $postmeta{content_body}
             if empty $asset->{content_body};
         $asset->{links} ||= $postmeta{links};
