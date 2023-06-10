@@ -51,11 +51,16 @@ sub postMeta {
 
     my @paragraphs = $tree->find('p', 'div');
     my $excerpt = '';
+    my $content_body = $content;
     foreach my $paragraph (@paragraphs) {
         $excerpt = $paragraph->as_text;
         $excerpt =~ s/^[ \t\r\n]+//;
         $excerpt =~ s/[ \t\r\n]+$//;
-        last if !empty $excerpt;
+        if (!empty $excerpt) {
+            $paragraph->delete;
+            $content_body = $tree->as_HTML;
+            last;
+	}
     }
 
     # Collect links.
@@ -77,7 +82,10 @@ sub postMeta {
         }
     }
 
-    return excerpt => $excerpt, links => [keys %links];
+    return
+        excerpt => $excerpt,
+        content_body => $content_body,
+        links => [keys %links];
 }
 
 1;
