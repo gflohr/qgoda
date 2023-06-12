@@ -83,6 +83,10 @@ sub getAssets {
     sort { $b->{priority} <=> $a->{priority} } values %{shift->{assets}};
 }
 
+sub getUnsortedAssets {
+    values %{shift->{assets}};
+}
+
 sub addArtefact {
     my ($self, $path, $origin) = @_;
 
