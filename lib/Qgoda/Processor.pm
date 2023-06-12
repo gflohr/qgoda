@@ -49,6 +49,27 @@ sub postMeta {
                                   ignore_ignorable_whitespace => 1);
     $tree->parse($content);
 
+    # Collect links.
+    my %links;
+    foreach my $record (@{$tree->extract_links}) {
+        my $href = uri_unescape $record->[0];
+        eval {
+            my $canonical = URI->new($href)->canonical;
+            $href = $canonical;
+        };
+        if (!empty $href) {
+            if ('/' eq substr $href, 0, 1) {
+                $href = lc $href if !$case_sensitive;
+            }
+
+            # This will also count links to itself but they will be filtered
+            # out by Qgoda::Site->computeRelated().
+            ++$links{$href};
+        }
+    }
+
+	# Get the excerpt as plain text and html, and try to get the content body
+	# (content minus excerpt).
     my @paragraphs = $tree->find('p', 'div');
     my $excerpt = '';
     my $excerpt_html = '';
@@ -62,25 +83,6 @@ sub postMeta {
             $paragraph->delete;
             $content_body = $tree->as_HTML;
             last;
-	}
-    }
-
-    # Collect links.
-    my %links;
-    foreach my $record (@{$tree->extract_links}) {
-        my $href = uri_unescape $record->[0];
-        eval {
-            my $canonical = URI->new($href)->canonical;
-            $href = $canonical;
-        };
-        if (!empty $href) {
-            if ('/' eq substr $href, 0, 1) {
-                $href = lc $href if !$case_sensitive;
-            }
-            
-            # This will also count links to itself but they will be filtered
-            # out by Qgoda::Site->computeRelated().
-            ++$links{$href};
         }
     }
 
