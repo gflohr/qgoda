@@ -653,7 +653,7 @@ sub strftime {
         web_set_locale($lingua, 'utf-8');
     }
 
-    $markup = "sup" if !defined $markup;
+    $markup = '' if !defined $markup;
     my $formatted_date = qstrftime $format, $time, $lingua, $markup;
 
     POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;

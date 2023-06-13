@@ -735,7 +735,9 @@ sub blength {
 sub qstrftime($;$$$) {
     my ($format, $date, $lingua, $markup) = @_;
 
-    my ($open, $close) = $markup ? ("<$markup>", "</$markup>") : ("", "");
+    # FIXME! If markup contains attributes, they have to be stripped off
+    # for the closing tag.
+    my ($open, $close) = !empty($markup) ? ("<$markup>", "</$markup>") : ('', '');
     my %converters = (
         de => sub { shift . '.' },
         en => sub {
@@ -759,6 +761,7 @@ sub qstrftime($;$$$) {
             if (1 == $mday) {
                 return "${mday}${open}er${close}";
             } else {
+                # FIXME! This looks suspicious!
                 shift;
             }
         },
