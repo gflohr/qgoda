@@ -82,6 +82,10 @@ sub postMeta {
         if (!empty $excerpt) {
             $paragraph->delete;
             $content_body = $tree->as_HTML;
+            
+            # We have to remove the html wrapper that was created.
+            $content_body =~ s{.*<body>}{}s;
+            $content_body =~ s{</body>.*?$}{}s;
             last;
         }
     }

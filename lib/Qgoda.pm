@@ -751,6 +751,8 @@ sub __prune {
         }
     }
 
+    $logger->debug(__"pruning done");
+
     return $deleted;
 }
 
