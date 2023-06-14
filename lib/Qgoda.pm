@@ -127,8 +127,9 @@ sub build {
 		or $logger->fatal(__x("cannot chdir to source directory '{dir}': {error}",
 							  dir => $config->{srcdir},
 							  error => $!));
-	my $site = Qgoda::Site->new($config);
-	$self->setSite($site);
+
+	$self->{__site} ||= Qgoda::Site->new($config);
+	my $site = $self->{__site};
 
 	$self->{__outfiles} = [];
 	$self->scan($site);
