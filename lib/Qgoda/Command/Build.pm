@@ -33,7 +33,7 @@ sub _getOptionSpecs {
 	drafts => 'D|drafts',
 	future => 'F|future',
 	dry_run => 'dry-run',
-	watch => 'w|watch'
+	watch => 'w|watch',
 }
 
 sub _run {

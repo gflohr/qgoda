@@ -21,11 +21,23 @@ use strict;
 use lib 't';
 use TestSite;
 use Test::More;
-use File::Spec;
+use File::Find qw(finddepth);
 
 use Qgoda::CLI;
 
+sub collect_artefacts;
+sub prune_site;
+sub touch;
+
 my $listing = <<'EOF';
+[% IF asset.lingua == 'de' %]
+	[% INCLUDE "listing-de.html" %]
+[% ELSE %]
+	[% INCLUDE "listing-en.html" %]
+[% END %]
+EOF
+
+my $listing_lingua = <<'EOF';
 [% USE q = Qgoda %]
 <ul>
 [% FOREACH post IN q.llistPosts() %]
@@ -42,14 +54,14 @@ my $site = TestSite->new(
 			lingua => 'de',
 			location => '/index.de.html',
 			content => "Liste\n",
-			view => 'listing-de.html',
+			view => 'listing.html',
 		},
 		'index.en.md' => {
 			title => 'English index page',
 			lingua => 'de',
 			location => '/index.en.html',
 			content => "Listing\n",
-			view => 'listing-en.html',
+			view => 'listing.html',
 		},
 		'de/post.md' => {
 			title => 'Deutsche Seite',
@@ -67,18 +79,61 @@ my $site = TestSite->new(
 		},
 	},
 	files => {
-		'_views/listing-de.html' => $listing,
-		'_views/listing-en.html' => $listing,
+		'_views/listing.html' => $listing,
+		'_views/listing-de.html' => $listing_lingua,
+		'_views/listing-en.html' => $listing_lingua,
 		'_views/post.html' => 'Hello, world!',
 	},
 );
 
-ok (Qgoda::CLI->new(['build'])->dispatch);
-ok -e '_site/index.de.html', '/index.de.html';
-ok -e '_site/index.en.html', '/index.en.html';
-ok -e '_site/de/post/index.html', '/de/post/index.html';
-ok -e '_site/en/post/index.html', '/en/post/index.html';
+my ($got, $wanted);
+
+my $qgoda = Qgoda->new;
+
+ok $qgoda->buildForWatch, '1st build';
+$got = collect_artefacts;
+$wanted = [
+	'_site/',
+	'_site/de/',
+	'_site/de/post/',
+	'_site/de/post/index.html',
+	'_site/en/',
+	'_site/en/post/',
+	'_site/en/post/index.html',
+	'_site/index.de.html',
+	'_site/index.en.html',
+];
+is_deeply $got, $wanted, 'build 1';
+prune_site $got;
 
 $site->tearDown;
 
 done_testing;
+
+sub collect_artefacts {
+	my @files;
+
+	my $cb = sub {
+			if (-d $File::Find::name) {
+					push @files, "$File::Find::name/";
+			} else {
+					push @files, "$File::Find::name";
+			}
+	};
+
+	finddepth { wanted => $cb, bydepth => 1, no_chdir => 1 }, '_site';
+
+	return [sort @files];
+}
+
+sub prune_site {
+	my ($files) = @_;
+
+	foreach my $filename (reverse @$files) {
+		if ('/' eq substr $filename, -1) {
+			rmdir $filename or die "rmdir '$filename': $!";
+		} else {
+			unlink $filename or die "unlink '$filename': $!";
+		}
+	}
+}

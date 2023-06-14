@@ -197,6 +197,14 @@ sub build {
 	return $self;
 }
 
+sub buildForWatch {
+	my ($self, $changeset, $options) = @_;
+
+	$self->build(%{$options || {}});
+
+	return $self;
+}
+
 sub dumpAssets {
 	my ($self) = @_;
 
@@ -242,7 +250,7 @@ sub watch {
 
 	eval {
 		# An initial build failure is fatal.
-		$self->build(%options);
+		$self->buildForWatch([], \%options);
 
 		my $config = $self->{__config};
 
@@ -256,7 +264,7 @@ sub watch {
 			dirs => [$config->{srcdir}],
 			interval => $config->{latency},
 			parse_events => 1,
-			cb => sub { $self->__onFilesysChange(@_) },
+			cb => sub { $self->__onFilesysChange(\%options, @_) },
 			filter => sub { $self->__filesysChangeFilter(@_) },
 		);
 
@@ -785,7 +793,7 @@ sub __filesysChangeFilter {
 }
 
 sub __onFilesysChange {
-	my ($self, @events) = @_;
+	my ($self, $options, @events) = @_;
 
 	my @files;
 
@@ -802,7 +810,7 @@ sub __onFilesysChange {
 
 	$logger->info(__"start rebuilding site because of file system change");
 
-	eval { $self->build };
+	eval { $self->buildForWatch(\@events, $options) };
 	$logger->error($@) if $@;
 
 	return $self;
