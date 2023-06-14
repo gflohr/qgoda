@@ -160,13 +160,6 @@ sub build {
     my $modified = scalar keys %{$site->getModified};
 
 	if ($modified + $deleted) {
-		foreach my $module (sort keys %{$self->{__post_processors}}) {
-			eval { $self->{__post_processors}->{$module}->postProcess($site) };
-			if ($@) {
-				$logger->error(__x("[Qgoda::PostProcessor::$module]: $@"));
-			}
-		}
-
 		if (!empty $config->{paths}->{timestamp}) {
 			my $timestamp_file = File::Spec->catfile($config->{srcdir},
 													$config->{paths}->{timestamp});
@@ -174,6 +167,14 @@ sub build {
 					$logger->error(__x("cannot write '{file}': {error}!",
 								file => $timestamp_file, error => $!));
 			}
+		}
+	}
+
+	foreach my $module (sort keys %{$self->{__post_processors}}) {
+		$logger->debug(__x("[Qgoda::PostProcessor::{module}]: postProcessing", module => $module));
+		eval { $self->{__post_processors}->{$module}->postProcess($site) };
+		if ($@) {
+			$logger->error(__x("[Qgoda::PostProcessor::{module}]: {error}", module => $module, error => $@));
 		}
 	}
 
@@ -545,6 +546,7 @@ sub __getPostProcessors {
 			}
 		}
 
+		$self->logger->debug(__x("found post-processor '{module}'", module => $class_name));
 		my $processor = $class_name->new(@options);
 		$self->{__post_processors}->{$class_name} = $processor;
 	}
