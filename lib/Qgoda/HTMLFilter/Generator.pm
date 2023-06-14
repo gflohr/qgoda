@@ -23,30 +23,30 @@ use strict;
 use Qgoda;
 
 sub new {
-    my ($class, %args) = @_;
+	my ($class, %args) = @_;
 
-    my $indent = exists $args{indent} ? $args{indent} : '  ';
-    my $self = {
-        __indent => $indent,
-    };
+	my $indent = exists $args{indent} ? $args{indent} : '  ';
+	my $self = {
+		__indent => $indent,
+	};
 
-    bless $self, $class;
+	bless $self, $class;
 }
 
 sub end {
-    my ($self, $chunk, %args) = @_;
+	my ($self, $chunk, %args) = @_;
 
-    return $chunk if 'head' ne $args{tagname};
+	return $chunk if 'head' ne $args{tagname};
 
-    $args{output} =~ /([ \t]*)/;
-    my $head_indent = $1;
+	$args{output} =~ /([ \t]*)/;
+	my $head_indent = $1;
 
-    my $generator = Qgoda->new->config->{generator};
-    my $version = qq{<meta name="generator" content="$generator" />};
+	my $generator = Qgoda->new->config->{generator};
+	my $version = qq{<meta name="generator" content="$generator" />};
 
-    $chunk = $self->{__indent} . "$version\n$head_indent$chunk";
+	$chunk = $self->{__indent} . "$version\n$head_indent$chunk";
 
-    return $chunk;
+	return $chunk;
 }
 
 1;

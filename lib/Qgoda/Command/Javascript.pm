@@ -42,33 +42,33 @@ sub _getOptionSpecs {
 	input_data => 'input-data=s',
 	input_format => 'input-format=s',
 	global => 'global=s',
-    no_output => 'no-output',
+	no_output => 'no-output',
 	no_console => 'no-console'
 }
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
 	my $q = Qgoda->new({quiet => 1, log_stderr => 1});
 
 	if (!empty $options{input} && !empty $options{input_data}) {
 		die __"The options '--input' and '--input-format' are mutually "
-		    . "exlusive!\n";
+			. "exlusive!\n";
 	}
 
 	my $lc_format = lc $options{input_format};
 	die __x("Unsupported input format '{format}'.\n",
-	        format => $options{input_format})
-	    if ($lc_format ne 'json' && $lc_format ne 'yaml'
-	        && $lc_format ne 'perl' && $lc_format ne 'storable');
+			format => $options{input_format})
+		if ($lc_format ne 'json' && $lc_format ne 'yaml'
+			&& $lc_format ne 'perl' && $lc_format ne 'storable');
 
 	my $code = '';
 	if ($args && @$args) {
 		foreach my $arg (@$args) {
 			my $content = read_file $arg;
 			die __x("error reading '{filename}': {error}!\n",
-			        filename => $arg, error => $!)
-			    if !defined $content;
+					filename => $arg, error => $!)
+				if !defined $content;
 			$code .= $content;
 		}
 	} else {
@@ -92,8 +92,8 @@ sub _run {
 		eval {
 			if ('json' eq $lc_format) {
 				$input_data = JSON->new->allow_nonref
-				                  ->allow_blessed->convert_blessed->utf8
-				                  ->decode($input_data);
+								  ->allow_blessed->convert_blessed->utf8
+								  ->decode($input_data);
 			} elsif ('yaml' eq $lc_format) {
 				$input_data = YAML::XS::Lod($input_data);
 			} elsif ('perl' eq $lc_format) {
@@ -105,7 +105,7 @@ sub _run {
 		};
 		if ($@) {
 			die __x("error reading input data from '{filename}': {error}!\n",
-			        filename => $input_filename, error => $@);
+					filename => $input_filename, error => $@);
 		}
 	}
 
@@ -120,7 +120,7 @@ sub _run {
 
 	$js->run($code);
 
-    return $self;
+	return $self;
 }
 
 1;
@@ -131,12 +131,12 @@ qgoda javascript - Execute JavaScript code inside Qgoda
 
 =head1 SYNOPSIS
 
-    qgoda javascript [<global options>] [-i|--input=FILENAME]
-                     [-g|--global=MODULE_DIR1] [-g|--global=MODULE_DIR2]
-                     [--input-data=DATA]
-                     [--input-format=JSON|YAML|Perl|Storable]
-                     [--no-stdout] [--no-stderr]
-                     [FILENAME...]
+	qgoda javascript [<global options>] [-i|--input=FILENAME]
+					 [-g|--global=MODULE_DIR1] [-g|--global=MODULE_DIR2]
+					 [--input-data=DATA]
+					 [--input-format=JSON|YAML|Perl|Storable]
+					 [--no-stdout] [--no-stderr]
+					 [FILENAME...]
 
 Try 'qgoda --help' for a description of global options.
 
@@ -156,7 +156,7 @@ are accepted by Duktape!
 Qgoda, however, implements a module resolver so that you can use constructs
 like:
 
-    const _ = require('lodash');
+	const _ = require('lodash');
 
 The module is resolved in the same way that NodeJS would resolve it.
 See the option I<--global> below for more information.

@@ -27,21 +27,21 @@ use Qgoda;
 use base qw(Qgoda::Plugger);
 
 sub new {
-    my ($class, $data) = @_;
+	my ($class, $data) = @_;
 
-    my $self = bless $data, $class;
+	my $self = bless $data, $class;
 
-    require $data->{main};
+	require $data->{main};
 
-    return $self;
+	return $self;
 }
 
 sub language {
-    return 'Perl';
+	return 'Perl';
 }
 
 sub native {
-    return 1;
+	return 1;
 }
 
 1;

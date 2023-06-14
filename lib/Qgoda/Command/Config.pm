@@ -29,15 +29,15 @@ sub _getDefaults {}
 sub _getOptionSpecs {}
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    $global_options->{quiet} = 1;
-    delete $global_options->{verbose};
-    $global_options->{log_stderr} = 1;
+	$global_options->{quiet} = 1;
+	delete $global_options->{verbose};
+	$global_options->{log_stderr} = 1;
 
-    Qgoda->new($global_options)->printConfig;
+	Qgoda->new($global_options)->printConfig;
 
-    return $self;
+	return $self;
 }
 
 1;

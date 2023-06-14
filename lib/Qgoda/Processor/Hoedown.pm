@@ -25,22 +25,22 @@ use base qw(Qgoda::Processor);
 use Text::Markdown::Hoedown qw(markdown);
 
 sub new {
-    my ($class, %options) = @_;
+	my ($class, %options) = @_;
 
-    my $self = $class->SUPER::new(%options);
-    $self->{__options} = \%options;
+	my $self = $class->SUPER::new(%options);
+	$self->{__options} = \%options;
 
-    return $self;
+	return $self;
 }
 
 sub process {
-    my ($self, $content, $asset, $filename) = @_;
+	my ($self, $content, $asset, $filename) = @_;
 
-    my %options = (
-        extensions => 0x7fff_ffff
-    );
+	my %options = (
+		extensions => 0x7fff_ffff
+	);
 
-    return markdown $content, %options;
+	return markdown $content, %options;
 }
 
 1;

@@ -35,115 +35,115 @@ use Qgoda::Splitter;
 use base qw(Locale::XGettext);
 
 sub readFile {
-    my ($self, $filename) = @_;
+	my ($self, $filename) = @_;
 
-    $self->{__qgoda_files} ||= [];
-    push @{$self->{__qgoda_files}}, $filename;
+	$self->{__qgoda_files} ||= [];
+	push @{$self->{__qgoda_files}}, $filename;
 
-    return $self;
+	return $self;
 }
 
 sub extractFromNonFiles {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $podir = getcwd;
-    my $srcdir = File::Spec->rel2abs($self->option('srcdir'));
+	my $podir = getcwd;
+	my $srcdir = File::Spec->rel2abs($self->option('srcdir'));
 
-    if (!chdir $srcdir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $srcdir, error => $!);
-    }
+	if (!chdir $srcdir) {
+		die __x("error changing working directory to '{dir}': {error}\n",
+				dir => $srcdir, error => $!);
+	}
 
-    my $qgoda = Qgoda->new({ 
-        quiet => 1,
-        verbose => 0,
-        log_stderr => 1,
-    });
+	my $qgoda = Qgoda->new({ 
+		quiet => 1,
+		verbose => 0,
+		log_stderr => 1,
+	});
 
-    my %masters = get_masters;
-    my %master_paths;
-    foreach my $relpath (keys %masters) {
-        my $abs = realpath(File::Spec->rel2abs($relpath, $srcdir));
-        $master_paths{$abs} = $relpath;
-    }
+	my %masters = get_masters;
+	my %master_paths;
+	foreach my $relpath (keys %masters) {
+		my $abs = realpath(File::Spec->rel2abs($relpath, $srcdir));
+		$master_paths{$abs} = $relpath;
+	}
 
-    foreach my $filename (@{$self->{__qgoda_files}}) {
-        my $abs = realpath(File::Spec->rel2abs($filename, $podir));
-        if (exists $master_paths{$abs}) {
-            my $relpath = $master_paths{$abs};
-            my $translations = $masters{$relpath};
-            $self->__extractFromMaster($filename, $relpath, $translations);
-        }
-    }
+	foreach my $filename (@{$self->{__qgoda_files}}) {
+		my $abs = realpath(File::Spec->rel2abs($filename, $podir));
+		if (exists $master_paths{$abs}) {
+			my $relpath = $master_paths{$abs};
+			my $translations = $masters{$relpath};
+			$self->__extractFromMaster($filename, $relpath, $translations);
+		}
+	}
 
-    if (!chdir $podir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $podir, error => $!);
-    }
+	if (!chdir $podir) {
+		die __x("error changing working directory to '{dir}': {error}\n",
+				dir => $podir, error => $!);
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __extractFromMaster {
-    my ($self, $filename, $master, $translations) = @_;
+	my ($self, $filename, $master, $translations) = @_;
 
-    my %translate;
-    my $site = Qgoda->new->getSite;
-    foreach my $relpath (%$translations) {
-        my $asset = $translations->{$relpath};
-        my $translate = $asset->{translate};
-        next if !defined $translate;
-        if (ref $translate && 'ARRAY' eq reftype $translate) {
-            map { $translate{$_} = 1 } @$translate;
-        } else {
-            $translate{$translate} = 1;
-        }
-    }
+	my %translate;
+	my $site = Qgoda->new->getSite;
+	foreach my $relpath (%$translations) {
+		my $asset = $translations->{$relpath};
+		my $translate = $asset->{translate};
+		next if !defined $translate;
+		if (ref $translate && 'ARRAY' eq reftype $translate) {
+			map { $translate{$_} = 1 } @$translate;
+		} else {
+			$translate{$translate} = 1;
+		}
+	}
 
-    my $master_asset = $site->getAssetByRelpath($master);
-    if (!$master_asset) {
-        my $path = File::Spec->rel2abs($master, $self->option('srcdir'));
-        $master_asset = Qgoda::Asset->new($path, $master);
-    }
-    my $splitter = Qgoda::Splitter->new($master_asset->getPath);
+	my $master_asset = $site->getAssetByRelpath($master);
+	if (!$master_asset) {
+		my $path = File::Spec->rel2abs($master, $self->option('srcdir'));
+		$master_asset = Qgoda::Asset->new($path, $master);
+	}
+	my $splitter = Qgoda::Splitter->new($master_asset->getPath);
 
-    my $meta = $splitter->meta;
-    foreach my $key (sort {$splitter->metaLineNumber($a) 
-                           <=> $splitter->metaLineNumber($b) 
-                     } keys %translate) {
-        next if !exists $master_asset->{$key};
-        my $slice = { $key => $master_asset->{$key}};
-        my $flat = flatten2hash $slice;
-        foreach my $variable (keys %$flat) {
-            my $msgid = $flat->{$variable};
-            if ($variable =~ /(.+)\.[0-9]+$/) {
-                my $root = $1;
-                if (ref $slice->{$root} && 'ARRAY' eq reftype $slice->{$root}) {
-                    $variable = $root;
-                }
-            }
-            $self->addEntry(
-                msgid => $msgid,
-                msgctxt => $variable,
-                reference => $filename . ':' . $splitter->metaLineNumber($key),
-            );
-        }
-    }
+	my $meta = $splitter->meta;
+	foreach my $key (sort {$splitter->metaLineNumber($a) 
+						   <=> $splitter->metaLineNumber($b) 
+					 } keys %translate) {
+		next if !exists $master_asset->{$key};
+		my $slice = { $key => $master_asset->{$key}};
+		my $flat = flatten2hash $slice;
+		foreach my $variable (keys %$flat) {
+			my $msgid = $flat->{$variable};
+			if ($variable =~ /(.+)\.[0-9]+$/) {
+				my $root = $1;
+				if (ref $slice->{$root} && 'ARRAY' eq reftype $slice->{$root}) {
+					$variable = $root;
+				}
+			}
+			$self->addEntry(
+				msgid => $msgid,
+				msgctxt => $variable,
+				reference => $filename . ':' . $splitter->metaLineNumber($key),
+			);
+		}
+	}
 
-    foreach my $entry ($splitter->entries) {
-        $self->addEntry(
-            msgid => $entry->{text},
-            reference => $filename . ':' . $entry->{lineno},
-            msgctxt => $entry->{msgctxt},
-            comment => $entry->{comment},
-        );
-    }
+	foreach my $entry ($splitter->entries) {
+		$self->addEntry(
+			msgid => $entry->{text},
+			reference => $filename . ':' . $entry->{lineno},
+			msgctxt => $entry->{msgctxt},
+			comment => $entry->{comment},
+		);
+	}
 
-    return $self;
+	return $self;
 }
 
 sub programName {
-    $0 . ' xgettext';
+	$0 . ' xgettext';
 }
 
 sub canFlags { return }
@@ -151,18 +151,18 @@ sub canKeywords { return }
 sub canExtractAll { return }
 
 sub languageSpecificOptions {
-    return [
-        [
-            '--srcdir=s',
-            'srcdir',
-            '    --srcdir=SRCDIR',
-            __"the Qgoda top-level source directory (defaults to '..')",
-        ]
-    ];
+	return [
+		[
+			'--srcdir=s',
+			'srcdir',
+			'	--srcdir=SRCDIR',
+			__"the Qgoda top-level source directory (defaults to '..')",
+		]
+	];
 }
 
 sub versionInformation {
-    Qgoda::CLI->displayVersion;
+	Qgoda::CLI->displayVersion;
 }
 
 1;

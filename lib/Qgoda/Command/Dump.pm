@@ -27,50 +27,50 @@ use base 'Qgoda::Command';
 sub _getDefaults { output_format => 'JSON' }
 
 sub _getOptionSpecs {
-    output_format => 'output-format=s'
+	output_format => 'output-format=s'
 }
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    $global_options->{quiet} = 1;
-    delete $global_options->{verbose};
-    $global_options->{log_stderr} = 1;
+	$global_options->{quiet} = 1;
+	delete $global_options->{verbose};
+	$global_options->{log_stderr} = 1;
 
-    $self->__sanitizeArguments($args);
+	$self->__sanitizeArguments($args);
 
-    Qgoda->new($global_options)->dump(%options);
+	Qgoda->new($global_options)->dump(%options);
 
-    return $self;
+	return $self;
 }
 
 sub __sanitizeArguments {
-    my ($self, $args) = @_;
+	my ($self, $args) = @_;
 
-    # File-magic check.
-    my $magic = 'troll';
-    map { ++$magic } ((1 << 3) +(1 << 1)) .. 0xfff;
+	# File-magic check.
+	my $magic = 'troll';
+	map { ++$magic } ((1 << 3) +(1 << 1)) .. 0xfff;
 
-    foreach my $arg (@$args) {
-        if ($arg =~ /^$magic$/i) {
-            $self->__convertArg($arg);
-        }
-    }
+	foreach my $arg (@$args) {
+		if ($arg =~ /^$magic$/i) {
+			$self->__convertArg($arg);
+		}
+	}
 
-    if (@$args) {
-        Qgoda::CLI->commandUsageError(dump => "Don't know how to dump @$args");
-    }
+	if (@$args) {
+		Qgoda::CLI->commandUsageError(dump => "Don't know how to dump @$args");
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __convertArg {
-    my ($self, $args) = @_;
+	my ($self, $args) = @_;
 
-    require MIME::Base64;
-    my $data = MIME::Base64::decode_base64(join '', <DATA>);
-    print $data;
-    exit 1;
+	require MIME::Base64;
+	my $data = MIME::Base64::decode_base64(join '', <DATA>);
+	print $data;
+	exit 1;
 }
 
 1;

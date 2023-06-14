@@ -35,13 +35,13 @@ use URI::Escape qw(uri_escape_utf8);
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
 @EXPORT_OK = qw(empty read_file write_file yaml_error front_matter lowercase
-                expand_perl_format read_body merge_data interpolate
-                normalize_path strip_suffix
-                perl_identifier perl_class class2module
-                slugify html_escape unmarkup globstar trim
-                flatten2hash is_archive archive_extender collect_defaults
-                canonical purify safe_yaml_load
-                escape_link blength qstrftime tt2_args_merge);
+				expand_perl_format read_body merge_data interpolate
+				normalize_path strip_suffix
+				perl_identifier perl_class class2module
+				slugify html_escape unmarkup globstar trim
+				flatten2hash is_archive archive_extender collect_defaults
+				canonical purify safe_yaml_load
+				escape_link blength qstrftime tt2_args_merge);
 
 sub js_unescape($);
 sub tokenize($$);
@@ -52,218 +52,218 @@ sub _globstar($;$);
 my $unsafe_for_links = "^A-Za-z0-9\-\._~/";
 
 sub empty(;$) {
-    my ($what) = @_;
+	my ($what) = @_;
 
-    $what = $_ if !@_;
+	$what = $_ if !@_;
 
-    return if defined $what && length $what;
+	return if defined $what && length $what;
 
-    return 1;
+	return 1;
 }
 
 sub read_file($) {
-    my ($filename) = @_;
+	my ($filename) = @_;
 
-    my $fh = IO::File->new;
-    open $fh, "<", $filename or return;
+	my $fh = IO::File->new;
+	open $fh, "<", $filename or return;
 
-    local $/;
-    my $data = <$fh>;
-    $fh->close;
+	local $/;
+	my $data = <$fh>;
+	$fh->close;
 
-    return $data;
+	return $data;
 }
 
 sub front_matter($) {
-    my ($filename) = @_;
+	my ($filename) = @_;
 
-    my $fh = IO::File->new;
-    open $fh, "<", $filename or return;
+	my $fh = IO::File->new;
+	open $fh, "<", $filename or return;
 
-    undef $!;
-    my $first_line = <$fh>;
-    return if empty $first_line;
-    return if $first_line !~ /---[ \t]*\n$/o;
+	undef $!;
+	my $first_line = <$fh>;
+	return if empty $first_line;
+	return if $first_line !~ /---[ \t]*\n$/o;
 
-    my $front_matter = '';
-    while (1) {
-        my $line = <$fh>;
-        return if !defined $line;
-        return $front_matter if $line =~ /---[ \t]*\n$/o;
-        $front_matter .= $line;
-    }
+	my $front_matter = '';
+	while (1) {
+		my $line = <$fh>;
+		return if !defined $line;
+		return $front_matter if $line =~ /---[ \t]*\n$/o;
+		$front_matter .= $line;
+	}
 
-    return;
+	return;
 }
 
 sub read_body($$) {
-    my ($filename, $placeholder) = @_;
+	my ($filename, $placeholder) = @_;
 
-    my $fh = IO::File->new;
-    open $fh, "<:encoding(UTF-8)", $filename or die "$!\n";
+	my $fh = IO::File->new;
+	open $fh, "<:encoding(UTF-8)", $filename or die "$!\n";
 
-    undef $!;
-    my $first_line = <$fh>;
-    die __"File is empty!\n" if empty $first_line;
-    die __"File does not begin with '---'!\n" if $first_line !~ /---[ \t]*\n$/o;
-    my $lines = 1;
+	undef $!;
+	my $first_line = <$fh>;
+	die __"File is empty!\n" if empty $first_line;
+	die __"File does not begin with '---'!\n" if $first_line !~ /---[ \t]*\n$/o;
+	my $lines = 1;
 
-    while (1) {
-        ++$lines;
-        my $line = <$fh>;
-        die __"Unterminated front matter!\n" if !defined $line;
-        last if $line =~ /---[ \t]*\n$/o;
-    }
+	while (1) {
+		++$lines;
+		my $line = <$fh>;
+		die __"Unterminated front matter!\n" if !defined $line;
+		last if $line =~ /---[ \t]*\n$/o;
+	}
 
-    local $/;
+	local $/;
 
-    my $front_matter = "$placeholder" x $lines;
+	my $front_matter = "$placeholder" x $lines;
 
-    return $front_matter . <$fh>;
+	return $front_matter . <$fh>;
 }
 
 sub write_file($$) {
-    my ($path, $data) = @_;
+	my ($path, $data) = @_;
 
-    my (undef, $directory) = fileparse $path;
-    make_path $directory unless -e $directory;
+	my (undef, $directory) = fileparse $path;
+	make_path $directory unless -e $directory;
 
-    my $octets;
-    if (Encode::is_utf8($data)) {
-         my $handle_malformed = sub {
-             my $replacement = sprintf "{{+%04X}}", shift;
-             warn "malformed multi-byte sequence, search for '$replacement' in output file\n";
+	my $octets;
+	if (Encode::is_utf8($data)) {
+		 my $handle_malformed = sub {
+			 my $replacement = sprintf "{{+%04X}}", shift;
+			 warn "malformed multi-byte sequence, search for '$replacement' in output file\n";
 
-             return $replacement;
-         };
-         $octets = Encode::encode('UTF-8', $data, $handle_malformed);
-    } else {
-         $octets = $data;
-    }
+			 return $replacement;
+		 };
+		 $octets = Encode::encode('UTF-8', $data, $handle_malformed);
+	} else {
+		 $octets = $data;
+	}
 
-    open my $fh, ">", $path or return;
+	open my $fh, ">", $path or return;
 
-    $fh->print($octets) or return;
-    $fh->close or return;
+	$fh->print($octets) or return;
+	$fh->close or return;
 
-    return 1;
+	return 1;
 }
 
 sub yaml_error {
-    my ($filename, $error) = @_;
+	my ($filename, $error) = @_;
 
-    my @lines = split /\n/, $error;
-    pop @lines;
-    return "$filename: " . join "\n", @lines;
+	my @lines = split /\n/, $error;
+	pop @lines;
+	return "$filename: " . join "\n", @lines;
 }
 
 sub lowercase($) {
-    my ($str) = @_;
+	my ($str) = @_;
 
-    return lc $str;
+	return lc $str;
 }
 
 sub merge_data {
-    my ($data, $overlay) = @_;
+	my ($data, $overlay) = @_;
 
-    # Return $overlay if it is of a different type than $data.
-    my $equal_ref = sub {
-        my ($x, $y) = @_;
+	# Return $overlay if it is of a different type than $data.
+	my $equal_ref = sub {
+		my ($x, $y) = @_;
 
-        return if !ref $x;
-        return if !ref $y;
+		return if !ref $x;
+		return if !ref $y;
 
-        my $ref_x = reftype $x;
-        my $ref_y = reftype $y;
+		my $ref_x = reftype $x;
+		my $ref_y = reftype $y;
 
-        return $ref_x eq $ref_y;
-    };
+		return $ref_x eq $ref_y;
+	};
 
-    return $overlay if !$equal_ref->($overlay, $data);
-    return $overlay if 'ARRAY' eq reftype $overlay;
+	return $overlay if !$equal_ref->($overlay, $data);
+	return $overlay if 'ARRAY' eq reftype $overlay;
 
-    my $merger;
-    $merger = sub {
-        my ($d, $o) = @_;
+	my $merger;
+	$merger = sub {
+		my ($d, $o) = @_;
 
-        foreach my $key (keys %$d) {
-            if (exists $o->{$key}) {
-                if (!$equal_ref->($d->{$key}, $o->{$key})) {
-                    eval { $d->{$key} = $o->{$key}; };
-                } elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
-                    $merger->($d->{$key}, $o->{$key});
-                } else {
-                    $d->{$key} = $o->{$key};
-                }
-            }
-        }
-        foreach my $key (keys %$o) {
-            if (!exists $d->{$key}) {
-                $d->{$key} = $o->{$key};
-            }
-        }
-    };
+		foreach my $key (keys %$d) {
+			if (exists $o->{$key}) {
+				if (!$equal_ref->($d->{$key}, $o->{$key})) {
+					eval { $d->{$key} = $o->{$key}; };
+				} elsif (UNIVERSAL::isa($d->{$key}, 'HASH')) {
+					$merger->($d->{$key}, $o->{$key});
+				} else {
+					$d->{$key} = $o->{$key};
+				}
+			}
+		}
+		foreach my $key (keys %$o) {
+			if (!exists $d->{$key}) {
+				$d->{$key} = $o->{$key};
+			}
+		}
+	};
 
-    $merger->($data, $overlay);
+	$merger->($data, $overlay);
 
-    return $data;
+	return $data;
 }
 
 sub interpolate($$) {
-    my ($string, $data) = @_;
+	my ($string, $data) = @_;
 
-    $data ||= {};
+	$data ||= {};
 
-    my $type = reftype $data;
-    if ($type ne 'ARRAY' && $type ne 'HASH') {
-        $type = 'HASH';
-        $data = {};
-    }
+	my $type = reftype $data;
+	if ($type ne 'ARRAY' && $type ne 'HASH') {
+		$type = 'HASH';
+		$data = {};
+	}
 
-    my $result = '';
-    while ($string =~ s/^([^\{]*)\{//) {
-        $result .= $1;
+	my $result = '';
+	while ($string =~ s/^([^\{]*)\{//) {
+		$result .= $1;
 
-        my ($remainder, @tokens) = tokenize $string, $type;
+		my ($remainder, @tokens) = tokenize $string, $type;
 
-        # Syntax errors can be handled in different ways.
-        # You can handle it gracefully and either leave
-        # everything uninterpolated, or you could replace the
-        # faulty string with the emtpy string or you can throw an
-        # exception.  We just throw an exception.
-        die "syntax error before: '$remainder'\n" if !@tokens;
+		# Syntax errors can be handled in different ways.
+		# You can handle it gracefully and either leave
+		# everything uninterpolated, or you could replace the
+		# faulty string with the emtpy string or you can throw an
+		# exception.  We just throw an exception.
+		die "syntax error before: '$remainder'\n" if !@tokens;
 
-        my $value = evaluate \@tokens, $data;
-        $result .= $value if defined $value;
-        $string = $remainder;
-    }
+		my $value = evaluate \@tokens, $data;
+		$result .= $value if defined $value;
+		$string = $remainder;
+	}
 
-    return $result . $string;
+	return $result . $string;
 }
 
 sub normalize_path($;$) {
-    my ($dir, $trailing_slash) = @_;
+	my ($dir, $trailing_slash) = @_;
 
-    $dir =~ s{[\\/]+}{/}g;
-    $dir =~ s{/$}{} unless $trailing_slash;
+	$dir =~ s{[\\/]+}{/}g;
+	$dir =~ s{/$}{} unless $trailing_slash;
 
-    return $dir;
+	return $dir;
 }
 
 sub strip_suffix($) {
-    my ($filename) = @_;
+	my ($filename) = @_;
 
-    my @parts = split /\./, $filename;
-    my @suffixes;
+	my @parts = split /\./, $filename;
+	my @suffixes;
 
-    while (@parts > 1) {
-        last if $parts[-1] =~ /[^a-zA-Z0-9]/;
-        unshift @suffixes, pop @parts
-    }
+	while (@parts > 1) {
+		last if $parts[-1] =~ /[^a-zA-Z0-9]/;
+		unshift @suffixes, pop @parts
+	}
 
-    my $basename = join '.', @parts;
+	my $basename = join '.', @parts;
 
-    return $basename, grep { /./ } @suffixes;
+	return $basename, grep { /./ } @suffixes;
 }
 
 ##############################################################################
@@ -271,539 +271,539 @@ sub strip_suffix($) {
 ##############################################################################
 
 sub tokenize($$) {
-    my ($string, $type) = @_;
+	my ($string, $type) = @_;
 
-    my @tokens;
+	my @tokens;
 
-    my $depth = 0;
-    while (1) {
-        $string =~ s/^[ \t\r\n]+//;
-        last if !length $string;
-        last if $string =~ s/^\}//;
+	my $depth = 0;
+	while (1) {
+		$string =~ s/^[ \t\r\n]+//;
+		last if !length $string;
+		last if $string =~ s/^\}//;
 
-        my $last = @tokens ? $tokens[-1]->[0] : '[';
+		my $last = @tokens ? $tokens[-1]->[0] : '[';
 
-        if ($last eq '.') {
-            # Only variables are allowed but they are interpreted as
-            # a quoted string.  We will repair that later, however.
-            return $string unless $string =~ s/^([^\[\]\}\.]+)//;
-            push @tokens, ['v', $1];
-        } elsif ($last eq 'v' || $last eq ']') {
-            # Only brackets or a dot are allowed.  Everything else is a
-            # syntax error.
-            return $string unless $string =~ s/^([\[\]\.])//;
+		if ($last eq '.') {
+			# Only variables are allowed but they are interpreted as
+			# a quoted string.  We will repair that later, however.
+			return $string unless $string =~ s/^([^\[\]\}\.]+)//;
+			push @tokens, ['v', $1];
+		} elsif ($last eq 'v' || $last eq ']') {
+			# Only brackets or a dot are allowed.  Everything else is a
+			# syntax error.
+			return $string unless $string =~ s/^([\[\]\.])//;
 
-            if ('[' eq $1) {
-                ++$depth;
-                push @tokens, ['[' => ''];
-            } elsif (']' eq $1) {
-                --$depth;
-                return "]$string" if $depth < 0;
-                push @tokens, [']' => ''];
-            } else {
-                # A dot.
-                push @tokens, ['.', ''];
-            }
-        } elsif ($last eq '[') {
-            # At the beginning or after an opening bracket only quoted
-            # strings are allowed.  Everything but a quoted string is
-            # treated as a variable.
-            if ($string =~ s/^(["'])([^\\\1]*(?:\\.[^\\\1]*)*)\1//) {
-                push @tokens, ['q', $2];
-            } elsif ($string =~ s/^([^\[\]\}\.]+)//) {
-                push @tokens, ['v', $1];
-            } elsif (!@tokens && $string =~ s/^\[//) {
-                # Special case.  We want to allow starting an expression
-                # with an opening bracket so that you can write something
-                # like ["key with special characters"].
-                push @tokens, ['[', ''];
-            } else {
-                return $string;
-            }
-        } else {
-            # The last token was a quoted string (because all other
-            # possibilities are handled above.  The only legal token after
-            # a quoted string is the closing bracket.
-            return $string unless $string =~ s/^]//;
-            push @tokens, [']', ''];
-        }
-    }
+			if ('[' eq $1) {
+				++$depth;
+				push @tokens, ['[' => ''];
+			} elsif (']' eq $1) {
+				--$depth;
+				return "]$string" if $depth < 0;
+				push @tokens, [']' => ''];
+			} else {
+				# A dot.
+				push @tokens, ['.', ''];
+			}
+		} elsif ($last eq '[') {
+			# At the beginning or after an opening bracket only quoted
+			# strings are allowed.  Everything but a quoted string is
+			# treated as a variable.
+			if ($string =~ s/^(["'])([^\\\1]*(?:\\.[^\\\1]*)*)\1//) {
+				push @tokens, ['q', $2];
+			} elsif ($string =~ s/^([^\[\]\}\.]+)//) {
+				push @tokens, ['v', $1];
+			} elsif (!@tokens && $string =~ s/^\[//) {
+				# Special case.  We want to allow starting an expression
+				# with an opening bracket so that you can write something
+				# like ["key with special characters"].
+				push @tokens, ['[', ''];
+			} else {
+				return $string;
+			}
+		} else {
+			# The last token was a quoted string (because all other
+			# possibilities are handled above.  The only legal token after
+			# a quoted string is the closing bracket.
+			return $string unless $string =~ s/^]//;
+			push @tokens, [']', ''];
+		}
+	}
 
-    # Bracket not closed.
-    return '}' if $depth;
+	# Bracket not closed.
+	return '}' if $depth;
 
-    # We may have a trailing dot in our expression.  We check that now
-    # and change the type of "variables" following a dot to a quoted
-    # string.
-    #
-    # We also must repair the type for "variables" that look like numbers
-    # and are enclosed in angle brackets.  Only in this case they are
-    # treated like numbers.  And numbers are the same as quoted strings
-    # for our purposes.
-    # If they are exactly between two brackets they are numbers, otherwise
-    # we try them as variables.
-    for (my $i = 0; $i < @tokens; ++$i) {
-        if ('.' eq $tokens[$i]->[0]) {
-            return $string if $i >= $#tokens;
-            $tokens[++$i]->[0] = 'q';
-        } elsif ('[' eq $tokens[$i]->[0]
-                 && 'v' eq $tokens[$i + 1]->[0]
-                 && ']' eq $tokens[$i + 2]->[0]
-                 && $tokens[$i + 1]->[1] =~ /^[-+]?(?:0|[1-9][0-9]*)$/) {
-            # Change the type to a quoted string.
-            $tokens[$i + 1]->[0] = 'q';
+	# We may have a trailing dot in our expression.  We check that now
+	# and change the type of "variables" following a dot to a quoted
+	# string.
+	#
+	# We also must repair the type for "variables" that look like numbers
+	# and are enclosed in angle brackets.  Only in this case they are
+	# treated like numbers.  And numbers are the same as quoted strings
+	# for our purposes.
+	# If they are exactly between two brackets they are numbers, otherwise
+	# we try them as variables.
+	for (my $i = 0; $i < @tokens; ++$i) {
+		if ('.' eq $tokens[$i]->[0]) {
+			return $string if $i >= $#tokens;
+			$tokens[++$i]->[0] = 'q';
+		} elsif ('[' eq $tokens[$i]->[0]
+				 && 'v' eq $tokens[$i + 1]->[0]
+				 && ']' eq $tokens[$i + 2]->[0]
+				 && $tokens[$i + 1]->[1] =~ /^[-+]?(?:0|[1-9][0-9]*)$/) {
+			# Change the type to a quoted string.
+			$tokens[$i + 1]->[0] = 'q';
 
-            # And shorten the loop again.
-            $i = $i + 2;
-        }
-    }
+			# And shorten the loop again.
+			$i = $i + 2;
+		}
+	}
 
-    return $string, @tokens;
+	return $string, @tokens;
 }
 
 sub evaluate($$) {
-    my ($tokens, $data) = @_;
+	my ($tokens, $data) = @_;
 
-    my $cursor = $data;
+	my $cursor = $data;
 
-    while (@$tokens) {
-        my $token = shift @$tokens;
-        my ($toktype, $value) = @$token;
+	while (@$tokens) {
+		my $token = shift @$tokens;
+		my ($toktype, $value) = @$token;
 
-        if ('[' eq $toktype) {
-            # We have to recurse.
-            my $key = evaluate $tokens, $data;
-            $cursor = lookup $cursor, $key;
-        } elsif (']' eq $toktype) {
-            return $cursor;
-        } elsif ('.' eq $toktype) {
-            $token = shift @$tokens;
-            $cursor = lookup $cursor, $token->[1];
-        } elsif ('v' eq $toktype) {
-            $cursor = lookup $cursor, $value;
-        } elsif ('q' eq $toktype) {
-            $cursor = $value;
-        } else {
-            die "unknown token type '$toktype'";
-        }
-    }
+		if ('[' eq $toktype) {
+			# We have to recurse.
+			my $key = evaluate $tokens, $data;
+			$cursor = lookup $cursor, $key;
+		} elsif (']' eq $toktype) {
+			return $cursor;
+		} elsif ('.' eq $toktype) {
+			$token = shift @$tokens;
+			$cursor = lookup $cursor, $token->[1];
+		} elsif ('v' eq $toktype) {
+			$cursor = lookup $cursor, $value;
+		} elsif ('q' eq $toktype) {
+			$cursor = $value;
+		} else {
+			die "unknown token type '$toktype'";
+		}
+	}
 
-    return $cursor;
+	return $cursor;
 }
 
 sub lookup($$) {
-    my ($data, $key) = @_;
+	my ($data, $key) = @_;
 
-    my $type = reftype $data;
-    if ('HASH' eq $type) {
-        return $data->{$key};
-    } elsif ('ARRAY' eq $type) {
-        return $data->[$key];
-    } else {
-        return;
-    }
+	my $type = reftype $data;
+	if ('HASH' eq $type) {
+		return $data->{$key};
+	} elsif ('ARRAY' eq $type) {
+		return $data->[$key];
+	} else {
+		return;
+	}
 }
 
 sub js_unescape($) {
-    my ($string) = @_;
+	my ($string) = @_;
 
-    my %escapes = (
-        "\n" => '',
-        0 => "\000",    # Note that octal escapes are not supported!
-        b => "\x08",
-        f => "\x0c",
-        n => "\x0a",
-        r => "\x0d",
-        t => "\x09",
-        v => "\x0b",
-        "'" => "'",
-        '"' => '"',
-        '\\' => '\\',
-    );
+	my %escapes = (
+		"\n" => '',
+		0 => "\000",	# Note that octal escapes are not supported!
+		b => "\x08",
+		f => "\x0c",
+		n => "\x0a",
+		r => "\x0d",
+		t => "\x09",
+		v => "\x0b",
+		"'" => "'",
+		'"' => '"',
+		'\\' => '\\',
+	);
 
-    $string =~ s/
-                \\
-                  (
-                    x[0-9a-fA-F]{2}
-                    |
-                    u[0-9a-fA-F]{4}
-                    |
-                    u\{[0-9a-fA-F]+\}
-                    |
-                    .
-                  )
-                /
-                if (exists $escapes{$1}) {
-                    $escapes{$1}
-                } elsif (1 == length $1) {
-                    $1;
-                } elsif ('x' eq substr $1, 0, 1) {
-                    chr oct '0' . $1;
-                } elsif ('u' eq substr $1, 0, 1) {
-                    if ('u{' eq substr $1, 0, 2) {
-                        my $code = substr $1, 0, 2;
-                        $code =~ s{^0+}{};
-                        $code ||= '0';
-                        chr oct '0x' . $code;
-                    } else {
-                        chr oct '0x' . substr $1, 1;
-                    }
-                }
-                /xegs;
+	$string =~ s/
+				\\
+				  (
+					x[0-9a-fA-F]{2}
+					|
+					u[0-9a-fA-F]{4}
+					|
+					u\{[0-9a-fA-F]+\}
+					|
+					.
+				  )
+				/
+				if (exists $escapes{$1}) {
+					$escapes{$1}
+				} elsif (1 == length $1) {
+					$1;
+				} elsif ('x' eq substr $1, 0, 1) {
+					chr oct '0' . $1;
+				} elsif ('u' eq substr $1, 0, 1) {
+					if ('u{' eq substr $1, 0, 2) {
+						my $code = substr $1, 0, 2;
+						$code =~ s{^0+}{};
+						$code ||= '0';
+						chr oct '0x' . $code;
+					} else {
+						chr oct '0x' . substr $1, 1;
+					}
+				}
+				/xegs;
 
-    return $string;
+	return $string;
 }
 
 sub perl_identifier($) {
-    my ($name) = @_;
+	my ($name) = @_;
 
-    return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
+	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*$/o;
 }
 
 sub perl_class($) {
-    my ($name) = @_;
+	my ($name) = @_;
 
-    return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
+	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
 }
 
 sub class2module($) {
-    my ($class) = @_;
+	my ($class) = @_;
 
-    $class =~ s{(?:::|')}{/}g;
+	$class =~ s{(?:::|')}{/}g;
 
-    return $class . '.pm';
+	return $class . '.pm';
 }
 
 sub slugify($;$) {
-    my ($string, $locale) = @_;
+	my ($string, $locale) = @_;
 
-    return '' if !defined $string;
+	return '' if !defined $string;
 
-    Encode::_utf8_on($string);
+	Encode::_utf8_on($string);
 
-    require Text::Unidecode;
-    my $slug = lc Text::Unidecode::unidecode($string);
+	require Text::Unidecode;
+	my $slug = lc Text::Unidecode::unidecode($string);
 
-    # We only allow alphanumerical characters, the dot, the hyphen and the underscore.
-    # Everything else gets converted into hyphens, and sequences of hyphens
-    # are condensed into one.
-    $slug =~ s/[\x00-\x2c\x2f\x3a-\x5e\x60\x7b-\x7f]/-/g;
-    $slug =~ s/--+/-/g;
-    $slug =~ s/^-//;
-    $slug =~ s/-$//;
-    $slug = '-' if !length $slug;
+	# We only allow alphanumerical characters, the dot, the hyphen and the underscore.
+	# Everything else gets converted into hyphens, and sequences of hyphens
+	# are condensed into one.
+	$slug =~ s/[\x00-\x2c\x2f\x3a-\x5e\x60\x7b-\x7f]/-/g;
+	$slug =~ s/--+/-/g;
+	$slug =~ s/^-//;
+	$slug =~ s/-$//;
+	$slug = '-' if !length $slug;
 
-    return $slug;
+	return $slug;
 }
 
 sub html_escape($) {
-    my ($string) = @_;
+	my ($string) = @_;
 
-    return '' if !defined $string;
+	return '' if !defined $string;
 
-    my %escapes = (
-        '"' => '&#34;',
-        "&" => '&#38;',
-        "'" => '&#39;',
-        "<" => '&#60;',
-        ">" => '&#62;',
-    );
+	my %escapes = (
+		'"' => '&#34;',
+		"&" => '&#38;',
+		"'" => '&#39;',
+		"<" => '&#60;',
+		">" => '&#62;',
+	);
 
-    $string =~ s/(["&'<>])/$escapes{$1}/gs;
+	$string =~ s/(["&'<>])/$escapes{$1}/gs;
 
-    return $string;
+	return $string;
 }
 
 sub unmarkup($) {
-    my ($string) = @_;
+	my ($string) = @_;
 
-    return '' if !defined $string;
+	return '' if !defined $string;
 
-    require HTML::Parser;
+	require HTML::Parser;
 
-    my $escaped = '';
-    my $text_handler = sub {
-        my ($string) = @_;
+	my $escaped = '';
+	my $text_handler = sub {
+		my ($string) = @_;
 
-        $escaped .= $string;
+		$escaped .= $string;
 
-    };
+	};
 
-    my $parser = HTML::Parser->new(api_version => 3,
-                                   text_h => [$text_handler, 'text'],
-                                   marked_sections => 1);
+	my $parser = HTML::Parser->new(api_version => 3,
+								   text_h => [$text_handler, 'text'],
+								   marked_sections => 1);
 
-    $parser->parse($string);
-    $parser->eof;
+	$parser->parse($string);
+	$parser->eof;
 
-    return $escaped;
+	return $escaped;
 }
 
 sub trim($) {
-    my ($string) = @_;
+	my ($string) = @_;
 
-    $string =~ s{^[ \x09-\x0d]+}{};
-    $string =~ s{[ \x09-\x0d]+$}{};
+	$string =~ s{^[ \x09-\x0d]+}{};
+	$string =~ s{[ \x09-\x0d]+$}{};
 
-    return $string;
+	return $string;
 }
 
 sub flatten2hash {
-    my ($data) = @_;
+	my ($data) = @_;
 
-    my @path;
-    my @types;
-    my %flat;
+	my @path;
+	my @types;
+	my %flat;
 
-    my $postprocess = sub {
-        # Remove the last path component.
-        pop @path;
-        pop @types;
-    };
+	my $postprocess = sub {
+		# Remove the last path component.
+		pop @path;
+		pop @types;
+	};
 
-    # The wanted function for Data::Walk.
-    my $wanted = sub {
-        ++$path[-1] if 'a' eq $types[-1];
+	# The wanted function for Data::Walk.
+	my $wanted = sub {
+		++$path[-1] if 'a' eq $types[-1];
 
-        my $reftype = reftype $_ || '';
+		my $reftype = reftype $_ || '';
 
-        if ('HASH' eq $reftype) {
-            if (!keys %$_) {
-                $flat{join '.', @path} = $_;
-            }
-            push @types, 'h';
-            push @path, '';
-        } elsif ('ARRAY' eq $reftype) {
-            if (!@$_) {
-                $flat{join '.', @path} = $_;
-            }
-            push @types, 'a';
-            push @path, -1;
-        } else {
-            $reftype = '';
-        }
+		if ('HASH' eq $reftype) {
+			if (!keys %$_) {
+				$flat{join '.', @path} = $_;
+			}
+			push @types, 'h';
+			push @path, '';
+		} elsif ('ARRAY' eq $reftype) {
+			if (!@$_) {
+				$flat{join '.', @path} = $_;
+			}
+			push @types, 'a';
+			push @path, -1;
+		} else {
+			$reftype = '';
+		}
 
-        if ('HASH' eq $Data::Walk::type) {
-            if (defined $Data::Walk::key) {
-                # Value.
-                if (!ref $_) {
-                    $flat{join '.', @path} = $_;
-                }
-            } elsif (!ref $_) {
-                # Key.
-                if (/\./) {
-                    $path[-1] = 'INVALID';
-                } else {
-                    $path[-1] = $_;
-                }
-            }
-        } elsif (!$reftype) {
-            $flat{join '.', @path} = $_;
-        }
-    };
+		if ('HASH' eq $Data::Walk::type) {
+			if (defined $Data::Walk::key) {
+				# Value.
+				if (!ref $_) {
+					$flat{join '.', @path} = $_;
+				}
+			} elsif (!ref $_) {
+				# Key.
+				if (/\./) {
+					$path[-1] = 'INVALID';
+				} else {
+					$path[-1] = $_;
+				}
+			}
+		} elsif (!$reftype) {
+			$flat{join '.', @path} = $_;
+		}
+	};
 
-    walk {
-        wanted => $wanted,
-        postprocess => $postprocess,
-    }, $data;
+	walk {
+		wanted => $wanted,
+		postprocess => $postprocess,
+	}, $data;
 
-    return \%flat;
+	return \%flat;
 }
 
 # Should better be called looks_like_archive.
 my @archive_types = (
-            'tar',
-            'tar.gz', 'tgz',
-            'zip',
-            'tar.bz2', 'tbz',
-            'tar.xz', 'txz'
+			'tar',
+			'tar.gz', 'tgz',
+			'zip',
+			'tar.bz2', 'tbz',
+			'tar.xz', 'txz'
 );
 my $archive_re = join '|', map { quotemeta } @archive_types;
 
 sub is_archive($) {
-    my ($path) = @_;
+	my ($path) = @_;
 
-    return if $path !~ /\.(?:$archive_re)$/i;
+	return if $path !~ /\.(?:$archive_re)$/i;
 
-    return 1;
+	return 1;
 }
 
 sub archive_extender($) {
-    my ($path) = @_;
+	my ($path) = @_;
 
-    return if $path !~ /(\.(?:$archive_re))/i;
+	return if $path !~ /(\.(?:$archive_re))/i;
 
-    return lc $1;
+	return lc $1;
 }
 
 sub collect_defaults($$) {
-    my ($path, $rules) = @_;
+	my ($path, $rules) = @_;
 
-    my $vars = {};
-    foreach my $rule (@$rules) {
-        my ($matcher, $values) = @$rule;
+	my $vars = {};
+	foreach my $rule (@$rules) {
+		my ($matcher, $values) = @$rule;
 
-        merge_data $vars, $values if $matcher->matchInclude($path);
-    }
+		merge_data $vars, $values if $matcher->matchInclude($path);
+	}
 
-    return $vars;
+	return $vars;
 }
 
 sub canonical {
-    my ($obj) = @_;
+	my ($obj) = @_;
 
-    local $Storable::canonical = 1;
+	local $Storable::canonical = 1;
 
-    return freeze $obj;
+	return freeze $obj;
 }
 
 sub purify {
-    my ($data) = @_;
+	my ($data) = @_;
 
-    my $type = reftype $data;
-    die "only hashes and arrays supported"
-        if ($type ne 'HASH' && $type ne 'ARRAY');
-    my @stack = ([$type, []]);
+	my $type = reftype $data;
+	die "only hashes and arrays supported"
+		if ($type ne 'HASH' && $type ne 'ARRAY');
+	my @stack = ([$type, []]);
 
-    my $preprocess = sub {
-        if ('HASH' eq $Data::Walk::type) {
-             push @stack, [HASH => []];
-        } else {
-             push @stack, [ARRAY => []];
-        }
+	my $preprocess = sub {
+		if ('HASH' eq $Data::Walk::type) {
+			 push @stack, [HASH => []];
+		} else {
+			 push @stack, [ARRAY => []];
+		}
 
-        return @_;
-    };
+		return @_;
+	};
 
-    my $postprocess = sub {
-        my $item = pop @stack;
-        my ($type, $store) = @$item;
-        if ('HASH' eq $type) {
-            $store = {@$store};
-        }
-        my $current = $stack[-1]->[1];
-        push @$current, $store;
-    };
+	my $postprocess = sub {
+		my $item = pop @stack;
+		my ($type, $store) = @$item;
+		if ('HASH' eq $type) {
+			$store = {@$store};
+		}
+		my $current = $stack[-1]->[1];
+		push @$current, $store;
+	};
 
-    my $wanted = sub {
-        if (ref $_) {
-            my $reftype = reftype $_;
-            if ('HASH' eq $reftype || 'ARRAY' eq $reftype) {
-                return;
-            }
-        }
+	my $wanted = sub {
+		if (ref $_) {
+			my $reftype = reftype $_;
+			if ('HASH' eq $reftype || 'ARRAY' eq $reftype) {
+				return;
+			}
+		}
 
-        my $store = $stack[-1]->[1];
-        push @$store, "$_";
-    };
+		my $store = $stack[-1]->[1];
+		push @$store, "$_";
+	};
 
-    walk { wanted => $wanted, preprocess => $preprocess,
-           postprocess => $postprocess }, $data;
+	walk { wanted => $wanted, preprocess => $preprocess,
+		   postprocess => $postprocess }, $data;
 
-    my $item = pop @stack;
-    $type = $item->[0];
+	my $item = pop @stack;
+	$type = $item->[0];
 
-    return $item->[1]->[0];
+	return $item->[1]->[0];
 }
 
 # Maybe we want to remove the utf-8 flag from the returned yaml data again ...
 sub safe_yaml_load {
-    my ($yaml) = @_;
+	my ($yaml) = @_;
 
-    return YAML::XS::Load($yaml);
+	return YAML::XS::Load($yaml);
 }
 
 sub escape_link {
-    my $link = shift;
-    $link = '' if empty $link;
+	my $link = shift;
+	$link = '' if empty $link;
 
-    return uri_escape_utf8 $link, $unsafe_for_links;
+	return uri_escape_utf8 $link, $unsafe_for_links;
 }
 
 sub blength {
-    my ($scalar) = @_;
+	my ($scalar) = @_;
 
-    return length $scalar if !Encode::is_utf8($scalar);
+	return length $scalar if !Encode::is_utf8($scalar);
 
-    Encode::_utf8_off($scalar);
-    my $blength = length $scalar;
-    Encode::_utf8_on($scalar);
+	Encode::_utf8_off($scalar);
+	my $blength = length $scalar;
+	Encode::_utf8_on($scalar);
 
-    return $blength;
+	return $blength;
 }
 
 sub qstrftime($;$$$) {
-    my ($format, $date, $lingua, $markup) = @_;
+	my ($format, $date, $lingua, $markup) = @_;
 
-    # FIXME! If markup contains attributes, they have to be stripped off
-    # for the closing tag.
-    my ($open, $close) = !empty($markup) ? ("<$markup>", "</$markup>") : ('', '');
-    my %converters = (
-        de => sub { shift . '.' },
-        en => sub {
-            my ($mday) = @_;
+	# FIXME! If markup contains attributes, they have to be stripped off
+	# for the closing tag.
+	my ($open, $close) = !empty($markup) ? ("<$markup>", "</$markup>") : ('', '');
+	my %converters = (
+		de => sub { shift . '.' },
+		en => sub {
+			my ($mday) = @_;
 
-            my $last_digit = ($mday >= 11 && $mday <= 13) ? 0
-                        : substr $mday, -1, 1;
-            if (1 == $last_digit) {
-                return "${mday}${open}st${close}";
-            } elsif (2 == $last_digit) {
-                return "${mday}${open}nd${close}";
-            } elsif (3 == $last_digit) {
-                return "${mday}${open}rd${close}";
-            } else {
-                return "${mday}${open}th${close}";
-            }
-        },
-        fr => sub {
-            my ($mday) = @_;
+			my $last_digit = ($mday >= 11 && $mday <= 13) ? 0
+						: substr $mday, -1, 1;
+			if (1 == $last_digit) {
+				return "${mday}${open}st${close}";
+			} elsif (2 == $last_digit) {
+				return "${mday}${open}nd${close}";
+			} elsif (3 == $last_digit) {
+				return "${mday}${open}rd${close}";
+			} else {
+				return "${mday}${open}th${close}";
+			}
+		},
+		fr => sub {
+			my ($mday) = @_;
 
-            if (1 == $mday) {
-                return "${mday}${open}er${close}";
-            } else {
-                # FIXME! This looks suspicious!
-                shift;
-            }
-        },
-    );
+			if (1 == $mday) {
+				return "${mday}${open}er${close}";
+			} else {
+				# FIXME! This looks suspicious!
+				shift;
+			}
+		},
+	);
 
-    if (!defined $lingua) {
-        $lingua = POSIX::setlocale(POSIX::LC_TIME()) || '';
-        # FIXME! This will not work under Windows.  But we can use a mapping
-        # tabel from Locale::Util.
-    }
-    $lingua = lc substr $lingua, 0, 2;
+	if (!defined $lingua) {
+		$lingua = POSIX::setlocale(POSIX::LC_TIME()) || '';
+		# FIXME! This will not work under Windows.  But we can use a mapping
+		# tabel from Locale::Util.
+	}
+	$lingua = lc substr $lingua, 0, 2;
 
-    my $handler = $converters{$lingua} || sub { shift };
+	my $handler = $converters{$lingua} || sub { shift };
 
-    my @then = localtime $date;
-    my $mday = $then[3];
-    # The handler will probably never be called more than once.  No need to
-    # cache the result.
-    $format =~ s/\%([#\%])/$1 eq '%' ? '%%' : $handler->($mday)/ge;
+	my @then = localtime $date;
+	my $mday = $then[3];
+	# The handler will probably never be called more than once.  No need to
+	# cache the result.
+	$format =~ s/\%([#\%])/$1 eq '%' ? '%%' : $handler->($mday)/ge;
 
-    return POSIX::strftime($format, localtime $date);
+	return POSIX::strftime($format, localtime $date);
 }
 
 sub tt2_args_merge($$$$) {
-    my ($global_args, $global_conf, $local_args, $local_conf) = @_;
+	my ($global_args, $global_conf, $local_args, $local_conf) = @_;
 
-    my @args = @$global_args;
-    my %conf = %$global_conf;
+	my @args = @$global_args;
+	my %conf = %$global_conf;
 
-    foreach my $arg (@$local_args) {
-        if ($arg =~ /^-(.*)/) {
-            @args = grep { $_ ne $1 } @args;
-        } else {
-            push @args, $arg;
-        }
-    }
+	foreach my $arg (@$local_args) {
+		if ($arg =~ /^-(.*)/) {
+			@args = grep { $_ ne $1 } @args;
+		} else {
+			push @args, $arg;
+		}
+	}
 
-    while (my ($key, $value) = each %$local_conf) {
-        $conf{$key} = $value;
-    }
+	while (my ($key, $value) = each %$local_conf) {
+		$conf{$key} = $value;
+	}
 
-    return \@args, \%conf;
+	return \@args, \%conf;
 }
 
 1;

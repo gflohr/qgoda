@@ -30,31 +30,31 @@ use Qgoda::Util qw(archive_extender);
 use base qw(Qgoda::Repository::Fetcher::File);
 
 sub fetch {
-    my ($self, $uri, $destination) = @_;
+	my ($self, $uri, $destination) = @_;
 
-    my $logger = Qgoda->new->logger;
+	my $logger = Qgoda->new->logger;
 
-    # FIXME! More configuration option needed here.
-    my $ua = LWP::UserAgent->new;
-    $ua->timeout(10);
-    $ua->env_proxy;
-    $ua->show_progress(1);
+	# FIXME! More configuration option needed here.
+	my $ua = LWP::UserAgent->new;
+	$ua->timeout(10);
+	$ua->env_proxy;
+	$ua->show_progress(1);
 
-    $logger->info(__x("downloading '{uri}' with lwp-perl"), uri => $uri);
+	$logger->info(__x("downloading '{uri}' with lwp-perl"), uri => $uri);
 
-    my $response = $ua->get($uri);
-    $logger->fatal(__x("error downloading '{uri}': {error}",
-                       uri => $$uri,
-                       error => $response->status_line))
-        if $response->is_error;
+	my $response = $ua->get($uri);
+	$logger->fatal(__x("error downloading '{uri}': {error}",
+					   uri => $$uri,
+					   error => $response->status_line))
+		if $response->is_error;
 
-    my $fh = File::Temp->new(SUFFIX => archive_extender $uri->path);
-    my $path = $fh->filename;
+	my $fh = File::Temp->new(SUFFIX => archive_extender $uri->path);
+	my $path = $fh->filename;
 
-    # Leave errors to the extractor.
-    print $fh $response->decoded_content;
+	# Leave errors to the extractor.
+	print $fh $response->decoded_content;
 
-    return $self->_extractArchive($path, $destination);
+	return $self->_extractArchive($path, $destination);
 }
 
 1;

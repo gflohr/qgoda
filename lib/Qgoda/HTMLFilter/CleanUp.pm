@@ -23,19 +23,19 @@ use strict;
 use Qgoda;
 
 sub new {
-    my ($class, %args) = @_;
+	my ($class, %args) = @_;
 
-    bless {}, $class;
+	bless {}, $class;
 }
 
 sub comment {
-    my ($self, $chunk, %args) = @_;
+	my ($self, $chunk, %args) = @_;
 
-    if ($chunk =~ /^<!--\[if/i) {
-       return $chunk;
-    }
+	if ($chunk =~ /^<!--\[if/i) {
+	   return $chunk;
+	}
 
-    return '';
+	return '';
 }
 
 1;

@@ -29,72 +29,72 @@ use Qgoda;
 use Qgoda::Util qw(empty);
 
 sub new {
-    bless {}, shift;
+	bless {}, shift;
 }
 
 sub process {
-    my ($self, $content, $asset) = @_;
+	my ($self, $content, $asset) = @_;
 
-    die __x("Processor class '{class}' does not implement the method process().\n",
-            class => ref $self);
+	die __x("Processor class '{class}' does not implement the method process().\n",
+			class => ref $self);
 }
 
 sub postMeta {
-    my ($self, $content, $asset) = @_;
+	my ($self, $content, $asset) = @_;
 
-    my $case_sensitive = Qgoda->new->config->{'case-senstive'};
+	my $case_sensitive = Qgoda->new->config->{'case-senstive'};
 
-    require HTML::TreeBuilder;
-    my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
-                                  ignore_ignorable_whitespace => 1);
-    $tree->parse($content);
+	require HTML::TreeBuilder;
+	my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
+								  ignore_ignorable_whitespace => 1);
+	$tree->parse($content);
 
-    # Collect links.
-    my %links;
-    foreach my $record (@{$tree->extract_links}) {
-        my $href = uri_unescape $record->[0];
-        eval {
-            my $canonical = URI->new($href)->canonical;
-            $href = $canonical;
-        };
-        if (!empty $href) {
-            if ('/' eq substr $href, 0, 1) {
-                $href = lc $href if !$case_sensitive;
-            }
+	# Collect links.
+	my %links;
+	foreach my $record (@{$tree->extract_links}) {
+		my $href = uri_unescape $record->[0];
+		eval {
+			my $canonical = URI->new($href)->canonical;
+			$href = $canonical;
+		};
+		if (!empty $href) {
+			if ('/' eq substr $href, 0, 1) {
+				$href = lc $href if !$case_sensitive;
+			}
 
-            # This will also count links to itself but they will be filtered
-            # out by Qgoda::Site->computeRelated().
-            ++$links{$href};
-        }
-    }
+			# This will also count links to itself but they will be filtered
+			# out by Qgoda::Site->computeRelated().
+			++$links{$href};
+		}
+	}
 
 	# Get the excerpt as plain text and html, and try to get the content body
 	# (content minus excerpt).
-    my @paragraphs = $tree->find('p', 'div');
-    my $excerpt = '';
-    my $excerpt_html = '';
-    my $content_body = $content;
-    foreach my $paragraph (@paragraphs) {
-        $excerpt = $paragraph->as_text;
-        $excerpt_html = $paragraph->as_HTML;
-        $excerpt =~ s/^[ \t\r\n]+//;
-        $excerpt =~ s/[ \t\r\n]+$//;
-        if (!empty $excerpt) {
-            $paragraph->delete;
-            $content_body = $tree->as_HTML;
-            
-            # We have to remove the html wrapper that was created.
-            $content_body =~ s{.*<body>}{}s;
-            $content_body =~ s{</body>.*?$}{}s;
-            last;
-        }
-    }
+	my @paragraphs = $tree->find('p', 'div');
+	my $excerpt = '';
+	my $excerpt_html = '';
+	my $content_body = $content;
+	foreach my $paragraph (@paragraphs) {
+		$excerpt = $paragraph->as_text;
+		$excerpt_html = $paragraph->as_HTML;
+		$excerpt =~ s/^[ \t\r\n]+//;
+		$excerpt =~ s/[ \t\r\n]+$//;
+		if (!empty $excerpt) {
+			$paragraph->delete;
+			$content_body = $tree->as_HTML;
+			
+			# We have to remove the html wrapper that was created.
+			$content_body =~ s{.*<body>}{}s;
+			$content_body =~ s{</body>.*?$}{}s;
+			last;
+		}
+	}
 
-    return
-        excerpt => $excerpt,
-        excerpt_html => $excerpt_html,
-        content_body => $content_body,
-        links => [keys %links];
+	return
+		excerpt => $excerpt,
+		excerpt_html => $excerpt_html,
+		content_body => $content_body,
+		links => [keys %links];
 }
 
 1;

@@ -29,35 +29,35 @@ use Qgoda;
 use base qw(Qgoda::Repository::Fetcher);
 
 sub fetch {
-    my ($self, $uri, $destination) = @_;
+	my ($self, $uri, $destination) = @_;
 
-    my $logger = Qgoda->new->logger;
+	my $logger = Qgoda->new->logger;
 
-    $logger->debug(__x("cloning repository '{repository}'",
-                       repository => $uri));
+	$logger->debug(__x("cloning repository '{repository}'",
+					   repository => $uri));
 
-    # This will die in case of an error.
-    Git::command('clone', '--depth', '1', $uri, $destination);
+	# This will die in case of an error.
+	Git::command('clone', '--depth', '1', $uri, $destination);
 
-    my $gitdir = File::Spec->catfile($destination, '.git');
-    $logger->debug(__x("deleting '{directory}'",
-                       directory => $gitdir));
+	my $gitdir = File::Spec->catfile($destination, '.git');
+	$logger->debug(__x("deleting '{directory}'",
+					   directory => $gitdir));
 
-    rmtree $gitdir, { error => \my $err };
-    if (@$err) {
-        for my $diag (@$err) {
-            my ($file, $message) = %$diag;
-            if ($file eq '') {
-                $logger->error($message);
-            } else {
-                $logger->error(__x("error deleting '{file}': {error}",
-                                   file => $file, error => $!));
-            }
-        }
-        $logger->fatal(__"giving up after previous errors");
-    }
+	rmtree $gitdir, { error => \my $err };
+	if (@$err) {
+		for my $diag (@$err) {
+			my ($file, $message) = %$diag;
+			if ($file eq '') {
+				$logger->error($message);
+			} else {
+				$logger->error(__x("error deleting '{file}': {error}",
+								   file => $file, error => $!));
+			}
+		}
+		$logger->fatal(__"giving up after previous errors");
+	}
 
-    return $destination;
+	return $destination;
 }
 
 1;

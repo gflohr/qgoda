@@ -30,17 +30,17 @@ use base 'Qgoda::Command';
 sub _getDefaults {}
 
 sub _getOptionSpecs {
-    drafts => 'D|drafts',
-    future => 'F|future',
-    dry_run => 'dry-run',
+	drafts => 'D|drafts',
+	future => 'F|future',
+	dry_run => 'dry-run',
 }
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    Qgoda->new($global_options)->watch(%options);
+	Qgoda->new($global_options)->watch(%options);
 
-    return $self;
+	return $self;
 }
 
 1;

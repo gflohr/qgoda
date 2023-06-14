@@ -25,23 +25,23 @@ use base qw(Qgoda::Processor);
 use Text::Markdown::Hoedown qw(markdown);
 
 sub new {
-    my ($class, %options) = @_;
+	my ($class, %options) = @_;
 
-    my $self = $class->SUPER::new(%options);
-    $self->{__options} = \%options;
+	my $self = $class->SUPER::new(%options);
+	$self->{__options} = \%options;
 
-    return $self;
+	return $self;
 }
 
 sub process {
-    my ($self, $content, $asset, $filename) = @_;
+	my ($self, $content, $asset, $filename) = @_;
 
-    my $trailing_newline = $content =~ /\n$/ ? 1 : undef;
-    $content =~ s/^[ \011-\015]+//;
-    $content =~ s/[ \011-\015]+$//;
-    $content .= "\n" if $trailing_newline;
+	my $trailing_newline = $content =~ /\n$/ ? 1 : undef;
+	$content =~ s/^[ \011-\015]+//;
+	$content =~ s/[ \011-\015]+$//;
+	$content .= "\n" if $trailing_newline;
 
-    return $content;
+	return $content;
 }
 
 1;

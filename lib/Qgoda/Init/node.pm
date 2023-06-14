@@ -26,67 +26,67 @@ use File::Spec;
 use Qgoda::Util qw(read_file write_file merge_data);
 
 sub new {
-    my ($class, $init) = @_;
+	my ($class, $init) = @_;
 
-    bless {
-        __init => $init,
-    }, $class;
+	bless {
+		__init => $init,
+	}, $class;
 }
 
 sub run {
-    my ($self, $config) = @_;
+	my ($self, $config) = @_;
 
-    my $q = Qgoda->new;
-    my $logger = $q->logger;
-    my $init = $self->{__init};
+	my $q = Qgoda->new;
+	my $logger = $q->logger;
+	my $init = $self->{__init};
 
-    my $npm = $init->getOption('npm');
+	my $npm = $init->getOption('npm');
 
-    my @cmd = ($npm, 'init', '--yes');
-    push @cmd, '--force' if $init->getOption('force');
+	my @cmd = ($npm, 'init', '--yes');
+	push @cmd, '--force' if $init->getOption('force');
 
-    if (!$init->command(@cmd)) {
-        $logger->error(__"Cannot setup asset processing.");
-        return;
-    }
+	if (!$init->command(@cmd)) {
+		$logger->error(__"Cannot setup asset processing.");
+		return;
+	}
 
-    my @dev_deps = @{$config->{_node_dev_dependencies} || []};
-    if (@dev_deps) {
-        @cmd = ($npm, 'add', '--save-dev', @dev_deps);
-        $init->command(@cmd);
-    }
+	my @dev_deps = @{$config->{_node_dev_dependencies} || []};
+	if (@dev_deps) {
+		@cmd = ($npm, 'add', '--save-dev', @dev_deps);
+		$init->command(@cmd);
+	}
 
-    my @deps = keys @{$config->{_node_dependencies} || []};
-    if (@deps) {
-        @cmd = ($npm, 'install', '--save', @deps);
-        $init->command(@cmd);
-    }
+	my @deps = keys @{$config->{_node_dependencies} || []};
+	if (@deps) {
+		@cmd = ($npm, 'install', '--save', @deps);
+		$init->command(@cmd);
+	}
 
-    return $self if !$config->{_package};
+	return $self if !$config->{_package};
 
-    if ($config->{_package}) {
-        $logger->info(__"updating 'package.json'");
+	if ($config->{_package}) {
+		$logger->info(__"updating 'package.json'");
 
-        my $json = JSON->new;
-        my $json_data = read_file 'package.json'
-            or $logger->fatal(__x("cannot read '{filename}': {error}",
-                                  filename => 'package.json',
-                                  error => $!));
+		my $json = JSON->new;
+		my $json_data = read_file 'package.json'
+			or $logger->fatal(__x("cannot read '{filename}': {error}",
+								  filename => 'package.json',
+								  error => $!));
 
-        my $old = eval { $json->decode($json_data) };
-        $logger->fatal($@) if $@;
+		my $old = eval { $json->decode($json_data) };
+		$logger->fatal($@) if $@;
 
-        my $data = merge_data $old, $config->{_package};
-        $json->pretty(1);
-        $json_data = $json->encode($data);
+		my $data = merge_data $old, $config->{_package};
+		$json->pretty(1);
+		$json_data = $json->encode($data);
 
-        write_file 'package.json', $json_data
-            or $logger->fatal(__x("cannot write '{filename}': {error}",
-                                  filename => 'package.json',
-                                  error => $!));
-    }
+		write_file 'package.json', $json_data
+			or $logger->fatal(__x("cannot write '{filename}': {error}",
+								  filename => 'package.json',
+								  error => $!));
+	}
 
-    return $self;
+	return $self;
 }
 
 1;

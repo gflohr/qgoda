@@ -27,26 +27,26 @@ use Qgoda::Util qw(empty);
 use base 'Qgoda::Command';
 
 sub run {
-    my ($self, $args, $global_options) = @_;
+	my ($self, $args, $global_options) = @_;
 
-    $global_options->{quiet} = 1;
-    delete $global_options->{verbose};
-    $global_options->{log_stderr} = 1;
+	$global_options->{quiet} = 1;
+	delete $global_options->{verbose};
+	$global_options->{log_stderr} = 1;
 
-    my $xgettext = Qgoda::Locale::XGettext->newFromArgv($args);
+	my $xgettext = Qgoda::Locale::XGettext->newFromArgv($args);
 
-    my $srcdir = $xgettext->option('srcdir');
-    $xgettext->setOption(srcdir => '..') if empty $srcdir;
+	my $srcdir = $xgettext->option('srcdir');
+	$xgettext->setOption(srcdir => '..') if empty $srcdir;
 
-    $xgettext->run->output;
+	$xgettext->run->output;
 
-    return $self;
+	return $self;
 }
 
 sub _displayHelp {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    Qgoda::Locale::XGettext->newFromArgv(['--help']);
+	Qgoda::Locale::XGettext->newFromArgv(['--help']);
 }
 
 1;
