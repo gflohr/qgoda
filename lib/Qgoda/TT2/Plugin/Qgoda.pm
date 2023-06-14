@@ -154,7 +154,7 @@ sub new {
 
 	my %escapes = ('"' => 'quot', '&' => 'amp');
 	my $quote_values = sub {
-		return { 
+		return {
 			pairmap {
 				$b =~ s/(["&])/&$escapes{$1};/og;
 				$a, qq{"$b"}
@@ -378,8 +378,16 @@ sub list {
 
 	$filters = $self->__sanitizeFilters($filters);
 
-	my $site = Qgoda->new->getSite;
-	return $site->searchAssets(%$filters);
+	my $qgoda = Qgoda->new;
+	my $dep_tracker = $qgoda->getDependencyTracker;
+	my $site = $qgoda->getSite;
+	my $assets = $site->searchAssets(%$filters);
+	my $user = $self->__getAsset;
+	foreach my $asset (@$assets) {
+		$dep_tracker->addUsage($user->{relpath}, $asset->{relpath});
+	}
+
+	return $assets;
 }
 
 sub llist {
@@ -420,7 +428,7 @@ sub link {
 		$json =~ s{.(.*).}{$1};
 		warn "broken link($json)\n";
 		return '';
-	} if (@$set > 1) {
+	} elsif (@$set > 1) {
 		my $json = encode_json($filters);
 		$json =~ s{.(.*).}{$1};
 		warn "ambiguous link($json)\n";
@@ -466,7 +474,7 @@ sub existsXref {
 
 sub xrefPost {
 	my ($self, $variable, $filters) = @_;
-	
+
 	$filters = $self->__sanitizeFilters($filters);
 	$filters->{type} = 'post';
 
@@ -686,7 +694,7 @@ sub strftime {
 
 	$format = '%c' if empty $format;
 
-	my $saved_locale;	
+	my $saved_locale;
 	if (!empty $lingua) {
 		$saved_locale = POSIX::setlocale(LC_ALL);
 		web_set_locale($lingua, 'utf-8');
@@ -858,7 +866,7 @@ sub loadJSON {
 	my $absolute = File::Spec->rel2abs($filename, Qgoda->new->config->{srcdir});
 	my ($volume, $directories, undef) = File::Spec->splitpath($absolute);
 	my @directories = File::Spec->splitdir($absolute);
-	map { 
+	map {
 		$_ eq File::Spec->updir and
 			die __x("'{filenname}'): '{updir}' is not allowed!\n",
 					filename => $filename, updir => File::Spec->updir);

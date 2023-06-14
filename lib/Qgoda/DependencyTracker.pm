@@ -36,4 +36,13 @@ sub addArtefact {
 
 	return $self;
 }
+
+sub addUsage {
+	my ($self, $user_path, $dep_path) = @_;
+
+	$self->{__uses}->{$user_path}->{$dep_path} = 1;
+
+	return $self;
+}
+
 1;

@@ -71,6 +71,7 @@ my %test_config = (
 			location => '/de/post/index.html',
 			content => 'Quatsch',
 			view => 'post.html',
+			type => 'post',
 		},
 		'en/post.md' => {
 			title => 'English post',
@@ -78,6 +79,7 @@ my %test_config = (
 			location => '/en/post/index.html',
 			content => 'nonsense',
 			view => 'post.html',
+			type => 'post',
 		},
 	},
 	files => {
@@ -122,7 +124,10 @@ $wanted = [
 ];
 is_deeply $got, $wanted, '2nd build artefacts';
 
-$site->tearDown;
+#use Data::Dumper;
+#print Dumper($qgoda->getDependencyTracker);
+
+# $site->tearDown;
 
 done_testing;
 
