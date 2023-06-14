@@ -30,8 +30,7 @@ use Qgoda::Util qw(empty read_file read_body write_file blength);
 use Qgoda::Util::Translate qw(translate_body);
 
 sub new {
-	my $self = '';
-	bless \$self, shift;
+	bless {}, shift;
 }
 
 sub build {
@@ -47,6 +46,7 @@ sub build {
 	# 1st pass, usually Markdown.
 	ASSET: foreach my $asset (sort { $b->{priority} <=> $a->{priority} }
 							  $site->getAssets) {
+		$self->{__current} = $asset;
 		my $saved_locale = setlocale(POSIX::LC_ALL());
 		eval {
 			local $SIG{__WARN__} = sub {
@@ -65,6 +65,7 @@ sub build {
 		setlocale(POSIX::LC_ALL(), $saved_locale);
 	}
 
+	delete $self->{__current};
 	$site->computeRelations;
 
 	# 2nd pass, usually HTML.
@@ -75,6 +76,7 @@ sub build {
 							   relpath => $asset->getRelpath));
 			next;
 		}
+		$self->{__current} = $asset;
 
 		my $saved_locale = setlocale(POSIX::LC_ALL());
 		eval {
@@ -99,7 +101,7 @@ sub build {
 		}
 		setlocale(POSIX::LC_ALL(), $saved_locale);
 	}
-	
+
 	if ($errors) {
 		$logger->error(">>>>>>>>>>>>>>>>>>>");
 		$logger->error(__nx("one artefact has not been built because of errors (see above)",
@@ -135,6 +137,8 @@ sub saveArtefact {
 	my $config = $qgoda->config;
 	$permalink = '/' . $asset->getRelpath if empty $permalink;
 	my $path = File::Spec->catdir($config->{paths}->{site}, $permalink);
+
+	$qgoda->getDependencyTracker->addArtefact($self->{__current}, $path);
 
 	my $existing = $site->getArtefact($path);
 	if ($existing) {
@@ -226,7 +230,7 @@ sub wrapAsset {
 	die __"no view specified.\n" if empty $view;
 
 	my $logger = $qgoda->logger;
-	
+
 	my $srcdir = $qgoda->config->{srcdir};
 	my $view_dir = $qgoda->config->{paths}->{views};
 	my $view_file = File::Spec->join($srcdir, $view_dir, $view);

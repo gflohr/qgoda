@@ -59,6 +59,7 @@ use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
 				   collect_defaults purify perl_class class2module trim
 				   read_file);
 use Qgoda::PluginUtils qw(load_plugins);
+use Qgoda::DependencyTracker;
 
 my $qgoda;
 
@@ -81,8 +82,13 @@ sub new {
 	$self->{__processors} = {};
 	$self->{__load_plugins} = 1;
 	$self->{__post_processors} = {};
+	$self->{__dep_tracker} = Qgoda::DependencyTracker->new;
 
 	return $qgoda;
+}
+
+sub getDependencyTracker {
+	shift->{__dep_tracker};
 }
 
 sub reset {
@@ -128,8 +134,8 @@ sub build {
 							  dir => $config->{srcdir},
 							  error => $!));
 
-	$self->{__site} ||= Qgoda::Site->new($config);
-	my $site = $self->{__site};
+	my $site = Qgoda::Site->new($config);
+	$self->setSite($site);
 
 	$self->{__outfiles} = [];
 	$self->scan($site);

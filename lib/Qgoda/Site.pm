@@ -208,7 +208,7 @@ sub filter {
 	foreach my $key (sort keys %filters) {
 		push @_filters, $key, $filters{$key};
 	}
-	
+
 	my $visualize = sub {
 		my ($index) = @_;
 

@@ -46,7 +46,7 @@ my $listing_lingua = <<'EOF';
 </ul>
 EOF
 
-my $site = TestSite->new(
+my %test_config = (
 	name => 'deptracker',
 	assets => {
 		'index.de.md' => {
@@ -55,6 +55,7 @@ my $site = TestSite->new(
 			location => '/index.de.html',
 			content => "Liste\n",
 			view => 'listing.html',
+			priority => -1,
 		},
 		'index.en.md' => {
 			title => 'English index page',
@@ -62,6 +63,7 @@ my $site = TestSite->new(
 			location => '/index.en.html',
 			content => "Listing\n",
 			view => 'listing.html',
+			priority => -1,
 		},
 		'de/post.md' => {
 			title => 'Deutsche Seite',
@@ -85,6 +87,7 @@ my $site = TestSite->new(
 		'_views/post.html' => 'Hello, world!',
 	},
 );
+my $site = TestSite->new(%test_config);
 
 my ($got, $wanted);
 
@@ -103,8 +106,21 @@ $wanted = [
 	'_site/index.de.html',
 	'_site/index.en.html',
 ];
-is_deeply $got, $wanted, 'build 1';
+is_deeply $got, $wanted, '1st build artefacts';
+
+# If German post was updated, only the German listing and the German post
+# itself should be rebuilt.
 prune_site $got;
+ok $qgoda->buildForWatch(['de/post.md']), '2nd build';
+$got = collect_artefacts;
+$wanted = [
+	'_site/',
+	'_site/de/',
+	'_site/de/post/',
+	'_site/de/post/index.html',
+	'_site/index.de.html',
+];
+is_deeply $got, $wanted, '2nd build artefacts';
 
 $site->tearDown;
 
@@ -129,6 +145,7 @@ sub collect_artefacts {
 sub prune_site {
 	my ($files) = @_;
 
+	shift @$files; # Remove the entry for '_site'.
 	foreach my $filename (reverse @$files) {
 		if ('/' eq substr $filename, -1) {
 			rmdir $filename or die "rmdir '$filename': $!";

@@ -29,4 +29,11 @@ sub new {
 	}, $class;
 }
 
+sub addArtefact {
+	my ($self, $parent, $path) = @_;
+
+	$self->{__descendants}->{$parent->{relpath}}->{$path} = 1;
+
+	return $self;
+}
 1;
