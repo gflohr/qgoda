@@ -110,7 +110,7 @@ $wanted = [
 ];
 is_deeply $got, $wanted, '1st build artefacts';
 
-# If German post was updated, only the German listing and the German post
+# If the German post was updated, only the German listing and the German post
 # itself should be rebuilt.
 prune_site $got;
 ok $qgoda->buildForWatch(['de/post.md']), '2nd build';
