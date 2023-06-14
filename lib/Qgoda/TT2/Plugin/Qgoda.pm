@@ -33,6 +33,7 @@ use POSIX qw(setlocale LC_ALL);
 use File::Basename qw();
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
+use Data::Dump;
 
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
@@ -171,6 +172,11 @@ sub new {
         return [List::Util::sample($size, @$list)];
     };
 
+    my $dump = sub {
+        my ($array) = @_;
+
+        return Data::Dump::dump($array);
+    };
 
     $context->define_vmethod(list => sortBy => $sort_by);
     $context->define_vmethod(list => nsortBy => $nsort_by);
@@ -183,6 +189,8 @@ sub new {
     $context->define_vmethod(hash => vmap => $vmap);
     $context->define_vmethod(list => shuffle => $shuffle);
     $context->define_vmethod(list => sample => $sample);
+    $context->define_vmethod(list => dump => $dump);
+    $context->define_vmethod(hash => dump => $dump);
 
     my $self = {
         __context => $context
@@ -192,6 +200,36 @@ sub new {
 
 sub __getAsset {
     shift->{__context}->stash->{asset};
+}
+
+sub logInfo {
+    my ($self, @msgs) = @_;
+
+    Qgoda->new->logger->info(@msgs);
+}
+
+sub logWarning {
+    my ($self, @msgs) = @_;
+
+    Qgoda->new->logger->info(@msgs);
+}
+
+sub logDebug {
+    my ($self, @msgs) = @_;
+
+    Qgoda->new->logger->debug(@msgs);
+}
+
+sub logError {
+    my ($self, @msgs) = @_;
+
+    Qgoda->new->logger->error(@msgs);
+}
+
+sub logFatal {
+    my ($self, @msgs) = @_;
+
+    Qgoda->new->logger->fatal(@msgs);
 }
 
 sub bustCache {
@@ -636,6 +674,7 @@ sub clone {
     $extra->{relpath} = $asset->getRelpath;
     $extra->{path} = $asset->getPath;
     $extra->{parent} = $parent;
+    $extra->{plocation} = $parent->{location} if !exists $extra->{plocation};
     return $self->__writeAsset($asset->getRelpath, $asset, $extra);
 }
 
