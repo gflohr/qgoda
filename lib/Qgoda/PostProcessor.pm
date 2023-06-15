@@ -23,14 +23,14 @@ use strict;
 use Locale::TextDomain qw(qgoda);
 
 sub new {
-    bless {}, shift;
+	bless {}, shift;
 }
 
 sub postProcess {
-    my ($self, $site) = @_;
+	my ($self, $site) = @_;
 
-    die __x("Post-processor class '{class}' does not implement the method postProcess().\n",
-            class => ref $self);
+	die __x("Post-processor class '{class}' does not implement the method postProcess().\n",
+			class => ref $self);
 }
 
 1;

@@ -30,24 +30,24 @@ use base 'Qgoda::Command';
 sub _getDefaults {}
 
 sub _getOptionSpecs {
-    drafts => 'D|drafts',
-    future => 'F|future',
-    dry_run => 'dry-run',
-    watch => 'w|watch'
+	drafts => 'D|drafts',
+	future => 'F|future',
+	dry_run => 'dry-run',
+	watch => 'w|watch',
 }
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    if ($options{watch}) {
-        Qgoda::CLI->commandUsageError(build => __x(<<EOF, program => $0));
+	if ($options{watch}) {
+		Qgoda::CLI->commandUsageError(build => __x(<<EOF, program => $0));
 option '--watch' is not supported, use '{program} watch' instead!'
 EOF
-    }
+	}
 
-    Qgoda->new($global_options)->build(%options);
+	Qgoda->new($global_options)->build(%options);
 
-    return $self;
+	return $self;
 }
 
 1;
@@ -76,11 +76,11 @@ If a file contains front matter, that front matter is taken as meta
 information about that file.  Front-matter is in L<YAML|http://yaml.org>
 format:
 
-    ---
-    title: My first blog post
-    type: post
-    ---
-    Text with *markup* or [% TemplateToolkit %] code follows.
+	---
+	title: My first blog post
+	type: post
+	---
+	Text with *markup* or [% TemplateToolkit %] code follows.
 
 If the file does not contain front matter, default values are applied
 and no processing takes place.

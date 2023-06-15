@@ -21,11 +21,11 @@ package Qgoda::Repository::Fetcher;
 use strict;
 
 sub new {
-    my ($class) = @_;
+	my ($class) = @_;
 
-    my $self = "";
+	my $self = "";
 
-    bless \$self, $class;
+	bless \$self, $class;
 }
 
 1;

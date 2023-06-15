@@ -28,81 +28,81 @@ use Qgoda::Util qw(empty perl_class perl_identifier);
 my $singleton;
 
 sub new {
-    my ($class) = @_;
+	my ($class) = @_;
 
-    return $singleton if $singleton;
+	return $singleton if $singleton;
 
-    $singleton = {
-        __modules => {}
-    };
+	$singleton = {
+		__modules => {}
+	};
 
-    bless $singleton, $class;
+	bless $singleton, $class;
 }
 
 sub namespace {
-    my ($self, $plugin_data) = @_;
+	my ($self, $plugin_data) = @_;
 
-    die __x("Field '{field}' missing in 'package.json'.\n",
-            field => 'qgoda.module')
-        if !exists $plugin_data->{module};
-    die __x("Invalid module name '{name}'.\n", name => $plugin_data->{module})
-        if !perl_class $plugin_data->{module};
+	die __x("Field '{field}' missing in 'package.json'.\n",
+			field => 'qgoda.module')
+		if !exists $plugin_data->{module};
+	die __x("Invalid module name '{name}'.\n", name => $plugin_data->{module})
+		if !perl_class $plugin_data->{module};
 
-    return 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
+	return 'Qgoda::TT2::Plugin::' . $plugin_data->{module};
 }
 
 sub addPlugin {
-    my ($self, $plugin_data) = @_;
+	my ($self, $plugin_data) = @_;
 
-    my $class_name = $self->namespace($plugin_data);
+	my $class_name = $self->namespace($plugin_data);
 
-    my $module_name = $class_name;
-    $module_name =~ s{(?:::|\')}{/}g;
-    $module_name .= '.pm';
+	my $module_name = $class_name;
+	$module_name =~ s{(?:::|\')}{/}g;
+	$module_name .= '.pm';
 
-    $self->{__modules}->{$module_name} = $plugin_data;
+	$self->{__modules}->{$module_name} = $plugin_data;
 
-    die __x("Field '{field}' missing in 'package.json'.\n", 
-            field => 'qgoda.entry')
-        if !exists $plugin_data->{entry};
-    my $entry = $plugin_data->{entry};
-    die __x("Invalid entry point '{entry}'.\n", entry => $entry)
-        if !perl_identifier $entry;
+	die __x("Field '{field}' missing in 'package.json'.\n", 
+			field => 'qgoda.entry')
+		if !exists $plugin_data->{entry};
+	my $entry = $plugin_data->{entry};
+	die __x("Invalid entry point '{entry}'.\n", entry => $entry)
+		if !perl_identifier $entry;
 
-    no strict 'refs';
+	no strict 'refs';
 
-    *{"${class_name}::init"} = sub {
-        my ($self) = @_;
+	*{"${class_name}::init"} = sub {
+		my ($self) = @_;
 
-        $self->{_DYNAMIC} = 1;
-        $self->install_filter($plugin_data->{entry});
+		$self->{_DYNAMIC} = 1;
+		$self->install_filter($plugin_data->{entry});
 
-        $plugin_data->{plugger}->compile->();
+		$plugin_data->{plugger}->compile->();
 
-        return $self;
-    };
+		return $self;
+	};
 
-    *{"${class_name}::filter"} = sub {
-        my (\$self, \$text, \$config, \$args) = \@_;
+	*{"${class_name}::filter"} = sub {
+		my (\$self, \$text, \$config, \$args) = \@_;
 
-        return $plugin_data->{entry}(\$self, \$text, \$config, \$args);
-    };
+		return $plugin_data->{entry}(\$self, \$text, \$config, \$args);
+	};
 
-    @{"${class_name}::ISA"} = 'Template::Plugin::Filter';
+	@{"${class_name}::ISA"} = 'Template::Plugin::Filter';
 
-    return $self;
+	return $self;
 }
 
 sub Qgoda::PluginLoader::TT2::Filter::INC {
-    my ($self, $filename) = @_;
+	my ($self, $filename) = @_;
 
-    return if !exists $self->{__modules}->{$filename};
+	return if !exists $self->{__modules}->{$filename};
 
-    my $data = 'use strict; 1;';
+	my $data = 'use strict; 1;';
 
-    open my $fh, '<', \$data;
+	open my $fh, '<', \$data;
 
-    return $fh;
+	return $fh;
 }
 
 unshift @INC, Qgoda::PluginLoader::TT2::Filter->new;

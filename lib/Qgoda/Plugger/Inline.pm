@@ -28,49 +28,49 @@ use Qgoda;
 use base qw(Qgoda::Plugger);
 
 sub new {
-    my ($class, $data) = @_;
+	my ($class, $data) = @_;
 
-    my $self = bless $data, $class;
+	my $self = bless $data, $class;
 
-    return $self;
+	return $self;
 }
 
 sub language {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $language = ref $self;
-    $language =~ s/^Qgoda::Plugger::Inline:://;
+	my $language = ref $self;
+	$language =~ s/^Qgoda::Plugger::Inline:://;
 
-    return $language;
+	return $language;
 }
 
 sub compile {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $language = $self->language;
+	my $language = $self->language;
 
-    my %config;
+	my %config;
 
-    if ($ENV{"QGODA_DEBUG_$language"}) {
-        $config{print_version} = 1;
-        $config{print_info} = 1;
-    }
+	if ($ENV{"QGODA_DEBUG_$language"}) {
+		$config{print_version} = 1;
+		$config{print_info} = 1;
+	}
 
-    my $namespace = $self->{plugin_loader}->namespace($self);
-    require Data::Dumper;
-    my $args = Data::Dumper::Dumper([$self->{main}, %config]);
-    $args =~ s{.*?= \[}{};
-    $args =~ s{\];.*?$}{};
+	my $namespace = $self->{plugin_loader}->namespace($self);
+	require Data::Dumper;
+	my $args = Data::Dumper::Dumper([$self->{main}, %config]);
+	$args =~ s{.*?= \[}{};
+	$args =~ s{\];.*?$}{};
 
-    return sub {
-        eval <<EOF;
+	return sub {
+		eval <<EOF;
 package $namespace;
 
 Inline->bind($language => $args);
 
 \$SIG{INT} = 'DEFAULT';
 EOF
-    };
+	};
 }
 
 1;

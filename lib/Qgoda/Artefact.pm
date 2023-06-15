@@ -23,20 +23,20 @@ use strict;
 use Locale::TextDomain qw('qgoda');
 
 sub new {
-    my ($class, $path, $asset) = @_;
+	my ($class, $path, $asset) = @_;
 
-    bless {
-        path => $path,
-        asset => $asset,
-    }, $class;
+	bless {
+		path => $path,
+		asset => $asset,
+	}, $class;
 }
 
 sub getPath {
-    shift->{path};
+	shift->{path};
 }
 
 sub getAsset {
-    shift->{asset};
+	shift->{asset};
 }
 
 1;

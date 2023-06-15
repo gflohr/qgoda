@@ -25,18 +25,18 @@ use base qw(Qgoda::Processor);
 use Text::Markdown qw(markdown);
 
 sub new {
-    my ($class, %options) = @_;
+	my ($class, %options) = @_;
 
-    my $self = $class->SUPER::new(%options);
-    $self->{__options} = \%options;
+	my $self = $class->SUPER::new(%options);
+	$self->{__options} = \%options;
 
-    return $self;
+	return $self;
 }
 
 sub process {
-    my ($self, $content, $asset, $filename) = @_;
+	my ($self, $content, $asset, $filename) = @_;
 
-    return markdown $content;
+	return markdown $content;
 }
 
 1;

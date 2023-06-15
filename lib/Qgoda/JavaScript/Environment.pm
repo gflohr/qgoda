@@ -183,7 +183,7 @@ sub __moduleResolve {
 	$@ or return $resolved;
 
 	$self->__jsError(__x("Cannot find module '{module}'!\n",
-	                     module => $module));
+						 module => $module));
 }
 
 sub __moduleLoad {
@@ -191,7 +191,7 @@ sub __moduleLoad {
 
 	open my $fh, '<', $filename
 		or $self->__jsError(__x("error reading '{filename}': {err}\n",
-		                        filename => $filename, err => $!));
+								filename => $filename, err => $!));
 
 	my $code = join '', <$fh>;
 	if ($filename =~ /\.json$/) {

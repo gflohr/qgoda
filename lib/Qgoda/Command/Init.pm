@@ -27,17 +27,17 @@ use base 'Qgoda::Command';
 sub _getDefaults { npm => 'npm', skip => [] }
 
 sub _getOptionSpecs { 
-    force => 'f|force+', 
-    npm => 'n|npm=s', 
-    skip => 's|skip=s@'
+	force => 'f|force+', 
+	npm => 'n|npm=s', 
+	skip => 's|skip=s@'
 }
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    Qgoda->new($global_options)->init($args, %options);
+	Qgoda->new($global_options)->init($args, %options);
 
-    return $self;
+	return $self;
 }
 
 1;
@@ -49,7 +49,7 @@ qgoda init - Initialize a Qgoda site with a theme
 =head1 SYNOPSIS
 
 qgoda init [<global options>] [-f|--force] [-n|--npm=PROGRAM] 
-           [-s|--skip=TASK] [<repository>]
+		   [-s|--skip=TASK] [<repository>]
 
 Try 'qgoda --help' for a description of global options.
 

@@ -124,6 +124,7 @@ taxonomies:
   links: 1
   tags: 2
 title: A new Qgoda Powered Site
+track-dependencies: true
 view: default.html
 EOF
 $expected = Load($expected);

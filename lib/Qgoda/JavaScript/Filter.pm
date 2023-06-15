@@ -53,7 +53,7 @@ EOF
 			if ($_ !~ m{^(?:[ \011-\015]*|//.*)$}) {
 				my (undef, $filename, $lineno) = caller;
 				die __x("The first line of the JavaScript code must be empty "
-				        . "or begin with \"//\" at {filename} {lineno}.\n",
+						. "or begin with \"//\" at {filename} {lineno}.\n",
 						filename => $filename, lineno => $lineno);
 			}
 			$_ = $preamble;
@@ -87,7 +87,7 @@ to be available as, here B<Qgoda::JavaScript::console>.
 
 Getting the content of the JavaScript file goes like this:
 
-    require 'Qgoda/JavaScript/console.js';
+	require 'Qgoda/JavaScript/console.js';
 
 	my $code = Qgoda::JavaScript::console->code;
 

@@ -23,50 +23,50 @@ use strict;
 use Qgoda::Util qw(merge_data);
 
 sub new {
-    my ($class, $path, $relpath) = @_;
+	my ($class, $path, $relpath) = @_;
 
-    my $self = {};
+	my $self = {};
 
-    # Overwrite these two keys unconditionally.
-    $self->{path} = $path;
-    $self->{relpath} = $relpath;
+	# Overwrite these two keys unconditionally.
+	$self->{path} = $path;
+	$self->{relpath} = $relpath;
 
-    my $reldir = $relpath;
-    $reldir =~ s{/[^/]+$}{};
-    $self->{reldir} = $reldir;
+	my $reldir = $relpath;
+	$reldir =~ s{/[^/]+$}{};
+	$self->{reldir} = $reldir;
 
-    bless $self, $class;
+	bless $self, $class;
 }
 
 sub getPath {
-    shift->{path};
+	shift->{path};
 }
 
 sub getRelpath {
-    shift->{relpath};
+	shift->{relpath};
 }
 
 sub getOrigin {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    if (exists $self->{origin}) {
-        return $self->{origin};
-    } else {
-        return $self->getPath;
-    }
+	if (exists $self->{origin}) {
+		return $self->{origin};
+	} else {
+		return $self->getPath;
+	}
 }
 
 sub dump {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    return %$self;
+	return %$self;
 }
 
 sub TO_JSON {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    # FIXME! Unbless all blessed objects with purify! Also add purify() as
-    # a method to the Qgoda TT2 plug-in.
-    return {%$self};
+	# FIXME! Unbless all blessed objects with purify! Also add purify() as
+	# a method to the Qgoda TT2 plug-in.
+	return {%$self};
 }
 1;

@@ -31,54 +31,54 @@ use base 'Qgoda::Command';
 sub _getDefaults { processor => 'Markdown' }
 
 sub _getOptionSpecs {
-    processor => 'processor=s'
+	processor => 'processor=s'
 }
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    $args = ['-'] if !@$args;
-    my $count = 0;
-    map { ++$count if '-' eq $_ } @$args;
-    Qgoda::CLI->commandUsageError(markdown =>
-                                  __"can only read once from standard input")
-        if $count > 1;
+	$args = ['-'] if !@$args;
+	my $count = 0;
+	map { ++$count if '-' eq $_ } @$args;
+	Qgoda::CLI->commandUsageError(markdown =>
+								  __"can only read once from standard input")
+		if $count > 1;
 
-    $global_options->{quiet} = 1;
-    delete $global_options->{verbose};
-    $global_options->{log_stderr} = 1;
+	$global_options->{quiet} = 1;
+	delete $global_options->{verbose};
+	$global_options->{log_stderr} = 1;
 
-    my $q = Qgoda->new($global_options);
-    my ($processor) = $q->_getProcessors($options{processor});
-    if (!$processor) {
-        die __x("error instantiating processor '{processor}'.\n",
-                processor => $options{processor});
-    }
+	my $q = Qgoda->new($global_options);
+	my ($processor) = $q->_getProcessors($options{processor});
+	if (!$processor) {
+		die __x("error instantiating processor '{processor}'.\n",
+				processor => $options{processor});
+	}
 
-    foreach my $arg (@$args) {
-        $self->__processFile($processor, $arg);
-    }
+	foreach my $arg (@$args) {
+		$self->__processFile($processor, $arg);
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __processFile {
-    my ($self, $processor, $filename) = @_;
+	my ($self, $processor, $filename) = @_;
 
-    my $markdown;
-    if ('-' eq $filename) {
-        $filename = __("[standard input]");
-        $markdown = join '', <STDIN>;
-    } else {
-        $markdown = read_file $filename;
-        die __x("unable to open '{filename}' for reading: {error}!\n",
-                filename => $filename, error => $!)
-            if !defined $markdown;
-    }
+	my $markdown;
+	if ('-' eq $filename) {
+		$filename = __("[standard input]");
+		$markdown = join '', <STDIN>;
+	} else {
+		$markdown = read_file $filename;
+		die __x("unable to open '{filename}' for reading: {error}!\n",
+				filename => $filename, error => $!)
+			if !defined $markdown;
+	}
 
-    print $processor->process($markdown);
+	print $processor->process($markdown);
 
-    return $self;
+	return $self;
 }
 
 1;
@@ -90,7 +90,7 @@ qgoda markdown - Run text through a Markdown processor
 =head1 SYNOPSIS
 
 qgoda markdown [<global options>]
-               [--processor=<Markdown processor>] [<file>...]
+			   [--processor=<Markdown processor>] [<file>...]
 
 Try 'qgoda --help' for a description of global options.
 

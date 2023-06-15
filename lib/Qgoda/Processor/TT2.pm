@@ -31,61 +31,64 @@ use base qw(Qgoda::Processor);
 my %instances;
 
 sub new {
-    my ($class, %options) = @_;
+	my ($class, %options) = @_;
 
-    my $self = bless {}, $class;
-    $self->{__options} = \%options;
+	my $self = bless {}, $class;
+	$self->{__options} = \%options;
 
-    require Qgoda;
-    my $qgoda = Qgoda->new;
-    my $config = $qgoda->config;
-    my $srcdir = $config->{srcdir};
-    my $viewdir = $config->{paths}->{views};
+	require Qgoda;
+	my $qgoda = Qgoda->new;
+	my $config = $qgoda->config;
+	my $srcdir = $config->{srcdir};
+	my $viewdir = $config->{paths}->{views};
 
-    # FIXME! Merge options with those from the configuration!
-    my %options = (
-        INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
-        PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
-        RECURSION => 1,
-        # Needed for qgoda po pot
-        RELATIVE => 1,
-	ENCODING => 'utf-8'
-    );
-    my $scm = $config->{scm};
-    if (!empty $scm && 'git' eq $scm) {
-        my $provider = Qgoda::Template::GitProvider->new(%options);
-        $options{LOAD_TEMPLATES} = [$provider];
-    }
-    $self->{__tt} = Template->new({
-        %options
-    }) or die Template->error;
+	# FIXME! Merge options with those from the configuration!
+	my $scm = $config->{scm};
+	my %options = (
+		INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
+		PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
+		RECURSION => 1,
+		# Needed for qgoda po pot
+		RELATIVE => 1,
+		ENCODING => 'utf-8',
+	);
+	my $provider = $self->{__provider} = Qgoda::Template::Provider->new(
+		%options,
+		git_enabled => !empty $scm && 'git' eq $scm,
+	);
+	$options{LOAD_TEMPLATES} = [$provider];
 
-    return $self;
+	$self->{__tt} = Template->new({
+		%options
+	}) or die Template->error;
+
+	return $self;
 }
 
 sub process {
-    my ($self, $content, $asset, $filename) = @_;
+	my ($self, $content, $asset, $filename) = @_;
 
-    require Qgoda;
-    my $qgoda = Qgoda->new;
-    my $srcdir = $qgoda->config->{srcdir};
-    my $viewdir = $qgoda->config->{paths}->{views};
-    my $absviewdir = File::Spec->rel2abs($viewdir, $srcdir);
-    my $gettext_filename = File::Spec->abs2rel($filename, $absviewdir);
-    my $vars = {
-        asset => $asset,
-        config => Qgoda->new->config,
-        gettext_filename => $gettext_filename,
-    };
+	require Qgoda;
+	my $qgoda = Qgoda->new;
+	my $srcdir = $qgoda->config->{srcdir};
+	my $viewdir = $qgoda->config->{paths}->{views};
+	my $absviewdir = File::Spec->rel2abs($viewdir, $srcdir);
+	my $gettext_filename = File::Spec->abs2rel($filename, $absviewdir);
+	my $vars = {
+		asset => $asset,
+		config => Qgoda->new->config,
+		gettext_filename => $gettext_filename,
+	};
 
-    my $cooked;
-    $self->{__tt}->process(\$content, $vars, \$cooked)
-        or die $self->{__tt}->error, "\n" if !defined $cooked;
+	my $cooked;
+	$self->{__provider}->{__asset} = $asset;
+	$self->{__tt}->process(\$content, $vars, \$cooked)
+		or die $self->{__tt}->error, "\n" if !defined $cooked;
 
-    return $cooked;
+	return $cooked;
 }
 
-package Qgoda::Template::GitProvider;
+package Qgoda::Template::Provider;
 
 use strict;
 
@@ -94,36 +97,60 @@ use Locale::TextDomain qw(qgoda);
 
 use base qw(Template::Provider);
 
+sub new {
+	my ($class, %options) = @_;
+
+	my $git_enabled = delete $options{git_enabled};
+	my $self = $class->SUPER::new(%options);
+	$self->{__git_enabled} = $git_enabled;
+
+	return $self;
+}
+
 sub fetch {
-    my ($self, $name) = @_;
+	my ($self, $name) = @_;
 
-    if (!ref $name) {
-        my $is_absolute;
-        my $path;
+	if (!ref $name) {
+		my $is_absolute;
+		my $path;
 
-        if (File::Spec->file_name_is_absolute($name)) {
-            $is_absolute = 1;
-            $path = $name if -e $name;
-        } elsif ($name !~ m/$Template::Provider::RELATIVE_PATH/o) {
-            foreach my $search (@{$self->{INCLUDE_PATH}}) {
-                my $try = File::Spec->catfile($search, $name);
-                if (-e $try) {
-                    $path = $try;
-                    $is_absolute = File::Spec->file_name_is_absolute($path);
-                    last;
-                }
-            }
-        }
+		if (File::Spec->file_name_is_absolute($name)) {
+			$is_absolute = 1;
+			$path = $name if -e $name;
+		} elsif ($name !~ m/$Template::Provider::RELATIVE_PATH/o) {
+			foreach my $search (@{$self->{INCLUDE_PATH}}) {
+				my $try = File::Spec->catfile($search, $name);
+				if (-e $try) {
+					$path = $try;
+					$is_absolute = File::Spec->file_name_is_absolute($path);
+					last;
+				}
+			}
+		}
 
-        if (defined $path
-            && !Qgoda->new->versionControlled($path, $is_absolute)) {
-            my $msg = __x("template file '{path}' is not under version control",
-                          path => $path);
-            return $msg, Template::Constants::STATUS_ERROR;
-        }
-    }
+		if (defined $path) {
+			my $qgoda = Qgoda->new;
+			if ($self->{__git_enabled}
+			    && !$qgoda->versionControlled($path, $is_absolute)) {
+				my $msg = __x("template file '{path}' is not under version control",
+				              path => $path);
+				return $msg, Template::Constants::STATUS_ERROR;
+			}
 
-    return $self->SUPER::fetch($name);
+			if ($is_absolute) {
+				my $srcdir = $qgoda->config->{srcdir};
+				my $viewdir = File::Spec->join($srcdir, $qgoda->config->{paths}->{views});
+				$path = File::Spec->abs2rel($path, $srcdir);
+			} else {
+				$path = File::Spec->join($qgoda->config->{paths}->{views}, $path);
+			}
+
+			my $deptracker = $qgoda->getDependencyTracker;
+			$deptracker->addUsage($self->{__asset}->{relpath}, $path);
+		}
+	}
+
+	return $self->SUPER::fetch($name);
 }
 
 1;

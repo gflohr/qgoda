@@ -57,7 +57,7 @@ sub _run {
 		print nfreeze($schema);
 	} else {
 		die __x("Unsupported schema format '{format}'.\n",
-		        format => $options{format});
+				format => $options{format});
 	}
 	return $self;
 }

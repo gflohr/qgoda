@@ -35,7 +35,7 @@ sub config {
 	return {
 		'$schema' => 'http://json-schema.org/draft-07/schema#',
 		'$id' => 'http://www.qgoda.net/schema/Qgoda/v'
-		         . $Qgoda::VERSION
+				 . $Qgoda::VERSION
 				 . '/config.schema.json',
 		title => __"Configuration",
 		description => __"A Qgoda Configuration",
@@ -44,34 +44,34 @@ sub config {
 		properties => {
 			'case-sensitive' => {
 				description => __"Set to true if a case-sensitive file system "
-				               . "shoud be assumed.",
+							   . "shoud be assumed.",
 				type => 'boolean',
 				default => false
 			},
 			'compare-output' => {
 				description => __"Should existing output files be read and "
-				               . "compared to the new version to avoid "
-				               . "updating timestamps (default => true)",
+							   . "compared to the new version to avoid "
+							   . "updating timestamps (default => true)",
 				type => 'boolean',
 				default => true
 			},
 			defaults => {
 				description => __"Default values, see "
-				               . "http://www.qgoda.net/en/docs/defaults",
+							   . "http://www.qgoda.net/en/docs/defaults",
 				type => 'array',
 				default => [],
 				items => {
 					description => __"A list of objects with properties "
-					               . "'files' and 'values', default => empty",
+								   . "'files' and 'values', default => empty",
 					type => 'object',
 					required => [qw(files values)],
 					additionalProperties => false,
 					properties => {
 						files => {
 							description => __"Either one single file name "
-							               . "pattern or a list of file name "
-							               . "patterns.  Files that match will "
-							               . "receive the values specified.",
+										   . "pattern or a list of file name "
+										   . "patterns.  Files that match will "
+										   . "receive the values specified.",
 							type => 'array',
 							items => {
 								type => 'string'
@@ -80,7 +80,7 @@ sub config {
 						},
 						values => {
 							description => __"Values that should be set for "
-							               . "matching files.",
+										   . "matching files.",
 							type => 'object',
 							default => {}
 						}
@@ -89,7 +89,7 @@ sub config {
 			},
 			exclude => {
 				description => __"List of additional file name patterns that "
-				               . "should be ignored for building the site.",
+							   . "should be ignored for building the site.",
 				type => 'array',
 				items => {
 					type => 'string'
@@ -98,8 +98,8 @@ sub config {
 			},
 			'exclude-watch' => {
 				description => __"List of additional file name patterns that "
-				               . "should be ignored when changed in watch "
-				               . "mode.",
+							   . "should be ignored when changed in watch "
+							   . "mode.",
 				type => 'array',
 				items => {
 					type => 'string'
@@ -108,8 +108,8 @@ sub config {
 			},
 			'front-matter-placeholder' => {
 				description => __"An object of valid chain names or '*' that "
-				               . "give the frontmatter placeholder string "
-				               . "for each configured processor chain.",
+							   . "give the frontmatter placeholder string "
+							   . "for each configured processor chain.",
 				type => 'object',
 				default => {
 					'*' => "[% '' %]\n"
@@ -117,15 +117,15 @@ sub config {
 			},
 			generator => {
 				description => __"Value for the generator meta tag in "
-				               . "generated pages.",
+							   . "generated pages.",
 				type => 'string',
 				default => __x("Qgoda v{version} (http://www.qgoda.net/)",
-				               version => $Qgoda::VERSION),
+							   version => $Qgoda::VERSION),
 			},
 			helpers => {
 				description => __"Key-value pairs of command identifiers and "
-				               . "the command to run in parallel, when running "
-				               . "in watch mode. Default: empty.",
+							   . "the command to run in parallel, when running "
+							   . "in watch mode. Default: empty.",
 				type => 'object',
 				additionalProperties => false,
 				patternProperties => {
@@ -140,22 +140,22 @@ sub config {
 			},
 			index => {
 				description => __"Basename of a file that is considered to be "
-				               . "the index document of a directory.",
+							   . "the index document of a directory.",
 				type => 'string',
 				default => 'index'
 			},
 			latency => {
 				descriptions => __"Number of seconds to wait until a rebuild "
-				                . "is triggered after a file system change in "
-				                . "watch mode.",
+								. "is triggered after a file system change in "
+								. "watch mode.",
 				type => 'number',
 				minimum => 0,
 				default => 0.5
 			},
 			linguas => {
 				description => __"List of language identifiers complying to "
-				               . "RFC4647 section 2.1 but without any asterisk "
-				               . "(*) characters.",
+							   . "RFC4647 section 2.1 but without any asterisk "
+							   . "(*) characters.",
 				type => 'array',
 				items => {
 					type => 'string',
@@ -177,8 +177,8 @@ sub config {
 			},
 			'no-scm' => {
 				description => __"List of additional file name patterns that "
-				               . "should be processed in scm mode, even when "
-				               . "not under version control",
+							   . "should be processed in scm mode, even when "
+							   . "not under version control",
 				type => 'array',
 				items => {
 					type => 'string'
@@ -199,27 +199,27 @@ sub config {
 					},
 					po => {
 						description => __"Directory for po files and other i18n "
-						               . "related files.",
+									   . "related files.",
 						type => 'string',
 						default => '_po'
 					},
 					site => {
 						description => __"Directory where to store rendered "
-						               . "files, defaults to the absolute path "
+									   . "files, defaults to the absolute path "
 									   . "to '_site' in the current directory.",
 						type => 'string',
 						default => File::Spec->catdir(Cwd::abs_path(''), '_site')
 					},
 					timestamp => {
 						description => __"Name of the timestamp file containing "
-						               . "the seconds since the epoch since "
-						               . "the last write of the site.",
+									   . "the seconds since the epoch since "
+									   . "the last write of the site.",
 						type => 'string',
 						default => '_timestamp'
 					},
 					views => {
 						description => __"Directory where view templates are "
-						               . "searched.",
+									   . "searched.",
 						type => 'string',
 						default => '_views',
 					}
@@ -232,22 +232,22 @@ sub config {
 			},
 			po => {
 				description => __"Variables for internationalization (i18n) and "
-				               . "the translation workflow.",
+							   . "the translation workflow.",
 				type => 'object',
 				additionalProperties => false,
 				default => {},
 				properties => {
 					'copyright-holder' => {
 						description => __"Copyright information for the original "
-						               . "content.",
+									   . "content.",
 						type => 'string',
 						default => __x("Set {variable} in '_config.yaml'.",
-						               variable => 'config.po.copyright-holder')
+									   variable => 'config.po.copyright-holder')
 					},
 					mdextra => {
 						description => __"List of file name patterns for "
-						               . "additional markdown files to "
-						               . "translate.",
+									   . "additional markdown files to "
+									   . "translate.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -256,7 +256,7 @@ sub config {
 					},
 					msgfmt => {
 						description => __"The 'msgfmt' command or an array of "
-						               . "the program name plus arguments.",
+									   . "the program name plus arguments.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -265,14 +265,14 @@ sub config {
 					},
 					'msgid-bugs-address' => {
 						description => __"Where to report translation problems "
-						               . "with the original strings.",
+									   . "with the original strings.",
 						type => 'string',
 						default => __x("Set {variable} in '_config.yaml'.",
-						               variable => 'config.po.msgid-bugs-address')
+									   variable => 'config.po.msgid-bugs-address')
 					},
 					msgmerge => {
 						description => __"The 'msgmerge' command(or an array of "
-						               . "the program name plus arguments.",
+									   . "the program name plus arguments.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -281,7 +281,7 @@ sub config {
 					},
 					qgoda => {
 						description => __"The 'qgoda' command or an array of the "
-						               . "program name plus arguments.",
+									   . "program name plus arguments.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -290,24 +290,24 @@ sub config {
 					},
 					reload => {
 						description => __"Whether to throw away the "
-						               . "translation before every rebuild, "
-						               . "defaults to false.",
+									   . "translation before every rebuild, "
+									   . "defaults to false.",
 						type => 'boolean',
 						default => false
 					},
 					textdomain => {
 						description => __"An identifier for the translation "
-						                . "catalog (textdomain), defaults to "
-						                . "'messages'.",
+										. "catalog (textdomain), defaults to "
+										. "'messages'.",
 						type => 'string',
 						default => 'messages'
 					},
 					tt2 => {
 						description => __"A list of file name patterns or one "
-						                . "single pattern, where translatable "
-						                . "templates for the Template Toolkit "
-						                . "version 2 are stored, defaults to "
-						                . "'_views'.",
+										. "single pattern, where translatable "
+										. "templates for the Template Toolkit "
+										. "version 2 are stored, defaults to "
+										. "'_views'.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -318,7 +318,7 @@ sub config {
 					},
 					xgettext => {
 						description => __"The 'xgettext' command or an array of "
-						               . "the program name plus arguments.",
+									   . "the program name plus arguments.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -327,8 +327,8 @@ sub config {
 					},
 					'xgettext-tt2' => {
 						description => __"The 'xgettext-tt2' command or an "
-						               . "array of the program name plus "
-						               . "arguments.",
+									   . "array of the program name plus "
+									   . "arguments.",
 						type => 'array',
 						items => {
 							type => 'string'
@@ -339,7 +339,7 @@ sub config {
 			},
 			processors => {
 				description => __"The processors to use for generating "
-				                 . "content.",
+								 . "content.",
 				additionalProperties => false,
 				default => {},
 				required => ['chains', 'options', 'triggers'],
@@ -365,7 +365,7 @@ sub config {
 						patternProperties => {
 							'[_a-zA-z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
-								                 . "chain.",
+												 . "chain.",
 								type => 'object',
 								additionalProperties => false,
 								required => ['modules'],
@@ -382,14 +382,14 @@ sub config {
 									},
 									suffix => {
 										description => __"An optional suffix "
-										                 . "if different from "
+														 . "if different from "
 														 . "original filename.",
 										type => 'string',
 										#minLength => 1,
 									},
 									wrapper => {
 										description => __"An optional wrapper "
-										               . "for a second run.",
+													   . "for a second run.",
 										type => 'string',
 										#minLength => 1
 										# The possible values are filled at
@@ -401,7 +401,7 @@ sub config {
 					},
 					options => {
 						description => __"Additional options for the"
-						               . " processor plug-ins",
+									   . " processor plug-ins",
 						type => 'object',
 						default => {
 							HTMLFilter => {
@@ -420,10 +420,10 @@ sub config {
 					},
 					triggers => {
 						description => __"Filename extenders that trigger a "
-						               . " particular chain if not specified"
-						               . " in front matter or defaults.",
+									   . " particular chain if not specified"
+									   . " in front matter or defaults.",
 						default => {
-							    htm => 'html',
+								htm => 'html',
 								html => 'html',
 								md => 'markdown',
 								mdown => 'markdown',
@@ -458,14 +458,14 @@ sub config {
 						patternProperties => {
 							'[_a-zA-Z][_a-zA-Z0-9]*(::[_a-zA-Z][_a-zA-Z0-9]*)*' => {
 								description => __"Name of one "
-								                 . "post-processor module.",
+												 . "post-processor module.",
 								type => 'string',
 							}
 						}
 					},
 					options => {
 						description => __"Additional options for the"
-						               . " post-processor plug-ins",
+									   . " post-processor plug-ins",
 						type => 'object',
 						default => {},
 					},
@@ -473,7 +473,7 @@ sub config {
 			},
 			scm => {
 				description => __"Source code management (SCM) that is in "
-				               . "use. If present, only files that are under "
+							   . "use. If present, only files that are under "
 							   . "version control and those matching 'no-scm' "
 							   . "are processed. Currently only git is "
 							   . "supported.",
@@ -482,7 +482,7 @@ sub config {
 			},
 			srcdir => {
 				description => __"The source directory for all assets. Do "
-				               . "not set that variable yourself! It will be "
+							   . "not set that variable yourself! It will be "
 							   . "overwritten at runtime with the absolute "
 							   . "path to the current directory.",
 				type => 'string',
@@ -490,7 +490,7 @@ sub config {
 			},
 			taxonomies => {
 				description => __"Key/value pairs of taxonomy names and their "
-				               . "respective weights for the computation "
+							   . "respective weights for the computation "
 							   . "of relatedness.",
 				type => 'object',
 				default => {
@@ -501,8 +501,15 @@ sub config {
 			},
 			title => {
 				description => __"The title of the site. It has no "
-				               . "particular semantics.",
+							   . "particular semantics.",
 				default => __"A new Qgoda Powered Site",
+			},
+			'track-dependencies' => {
+				description => __"Set to true if you want to speed up watch "
+							   . "mode by re-processing only assets that have "
+							   . "changed or depend on changed files.",
+				type => 'boolean',
+				default => true,
 			},
 			view => {
 				description => __"The default view template to use.",

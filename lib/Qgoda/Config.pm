@@ -131,7 +131,9 @@ sub new {
 
 	# Clean up certain variables or overwrite them unconditionally.
 	$config->{srcdir} = Cwd::abs_path('');
-	$config->{paths}->{site} = Cwd::abs_path($config->{paths}->{site});
+	$config->{paths}->{site} =
+		File::Spec->canonpath(Cwd::abs_path($config->{paths}->{site}));
+	$config->{paths}->{views} = File::Spec->canonpath($config->{paths}->{views});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
 		if 0 == @{$config->{po}->{tt2}};

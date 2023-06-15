@@ -39,188 +39,188 @@ use base 'Qgoda::Command';
 my $seed_repo = 'https://github.com/gflohr/Template-Plugin-Gettext-Seed';
 
 sub _run {
-    my ($self, $args, $global_options, %options) = @_;
+	my ($self, $args, $global_options, %options) = @_;
 
-    Qgoda::CLI->commandUsageError('po', __"no target specified",
-                                  'po [OPTIONS] TARGET')
-        if !@$args;
-    
-    Qgoda::CLI->commandUsageError('po', __"only one target may be specified",
-                                  'po [OPTIONS] TARGET')
-        if 1 != @$args;
-    
-    my $target = $args->[0];
+	Qgoda::CLI->commandUsageError('po', __"no target specified",
+								  'po [OPTIONS] TARGET')
+		if !@$args;
+	
+	Qgoda::CLI->commandUsageError('po', __"only one target may be specified",
+								  'po [OPTIONS] TARGET')
+		if 1 != @$args;
+	
+	my $target = $args->[0];
 
-    my $qgoda = Qgoda->new($global_options);
+	my $qgoda = Qgoda->new($global_options);
 
-    my $config = $qgoda->config;
-    my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $logger = $qgoda->logger;
 
-    my $textdomain = $config->{po}->{textdomain};
-    $logger->fatal(__"configuration variable 'po.textdomain' not set")
-        if empty $textdomain;
-    my $linguas = $config->{linguas};
-    $logger->fatal(__"configuration variable 'linguas' not set or empty")
-        if empty $linguas || !@$linguas;
+	my $textdomain = $config->{po}->{textdomain};
+	$logger->fatal(__"configuration variable 'po.textdomain' not set")
+		if empty $textdomain;
+	my $linguas = $config->{linguas};
+	$logger->fatal(__"configuration variable 'linguas' not set or empty")
+		if empty $linguas || !@$linguas;
 
-    my @missing;
-    if ('reset' eq $target) {
-        @missing = '', qw(Makefile PACKAGE PLFILES GitIgnore QgodaINC);
-    } else {
-        @missing = $self->__checkFiles;
-    }
+	my @missing;
+	if ('reset' eq $target) {
+		@missing = '', qw(Makefile PACKAGE PLFILES GitIgnore QgodaINC);
+	} else {
+		@missing = $self->__checkFiles;
+	}
 
-    foreach my $missing (@missing) {
-        my $method = '__addMissing' . $missing;
-        $self->$method;
-    }
-    return $self if 'reset' eq $target;
+	foreach my $missing (@missing) {
+		my $method = '__addMissing' . $missing;
+		$self->$method;
+	}
+	return $self if 'reset' eq $target;
 
-    my $here = getcwd;
-    if (!defined $here) {
-        $logger->fatal(__x("cannot get current working directory: {error}",
-                           error => $!));        
-    }
+	my $here = getcwd;
+	if (!defined $here) {
+		$logger->fatal(__x("cannot get current working directory: {error}",
+						   error => $!));		
+	}
 
-    my $podir = $config->{paths}->{po};
-    if (!chdir $podir) {
-        $logger->fatal(__x("cannot change directory to '{directory}': {error}",
-                           directory => $podir, error => $!));
-    }
+	my $podir = $config->{paths}->{po};
+	if (!chdir $podir) {
+		$logger->fatal(__x("cannot change directory to '{directory}': {error}",
+						   directory => $podir, error => $!));
+	}
 
-    return $self->__make($target) if !empty $config->{po}->{make};
+	return $self->__make($target) if !empty $config->{po}->{make};
 
-    my %methods = (
-        potfiles => '__makePOTFILES',
-        pot => '__makePOT',
-        'update-po' => '__makeUpdatePO',
-        'update-mo' => '__makeUpdateMO',
-        install => '__makeInstall',
-        all => '__makeAll',
-    );
+	my %methods = (
+		potfiles => '__makePOTFILES',
+		pot => '__makePOT',
+		'update-po' => '__makeUpdatePO',
+		'update-mo' => '__makeUpdateMO',
+		install => '__makeInstall',
+		all => '__makeAll',
+	);
 
-    my $method = $methods{lc $target};
+	my $method = $methods{lc $target};
 
-    unless ($method && $self->can($method)) {
-        my $msg = __x("unsupported target '{target}'", target => $target);
+	unless ($method && $self->can($method)) {
+		my $msg = __x("unsupported target '{target}'", target => $target);
 
-        Qgoda::CLI->commandUsageError('po', $msg, 'po [OPTIONS] TARGET');
-    }
+		Qgoda::CLI->commandUsageError('po', $msg, 'po [OPTIONS] TARGET');
+	}
 
-    return $self->$method($here);
+	return $self->$method($here);
 }
 
 sub __checkFiles {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
+	my $qgoda = Qgoda->new;
 
-    my $config = $qgoda->config;
-    my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $logger = $qgoda->logger;
 
-    my $podir = $config->{paths}->{po};
+	my $podir = $config->{paths}->{po};
 
-    my @missing;
+	my @missing;
 
-    $logger->debug(__"checking for missing files in po directory");
+	$logger->debug(__"checking for missing files in po directory");
 
-    push @missing, '' if !-e $podir;
+	push @missing, '' if !-e $podir;
 
-    my $makefile = File::Spec->catfile($podir, 'Makefile');
-    push @missing, 'Makefile' if !-e $makefile;
+	my $makefile = File::Spec->catfile($podir, 'Makefile');
+	push @missing, 'Makefile' if !-e $makefile;
 
-    my $package = File::Spec->catfile($podir, 'PACKAGE');
-    push @missing, 'PACKAGE' if !-e $package;
+	my $package = File::Spec->catfile($podir, 'PACKAGE');
+	push @missing, 'PACKAGE' if !-e $package;
 
-    my $plfiles = File::Spec->catfile($podir, 'PLFILES');
-    push @missing, 'PLFILES' if !-e $plfiles;
+	my $plfiles = File::Spec->catfile($podir, 'PLFILES');
+	push @missing, 'PLFILES' if !-e $plfiles;
 
-    my $git_ignore = File::Spec->catfile($podir, '.gitignore');
-    push @missing, 'GitIgnore' if !-e $git_ignore;
+	my $git_ignore = File::Spec->catfile($podir, '.gitignore');
+	push @missing, 'GitIgnore' if !-e $git_ignore;
 
-    my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
-    push @missing, 'QgodaINC' if !-e $qgoda_inc;
+	my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
+	push @missing, 'QgodaINC' if !-e $qgoda_inc;
 
-    return @missing;
+	return @missing;
 }
 
 # Unfortunate name ... it's for the directory itself.
 sub __addMissing {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
 
-    my $podir = $config->{paths}->{po};
-    $logger->info(__x("creating '{filename}'", filename => $podir));
+	my $podir = $config->{paths}->{po};
+	$logger->info(__x("creating '{filename}'", filename => $podir));
 
-    if (!mkdir $podir) {
-        $logger->fatal(__x("error creating directory '{directory}': {error}",
-                           directory => $podir,
-                           error => $!));        
-    }
+	if (!mkdir $podir) {
+		$logger->fatal(__x("error creating directory '{directory}': {error}",
+						   directory => $podir,
+						   error => $!));		
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __addMissingPACKAGE {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
-    my $po_config = $config->{po};
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $po_config = $config->{po};
 
-    my $podir = $config->{paths}->{po};
+	my $podir = $config->{paths}->{po};
 
-    my $package = File::Spec->catfile($podir, 'PACKAGE');
-    $logger->info(__x("creating '{filename}'", filename => $package));
+	my $package = File::Spec->catfile($podir, 'PACKAGE');
+	$logger->info(__x("creating '{filename}'", filename => $package));
 
-    my $header_comment = $self->__comment(__(<<EOF));
+	my $header_comment = $self->__comment(__(<<EOF));
 Makefile snippet holding package-dependent information.  Please adhere
 to Makefile syntax!
 EOF
 
-    my $linguas_comment = $self->__comment(__(<<EOF));
+	my $linguas_comment = $self->__comment(__(<<EOF));
 Space-separated list of language codes.  Omit the base language!
 EOF
-    chomp $linguas_comment;
+	chomp $linguas_comment;
 
-    my @linguas = @{$config->{linguas}};
-    shift @linguas;
-    my $linguas = join ' ', @linguas;    
+	my @linguas = @{$config->{linguas}};
+	shift @linguas;
+	my $linguas = join ' ', @linguas;	
 
-    my $textdomain_comment = $self->__comment(__(<<EOF));
+	my $textdomain_comment = $self->__comment(__(<<EOF));
 Textdomain of the site, for example reverse domain name.
 EOF
-    chomp $textdomain_comment;
-    my $textdomain = $po_config->{textdomain};
+	chomp $textdomain_comment;
+	my $textdomain = $po_config->{textdomain};
 
-    my $msgid_bugs_address_comment = $self->__comment(__(<<EOF));
+	my $msgid_bugs_address_comment = $self->__comment(__(<<EOF));
 Where to send msgid bug reports?
 EOF
-    chomp $msgid_bugs_address_comment;
-    my $msgid_bugs_address = $po_config->{'msgid-bugs-address'};
-    $msgid_bugs_address = __"Please set MSGID_BUGS_ADDRESS in 'PACKAGE'"
-        if empty $msgid_bugs_address;
-    
-    my $copyright_holder_comment = $self->__comment(__(<<EOF));
+	chomp $msgid_bugs_address_comment;
+	my $msgid_bugs_address = $po_config->{'msgid-bugs-address'};
+	$msgid_bugs_address = __"Please set MSGID_BUGS_ADDRESS in 'PACKAGE'"
+		if empty $msgid_bugs_address;
+	
+	my $copyright_holder_comment = $self->__comment(__(<<EOF));
 Initial copyright holder added to pot and po files.
 EOF
-    chomp $copyright_holder_comment;
-    my $copyright_holder = $po_config->{'copyright-holder'};
-    $copyright_holder = __"Please set COPYRIGHT_HOLDER in 'PACKAGE'"
-        if empty $copyright_holder;
+	chomp $copyright_holder_comment;
+	my $copyright_holder = $po_config->{'copyright-holder'};
+	$copyright_holder = __"Please set COPYRIGHT_HOLDER in 'PACKAGE'"
+		if empty $copyright_holder;
 
-    my $override_comment = $self->__comment(__(<<EOF));
+	my $override_comment = $self->__comment(__(<<EOF));
 Override these default values as needed.
 EOF
-    chomp $override_comment;
+	chomp $override_comment;
 
 	my @cmd_lines;
 	foreach my $cmd ('xgettext', 'xgettext-tt2', 'msgmerge', 'msgfmt',
-	                 'qgoda') {
+					 'qgoda') {
 		my $varname = uc $cmd;
 		$varname =~ s/-/_/g;
 		my $cmd_line = $self->__escapeCommand($po_config->{$cmd});
@@ -229,7 +229,7 @@ EOF
 	}
 	my $cmd_lines = join "\n", @cmd_lines;
 
-    my $contents = <<EOF;
+	my $contents = <<EOF;
 $header_comment
 $linguas_comment
 LINGUAS = $linguas
@@ -247,116 +247,116 @@ $override_comment
 $cmd_lines
 EOF
 
-    if (!write_file $package, $contents) {
-        $logger->fatal(__x("error writing '{filename}': {error}",
-                           filename => $package,
-                           error => $!));
-    }
+	if (!write_file $package, $contents) {
+		$logger->fatal(__x("error writing '{filename}': {error}",
+						   filename => $package,
+						   error => $!));
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __addMissingMakefile {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    # Fail early if Git is not installed.
-    require Git;
+	# Fail early if Git is not installed.
+	require Git;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
-    my $po_config = $config->{po};
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $po_config = $config->{po};
 
-    my $podir = $config->{paths}->{po};
+	my $podir = $config->{paths}->{po};
 
-    my $makefile = File::Spec->catfile($podir, 'Makefile');
-    $logger->info(__x("creating '{filename}'", filename => $makefile));
-    $logger->info(__x("cloning git repository '{repo}'",
-                      repo => $seed_repo));
+	my $makefile = File::Spec->catfile($podir, 'Makefile');
+	$logger->info(__x("creating '{filename}'", filename => $makefile));
+	$logger->info(__x("cloning git repository '{repo}'",
+					  repo => $seed_repo));
 
-    my $tmp = File::Temp->newdir;
-    $logger->debug(__x("created temporary directory '{dir}'",
-                       dir => $tmp));
+	my $tmp = File::Temp->newdir;
+	$logger->debug(__x("created temporary directory '{dir}'",
+					   dir => $tmp));
 
-    Git::command('clone', '--depth', '1', $seed_repo, $tmp);
+	Git::command('clone', '--depth', '1', $seed_repo, $tmp);
 
-    my $remote = File::Spec->catfile($tmp, 'po', 'Makefile');
-    $logger->debug(__x("copying '{from}' to '{to}'",
-                       from => $remote, to => $makefile));
+	my $remote = File::Spec->catfile($tmp, 'po', 'Makefile');
+	$logger->debug(__x("copying '{from}' to '{to}'",
+					   from => $remote, to => $makefile));
 
-    if (!copy $remote, $podir) {
-        $logger->fatal(__x("error copying '{from}' to '{to}'",
-                           from => $remote, to => $makefile))
-    }
+	if (!copy $remote, $podir) {
+		$logger->fatal(__x("error copying '{from}' to '{to}'",
+						   from => $remote, to => $makefile))
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __addMissingPLFILES {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
 
-    my $podir = $config->{paths}->{po};
+	my $podir = $config->{paths}->{po};
 
-    my $plfiles = File::Spec->catfile($podir, 'PLFILES');
-    $logger->info(__x("creating '{filename}'", filename => $plfiles));
+	my $plfiles = File::Spec->catfile($podir, 'PLFILES');
+	$logger->info(__x("creating '{filename}'", filename => $plfiles));
 
-    if (!write_file $plfiles, '') {
-        $logger->fatal(__x("error writing '{filename}': {error}",
-                           filename => $plfiles,
-                           error => $!));
-    }
+	if (!write_file $plfiles, '') {
+		$logger->fatal(__x("error writing '{filename}': {error}",
+						   filename => $plfiles,
+						   error => $!));
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __addMissingGitIgnore {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
 
-    my $podir = $config->{paths}->{po};
+	my $podir = $config->{paths}->{po};
 
-    my $gitignore = File::Spec->catfile($podir, '.gitignore');
-    $logger->info(__x("creating '{filename}'", filename => $gitignore));
+	my $gitignore = File::Spec->catfile($podir, '.gitignore');
+	$logger->info(__x("creating '{filename}'", filename => $gitignore));
 
-    my $ignore_list = <<EOF;
+	my $ignore_list = <<EOF;
 /*.gmo
 /*.mo
 EOF
 
-    if (!write_file $gitignore, $ignore_list) {
-        $logger->fatal(__x("error writing '{filename}': {error}",
-                           filename => $gitignore,
-                           error => $!));
-    }
+	if (!write_file $gitignore, $ignore_list) {
+		$logger->fatal(__x("error writing '{filename}': {error}",
+						   filename => $gitignore,
+						   error => $!));
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __addMissingQgodaINC {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
 
-    my $podir = $config->{paths}->{po};
+	my $podir = $config->{paths}->{po};
 
-    my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
-    $logger->info(__x("creating '{filename}'", filename => $qgoda_inc));
+	my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
+	$logger->info(__x("creating '{filename}'", filename => $qgoda_inc));
 
-    my $include = <<'EOF';
+	my $include = <<'EOF';
 # Makefile snippet for Qgoda.  Extract all strings from Markdown files that
 # serve as the base for translated documents.
 
 MDPOTFILES = $(srcdir)/MDPOTFILES \
-        $(shell cat $(srcdir)/MDPOTFILES)
+		$(shell cat $(srcdir)/MDPOTFILES)
 
 $(srcdir)/markdown.pot: $(srcdir)/MDPOTFILES $(MDPOTFILES)
 	$(QGODA) xgettext --output=$(srcdir)/markdown.pox --from-code="utf-8" \
@@ -366,440 +366,440 @@ $(srcdir)/markdown.pot: $(srcdir)/MDPOTFILES $(MDPOTFILES)
 	rm -f $@ && mv $(srcdir)/markdown.pox $@
 EOF
 
-    if (!write_file $qgoda_inc, $include) {
-        $logger->fatal(__x("error writing '{filename}': {error}",
-                           filename => $qgoda_inc,
-                           error => $!));
-    }
+	if (!write_file $qgoda_inc, $include) {
+		$logger->fatal(__x("error writing '{filename}': {error}",
+						   filename => $qgoda_inc,
+						   error => $!));
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __comment {
-    my ($self, $text) = @_;
+	my ($self, $text) = @_;
 
-    $text =~ s/^/# /gm;
+	$text =~ s/^/# /gm;
 
-    return $text;
+	return $text;
 }
 
 sub __escapeCommand {
 	my ($self, $command) = @_;
 
 	my @escaped;
-    foreach my $part (@$command) {
-        my $pretty = $part;
-        $pretty =~ s{(["\\\$])}{\\$1}g;
-        $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
-        push @escaped, $pretty;
-    }
+	foreach my $part (@$command) {
+		my $pretty = $part;
+		$pretty =~ s{(["\\\$])}{\\$1}g;
+		$pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
+		push @escaped, $pretty;
+	}
 
-    return join ' ', @escaped;
+	return join ' ', @escaped;
 }
 
 sub __command {
-    my ($self, @args) = @_;
+	my ($self, @args) = @_;
 
-    my @pretty;
-    foreach my $arg (@args) {
-        my $pretty = $arg;
-        $pretty =~ s{(["\\\$])}{\\$1}g;
-        $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
-        push @pretty, $pretty;
-    }
+	my @pretty;
+	foreach my $arg (@args) {
+		my $pretty = $arg;
+		$pretty =~ s{(["\\\$])}{\\$1}g;
+		$pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
+		push @pretty, $pretty;
+	}
 
-    my $pretty = join ' ', @pretty;
-    my $logger = Qgoda->new->logger;
+	my $pretty = join ' ', @pretty;
+	my $logger = Qgoda->new->logger;
 
-    $logger->info(__x("execute: {cmd}", cmd => $pretty));;
+	$logger->info(__x("execute: {cmd}", cmd => $pretty));;
 
-    system @args;
+	system @args;
 }
 
 sub __fatalCommand {
-    my ($self, @args) = @_;
+	my ($self, @args) = @_;
 
-    return $self if 0 == $self->__command(@args);
+	return $self if 0 == $self->__command(@args);
 
-    my @pretty;
-    foreach my $arg (@args) {
-        my $pretty = $arg;
-        $pretty =~ s{(["\\\$])}{\\$1}g;
-        $pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
-        push @pretty, $pretty;
-    }
+	my @pretty;
+	foreach my $arg (@args) {
+		my $pretty = $arg;
+		$pretty =~ s{(["\\\$])}{\\$1}g;
+		$pretty = qq{"$pretty"} if $pretty =~ /[ \t]/;
+		push @pretty, $pretty;
+	}
 
-    my $pretty = join ' ', @pretty;
+	my $pretty = join ' ', @pretty;
 
-    my $logger = Qgoda->new->logger;
+	my $logger = Qgoda->new->logger;
 
-    if ($? == -1) {
-        $logger->fatal(__x("{command}: failed to execute: {error}", 
-                           command => $pretty, error => $!));;
-    } elsif ($? & 127) {
-        $logger->fatal(__x("{command}: died with signal {signo}", 
-                           command => $pretty, signo => $? & 127));
-    }
+	if ($? == -1) {
+		$logger->fatal(__x("{command}: failed to execute: {error}", 
+						   command => $pretty, error => $!));;
+	} elsif ($? & 127) {
+		$logger->fatal(__x("{command}: died with signal {signo}", 
+						   command => $pretty, signo => $? & 127));
+	}
 
-    $logger->fatal(__x("{command}: terminated with exit code {code}", 
-                       command => $pretty, code => $? >> 8));
+	$logger->fatal(__x("{command}: terminated with exit code {code}", 
+					   command => $pretty, code => $? >> 8));
 }
 
 sub __safeRename {
-    my ($self, $from, $to) = @_;
+	my ($self, $from, $to) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
 
-    $logger->info(__x("rename '{from}' to '{to}'",
-                      from => $from, to => $to));
-    
-    return $self if rename $from, $to;
+	$logger->info(__x("rename '{from}' to '{to}'",
+					  from => $from, to => $to));
+	
+	return $self if rename $from, $to;
 
-    $logger->fatal(__x("error renaming '{from}' to '{to}': {error}",
-                       from => $from, to => $to, error => $!));    
+	$logger->fatal(__x("error renaming '{from}' to '{to}': {error}",
+					   from => $from, to => $to, error => $!));	
 }
 
 sub __outOfDate {
-    my ($self, $target, @deps) = @_;
+	my ($self, $target, @deps) = @_;
 
-    my @ref = stat $target or return 1;
+	my @ref = stat $target or return 1;
 
-    foreach my $dep (@deps) {
-        my @stat = stat $dep or return 1;
-        return 1 if $stat[9] > $ref[9];
-    }
+	foreach my $dep (@deps) {
+		my @stat = stat $dep or return 1;
+		return 1 if $stat[9] > $ref[9];
+	}
 
-    return;
+	return;
 }
 
 sub __filelist {
-    my ($self, $filelist) = @_;
+	my ($self, $filelist) = @_;
 
-    my $fh;
-    if (!open $fh, '<', $filelist) {
-        my $logger = Qgoda->new->logger;
+	my $fh;
+	if (!open $fh, '<', $filelist) {
+		my $logger = Qgoda->new->logger;
 
-        $logger->fatal(__x("error reading '{filename}': {error}",
-                           filename => $filelist, error => $!));
-    }
+		$logger->fatal(__x("error reading '{filename}': {error}",
+						   filename => $filelist, error => $!));
+	}
 
-    return grep { length } 
-           map { my $u = $_; $u =~ s/^[ \r\t]*//; $u =~ s/[ \t\r\n]*$//; $u } <$fh>;
+	return grep { length } 
+		   map { my $u = $_; $u =~ s/^[ \r\t]*//; $u =~ s/[ \t\r\n]*$//; $u } <$fh>;
 }
 
 sub __make {
-    my ($self, $target) = @_;
+	my ($self, $target) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $config = $qgoda->config;
-    my $logger = $qgoda->logger;
+	my $qgoda = Qgoda->new;
+	my $config = $qgoda->config;
+	my $logger = $qgoda->logger;
 
-    my $make = $config->{po}->{make};
+	my $make = $config->{po}->{make};
 
-    $self->__fatalCommand($make, $target);
+	$self->__fatalCommand($make, $target);
 
-    return $self;
+	return $self;
 }
 
 sub __makePOTFILES {
-    my ($self, $srcdir) = @_;
+	my ($self, $srcdir) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $config = $qgoda->config;
-    my $logger = $qgoda->logger;
+	my $qgoda = Qgoda->new;
+	my $config = $qgoda->config;
+	my $logger = $qgoda->logger;
 
-    my $viewspatterns = $config->{po}->{views};
-    if (!$viewspatterns) {
-        my $pattern = $config->{paths}->{views};
-        $pattern =~ s{/+$}{};
-        die __"default views directory is '/', please configure 'po.views'"
-            if !length $pattern;
-        $pattern .= '/**';
-        $viewspatterns = [$pattern];
-    }
+	my $viewspatterns = $config->{po}->{views};
+	if (!$viewspatterns) {
+		my $pattern = $config->{paths}->{views};
+		$pattern =~ s{/+$}{};
+		die __"default views directory is '/', please configure 'po.views'"
+			if !length $pattern;
+		$pattern .= '/**';
+		$viewspatterns = [$pattern];
+	}
 
-    my $podir = getcwd;
-    if (!chdir $srcdir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $srcdir, error => $!);
-    }
+	my $podir = getcwd;
+	if (!chdir $srcdir) {
+		die __x("error changing working directory to '{dir}': {error}\n",
+				dir => $srcdir, error => $!);
+	}
 
-    my %files;
-    foreach my $pattern (@$viewspatterns) {
-        my $negated = $pattern =~ s/^!//;
-        # Force path to be relative.
-        $pattern =~ s{^/+}{};
-        my @files = globstar $pattern;
-        foreach my $found (@files) {
-            if (-d $found) {
-                # Skip directory.
-            } elsif ($negated) {
-                $logger->debug(__x("removing template file '{filename}'",
-                                   filename => $found));
-                delete $files{$found};                
-            } else {
-                $logger->debug(__x("adding template file '{filename}'",
-                                   filename => $found));
-                $files{$found} = 1;
-            }
-        }
-    }
+	my %files;
+	foreach my $pattern (@$viewspatterns) {
+		my $negated = $pattern =~ s/^!//;
+		# Force path to be relative.
+		$pattern =~ s{^/+}{};
+		my @files = globstar $pattern;
+		foreach my $found (@files) {
+			if (-d $found) {
+				# Skip directory.
+			} elsif ($negated) {
+				$logger->debug(__x("removing template file '{filename}'",
+								   filename => $found));
+				delete $files{$found};				
+			} else {
+				$logger->debug(__x("adding template file '{filename}'",
+								   filename => $found));
+				$files{$found} = 1;
+			}
+		}
+	}
 
-    my @files;
-    foreach my $path (keys %files) {
-        my $abspath = File::Spec->rel2abs($path);
-        my $relpath = File::Spec->abs2rel($abspath, $podir);
-        if ($config->{scm}) {
-            next unless $qgoda->versionControlled($abspath, 1);
-        }
-        push @files, $relpath;
-    }
+	my @files;
+	foreach my $path (keys %files) {
+		my $abspath = File::Spec->rel2abs($path);
+		my $relpath = File::Spec->abs2rel($abspath, $podir);
+		if ($config->{scm}) {
+			next unless $qgoda->versionControlled($abspath, 1);
+		}
+		push @files, $relpath;
+	}
 
-    push @files, 'markdown.pot', 'perl.pot';
+	push @files, 'markdown.pot', 'perl.pot';
 
-    if (!chdir $podir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $podir, error => $!);
-    }
+	if (!chdir $podir) {
+		die __x("error changing working directory to '{dir}': {error}\n",
+				dir => $podir, error => $!);
+	}
 
-    my $potfiles = join "\n", sort @files;
-    my $display_name = File::Spec->catfile($config->{paths}->{po},
-                                           'POTFILES');
-    $logger->info(__x("writing '{filename}'", filename => $display_name));
-    unless (write_file 'POTFILES', "$potfiles\n") {
-        $logger->fatal(__x("error writing '{filename}': {error}",
-                           filename => $display_name, error => $!));
-    }
+	my $potfiles = join "\n", sort @files;
+	my $display_name = File::Spec->catfile($config->{paths}->{po},
+										   'POTFILES');
+	$logger->info(__x("writing '{filename}'", filename => $display_name));
+	unless (write_file 'POTFILES', "$potfiles\n") {
+		$logger->fatal(__x("error writing '{filename}': {error}",
+						   filename => $display_name, error => $!));
+	}
 
-    $self->__makeMDPOTFILES($srcdir);
+	$self->__makeMDPOTFILES($srcdir);
 
-    return $self;
+	return $self;
 }
 
 sub __makeMDPOTFILES {
-    my ($self, $srcdir) = @_;
+	my ($self, $srcdir) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $config = $qgoda->config;
-    my $logger = $qgoda->logger;
+	my $qgoda = Qgoda->new;
+	my $config = $qgoda->config;
+	my $logger = $qgoda->logger;
 
-    my $podir = getcwd;
-    if (!chdir $srcdir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $srcdir, error => $!);
-    }
+	my $podir = getcwd;
+	if (!chdir $srcdir) {
+		die __x("error changing working directory to '{dir}': {error}\n",
+				dir => $srcdir, error => $!);
+	}
 
-    my %masters = get_masters;
-    my @files;
-    foreach my $path (keys %masters) {
-        if ($config->{scm}) {
-            next unless $qgoda->versionControlled($path);
-        }
-        my $relpath = File::Spec->abs2rel($path, $podir);
-        push @files, $relpath;
-    }
+	my %masters = get_masters;
+	my @files;
+	foreach my $path (keys %masters) {
+		if ($config->{scm}) {
+			next unless $qgoda->versionControlled($path);
+		}
+		my $relpath = File::Spec->abs2rel($path, $podir);
+		push @files, $relpath;
+	}
 
-    if (!chdir $podir) {
-        die __x("error changing working directory to '{dir}': {error}\n",
-                dir => $podir, error => $!);
-    }
+	if (!chdir $podir) {
+		die __x("error changing working directory to '{dir}': {error}\n",
+				dir => $podir, error => $!);
+	}
 
-    my $potfiles = join "\n", sort @files;
-    my $display_name = File::Spec->catfile($config->{paths}->{po},
-                                           'MDPOTFILES');
-    $logger->info(__x("writing '{filename}'", filename => $display_name));
-    unless (write_file 'MDPOTFILES', "$potfiles\n") {
-        $logger->fatal(__x("error writing '{filename}': {error}",
-                           filename => $display_name, error => $!));
-    }
+	my $potfiles = join "\n", sort @files;
+	my $display_name = File::Spec->catfile($config->{paths}->{po},
+										   'MDPOTFILES');
+	$logger->info(__x("writing '{filename}'", filename => $display_name));
+	unless (write_file 'MDPOTFILES', "$potfiles\n") {
+		$logger->fatal(__x("error writing '{filename}': {error}",
+						   filename => $display_name, error => $!));
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __makePOT {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $po_config = $qgoda->config->{po};
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $po_config = $qgoda->config->{po};
 
-    # FIXME! Check dependencies!
-    my ($pox, $pot) = ('perl.pox', 'perl.pot');
-    my @options = split / /, Locale::TextDomain->options;
-    my @cmd = (@{$po_config->{xgettext}},
-               "--output=$pox", "--from-code=utf-8",
-               "--add-comments=TRANSLATORS:", "--files-from=PLFILES",
-               "--copyright-holder='$po_config->{'copyright-holder'}'",
-               "--force-po",
-               "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'",
-               @options);
-    $self->__fatalCommand(@cmd);
-    $logger->info(__x("unlink '{filename}'", filename => $pot));
-    unlink $pot;
-    $self->__safeRename($pox, $pot);
+	# FIXME! Check dependencies!
+	my ($pox, $pot) = ('perl.pox', 'perl.pot');
+	my @options = split / /, Locale::TextDomain->options;
+	my @cmd = (@{$po_config->{xgettext}},
+			   "--output=$pox", "--from-code=utf-8",
+			   "--add-comments=TRANSLATORS:", "--files-from=PLFILES",
+			   "--copyright-holder='$po_config->{'copyright-holder'}'",
+			   "--force-po",
+			   "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'",
+			   @options);
+	$self->__fatalCommand(@cmd);
+	$logger->info(__x("unlink '{filename}'", filename => $pot));
+	unlink $pot;
+	$self->__safeRename($pox, $pot);
 
-    ($pox, $pot) = ("markdown.pox", 
-                    "markdown.pot");
-    @cmd = (@{$po_config->{qgoda}}, "xgettext",
-               "--output=$pox", "--from-code=utf-8",
-               "--add-comments=TRANSLATORS:", "--files-from=MDPOTFILES",
-               "--copyright-holder='$po_config->{'copyright-holder'}'",
-               "--force-po",
-               "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'");
-    $self->__fatalCommand(@cmd);
-    $logger->info(__x("unlink '{filename}'", filename => $pot));
-    unlink $pot;
-    $self->__safeRename($pox, $pot);
+	($pox, $pot) = ("markdown.pox", 
+					"markdown.pot");
+	@cmd = (@{$po_config->{qgoda}}, "xgettext",
+			   "--output=$pox", "--from-code=utf-8",
+			   "--add-comments=TRANSLATORS:", "--files-from=MDPOTFILES",
+			   "--copyright-holder='$po_config->{'copyright-holder'}'",
+			   "--force-po",
+			   "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'");
+	$self->__fatalCommand(@cmd);
+	$logger->info(__x("unlink '{filename}'", filename => $pot));
+	unlink $pot;
+	$self->__safeRename($pox, $pot);
 
-    ($pox, $pot) = ("$po_config->{textdomain}.pox", 
-                    "$po_config->{textdomain}.pot");
-    @cmd = (@{$po_config->{'xgettext-tt2'}},
-               "--output=$pox", "--from-code=utf-8",
-               "--add-comments=TRANSLATORS:", "--files-from=POTFILES",
-               "--copyright-holder='$po_config->{'copyright-holder'}'",
-               "--force-po",
-               "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'");
-    $self->__fatalCommand(@cmd);
-    $logger->info(__x("unlink '{filename}'", filename => $pot));
-    unlink $pot;
-    $self->__safeRename($pox, $pot);
+	($pox, $pot) = ("$po_config->{textdomain}.pox", 
+					"$po_config->{textdomain}.pot");
+	@cmd = (@{$po_config->{'xgettext-tt2'}},
+			   "--output=$pox", "--from-code=utf-8",
+			   "--add-comments=TRANSLATORS:", "--files-from=POTFILES",
+			   "--copyright-holder='$po_config->{'copyright-holder'}'",
+			   "--force-po",
+			   "--msgid-bugs-address='$po_config->{'msgid-bugs-address'}'");
+	$self->__fatalCommand(@cmd);
+	$logger->info(__x("unlink '{filename}'", filename => $pot));
+	unlink $pot;
+	$self->__safeRename($pox, $pot);
 
-    return $self;
+	return $self;
 }
 
 sub __makeUpdatePO {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
-    my $po_config = $config->{po};
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $po_config = $config->{po};
 
-    my @deps = $self->__filelist('PLFILES');
-    push @deps, $self->__filelist('MDPOTFILES');
-    push @deps, $self->__filelist('POTFILES');
-    push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
-    $self->__makePOT if $self->__outOfDate("$config->{po}->{textdomain}.pot", 
-                                           @deps);
+	my @deps = $self->__filelist('PLFILES');
+	push @deps, $self->__filelist('MDPOTFILES');
+	push @deps, $self->__filelist('POTFILES');
+	push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
+	$self->__makePOT if $self->__outOfDate("$config->{po}->{textdomain}.pot", 
+										   @deps);
 
-    my @linguas = @{$config->{linguas}};
-    shift @linguas;
+	my @linguas = @{$config->{linguas}};
+	shift @linguas;
 
-    my $errors = 0;
-    foreach my $lang (@linguas) {
-        $logger->info(__x("merging {filename}", filename => "$lang.po"));
+	my $errors = 0;
+	foreach my $lang (@linguas) {
+		$logger->info(__x("merging {filename}", filename => "$lang.po"));
 
-        $self->__safeRename("$lang.po", "$lang.old.po");
+		$self->__safeRename("$lang.po", "$lang.old.po");
 
-        my @cmd = (@{$po_config->{msgmerge}}, 
-                   "$lang.old.po", "$po_config->{textdomain}.pot", 
-                   '--previous',
-                   '-o', "$lang.po");
-        if (0 == $self->__command(@cmd)) {
-            $logger->info(__x("unlink '{filename}'", 
-                              filename => "$lang.old.po"));
-            unlink "$lang.old.po";
-        } else {
-            ++$errors;
-            $logger->error(__x("Merging {filename} failed",
-                               filename => "$lang.po"));
-            $self->__safeRename("$lang.old.po", "$lang.po");
-        }
-    }
+		my @cmd = (@{$po_config->{msgmerge}}, 
+				   "$lang.old.po", "$po_config->{textdomain}.pot", 
+				   '--previous',
+				   '-o', "$lang.po");
+		if (0 == $self->__command(@cmd)) {
+			$logger->info(__x("unlink '{filename}'", 
+							  filename => "$lang.old.po"));
+			unlink "$lang.old.po";
+		} else {
+			++$errors;
+			$logger->error(__x("Merging {filename} failed",
+							   filename => "$lang.po"));
+			$self->__safeRename("$lang.old.po", "$lang.po");
+		}
+	}
 
-    exit 1 if $errors;
+	exit 1 if $errors;
 
-    return $self;
+	return $self;
 }
 
 sub __makeUpdateMO {
-    my ($self) = @_;
+	my ($self) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
-    my $po_config = $config->{po};
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $po_config = $config->{po};
 
-    my @linguas = @{$config->{linguas}};
-    shift @linguas;
+	my @linguas = @{$config->{linguas}};
+	shift @linguas;
 
-    my @deps = $self->__filelist('PLFILES');
-    push @deps, $self->__filelist('MDPOTFILES');
-    push @deps, $self->__filelist('POTFILES');
-    push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
+	my @deps = $self->__filelist('PLFILES');
+	push @deps, $self->__filelist('MDPOTFILES');
+	push @deps, $self->__filelist('POTFILES');
+	push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
 
-    foreach my $lang (@linguas) {
-        if ($self->__outOfDate("$lang.po", @deps)) {
-            $self->__makeUpdatePO;
-            last;
-        }
-    }
+	foreach my $lang (@linguas) {
+		if ($self->__outOfDate("$lang.po", @deps)) {
+			$self->__makeUpdatePO;
+			last;
+		}
+	}
 
-    foreach my $lang (@linguas) {
-        $self->__makeUpdatePO if $self->__outOfDate("$lang.po", @deps);
-        my @cmd = (@{$po_config->{msgfmt}}, "--check",
-                   "--statistics", "--verbose",
-                   '-o', "$lang.gmo", "$lang.po");
-        $self->__fatalCommand(@cmd);
-    }
+	foreach my $lang (@linguas) {
+		$self->__makeUpdatePO if $self->__outOfDate("$lang.po", @deps);
+		my @cmd = (@{$po_config->{msgfmt}}, "--check",
+				   "--statistics", "--verbose",
+				   '-o', "$lang.gmo", "$lang.po");
+		$self->__fatalCommand(@cmd);
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __makeInstall {
-    my ($self, $srcdir) = @_;
+	my ($self, $srcdir) = @_;
 
-    my $qgoda = Qgoda->new;
-    my $logger = $qgoda->logger;
-    my $config = $qgoda->config;
-    my $po_config = $config->{po};
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+	my $config = $qgoda->config;
+	my $po_config = $config->{po};
 
-    my @linguas = @{$config->{linguas}};
-    shift @linguas;
+	my @linguas = @{$config->{linguas}};
+	shift @linguas;
 
-    my @deps = $self->__filelist('PLFILES');
-    push @deps, $self->__filelist('MDPOTFILES');
-    push @deps, $self->__filelist('POTFILES');
-    push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
-    push @deps, map { "$_.po" } @linguas;
+	my @deps = $self->__filelist('PLFILES');
+	push @deps, $self->__filelist('MDPOTFILES');
+	push @deps, $self->__filelist('POTFILES');
+	push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
+	push @deps, map { "$_.po" } @linguas;
 
-    foreach my $lang (@linguas) {
-        if ($self->__outOfDate("$lang.gmo", @deps)) {
-            $self->__makeUpdateMO;
-            last;
-        }
-    }
+	foreach my $lang (@linguas) {
+		if ($self->__outOfDate("$lang.gmo", @deps)) {
+			$self->__makeUpdateMO;
+			last;
+		}
+	}
 
-    my $targetdir = File::Spec->catfile($srcdir, 'LocaleData');
-    foreach my $lang (@linguas) {
-        my $destdir = File::Spec->catfile($targetdir, $lang, 'LC_MESSAGES');
-        if (!-e $destdir) {
-            $logger->info(__x("create directory '{directory}'",
-                              directory => $destdir));
-            make_path $destdir if !-e $destdir;
-        }
-        my $dest = File::Spec->catfile($destdir, "$po_config->{textdomain}.mo");
-        $logger->info(__x("copy '{from}' to '{to}'",
-                          from => "$lang.gmo", to => $dest));
-        if (!copy "$lang.gmo", "$dest") {
-            $logger->fatal(__x("cannot copy '{from}' to '{to}': {error}",
-                              from => "$lang.gmo", to => $dest, error => $!));
-            
-        }
-    }
+	my $targetdir = File::Spec->catfile($srcdir, 'LocaleData');
+	foreach my $lang (@linguas) {
+		my $destdir = File::Spec->catfile($targetdir, $lang, 'LC_MESSAGES');
+		if (!-e $destdir) {
+			$logger->info(__x("create directory '{directory}'",
+							  directory => $destdir));
+			make_path $destdir if !-e $destdir;
+		}
+		my $dest = File::Spec->catfile($destdir, "$po_config->{textdomain}.mo");
+		$logger->info(__x("copy '{from}' to '{to}'",
+						  from => "$lang.gmo", to => $dest));
+		if (!copy "$lang.gmo", "$dest") {
+			$logger->fatal(__x("cannot copy '{from}' to '{to}': {error}",
+							  from => "$lang.gmo", to => $dest, error => $!));
+			
+		}
+	}
 
-    return $self;
+	return $self;
 }
 
 sub __makeAll {
-    my ($self, $srcdir) = @_;
+	my ($self, $srcdir) = @_;
 
-    $self->__makePOTFILES($srcdir);
-    $self->__makePOT($srcdir);
-    $self->__makeUpdatePO($srcdir);
-    $self->__makeUpdateMO($srcdir);
-    $self->__makeInstall($srcdir);
+	$self->__makePOTFILES($srcdir);
+	$self->__makePOT($srcdir);
+	$self->__makeUpdatePO($srcdir);
+	$self->__makeUpdateMO($srcdir);
+	$self->__makeInstall($srcdir);
 }
 
 1;
@@ -810,15 +810,15 @@ qgoda po - Translation workflow based on PO files
 
 =head1 SYNOPSIS
 
-    qgoda po [<global options>] potfiles
-    qgoda po [<global options>] pot
-    qgoda po [<global options>] update-po
-    qgoda po [<global options>] update-mo
-    qgoda po [<global options>] install
+	qgoda po [<global options>] potfiles
+	qgoda po [<global options>] pot
+	qgoda po [<global options>] update-po
+	qgoda po [<global options>] update-mo
+	qgoda po [<global options>] install
 
 Or for all of the above:
 
-    qgoda po [<global options>] all
+	qgoda po [<global options>] all
 
 Try 'qgoda --help' for a description of global options.
 
@@ -840,14 +840,14 @@ in F<_config.yaml> points to.
 The directory is autmatically created and populated when necessary.  It is
 necessary, if you use L<Template::Plugin::Gettext> in one of your templates:
 
-    [% USE gtx = Gettext('com.example.www', asset.lingua) %]
+	[% USE gtx = Gettext('com.example.www', asset.lingua) %]
 
 Creation of the F<_po> directory is also triggered, if one of your site's
 markdown documents refers to another from the document variable C<master>
 
-    ---
-    master: /en/about.md
-    ---
+	---
+	master: /en/about.md
+	---
 
 Additionally, you must set the textdomain of your site in the configuration
 variable C<po.textdomain>.  The textdomain is
@@ -878,7 +878,7 @@ the creation of F<PACKAGE>:
 
 An array of language codes, for example:
 
-    linguas: [en, fr, de, bg]
+	linguas: [en, fr, de, bg]
 
 The first value is assumed to be the base language of your site.
 
@@ -924,11 +924,11 @@ use a single value or a list, if you want to pass options to the command.
 
 Example configuration for F<PACKAGE>:
 
-    linguas: [en, fr, de, bg]
-    po:
-      textdomain: com.example.www
-      msgid_bugs_address: John Doe <po-bugs@example.com>
-      copyright_holder: Acme Ltd. <http://www.example.com>
+	linguas: [en, fr, de, bg]
+	po:
+	  textdomain: com.example.www
+	  msgid_bugs_address: John Doe <po-bugs@example.com>
+	  copyright_holder: Acme Ltd. <http://www.example.com>
 
 When you change the configuration, you have to either delete the generated
 files from the F<_po> directory or run C<qgoda po reset> in order to
@@ -972,14 +972,14 @@ can override that setting with the configuration variable C<po.views>
 
 po:
   views:
-    - /_views/**
+	- /_views/**
 
 You can extend or reduce that list like this:
 
 po:
   views:
-    - /_views/**
-    - !/_views/**/*.bak
+	- /_views/**
+	- !/_views/**/*.bak
 
 Note, that this file will normally also contain a line for F<./MDPOTFILES>.
 This line has the effect that all translatable strings in Markdown files
@@ -997,7 +997,7 @@ language you have configured.  Failure to do so will result in an error.
 
 The simplest way of creating such a file from scratch is with the command:
 
-    msginit --locale=fr --input=TEXTDOMAIN.pot
+	msginit --locale=fr --input=TEXTDOMAIN.pot
 
 Replace "fr" with the language you need and F<TEXTDOMAIN.pot> with the 
 name of the master translation catalog that you have configured.

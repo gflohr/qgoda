@@ -29,114 +29,114 @@ use Qgoda::Util qw(empty perl_class class2module);
 use base qw(Qgoda::Processor);
 
 sub new {
-    my ($class, %plug_ins) = @_;
+	my ($class, %plug_ins) = @_;
 
-    my %handlers = (
-        declaration => [],
-        start => [],
-        text => [],
-        end => [],
-        comment => [],
-        process => [],
-    );
+	my %handlers = (
+		declaration => [],
+		start => [],
+		text => [],
+		end => [],
+		comment => [],
+		process => [],
+	);
 
-    # FIXME! Sort this by 'order'!
-    foreach my $name (keys %plug_ins) {
-        my $args = $plug_ins{$name};
+	# FIXME! Sort this by 'order'!
+	foreach my $name (keys %plug_ins) {
+		my $args = $plug_ins{$name};
 
-        if (!perl_class $name) {
-            die __x("{class}: filter specification:"
-                    . " illegal plug-in name '{name}'",
-                    class => $class, name => $name);
-        }
-
-		if (!ref $args || 'HASH' ne reftype $args) {
-			die __x("{class}: filter specification for plug-in '{name}':"
-			        . " use named arguments!",
+		if (!perl_class $name) {
+			die __x("{class}: filter specification:"
+					. " illegal plug-in name '{name}'",
 					class => $class, name => $name);
 		}
 
-        $name = 'Qgoda::HTMLFilter::' . $name;
+		if (!ref $args || 'HASH' ne reftype $args) {
+			die __x("{class}: filter specification for plug-in '{name}':"
+					. " use named arguments!",
+					class => $class, name => $name);
+		}
 
-        my $module = class2module $name;
-        require $module;
+		$name = 'Qgoda::HTMLFilter::' . $name;
 
-        my $plug_in = $name->new(%$args);
-        push @{$handlers{declaration}}, $plug_in
-            if $plug_in->can('declaration');
-        push @{$handlers{start}}, $plug_in
-            if $plug_in->can('start');
-        push @{$handlers{text}}, $plug_in
-            if $plug_in->can('text');
-        push @{$handlers{end}}, $plug_in
-            if $plug_in->can('end');
-        push @{$handlers{comment}}, $plug_in
-            if $plug_in->can('comment');
-        push @{$handlers{process}}, $plug_in
-            if $plug_in->can('process');
-        push @{$handlers{start_document}}, $plug_in
-            if $plug_in->can('start_document');
-        push @{$handlers{end_document}}, $plug_in
-            if $plug_in->can('end_document');
-    }
+		my $module = class2module $name;
+		require $module;
 
-    my $self = {
-        __handlers => \%handlers,
-    };
+		my $plug_in = $name->new(%$args);
+		push @{$handlers{declaration}}, $plug_in
+			if $plug_in->can('declaration');
+		push @{$handlers{start}}, $plug_in
+			if $plug_in->can('start');
+		push @{$handlers{text}}, $plug_in
+			if $plug_in->can('text');
+		push @{$handlers{end}}, $plug_in
+			if $plug_in->can('end');
+		push @{$handlers{comment}}, $plug_in
+			if $plug_in->can('comment');
+		push @{$handlers{process}}, $plug_in
+			if $plug_in->can('process');
+		push @{$handlers{start_document}}, $plug_in
+			if $plug_in->can('start_document');
+		push @{$handlers{end_document}}, $plug_in
+			if $plug_in->can('end_document');
+	}
 
-    bless $self, $class;
+	my $self = {
+		__handlers => \%handlers,
+	};
+
+	bless $self, $class;
 }
 
 sub process {
-    my ($self, $content, $asset) = @_;
+	my ($self, $content, $asset) = @_;
 
-    my $output = '';
-    
-    my $handler = sub {
-        my ($event, $text, $tagname, $attr, $attrseq, $is_cdata) = @_;
+	my $output = '';
+	
+	my $handler = sub {
+		my ($event, $text, $tagname, $attr, $attrseq, $is_cdata) = @_;
 
-        my $chunk;
-        if ('start_document' eq $event || 'end_document' eq $event) {
-            $chunk = $output;
-            $output = '';
-        } else {
-            $chunk = $text;
-        }
+		my $chunk;
+		if ('start_document' eq $event || 'end_document' eq $event) {
+			$chunk = $output;
+			$output = '';
+		} else {
+			$chunk = $text;
+		}
 
-        foreach my $plug_in (@{$self->{__handlers}->{$event}}) {
-            $chunk = $plug_in->$event(
-                $chunk,
-                event => $event,
-                text => $text,
-                output => \$output,
-                text => $text,
-                tagname => $tagname,
-                attr => $attr,
-                attrseq => $attrseq,
-                is_cdata => $is_cdata,
-                asset => $asset,
-            );
-        }
+		foreach my $plug_in (@{$self->{__handlers}->{$event}}) {
+			$chunk = $plug_in->$event(
+				$chunk,
+				event => $event,
+				text => $text,
+				output => \$output,
+				text => $text,
+				tagname => $tagname,
+				attr => $attr,
+				attrseq => $attrseq,
+				is_cdata => $is_cdata,
+				asset => $asset,
+			);
+		}
 
-        $output .= $chunk;
-    };
+		$output .= $chunk;
+	};
 
-    my $parser = HTML::Parser->new(
-        comment_h => [$handler, 'event, text'],
-        declaration_h => [$handler, 'event, text'],
-        start_h => [$handler, 'event, text, tagname, attr, attrseq, is_cdata'],
-        end_h => [$handler, 'event, text, tagname'],
-        process_h => [$handler, 'event, text'],
-        text_h => [$handler, 'event, text'],
-        start_document_h => [$handler, 'event'],
-    );
-    $parser->empty_element_tags(1);
-    $parser->parse($content);
+	my $parser = HTML::Parser->new(
+		comment_h => [$handler, 'event, text'],
+		declaration_h => [$handler, 'event, text'],
+		start_h => [$handler, 'event, text, tagname, attr, attrseq, is_cdata'],
+		end_h => [$handler, 'event, text, tagname'],
+		process_h => [$handler, 'event, text'],
+		text_h => [$handler, 'event, text'],
+		start_document_h => [$handler, 'event'],
+	);
+	$parser->empty_element_tags(1);
+	$parser->parse($content);
 
-    # FIXME! Why can that handler not be registered like the others?
-    $handler->('end_document', $output);
+	# FIXME! Why can that handler not be registered like the others?
+	$handler->('end_document', $output);
 
-    return $output;    
+	return $output;	
 }
 
 1;

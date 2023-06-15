@@ -23,54 +23,54 @@ use strict;
 use Qgoda::Util qw(empty);
 
 sub new {
-    my ($class, %args) = @_;
+	my ($class, %args) = @_;
 
-    my $match = $args{match};
-    $match = '^(?:https?|ftp)://' if empty $match;
+	my $match = $args{match};
+	$match = '^(?:https?|ftp)://' if empty $match;
 
-    my $target = $args{target};
-    $target = '_blank' if empty $target;
+	my $target = $args{target};
+	$target = '_blank' if empty $target;
 
-    $match = qr/$match/;
-    my $self = {
-        __match => $match,
-        __target => $target,
-    };
+	$match = qr/$match/;
+	my $self = {
+		__match => $match,
+		__target => $target,
+	};
 
-    bless $self, $class;
+	bless $self, $class;
 }
 
 sub start {
-    my ($self, $chunk, %args) = @_;
+	my ($self, $chunk, %args) = @_;
 
-    return $chunk if 'a' ne $args{tagname};
+	return $chunk if 'a' ne $args{tagname};
 
-    my $attr = $args{attr};
-    my $href = $args{attr}->{href};
+	my $attr = $args{attr};
+	my $href = $args{attr}->{href};
 
-    return $chunk if empty $href;
-    return $chunk if !empty $attr->{target};
-    return $chunk if $href !~ $self->{__match};
+	return $chunk if empty $href;
+	return $chunk if !empty $attr->{target};
+	return $chunk if $href !~ $self->{__match};
 
-    my $attrseq = $args{attrseq};
-    push @$attrseq, 'target';
-    $attr->{target} = $self->{__target};
+	my $attrseq = $args{attrseq};
+	push @$attrseq, 'target';
+	$attr->{target} = $self->{__target};
 
-    $chunk = '<' . $args{tagname};
+	$chunk = '<' . $args{tagname};
 
-    foreach my $key (@$attrseq) {
-        my $value = $attr->{$key};
+	foreach my $key (@$attrseq) {
+		my $value = $attr->{$key};
 
-        my %escapes = (
-            '"' => '&quot;',
-            '&' => '&amp;'
-        );
-        $value =~ s/(["&])/$escapes{$1}/g;
-        $chunk .= qq{ $key="$value"};
-    }
-    
-    $chunk .= '>';
+		my %escapes = (
+			'"' => '&quot;',
+			'&' => '&amp;'
+		);
+		$value =~ s/(["&])/$escapes{$1}/g;
+		$chunk .= qq{ $key="$value"};
+	}
+	
+	$chunk .= '>';
 
-    return $chunk;
+	return $chunk;
 }
 1;

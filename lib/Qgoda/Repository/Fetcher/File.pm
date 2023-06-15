@@ -30,60 +30,60 @@ use Qgoda;
 use base qw(Qgoda::Repository::Fetcher);
 
 sub fetch {
-    my ($self, $uri, $destination) = @_;
+	my ($self, $uri, $destination) = @_;
 
-    my $logger = Qgoda->new->logger;
+	my $logger = Qgoda->new->logger;
 
-    my $path = $uri->file;
-    if (-d $path) {
-        if (!dircopy $path, $destination) {
-            $logger->fatal(__x("error copying '{src}' to '{dest}': {error}",
-                               src => $path, dest => $destination,
-                               error => $!));
-        }
+	my $path = $uri->file;
+	if (-d $path) {
+		if (!dircopy $path, $destination) {
+			$logger->fatal(__x("error copying '{src}' to '{dest}': {error}",
+							   src => $path, dest => $destination,
+							   error => $!));
+		}
 
-        return $destination;
-    };
+		return $destination;
+	};
 
-    return $self->_extractArchive($path, $destination);
+	return $self->_extractArchive($path, $destination);
 }
 
 sub _extractArchive {
-    my ($self, $path, $destination) = @_;
+	my ($self, $path, $destination) = @_;
 
-    my $logger = Qgoda->new->logger;
+	my $logger = Qgoda->new->logger;
 
-    my $ae = Archive::Extract->new(archive => $path);
-    $ae->extract(to => $destination)
-        or $logger->fatal(__x("error extracing '{archive}' to"
-                              ." '{destination}': {error}"),
-                              archive => $path,
-                              destination => $destination,
-                              error => $ae->error);
+	my $ae = Archive::Extract->new(archive => $path);
+	$ae->extract(to => $destination)
+		or $logger->fatal(__x("error extracing '{archive}' to"
+							  ." '{destination}': {error}"),
+							  archive => $path,
+							  destination => $destination,
+							  error => $ae->error);
 
-    opendir my $dh, $destination
-        or $logger->fatal(__x("error reading directory '{directory}': {error}",
-                              directory => $destination,
-                              error => $ae->error));
+	opendir my $dh, $destination
+		or $logger->fatal(__x("error reading directory '{directory}': {error}",
+							  directory => $destination,
+							  error => $ae->error));
 
-    my @contents = sort File::Spec->no_upwards(readdir $dh)
-        or $logger->fatal(__x("archive '{archive} is empty",
-                              archive => $path));
+	my @contents = sort File::Spec->no_upwards(readdir $dh)
+		or $logger->fatal(__x("archive '{archive} is empty",
+							  archive => $path));
 
-    $logger->warning(__x("archive '{archive}' has ambiguous content,"
-                         . " trying first entry '{first}''",
-                         archive => $path, first => $contents[0]))
-        if @contents > 1;
+	$logger->warning(__x("archive '{archive}' has ambiguous content,"
+						 . " trying first entry '{first}''",
+						 archive => $path, first => $contents[0]))
+		if @contents > 1;
 
-    my $first = File::Spec->catfile($destination, $contents[0]);
-    if (-d $contents[0]) {
-        # Properly packaged, return the directory.
-        return $contents[0];
-    }
+	my $first = File::Spec->catfile($destination, $contents[0]);
+	if (-d $contents[0]) {
+		# Properly packaged, return the directory.
+		return $contents[0];
+	}
 
-    # Archive does not unpack into a single directory.  Let's assume that
-    # the directory level is simply missing.
-    return $destination;
+	# Archive does not unpack into a single directory.  Let's assume that
+	# the directory level is simply missing.
+	return $destination;
 }
 
 1;
