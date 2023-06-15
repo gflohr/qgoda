@@ -134,35 +134,35 @@ EOF
 	$msg .= "\n";
 
 	$msg .= __<<EOF;
-  build					   build site and exit
-  watch					   build, then watch for changes and build on demand
-  config					  dump the current configuration and exit
-  schema					  dump the configuration JSON schema and exit
-  init						initialize a new qgoda site
-  dump						dump the site structure as JSON (implies --quiet)
-  javascript				  evaluate JavaScript code
-  js						  same as "javascript" above
-  markdown					process Markdown
-  xgettext					extract translatable strings from Markdown
-							  files
-  po						  various commands for processing translations
+  build                      build site and exit
+  watch                      build, then watch for changes and build on demand
+  config                     dump the current configuration and exit
+  schema                     dump the configuration JSON schema and exit
+  init                       initialize a new qgoda site
+  dump                       dump the site structure as JSON (implies --quiet)
+  javascript                 evaluate JavaScript code
+  js                         same as "javascript" above
+  markdown                   process Markdown
+  xgettext                   extract translatable strings from Markdown
+                             files
+  po                         various commands for processing translations
 EOF
 
 	$msg .= "\n";
 
 	$msg .= __<<EOF;
 Operation mode:
-  -q, --quiet				 quiet mode
-  -v, --verbose			   verbosely log what is going on 
-	  --log-stderr			log to standard error instead of standard out
+  -q, --quiet                quiet mode
+  -v, --verbose              verbosely log what is going on
+  --log-stderr               log to standard error instead of standard out
 EOF
 
 	$msg .= "\n";
 
 	$msg .= __<<EOF;
 Informative output:
-  -h, --help				  display this help and exit
-  -V, --version			   output version information and exit
+  -h, --help                 display this help and exit
+  -V, --version              output version information and exit
 EOF
 
 	$msg .= "\n";
