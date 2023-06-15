@@ -504,6 +504,13 @@ sub config {
 							   . "particular semantics.",
 				default => __"A new Qgoda Powered Site",
 			},
+			'track-dependencies' => {
+				description => __"Set to true if you want to speed up watch "
+							   . "mode by re-processing only assets that have "
+							   . "changed or depend on changed files.",
+				type => 'boolean',
+				default => true,
+			},
 			view => {
 				description => __"The default view template to use.",
 				default => 'default.html',
