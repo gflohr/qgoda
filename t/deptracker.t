@@ -59,7 +59,7 @@ my %test_config = (
 		},
 		'index.en.md' => {
 			title => 'English index page',
-			lingua => 'de',
+			lingua => 'en',
 			location => '/index.en.html',
 			content => "Listing\n",
 			view => 'listing.html',
@@ -124,10 +124,7 @@ $wanted = [
 ];
 is_deeply $got, $wanted, '2nd build artefacts';
 
-#use Data::Dumper;
-#print Dumper($qgoda->getDependencyTracker);
-
-# $site->tearDown;
+$site->tearDown;
 
 done_testing;
 

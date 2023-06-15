@@ -46,6 +46,12 @@ sub new {
 	bless $self, $class;
 }
 
+sub resetDirty {
+	my ($self) = @_;
+
+	delete $self->{__dirty};
+}
+
 sub addAsset {
 	my ($self, $asset) = @_;
 
@@ -56,11 +62,46 @@ sub addAsset {
 	return $self;
 }
 
+sub addDirtyAsset {
+	my ($self, $asset) = @_;
+
+	$self->addAsset($asset);
+	my $path = $asset->getPath;
+	$self->{__dirty} ||= {};
+	$self->{__dirty}->{$path} = $asset;
+
+	return $self;
+}
+
+sub getAssetsForBuild {
+	my ($self) = @_;
+
+	if ($self->{__dirty}) {
+		return sort { $b->{priority} <=> $a->{priority} } values %{shift->{assets}};
+	} else {
+		return $self->getAssets;
+	}
+}
+
 sub removeAsset {
 	my ($self, $asset) = @_;
 
 	delete $self->{assets}->{$asset->getPath};
 	delete $self->{__relpaths}->{$asset->getRelpath};
+
+	return $self;
+}
+
+sub removeAssetByRelpath {
+	my ($self, $relpath) = @_;
+
+	my $qgoda = Qgoda->new;
+	my $config = $qgoda->config;
+	my $srcdir = $config->{srcdir};
+
+	my $path = File::Spec->rel2abs($relpath);
+	delete $self->{assets}->{$path};
+	delete $self->{__relpaths}->{$relpath};
 
 	return $self;
 }

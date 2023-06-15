@@ -44,8 +44,7 @@ sub build {
 	my $errors = $site->getErrors;
 
 	# 1st pass, usually Markdown.
-	ASSET: foreach my $asset (sort { $b->{priority} <=> $a->{priority} }
-							  $site->getAssets) {
+	ASSET: foreach my $asset ($site->getAssetsForBuild) {
 		$self->{__current} = $asset;
 		my $saved_locale = setlocale(POSIX::LC_ALL());
 		eval {
@@ -69,8 +68,7 @@ sub build {
 	$site->computeRelations;
 
 	# 2nd pass, usually HTML.
-	ASSET: foreach my $asset (sort { $b->{priority} <=> $a->{priority} }
-							$site->getAssets) {
+	ASSET: foreach my $asset ($site->getAssetsForBuild) {
 		if ($asset->{virtual}) {
 			$logger->debug(__x("not wrapping virtual asset '/{relpath}'",
 							   relpath => $asset->getRelpath));

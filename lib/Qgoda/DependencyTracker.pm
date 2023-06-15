@@ -24,8 +24,9 @@ sub new {
 	my ($class) = @_;
 
 	bless {
-		__uses => {},
+		__used_by => {},
 		__descendants => {},
+		__outfiles => {},
 	}, $class;
 }
 
@@ -33,6 +34,7 @@ sub addArtefact {
 	my ($self, $parent, $path) = @_;
 
 	$self->{__descendants}->{$parent->{relpath}}->{$path} = 1;
+	$self->{__outfiles}->{$path} = 1;
 
 	return $self;
 }
@@ -40,7 +42,85 @@ sub addArtefact {
 sub addUsage {
 	my ($self, $user_path, $dep_path) = @_;
 
-	$self->{__uses}->{$user_path}->{$dep_path} = 1;
+	$self->{__used_by}->{$dep_path}->{$user_path} = 1;
+
+	return $self;
+}
+
+sub compute {
+	my ($self, $changeset) = @_;
+
+	$self->{__dirty} = {};
+	$self->{__outfiles} = {};
+	my $qgoda = Qgoda->new;
+	my $site = $qgoda->getSite;
+	$site->resetDirty;
+	foreach my $relpath (@$changeset) {
+		$self->__addChange($relpath, $site);
+	}
+
+	return $self;
+}
+
+sub dirty {
+	my ($self) = @_;
+
+	return [keys %{$self->{__dirty}}] if $self->{__dirty};
+
+	return;
+}
+
+sub outfiles {
+	my ($self) = @_;
+
+	return [keys %{$self->{__outfiles}}];
+}
+
+sub __isView {
+	my ($path) = @_;
+
+	my $viewdir = Qgoda->new->config->{paths}->{views};
+	my $vlength = length $viewdir;
+	if ($viewdir eq substr $path, 0, $vlength) {
+			return 1;
+	} else {
+			return;
+	}
+}
+
+sub __addChange {
+	my ($self, $relpath, $site) = @_;
+
+	my $dirty = $self->{__dirty};
+	my $outfiles = $self->{__outfiles};
+	if (!$self->__isView($relpath)) {
+		$dirty->{$relpath} = 1;
+		$outfiles->{$relpath} = 1;
+	}
+
+	my $deleted = !-e $relpath;
+	$site->removeAssetByRelpath($relpath) if $deleted;
+	if (exists $self->{__used_by}->{$relpath}) {
+		my $users = delete $self->{__used_by}->{$relpath};
+		foreach my $user (keys %$users) {
+			my $is_view = $self->__isView($user);
+			if (!exists $dirty->{$user}) {
+				$dirty->{$user} = 1 if -e $user && !$is_view;
+				$self->__addChange($user);
+				return $self if !$self->{__dirty};
+			} elsif (!$is_view) {
+				delete $self->{__dirty};
+				$self->{__outfiles} = {};
+			}
+		}
+	}
+
+	if (exists $self->{__descendants}->{$relpath}) {
+		my $descendants = delete $self->{__descendants}->{$relpath};
+		foreach my $descendant (keys %$descendants) {
+			$self->{__outfiles}->{$descendant} = 1;
+		}
+	}
 
 	return $self;
 }

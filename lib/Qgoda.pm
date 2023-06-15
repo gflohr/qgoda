@@ -137,7 +137,6 @@ sub build {
 	my $site = Qgoda::Site->new($config);
 	$self->setSite($site);
 
-	$self->{__outfiles} = [];
 	$self->scan($site);
 	$self->__initVersionControlled($site)
 		if !empty $config->{scm} && 'git' eq $config->{scm};
@@ -206,6 +205,10 @@ sub build {
 
 sub buildForWatch {
 	my ($self, $changeset, $options) = @_;
+
+	if ($changeset && @$changeset) {
+		$self->getDependencyTracker->compute($changeset);
+	}
 
 	$self->build(%{$options || {}});
 
@@ -574,9 +577,25 @@ sub scan {
 
 	my $logger = $self->{__logger};
 	my $config = $self->{__config};
+	my $srcdir = $config->{srcdir};
+
+	if (!$just_find && $config->{'track-dependencies'}) {
+		my $deptracker = $self->getDependencyTracker;
+		my $dirty = $deptracker->dirty;
+		if ($dirty) {
+			$logger->debug(__"skip source directory scan and use dependencies");
+			$self->{__outfiles} = $deptracker->outfiles;
+			foreach my $relpath (@$dirty) {
+				my $path = File::Spec->rel2abs($relpath, $config->{srcdir});
+				my $asset = Qgoda::Asset->new($path, $relpath);
+				$site->addDirtyAsset($asset);
+			}
+
+			return $self;
+		}
+	}
 
 	my $outdir = $config->{paths}->{site};
-	my $srcdir = $config->{srcdir};
 
 	# Scan the source directory.
 	$logger->debug(__x("scanning source directory '{srcdir}'",
@@ -776,6 +795,12 @@ sub __prune {
 sub __filesysChangeFilter {
 	my ($self, $filename) = @_;
 
+	# It would be possible to also ignore deleted directories but that is
+	# not very relevant for Qgoda's typical usage.
+	if (-d $filename) {
+		return;
+	}
+
 	my $config = $self->{__config};
 
 	if ($filename =~ /_stop$/ && -e $filename) {
@@ -817,7 +842,11 @@ sub __onFilesysChange {
 
 	$logger->info(__"start rebuilding site because of file system change");
 
-	eval { $self->buildForWatch(\@events, $options) };
+	if ($config->{'track-dependencies'}) {
+		eval { $self->buildForWatch(\@events, $options) };
+	} else {
+		eval { $self->build(%$options) };
+	}
 	$logger->error($@) if $@;
 
 	return $self;
