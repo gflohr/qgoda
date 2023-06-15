@@ -57,6 +57,7 @@ sub compute {
 	$site->resetDirty;
 	foreach my $relpath (@$changeset) {
 		$self->__addChange($relpath, $site);
+		return $self if !$self->__isActive;
 	}
 
 	return $self;
@@ -88,14 +89,28 @@ sub __isView {
 	}
 }
 
+sub __reset {
+	my ($self, $site) = @_;
+
+	delete $self->{__dirty};
+	$self->{__outfiles} = {};
+	$site->resetDirty;
+
+	return $self;
+}
+
+sub __isActive {
+	shift->{__dirty};
+}
+
 sub __addChange {
 	my ($self, $relpath, $site) = @_;
 
 	my $dirty = $self->{__dirty};
 	my $outfiles = $self->{__outfiles};
-	if (!$self->__isView($relpath)) {
+	my $relpath_is_view = $self->__isView($relpath);
+	if (!$relpath_is_view) {
 		$dirty->{$relpath} = 1;
-		$outfiles->{$relpath} = 1;
 	}
 
 	my $deleted = !-e $relpath;
@@ -106,13 +121,13 @@ sub __addChange {
 			my $is_view = $self->__isView($user);
 			if (!exists $dirty->{$user}) {
 				$dirty->{$user} = 1 if -e $user && !$is_view;
-				$self->__addChange($user);
-				return $self if !$self->{__dirty};
-			} elsif (!$is_view) {
-				delete $self->{__dirty};
-				$self->{__outfiles} = {};
+				$self->__addChange($user, $site);
+				return $self if !$self->__isActive;
 			}
 		}
+	} elsif (!$relpath_is_view && !$deleted &&
+	         !$site->getAssetByRelpath($relpath)) {
+		return $self->__reset($site);
 	}
 
 	if (exists $self->{__descendants}->{$relpath}) {

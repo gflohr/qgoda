@@ -95,7 +95,7 @@ my ($got, $wanted);
 
 my $qgoda = Qgoda->new;
 
-ok $qgoda->buildForWatch, '1st build';
+ok $qgoda->buildForWatch, 'initial build';
 $got = collect_artefacts;
 $wanted = [
 	'_site/',
@@ -108,12 +108,12 @@ $wanted = [
 	'_site/index.de.html',
 	'_site/index.en.html',
 ];
-is_deeply $got, $wanted, '1st build artefacts';
+is_deeply $got, $wanted, 'initial build artefacts';
 
 # If the German post was updated, only the German listing and the German post
 # itself should be rebuilt.
 prune_site $got;
-ok $qgoda->buildForWatch(['de/post.md']), '2nd build';
+ok $qgoda->buildForWatch(['de/post.md']), 'referenced asset updated';
 $got = collect_artefacts;
 $wanted = [
 	'_site/',
@@ -122,7 +122,32 @@ $wanted = [
 	'_site/de/post/index.html',
 	'_site/index.de.html',
 ];
-is_deeply $got, $wanted, '2nd build artefacts';
+is_deeply $got, $wanted, 'referenced asset updated artefacts';
+
+# If an asset is added, the whole site should be rebuilt.
+prune_site $got;
+open my $fh, '>', $qgoda->config->{srcdir} . '/README'
+	or die "cannot create README";
+$fh->print("Read me!\n");
+$fh->close or die;
+ok $qgoda->buildForWatch(['README']), 'new asset';
+$got = collect_artefacts;
+$wanted = [
+	'_site/',
+	'_site/README',
+	'_site/de/',
+	'_site/de/post/',
+	'_site/de/post/index.html',
+	'_site/en/',
+	'_site/en/post/',
+	'_site/en/post/index.html',
+	'_site/index.de.html',
+	'_site/index.en.html',
+];
+is_deeply $got, $wanted, 'new asset artefacts';
+
+# If an asset is deleted, even it is not used by any other asset, it should
+# be deleted.
 
 $site->tearDown;
 

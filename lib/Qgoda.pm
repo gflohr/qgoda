@@ -134,8 +134,11 @@ sub build {
 							  dir => $config->{srcdir},
 							  error => $!));
 
-	my $site = Qgoda::Site->new($config);
-	$self->setSite($site);
+	my $site = $qgoda->getSite;
+	if (!$site) {
+		$site = Qgoda::Site->new($config);
+		$self->setSite($site);
+	}
 
 	$self->scan($site);
 	$self->__initVersionControlled($site)
@@ -207,6 +210,11 @@ sub buildForWatch {
 	my ($self, $changeset, $options) = @_;
 
 	if ($changeset && @$changeset) {
+		my $site = $self->getSite;
+		if (!$site) {
+			$site = Qgoda::Site->new;
+			$self->setSite($site);
+		}
 		$self->getDependencyTracker->compute($changeset);
 	}
 

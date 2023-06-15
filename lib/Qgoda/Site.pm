@@ -77,7 +77,7 @@ sub getAssetsForBuild {
 	my ($self) = @_;
 
 	if ($self->{__dirty}) {
-		return sort { $b->{priority} <=> $a->{priority} } values %{shift->{assets}};
+		return sort { $b->{priority} <=> $a->{priority} } values %{shift->{__dirty}};
 	} else {
 		return $self->getAssets;
 	}
