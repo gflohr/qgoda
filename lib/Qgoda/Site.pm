@@ -46,10 +46,19 @@ sub new {
 	bless $self, $class;
 }
 
-sub resetDirty {
-	my ($self) = @_;
+sub reset {
+	my ($self, $just_empty_dirty) = @_;
 
-	delete $self->{__dirty};
+	$self->{__filter_cache} = {};
+	$self->{__modified} = {};
+	$self->{__errors} = 0;
+	if ($just_empty_dirty) {
+		$self->{__dirty} = {};
+	} else {
+		delete $self->{__dirty};
+	}
+
+	return $self;
 }
 
 sub addAsset {
@@ -67,7 +76,6 @@ sub addDirtyAsset {
 
 	$self->addAsset($asset);
 	my $path = $asset->getPath;
-	$self->{__dirty} ||= {};
 	$self->{__dirty}->{$path} = $asset;
 
 	return $self;
@@ -99,7 +107,7 @@ sub removeAssetByRelpath {
 	my $config = $qgoda->config;
 	my $srcdir = $config->{srcdir};
 
-	my $path = File::Spec->rel2abs($relpath);
+	my $path = File::Spec->rel2abs($relpath, $srcdir);
 	delete $self->{assets}->{$path};
 	delete $self->{__relpaths}->{$relpath};
 
@@ -138,11 +146,19 @@ sub addArtefact {
 }
 
 sub getArtefact {
-	my ($self, $name) = @_;
+	my ($self, $path) = @_;
 
-	return if !exists $self->{artefacts}->{$name};
+	return if !exists $self->{artefacts}->{$path};
 
-	return $self->{artefacts}->{$name};
+	return $self->{artefacts}->{$path};
+}
+
+sub removeArtefact {
+	my ($self, $path) = @_;
+
+	delete $self->{artefacts}->{$path};
+
+	return $self;
 }
 
 sub getArtefacts {

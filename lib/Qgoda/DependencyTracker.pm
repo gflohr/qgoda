@@ -54,7 +54,7 @@ sub compute {
 	$self->{__outfiles} = {};
 	my $qgoda = Qgoda->new;
 	my $site = $qgoda->getSite;
-	$site->resetDirty;
+	$site->reset(1);
 	foreach my $relpath (@$changeset) {
 		$self->__addChange($relpath, $site);
 		return $self if !$self->__isActive;
@@ -78,7 +78,7 @@ sub outfiles {
 }
 
 sub __isView {
-	my ($path) = @_;
+	my ($self, $path) = @_;
 
 	my $viewdir = Qgoda->new->config->{paths}->{views};
 	my $vlength = length $viewdir;
@@ -94,7 +94,7 @@ sub __reset {
 
 	delete $self->{__dirty};
 	$self->{__outfiles} = {};
-	$site->resetDirty;
+	$site->reset;
 
 	return $self;
 }
@@ -109,12 +109,15 @@ sub __addChange {
 	my $dirty = $self->{__dirty};
 	my $outfiles = $self->{__outfiles};
 	my $relpath_is_view = $self->__isView($relpath);
-	if (!$relpath_is_view) {
+	my $deleted = !-e $relpath;
+	if (!$relpath_is_view && !$deleted) {
 		$dirty->{$relpath} = 1;
 	}
 
-	my $deleted = !-e $relpath;
-	$site->removeAssetByRelpath($relpath) if $deleted;
+	if ($deleted && !$relpath_is_view) {
+		$site->removeAssetByRelpath($relpath);
+	}
+
 	if (exists $self->{__used_by}->{$relpath}) {
 		my $users = delete $self->{__used_by}->{$relpath};
 		foreach my $user (keys %$users) {
@@ -134,6 +137,7 @@ sub __addChange {
 		my $descendants = delete $self->{__descendants}->{$relpath};
 		foreach my $descendant (keys %$descendants) {
 			$self->{__outfiles}->{$descendant} = 1;
+			$site->removeArtefact($descendant);
 		}
 	}
 

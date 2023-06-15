@@ -266,6 +266,10 @@ EOF
 		if !defined $content;
 	Encode::_utf8_on($content) if !$asset->{raw};
 	my $template_name = File::Spec->join($view_dir, $view);
+	$qgoda->getDependencyTracker->addUsage(
+		$asset->{relpath},
+		File::Spec->join($view_dir, $view),
+	);
 	foreach my $processor (@processors) {
 		my $short_name = ref $processor;
 		$short_name =~ s/^Qgoda::Processor:://;

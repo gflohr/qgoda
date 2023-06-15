@@ -146,8 +146,31 @@ $wanted = [
 ];
 is_deeply $got, $wanted, 'new asset artefacts';
 
-# If an asset is deleted, even it is not used by any other asset, it should
-# be deleted.
+# If an asset is deleted, even it is not used by any other asset, the artefact
+# for it should be deleted but nothing should be generated.
+prune_site $got;
+my $src_file = $qgoda->config->{srcdir} . '/README';
+my $dest_file = $qgoda->config->{paths}->{site} . '/README';
+rename $src_file, $dest_file
+	or die "cannot rename '$src_file' to '$dest_file': $!";
+ok $qgoda->buildForWatch(['README']), 'deleted unused asset';
+$got = collect_artefacts;
+$wanted = [
+	'_site/',
+];
+is_deeply $got, $wanted, 'deleted unused asset';
+
+
+# If a view file is modified, all artefacts rendered with this template have
+# to be rebuild.
+prune_site $got;
+ok $qgoda->buildForWatch(['_views/listing-de.html']), 'modified included view file';
+$got = collect_artefacts;
+$wanted = [
+	'_site/',
+	'_site/index.de.html',
+];
+is_deeply $got, $wanted, 'modified included view file';
 
 $site->tearDown;
 
