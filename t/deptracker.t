@@ -160,7 +160,6 @@ $wanted = [
 ];
 is_deeply $got, $wanted, 'deleted unused asset';
 
-
 # If a view file is modified, all artefacts rendered with this template have
 # to be rebuild.
 prune_site $got;
@@ -171,6 +170,18 @@ $wanted = [
 	'_site/index.de.html',
 ];
 is_deeply $got, $wanted, 'modified included view file';
+
+# Same test but with the root view of the asset.  This view is always processed
+# as a string and has a different inclusion mechanism
+prune_site $got;
+ok $qgoda->buildForWatch(['_views/listing.html']), 'modified root view file';
+$got = collect_artefacts;
+$wanted = [
+	'_site/',
+	'_site/index.de.html',
+	'_site/index.en.html',
+];
+is_deeply $got, $wanted, 'modified root view file';
 
 $site->tearDown;
 
