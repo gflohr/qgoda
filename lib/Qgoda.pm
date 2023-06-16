@@ -601,6 +601,9 @@ sub scan {
 
 			return $self;
 		}
+	} else {
+		$site->reset;
+		$site->{artefacts} = {};
 	}
 
 	my $outdir = $config->{paths}->{site};
