@@ -47,6 +47,10 @@ sub addUsage {
 	return $self;
 }
 
+sub getUsages {
+	shift->{__used_by};
+}
+
 sub compute {
 	my ($self, $changeset) = @_;
 
