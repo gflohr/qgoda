@@ -22,7 +22,7 @@ use lib 't';
 use TestSite;
 use Test::More;
 
-use Qgoda::Util::Translate qw(get_masters);
+use Qgoda::Util::Translate qw(get_mains);
 
 # Do not just add 1 to the year.  That may not work on Feb, 29th.
 my @next_year = localtime(time + 31556925);
@@ -48,26 +48,26 @@ my $site = TestSite->new(
 		},
 		'de-normal.md' => {
 			lingua => 'de',
-			master => './en-normal.md',
+			main => './en-normal.md',
 		},
 		'de-draft.md' => {
 			lingua => 'de',
-			master => './en-draft.md',
+			main => './en-draft.md',
 		},
 		'de-future.md' => {
 			lingua => 'de',
-			master => './en-future.md',
+			main => './en-future.md',
 		},
 	}
 );
 
 # Check that all markdown documents are considered translatable, even future
 # ones and drafts.
-my %masters = get_masters;
-ok $masters{'./en-normal.md'}, "Normal document should be translated.";
-ok $masters{'./en-draft.md'}, "Draft should be translated.";
-ok $masters{'./en-future.md'}, "Future document should be translated.";
-ok ((3 == keys %masters), "There should be exactly 3 master documents.");
+my %mains = get_mains;
+ok $mains{'./en-normal.md'}, "Normal document should be translated.";
+ok $mains{'./en-draft.md'}, "Draft should be translated.";
+ok $mains{'./en-future.md'}, "Future document should be translated.";
+ok ((3 == keys %mains), "There should be exactly 3 main documents.");
 
 $site->tearDown;
 

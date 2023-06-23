@@ -30,12 +30,12 @@ use TestSite;
 my %assets;
 
 $assets{'en/index.md'} = {
-	name => 'master',
+	name => 'main',
 	content => 'translate me',
 	tags => ['foo', 'bar'],
 };
 $assets{'de/index.md'} = {
-	master => 'en/index.md',
+	main => 'en/index.md',
 	lingua => 'de',
 };
 

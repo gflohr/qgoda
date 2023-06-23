@@ -1,6 +1,6 @@
 ---
-title: Master Document
-name: master-document
+title: Main Document
+name: main-document
 description: Test for po mechanism
 ---
 Multiple lines

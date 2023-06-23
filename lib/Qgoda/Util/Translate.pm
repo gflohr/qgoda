@@ -33,7 +33,7 @@ use Qgoda::Splitter;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(translate_front_matter translate_body get_masters);
+@EXPORT_OK = qw(translate_front_matter translate_body get_mains);
 
 sub __translate_property {
 	my ($property, $value, $textdomain) = @_;
@@ -77,16 +77,16 @@ sub translate_front_matter {
 	my $lingua = $asset->{lingua};
 	die __"lingua not set" if empty $lingua;
 
-	my $master_relpath = $asset->{master};
-	$master_relpath =~ s{^/}{};
-	$master_relpath = 'index.html' if empty $master_relpath;
+	my $main_relpath = $asset->{main};
+	$main_relpath =~ s{^/}{};
+	$main_relpath = 'index.html' if empty $main_relpath;
 
-	my $front_matter = front_matter $master_relpath;
-	die __x("cannot read front matter from master '{path}': {error}",
-			path => $master_relpath, error => $!)
+	my $front_matter = front_matter $main_relpath;
+	die __x("cannot read front matter from main '{path}': {error}",
+			path => $main_relpath, error => $!)
 		if !defined $front_matter;
-	
-	my $master = dclone safe_yaml_load $front_matter;
+
+	my $main = dclone safe_yaml_load $front_matter;
 
 	my @translate;
 	if (!empty $asset->{translate}) {
@@ -99,22 +99,22 @@ sub translate_front_matter {
 
 	my $textdomain = $config->{po}->{textdomain};
 
-	# Merge the master data unconditionally into the asset.
-	merge_data $asset, $master;
+	# Merge the main data unconditionally into the asset.
+	merge_data $asset, $main;
 
 	# And now translate the translatable properties.
 	local %ENV = %ENV;
 	$ENV{LANGUAGE} = $lingua;
 	foreach my $prop (@translate) {
-		$asset->{$prop} = __translate_property($prop, $master->{$prop},
+		$asset->{$prop} = __translate_property($prop, $main->{$prop},
 											   $textdomain);
 	}
-	merge_data $master, $asset;
+	merge_data $main, $asset;
 
 	# Now overwrite the explicitely set properties.
-	merge_data $master, $preserve;
+	merge_data $main, $preserve;
 
-	%{$_[0]} = %$master;
+	%{$_[0]} = %$main;
 
 	return 1;
 }
@@ -129,15 +129,15 @@ sub translate_body {
 	my $lingua = $asset->{lingua};
 	die __"lingua not set" if empty $lingua;
 
-	my $master_relpath = $asset->{master};
-	$master_relpath =~ s{^/}{};
-	$master_relpath = 'index.html' if empty $master_relpath;
+	my $main_relpath = $asset->{main};
+	$main_relpath =~ s{^/}{};
+	$main_relpath = 'index.html' if empty $main_relpath;
 
-	my $front_matter = front_matter $master_relpath;
-	die __x("cannot read front matter from master '{path}': {error}")
+	my $front_matter = front_matter $main_relpath;
+	die __x("cannot read front matter from main '{path}': {error}")
 		if !defined $front_matter;
-	
-	my $splitter = Qgoda::Splitter->new($master_relpath);
+
+	my $splitter = Qgoda::Splitter->new($main_relpath);
 
 	local %ENV = %ENV;
 	$ENV{LANGUAGE} = $lingua;
@@ -156,13 +156,13 @@ sub translate_body {
 	return $splitter->reassemble($translate);
 }
 
-sub get_masters {
+sub get_mains {
 	my ($self) = @_;
 
 	my $qgoda = Qgoda->new;
 	# For translations we always want all files.
 	$qgoda->buildOptions(drafts => 1, future => 1);
-	
+
 	$qgoda->initPlugins;
 	$qgoda->initAnalyzers;
 	my $config = $qgoda->config;
@@ -186,8 +186,8 @@ sub get_masters {
 			} elsif ($negated) {
 				$logger->debug(__x("removing markdown file '{filename}'",
 								   filename => $found));
-				delete $mdextra{$found};  
-				$mddelete{$found} = 1;			  
+				delete $mdextra{$found};
+				$mddelete{$found} = 1;
 			} else {
 				$logger->debug(__x("adding markdown file '{filename}'",
 								   filename => $found));
@@ -214,16 +214,16 @@ sub get_masters {
 
 	$qgoda->analyze($site);
 
-	my %masters;
+	my %mains;
 	foreach my $asset (values %{$site->{assets}}) {
-		next if empty $asset->{master};
+		next if empty $asset->{main};
 
-		my $master = $asset->{master};
-		$master =~ s{^/+}{};
-		$masters{$master}->{$asset->getPath} = $asset;
+		my $main = $asset->{main};
+		$main =~ s{^/+}{};
+		$mains{$main}->{$asset->getPath} = $asset;
 	}
 
-	return %masters;
+	return %mains;
 }
 
 

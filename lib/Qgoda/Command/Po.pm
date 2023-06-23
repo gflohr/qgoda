@@ -30,7 +30,7 @@ use Cwd qw(getcwd);
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
-use Qgoda::Util::Translate qw(get_masters);
+use Qgoda::Util::Translate qw(get_mains);
 use Qgoda::CLI;
 use Qgoda::Site;
 
@@ -44,11 +44,11 @@ sub _run {
 	Qgoda::CLI->commandUsageError('po', __"no target specified",
 								  'po [OPTIONS] TARGET')
 		if !@$args;
-	
+
 	Qgoda::CLI->commandUsageError('po', __"only one target may be specified",
 								  'po [OPTIONS] TARGET')
 		if 1 != @$args;
-	
+
 	my $target = $args->[0];
 
 	my $qgoda = Qgoda->new($global_options);
@@ -79,7 +79,7 @@ sub _run {
 	my $here = getcwd;
 	if (!defined $here) {
 		$logger->fatal(__x("cannot get current working directory: {error}",
-						   error => $!));		
+						   error => $!));
 	}
 
 	my $podir = $config->{paths}->{po};
@@ -158,7 +158,7 @@ sub __addMissing {
 	if (!mkdir $podir) {
 		$logger->fatal(__x("error creating directory '{directory}': {error}",
 						   directory => $podir,
-						   error => $!));		
+						   error => $!));
 	}
 
 	return $self;
@@ -189,7 +189,7 @@ EOF
 
 	my @linguas = @{$config->{linguas}};
 	shift @linguas;
-	my $linguas = join ' ', @linguas;	
+	my $linguas = join ' ', @linguas;
 
 	my $textdomain_comment = $self->__comment(__(<<EOF));
 Textdomain of the site, for example reverse domain name.
@@ -204,7 +204,7 @@ EOF
 	my $msgid_bugs_address = $po_config->{'msgid-bugs-address'};
 	$msgid_bugs_address = __"Please set MSGID_BUGS_ADDRESS in 'PACKAGE'"
 		if empty $msgid_bugs_address;
-	
+
 	my $copyright_holder_comment = $self->__comment(__(<<EOF));
 Initial copyright holder added to pot and po files.
 EOF
@@ -434,14 +434,14 @@ sub __fatalCommand {
 	my $logger = Qgoda->new->logger;
 
 	if ($? == -1) {
-		$logger->fatal(__x("{command}: failed to execute: {error}", 
+		$logger->fatal(__x("{command}: failed to execute: {error}",
 						   command => $pretty, error => $!));;
 	} elsif ($? & 127) {
-		$logger->fatal(__x("{command}: died with signal {signo}", 
+		$logger->fatal(__x("{command}: died with signal {signo}",
 						   command => $pretty, signo => $? & 127));
 	}
 
-	$logger->fatal(__x("{command}: terminated with exit code {code}", 
+	$logger->fatal(__x("{command}: terminated with exit code {code}",
 					   command => $pretty, code => $? >> 8));
 }
 
@@ -453,11 +453,11 @@ sub __safeRename {
 
 	$logger->info(__x("rename '{from}' to '{to}'",
 					  from => $from, to => $to));
-	
+
 	return $self if rename $from, $to;
 
 	$logger->fatal(__x("error renaming '{from}' to '{to}': {error}",
-					   from => $from, to => $to, error => $!));	
+					   from => $from, to => $to, error => $!));
 }
 
 sub __outOfDate {
@@ -484,7 +484,7 @@ sub __filelist {
 						   filename => $filelist, error => $!));
 	}
 
-	return grep { length } 
+	return grep { length }
 		   map { my $u = $_; $u =~ s/^[ \r\t]*//; $u =~ s/[ \t\r\n]*$//; $u } <$fh>;
 }
 
@@ -537,7 +537,7 @@ sub __makePOTFILES {
 			} elsif ($negated) {
 				$logger->debug(__x("removing template file '{filename}'",
 								   filename => $found));
-				delete $files{$found};				
+				delete $files{$found};
 			} else {
 				$logger->debug(__x("adding template file '{filename}'",
 								   filename => $found));
@@ -590,9 +590,9 @@ sub __makeMDPOTFILES {
 				dir => $srcdir, error => $!);
 	}
 
-	my %masters = get_masters;
+	my %mains = get_mains;
 	my @files;
-	foreach my $path (keys %masters) {
+	foreach my $path (keys %mains) {
 		if ($config->{scm}) {
 			next unless $qgoda->versionControlled($path);
 		}
@@ -639,7 +639,7 @@ sub __makePOT {
 	unlink $pot;
 	$self->__safeRename($pox, $pot);
 
-	($pox, $pot) = ("markdown.pox", 
+	($pox, $pot) = ("markdown.pox",
 					"markdown.pot");
 	@cmd = (@{$po_config->{qgoda}}, "xgettext",
 			   "--output=$pox", "--from-code=utf-8",
@@ -652,7 +652,7 @@ sub __makePOT {
 	unlink $pot;
 	$self->__safeRename($pox, $pot);
 
-	($pox, $pot) = ("$po_config->{textdomain}.pox", 
+	($pox, $pot) = ("$po_config->{textdomain}.pox",
 					"$po_config->{textdomain}.pot");
 	@cmd = (@{$po_config->{'xgettext-tt2'}},
 			   "--output=$pox", "--from-code=utf-8",
@@ -680,7 +680,7 @@ sub __makeUpdatePO {
 	push @deps, $self->__filelist('MDPOTFILES');
 	push @deps, $self->__filelist('POTFILES');
 	push @deps, 'PLFILES', 'MDPOTFILES', 'POTFILES';
-	$self->__makePOT if $self->__outOfDate("$config->{po}->{textdomain}.pot", 
+	$self->__makePOT if $self->__outOfDate("$config->{po}->{textdomain}.pot",
 										   @deps);
 
 	my @linguas = @{$config->{linguas}};
@@ -692,12 +692,12 @@ sub __makeUpdatePO {
 
 		$self->__safeRename("$lang.po", "$lang.old.po");
 
-		my @cmd = (@{$po_config->{msgmerge}}, 
-				   "$lang.old.po", "$po_config->{textdomain}.pot", 
+		my @cmd = (@{$po_config->{msgmerge}},
+				   "$lang.old.po", "$po_config->{textdomain}.pot",
 				   '--previous',
 				   '-o', "$lang.po");
 		if (0 == $self->__command(@cmd)) {
-			$logger->info(__x("unlink '{filename}'", 
+			$logger->info(__x("unlink '{filename}'",
 							  filename => "$lang.old.po"));
 			unlink "$lang.old.po";
 		} else {
@@ -785,7 +785,7 @@ sub __makeInstall {
 		if (!copy "$lang.gmo", "$dest") {
 			$logger->fatal(__x("cannot copy '{from}' to '{to}': {error}",
 							  from => "$lang.gmo", to => $dest, error => $!));
-			
+
 		}
 	}
 
@@ -825,7 +825,7 @@ Try 'qgoda --help' for a description of global options.
 =head1 DESCRIPTION
 
 You will find tutorial style information for the internationalization (i18n)
-of Qgoda sites at L<http://www.qgoda.net/en/docs/i18n/>.  The following 
+of Qgoda sites at L<http://www.qgoda.net/en/docs/i18n/>.  The following
 is rather meant as a quick reference.
 
 Updates, compiles and installs translations.  You need the GNU gettext tools
@@ -843,10 +843,10 @@ necessary, if you use L<Template::Plugin::Gettext> in one of your templates:
 	[% USE gtx = Gettext('com.example.www', asset.lingua) %]
 
 Creation of the F<_po> directory is also triggered, if one of your site's
-markdown documents refers to another from the document variable C<master>
+markdown documents refers to another from the document variable C<main>
 
 	---
-	master: /en/about.md
+	main: /en/about.md
 	---
 
 Additionally, you must set the textdomain of your site in the configuration
@@ -862,7 +862,7 @@ The F<_po> directory contains the following files:
 =item B<PACKAGE>
 
 Contains the basic configuration of your site suitable for a Makefile and it
-is only needed if you use the Makefile.  The file is 
+is only needed if you use the Makefile.  The file is
 auto-generated but then left untouched so that you can edit it to your needs.
 
 In order to reset the file to the latest upstream version, delete it and then
@@ -894,7 +894,7 @@ your site.  See below for an example.
 
 =item B<po.copyright-holder>
 
-The copyright holder that should be put into the header of the master
+The copyright holder that should be put into the header of the main
 translation file F<TEXTDOMAIN.pot>.
 
 =item B<po.xgettext>
@@ -938,7 +938,7 @@ update them.
 
 This script is responsible for invoking the necessary helper programs as
 needed.  Try C<perl po-make.pl --help> for usage information if you want to
-run the program yourself.  The result will be the same as using 
+run the program yourself.  The result will be the same as using
 C<qgoda po TARGET>.
 
 =item B<Makefile>
@@ -983,7 +983,7 @@ po:
 
 Note, that this file will normally also contain a line for F<./MDPOTFILES>.
 This line has the effect that all translatable strings in Markdown files
-are also included in the master translation catalog.
+are also included in the main translation catalog.
 
 =item B<qgoda.inc>
 
@@ -999,8 +999,8 @@ The simplest way of creating such a file from scratch is with the command:
 
 	msginit --locale=fr --input=TEXTDOMAIN.pot
 
-Replace "fr" with the language you need and F<TEXTDOMAIN.pot> with the 
-name of the master translation catalog that you have configured.
+Replace "fr" with the language you need and F<TEXTDOMAIN.pot> with the
+name of the main translation catalog that you have configured.
 
 Note that you have to run <qgoda po pot> at least once before you can
 create PO files.
@@ -1019,9 +1019,9 @@ In order to reset the file to the latest upstream version, delete it and then
 run C<qgoda build> or C<qgoda watch> once.  Alternatively, run C<qgoda po
 reset>.
 
-The master translation catalog F<TEXTDOMAIN.pot> is a generated file and
+The main translation catalog F<TEXTDOMAIN.pot> is a generated file and
 generated files should normally be ignored by version control systems.  No
-rule without an exception, master translation catalogs are conventionally not
+rule without an exception, main translation catalogs are conventionally not
 put into the ignore list.  Rationale: Translators should not need any tools
 needed for creating F<.pot> and F<.po> files.
 
@@ -1033,11 +1033,11 @@ needed for creating F<.pot> and F<.po> files.
 
 =item B<pot>
 
-Updates or creates the master translation catalog F<TEXTDOMAIN.pot>.
+Updates or creates the main translation catalog F<TEXTDOMAIN.pot>.
 
 =item B<update-po>
 
-Updates all F<.po> files by merging in the current strings found in 
+Updates all F<.po> files by merging in the current strings found in
 F<TEXTDOMAIN.pot>.  Note that you have to I<create> the F<.po> files
 yourself (try C<msginit --help>).
 
@@ -1060,7 +1060,7 @@ This target implicitely includes the B<update-mo> and all preceding targets.
 
 =item B<all>
 
-Does all of the above.  Use this target if you just want to ensure that 
+Does all of the above.  Use this target if you just want to ensure that
 everything is up-to-date and documents are translated to the extent that
 translations are available.
 
@@ -1094,7 +1094,7 @@ so that you can easily extend it.
 
 =head1 SEE ALSO
 
-L<http://www.qgoda.net/en/docs/i18n/>, L<xgettext-tt2>, 
+L<http://www.qgoda.net/en/docs/i18n/>, L<xgettext-tt2>,
 L<Template::Plugin::Gettext>, xgettext(1), msgmerge(1), msgfmt(1), git(1)
 
 =head1 QGODA

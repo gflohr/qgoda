@@ -30,14 +30,14 @@ use Qgoda::Util qw(read_file);
 
 my $testdir = dirname __FILE__;
 
-my $master_md = File::Spec->catfile($testdir, 'master.md');
+my $main_md = File::Spec->catfile($testdir, 'main.md');
 
-my $splitter = Qgoda::Splitter->new($master_md);
-ok $splitter, 'parse master';
+my $splitter = Qgoda::Splitter->new($main_md);
+ok $splitter, 'parse main';
 my $meta = $splitter->meta;
-is $meta->{title}, 'Master Document';
+is $meta->{title}, 'Main Document';
 is $splitter->metaLineNumber('title'), 2, 'title line number';
-is $meta->{name}, 'master-document';
+is $meta->{name}, 'main-document';
 is $splitter->metaLineNumber('name'), 3, 'name line number';
 is $meta->{description}, 'Test for po mechanism';
 is $splitter->metaLineNumber('description'), 4, 'description line number';
@@ -81,14 +81,14 @@ is $entries[3]->{msgctxt}, $expected, 'message context';
 # markers.
 my $site = TestSite->new(name => 'splitter',
                          assets => {
-                             'master.md' => {
+                             'main.md' => {
                                  title => 'Splitter Test',
-                                 content => read_file $master_md,
+                                 content => read_file $main_md,
                              }
                          });
 ok (Qgoda::CLI->new(['build'])->dispatch);
-ok -e '_site/master/index.html';
-my $generated = read_file '_site/master/index.html';
+ok -e '_site/main/index.html';
+my $generated = read_file '_site/main/index.html';
 ok $generated !~ /qgoda-xgettext/;
 ok $generated !~ /qgoda-no-xgettext/;
 $site->tearDown;
