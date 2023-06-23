@@ -116,7 +116,7 @@ sub readAssetContent {
 
 	if ($asset->{raw}) {
 		return read_file($asset->getPath);
-	} elsif (!empty $asset->{master}) {
+	} elsif (!empty $asset->{main}) {
 		return translate_body $asset;
 	} else {
 		my $chain = $asset->{chain};

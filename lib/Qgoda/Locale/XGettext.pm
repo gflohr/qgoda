@@ -28,7 +28,7 @@ use Locale::XGettext 0.7;
 
 use Qgoda;
 use Qgoda::Util qw(read_file flatten2hash);
-use Qgoda::Util::Translate qw(get_masters);
+use Qgoda::Util::Translate qw(get_mains);
 use Qgoda::CLI;
 use Qgoda::Splitter;
 
@@ -54,25 +54,25 @@ sub extractFromNonFiles {
 				dir => $srcdir, error => $!);
 	}
 
-	my $qgoda = Qgoda->new({ 
+	my $qgoda = Qgoda->new({
 		quiet => 1,
 		verbose => 0,
 		log_stderr => 1,
 	});
 
-	my %masters = get_masters;
-	my %master_paths;
-	foreach my $relpath (keys %masters) {
+	my %mains = get_mains;
+	my %mains_paths;
+	foreach my $relpath (keys %mains) {
 		my $abs = realpath(File::Spec->rel2abs($relpath, $srcdir));
-		$master_paths{$abs} = $relpath;
+		$mains_paths{$abs} = $relpath;
 	}
 
 	foreach my $filename (@{$self->{__qgoda_files}}) {
 		my $abs = realpath(File::Spec->rel2abs($filename, $podir));
-		if (exists $master_paths{$abs}) {
-			my $relpath = $master_paths{$abs};
-			my $translations = $masters{$relpath};
-			$self->__extractFromMaster($filename, $relpath, $translations);
+		if (exists $mains_paths{$abs}) {
+			my $relpath = $mains_paths{$abs};
+			my $translations = $mains{$relpath};
+			$self->__extractFromMain($filename, $relpath, $translations);
 		}
 	}
 
@@ -84,8 +84,8 @@ sub extractFromNonFiles {
 	return $self;
 }
 
-sub __extractFromMaster {
-	my ($self, $filename, $master, $translations) = @_;
+sub __extractFromMain {
+	my ($self, $filename, $main, $translations) = @_;
 
 	my %translate;
 	my $site = Qgoda->new->getSite;
@@ -100,19 +100,19 @@ sub __extractFromMaster {
 		}
 	}
 
-	my $master_asset = $site->getAssetByRelpath($master);
-	if (!$master_asset) {
-		my $path = File::Spec->rel2abs($master, $self->option('srcdir'));
-		$master_asset = Qgoda::Asset->new($path, $master);
+	my $main_asset = $site->getAssetByRelpath($main);
+	if (!$main_asset) {
+		my $path = File::Spec->rel2abs($main, $self->option('srcdir'));
+		$main_asset = Qgoda::Asset->new($path, $main);
 	}
-	my $splitter = Qgoda::Splitter->new($master_asset->getPath);
+	my $splitter = Qgoda::Splitter->new($main_asset->getPath);
 
 	my $meta = $splitter->meta;
-	foreach my $key (sort {$splitter->metaLineNumber($a) 
-						   <=> $splitter->metaLineNumber($b) 
+	foreach my $key (sort {$splitter->metaLineNumber($a)
+						   <=> $splitter->metaLineNumber($b)
 					 } keys %translate) {
-		next if !exists $master_asset->{$key};
-		my $slice = { $key => $master_asset->{$key}};
+		next if !exists $main_asset->{$key};
+		my $slice = { $key => $main_asset->{$key}};
 		my $flat = flatten2hash $slice;
 		foreach my $variable (keys %$flat) {
 			my $msgid = $flat->{$variable};

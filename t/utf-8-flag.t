@@ -61,7 +61,7 @@ my $site = TestSite->new(name => 'utf-8-flag',
                              },
                              'de/index.md' => {
                                  location => '/de/index.html',
-                                 master => '/en/index.md',
+                                 main => '/en/index.md',
                                  lingua => 'de',
                                  translate => ['month', 'title']
                              }

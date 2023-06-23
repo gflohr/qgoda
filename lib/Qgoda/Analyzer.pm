@@ -61,6 +61,10 @@ sub analyze {
 		$front_matter_data->{raw} = 1;
 	}
 
+	# Remove this at the end of 2024!
+	$front_matter_data->{master} = $front_matter_data->{main}
+		if exists $front_matter_data->{main};
+
 	merge_data $meta, $front_matter_data;
 
 	delete $meta->{path};
@@ -68,7 +72,7 @@ sub analyze {
 	delete $meta->{reldir};
 
 	merge_data $asset, $meta;
-	if (!empty $asset->{master}) {
+	if (!empty $asset->{main}) {
 		translate_front_matter $asset, $front_matter_data;
 	}
 
