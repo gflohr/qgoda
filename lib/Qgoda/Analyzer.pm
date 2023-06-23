@@ -57,13 +57,14 @@ sub analyze {
 	my $front_matter_data;
 	if (defined $front_matter) {
 		$front_matter_data = safe_yaml_load $front_matter;
+		# Remove this at the end of 2024!
+		if (exists $front_matter_data->{master}) {
+			$front_matter_data->{main} = 
+				delete $front_matter_data->{master};
+		}
 	} else {
 		$front_matter_data->{raw} = 1;
 	}
-
-	# Remove this at the end of 2024!
-	$front_matter_data->{master} = $front_matter_data->{main}
-		if exists $front_matter_data->{main};
 
 	merge_data $meta, $front_matter_data;
 
