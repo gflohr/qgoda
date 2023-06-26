@@ -1,78 +1,80 @@
 {{$NEXT}}
-    Manually force version 0.000074 of ExtUtils::Duktape::XS.
+	- Manually force version 0.000074 of ExtUtils::Duktape::XS.
+	- Breaking changes:
+	  * Local configuration variables must start with an underscore.
 
 0.9.7 - 2020-04-12
-    - Use AnyEvent::Filesys::Notify again
-    - Issues resolved:
-      * https://github.com/gflohr/qgoda/issues/88
-      * https://github.com/gflohr/qgoda/issues/81
-      * https://github.com/gflohr/qgoda/issues/34
+	- Use AnyEvent::Filesys::Notify again
+	- Issues resolved:
+	  * https://github.com/gflohr/qgoda/issues/88
+	  * https://github.com/gflohr/qgoda/issues/81
+	  * https://github.com/gflohr/qgoda/issues/34
 
 0.9.6 - 2018-12-03
-    - New versioning scheme YY.MM.COUNT.
-    - Replaced nested data structure with simpler structure without cyclic references.
-    - Programmatic stop in watch mode: Drop a file "_stop" and optionally write the reason for the termination into it.
-    - Compatibility with Perl 5.18.
-    - The docker container no longer runs as root but as unpriviliged user qgoda in group qgoda.
-    - The container is now based on an ubuntu image and using the system perl in order to save space and build time.
-    - Increased test coverage to 80 %.
-    - Issues fixed:
-      * https://github.com/gflohr/qgoda/issues/79
-      * https://github.com/gflohr/qgoda/issues/77
-      * https://github.com/gflohr/qgoda/issues/74
+	- New versioning scheme YY.MM.COUNT.
+	- Replaced nested data structure with simpler structure without cyclic references.
+	- Programmatic stop in watch mode: Drop a file "_stop" and optionally write the reason for the termination into it.
+	- Compatibility with Perl 5.18.
+	- The docker container no longer runs as root but as unpriviliged user qgoda in group qgoda.
+	- The container is now based on an ubuntu image and using the system perl in order to save space and build time.
+	- Increased test coverage to 80 %.
+	- Issues fixed:
+	  * https://github.com/gflohr/qgoda/issues/79
+	  * https://github.com/gflohr/qgoda/issues/77
+	  * https://github.com/gflohr/qgoda/issues/74
 
 0.9.5 - 2018-12-01
-    - New versioning scheme YY.MM.COUNT.
-    - Replaced nested data structure with simpler structure without
-      cyclic references.
-    - Programmatic stop in watch mode: Drop a file "_stop" and
-      optionally write the reason for the termination into it.
-    - Compatibility with Perl 5.18.
-    - The docker container no longer runs as root but as
-      unpriviliged user qgoda in group qgoda.
-    - The container is now based on an ubuntu image and using the
-      system perl in order to save space and build time.
-    - Increased test coverage to 80 %.
-    - Issues fixed:
-      * https://github.com/gflohr/qgoda/issues/79
-      * https://github.com/gflohr/qgoda/issues/77
-      * https://github.com/gflohr/qgoda/issues/74
+	- New versioning scheme YY.MM.COUNT.
+	- Replaced nested data structure with simpler structure without
+	  cyclic references.
+	- Programmatic stop in watch mode: Drop a file "_stop" and
+	  optionally write the reason for the termination into it.
+	- Compatibility with Perl 5.18.
+	- The docker container no longer runs as root but as
+	  unpriviliged user qgoda in group qgoda.
+	- The container is now based on an ubuntu image and using the
+	  system perl in order to save space and build time.
+	- Increased test coverage to 80 %.
+	- Issues fixed:
+	  * https://github.com/gflohr/qgoda/issues/79
+	  * https://github.com/gflohr/qgoda/issues/77
+	  * https://github.com/gflohr/qgoda/issues/74
 
 0.9.4 - 2018-11-04
-    - Require libintl-perl 1.30, because of
-      https://github.com/gflohr/libintl-perl/issues/4.
-    - Issues fixed:
-      * https://github.com/gflohr/qgoda/issues/73
-      * https://github.com/gflohr/qgoda/issues/72
+	- Require libintl-perl 1.30, because of
+	  https://github.com/gflohr/libintl-perl/issues/4.
+	- Issues fixed:
+	  * https://github.com/gflohr/qgoda/issues/73
+	  * https://github.com/gflohr/qgoda/issues/72
 
 v0.9.3 - 2018-11-01
-    - Configuration validation is now using a JSON schema
-      (try "qgoda schema").
-    - Validator is Ajv (https://ajv.js.org/), JSON schema version
-      "draft_07".  The validator is called with "coerceTypes" set
-      to "array", and "useDefaults".  That means that a lone string
-      value is automatically coerced into an array, where needed.
-    - Replaced the underscore with a hyphen in all config variables,
-      so that "exclude_watch" is now for example "exclude-watch".
-    - New commands "qgoda schema", "qgoda javascript", and "qgoda js"
-      (which is an alias for "qgoda javascript").
-    - Gradually increasing test coverage (displayed on github page
-      https://github.com/gflohr/qgoda).
+	- Configuration validation is now using a JSON schema
+	  (try "qgoda schema").
+	- Validator is Ajv (https://ajv.js.org/), JSON schema version
+	  "draft_07".  The validator is called with "coerceTypes" set
+	  to "array", and "useDefaults".  That means that a lone string
+	  value is automatically coerced into an array, where needed.
+	- Replaced the underscore with a hyphen in all config variables,
+	  so that "exclude_watch" is now for example "exclude-watch".
+	- New commands "qgoda schema", "qgoda javascript", and "qgoda js"
+	  (which is an alias for "qgoda javascript").
+	- Gradually increasing test coverage (displayed on github page
+	  https://github.com/gflohr/qgoda).
 	- The i18n seed repo is now the official one (not file:///...).
 	- New date functions for W3C and RFC822 date and time formats
-      (try asset.date.w3c, asset.date.rfc822, asset.date.w3cLocal,
-      and asset.date.rfc822Local)
+	  (try asset.date.w3c, asset.date.rfc822, asset.date.w3cLocal,
+	  and asset.date.rfc822Local)
 	- yeoman generator (work in progress), see
 	  https://www.npmjs.com/package/generator-qgoda.
 	- Plug-ins present in ./node_modules are automatically loaded.
 	- Asset priority is now honored in all generation rounds.
-    - Configuration variable "front_matter_placeholder" is now
-      "front-matter-placeholder" and an object.  The keys are the
-      chain name, and the value is the placeholder as a string.
+	- Configuration variable "front_matter_placeholder" is now
+	  "front-matter-placeholder" and an object.  The keys are the
+	  chain name, and the value is the placeholder as a string.
 	- The generator meta tag is now configurable in config.generator.
 	- Added "Strip" to the default processor chains for discarding
 	  leading and trailing whitespace from the generated files,
-      useful for XML output.
+	  useful for XML output.
 	- A new "xml" processor chain, defaults to ['TT2', 'Strip']
 	- Non-standard strftime extension '#%' for the ordinal day
 	  of the month (1st in English, 2eme in French, 3. in German),
@@ -88,7 +90,7 @@ v0.9.3 - 2018-11-01
 	  * https://github.com/gflohr/qgoda/issues/32
 	  * https://github.com/gflohr/qgoda/issues/44
 	  * https://github.com/gflohr/qgoda/issues/49
-      And tons of others that have not been reported.
+	  And tons of others that have not been reported.
 
 v0.9.2 - 2018-05-17
 	- Content translation with PO files and gettext workflow.
@@ -97,16 +99,16 @@ v0.9.2 - 2018-05-17
 	- Use utf8 flag. :(
 	- New plug-in methods q.anchor() and q.lanchor().
 	- New plug-in methods q.existsLink(), q.lexistsLink(),
-      q.existsXref(), q.lexistsXref().
+	  q.existsXref(), q.lexistsXref().
 	- Calculate related documents based on shared taxonomy values.
 	- Generic html filter interface.
 	- Automatic TOC generation.
 	- Virtual assets (assets with property "virtual" set to a truth
-      value are not rendered).
+	  value are not rendered).
 	- Pluggable analyzers.
 	- Version control mode (only git supported at the moment).  If
-      "config.scm" is set to "git", only files under version control
-      are processed.
+	  "config.scm" is set to "git", only files under version control
+	  are processed.
 	- Drafts mode, enabled by setting asset property "draft" to 1.
 	- Do not process future documents (unless requested)
 	- Inverted semantics for "priority"
