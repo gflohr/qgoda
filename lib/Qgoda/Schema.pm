@@ -50,7 +50,16 @@ sub config {
 			}
 		},
 		properties => {
-
+			'analyzers' => {
+				description => __"Additional analyzers to run after the Qgoda "
+							   . "standard analyzer.",
+				type => 'array',
+				default => [],
+				items => {
+					description => __"Name of the analyzer without the leading "
+								   . "Qgoda::Analyzer::",
+				},
+			},
 			'case-sensitive' => {
 				description => __"Set to true if a case-sensitive file system "
 							   . "shoud be assumed.",
@@ -91,7 +100,16 @@ sub config {
 							description => __"Values that should be set for "
 										   . "matching files.",
 							type => 'object',
-							default => {}
+							additionalProperties => false,
+							default => {},
+							patternProperties => {
+								'.*' => {
+									type => [
+										'string', 'number', 'integer', 'object',
+										'array', 'boolean', 'null'
+									]
+								}
+							},
 						}
 					}
 				}
@@ -120,8 +138,18 @@ sub config {
 							   . "give the frontmatter placeholder string "
 							   . "for each configured processor chain.",
 				type => 'object',
+				additionalProperties => false,
+				patternProperties => {
+					'(\\*|_[a-zA-Z][_a-zA-Z0-9]*)' => {
+						type => 'string',
+					},
+				},
 				default => {
 					'*' => "[% '' %]\n"
+				},
+				items => {
+					description => __"Chain name or '*' for any chain.",
+
 				}
 			},
 			generator => {
@@ -197,8 +225,8 @@ sub config {
 			paths => {
 				description => __"Configurable paths.",
 				type => 'object',
-				required => [qw(plugins po site timestamp views)],
 				additionalProperties => false,
+				required => [qw(plugins po site timestamp views)],
 				default => {},
 				properties => {
 					plugins => {
@@ -412,6 +440,13 @@ sub config {
 						description => __"Additional options for the"
 									   . " processor plug-ins",
 						type => 'object',
+						additionalProperties => true,
+						items => {
+							type => [
+								'string', 'number', 'integer', 'object',
+								'array', 'boolean', 'null'
+							]
+						},
 						default => {
 							HTMLFilter => {
 								TOC => {
@@ -476,6 +511,15 @@ sub config {
 						description => __"Additional options for the"
 									   . " post-processor plug-ins",
 						type => 'object',
+						additionalProperties => false,
+						patternProperties => {
+							'.*' => {
+								type => [
+									'string', 'number', 'integer', 'object',
+									'array', 'boolean', 'null'
+								]
+							}
+						},
 						default => {},
 					},
 				},
@@ -502,15 +546,20 @@ sub config {
 							   . "respective weights for the computation "
 							   . "of relatedness.",
 				type => 'object',
+				additionalProperties => true,
 				default => {
 					categories => 3,
 					links => 1,
 					tags => 2
+				},
+				items => {
+					type => 'string',
 				}
 			},
 			title => {
 				description => __"The title of the site. It has no "
 							   . "particular semantics.",
+				type => 'string',
 				default => __"A new Qgoda Powered Site",
 			},
 			'track-dependencies' => {
@@ -519,6 +568,11 @@ sub config {
 							   . "changed or depend on changed files.",
 				type => 'boolean',
 				default => true,
+			},
+			url => {
+				description => __"The main url of the site.",
+				type => 'string',
+				default => __"Configure 'url' in _config.yaml!",
 			},
 			view => {
 				description => __"The default view template to use.",
