@@ -40,8 +40,17 @@ sub config {
 		title => __"Configuration",
 		description => __"A Qgoda Configuration",
 		type => 'object',
-		#additionalProperties => false,
+		additionalProperties => false,
+		patternProperties => {
+			"_.*" => {
+				type => [
+					'string', 'number', 'integer', 'object', 'array',
+					'boolean', 'null'
+				]
+			}
+		},
 		properties => {
+
 			'case-sensitive' => {
 				description => __"Set to true if a case-sensitive file system "
 							   . "shoud be assumed.",
