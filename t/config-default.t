@@ -25,6 +25,7 @@ use YAML::XS;
 use JSON::PP;
 
 use Qgoda::Config;
+use Qgoda::Schema;
 
 use constant true => $JSON::PP::true;
 use constant false => $JSON::PP::false;
@@ -35,9 +36,14 @@ ok $config;
 $config = YAML::XS::Load($config);
 $site->tearDown;
 
+my $schema = Qgoda::Schema->config;
+my $url = $schema->{properties}->{url}->{default};
+
 my $srcdir = Cwd::abs_path() . '/t/config-default';
+
 my $expected = <<EOF;
 ---
+analyzers: []
 case-sensitive: false
 compare-output: true
 defaults: []
@@ -125,6 +131,7 @@ taxonomies:
   tags: 2
 title: A new Qgoda Powered Site
 track-dependencies: true
+url: $url
 view: default.html
 EOF
 $expected = Load($expected);
