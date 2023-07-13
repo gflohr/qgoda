@@ -158,7 +158,7 @@ sub config {
 				description => __"Value for the generator meta tag in "
 							   . "generated pages.",
 				type => 'string',
-				default => __x("Qgoda v{version} (http://www.qgoda.net/)",
+				default => __x("Qgoda v{version} (https://www.qgoda.net/)",
 							   version => $Qgoda::VERSION),
 			},
 			helpers => {
