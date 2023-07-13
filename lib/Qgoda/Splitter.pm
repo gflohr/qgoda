@@ -74,6 +74,9 @@ sub new {
 	foreach my $chunk (@first) {
 		if ($chunk =~ /^[ \011-\015]+$/) {
 			push @chunks, $chunk;
+		} elsif ($chunk =~ m{^<qgoda-toc[ \011-\015]*/>}
+		         || $chunk =~ m{<qgoda-toc>[ \011-\015]*</qgoda-toc>}) {
+			next;
 		} else {
 			my $head = $chunk =~ s/^([ \011-\015]+)// ? $1 : undef;
 			my $tail = $chunk =~ s/([ \011-\015]+)$// ? $1 : undef;
