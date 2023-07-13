@@ -1,6 +1,7 @@
 {{$NEXT}}
 	- Switch to AnyEvent::Filesys::Watcher:
 	  * support for MSWin32
+	  * less dependencies because not based on Moo
 	  * less file system scans on macOS
 	  * lower latency values possible (change latency in _config.yaml to 0.1
 	    if you are on a Mac)
@@ -15,6 +16,8 @@
 	  paragraph.
 	- New template variable `excerpt_html` with the HTML version of the
 	  excerpt.
+	- No longer depends on Moose (because Markdown::Pod has been removed as a
+      depency).
 	- Breaking changes:
 	  * Local configuration variables must start with an underscore.
 
