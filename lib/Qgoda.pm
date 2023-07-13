@@ -45,7 +45,7 @@ use POSIX qw(:sys_wait_h);
 use Template::Plugin::Gettext 0.7;
 use List::Util 1.45 qw(uniq);
 use YAML::XS 0.67;
-use AnyEvent::Filesys::Notify 1.23;
+use AnyEvent::Filesys::Watcher;
 use boolean;
 $YAML::XS::Boolean = 'JSON::PP';
 
@@ -278,11 +278,10 @@ sub watch {
 
 		$logger->debug(__x("waiting for changes in '{dir}'",
 						   dir => $config->{srcdir}));
-		AnyEvent::Filesys::Notify->new(
-			dirs => [$config->{srcdir}],
+		AnyEvent::Filesys::Watcher->new(
+			directories => $config->{srcdir},
 			interval => $config->{latency},
-			parse_events => 1,
-			cb => sub { $self->__onFilesysChange(\%options, @_) },
+			callback => sub { $self->__onFilesysChange(\%options, @_) },
 			filter => sub { $self->__filesysChangeFilter(@_) },
 		);
 
