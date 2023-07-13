@@ -1,9 +1,24 @@
 {{$NEXT}}
+	- Switch to AnyEvent::Filesys::Watcher:
+	  * support for MSWin32
+	  * less file system scans on macOS
+	  * lower latency values possible (change latency in _config.yaml to 0.1
+	    if you are on a Mac)
 	- Manually force version 0.000074 of ExtUtils::Duktape::XS.
+	- There is a new template variable `rawContent` with the
+	  unexpanded content from the asset.
+	- Post-processors (docs pending).
+	- Changed files are now displayed in the logs by default.
+	- New virtual list methods `shuffle` and `sample`.
+	- New plug-in methods `basename`, `dirname`, and `fileparse`.
+	- New template variable `content_body` with everything but the first
+	  paragraph.
+	- New template variable `excerpt_html` with the HTML version of the
+	  excerpt.
 	- Breaking changes:
 	  * Local configuration variables must start with an underscore.
 
-0.9.7 - 2020-04-12
+0.9.8 - 2020-04-13
 	- Use AnyEvent::Filesys::Notify again
 	- Issues resolved:
 	  * https://github.com/gflohr/qgoda/issues/88
