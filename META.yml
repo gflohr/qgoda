@@ -11,6 +11,7 @@ build_requires:
   autodie: '0'
   common::sense: '0'
   lib: '0'
+  utf8: '0'
 configure_requires:
   ExtUtils::MakeMaker: '7.1101'
 dynamic_config: 1
@@ -22,12 +23,13 @@ meta-spec:
 name: Qgoda
 requires:
   AnyEvent: '0'
-  AnyEvent::Filesys::Notify: '1.23'
+  AnyEvent::Filesys::Watcher: '0'
   AnyEvent::Handle: '0'
   AnyEvent::Loop: '0'
   Archive::Extract: '0'
   Cpanel::JSON::XS: '0'
   Cwd: '0'
+  Data::Dump: '0'
   Data::Dumper: '0'
   Data::Walk: '2.00'
   Date::Parse: '0'
@@ -65,7 +67,6 @@ requires:
   Locale::XGettext: '0.7'
   Locale::gettext_dumb: '0'
   MIME::Base64: '0'
-  Markdown::Pod: '0.008'
   POSIX: '0'
   Pod::Perldoc: '0'
   Scalar::Util: '0'

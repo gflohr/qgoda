@@ -36,6 +36,7 @@ lib/Qgoda/Command/Schema.pm
 lib/Qgoda/Command/Watch.pm
 lib/Qgoda/Command/Xgettext.pm
 lib/Qgoda/Config.pm
+lib/Qgoda/DependencyTracker.pm
 lib/Qgoda/HTMLFilter/AnchorTarget.pm
 lib/Qgoda/HTMLFilter/CleanUp.pm
 lib/Qgoda/HTMLFilter/Generator.pm
@@ -56,6 +57,7 @@ lib/Qgoda/Plugger/Inline/Python.pm
 lib/Qgoda/Plugger/Perl.pm
 lib/Qgoda/PluginLoader/TT2/Filter.pm
 lib/Qgoda/PluginUtils.pm
+lib/Qgoda/PostProcessor.pm
 lib/Qgoda/Processor.pm
 lib/Qgoda/Processor/HTMLFilter.pm
 lib/Qgoda/Processor/Hoedown.pm
@@ -103,8 +105,11 @@ t/command-xgettext.t
 t/config-default.t
 t/config-defaults.t
 t/config-invalid.t
+t/config-private-invalid.t
+t/config-private-valid.t
 t/config-round-trip.t
 t/default-view.t
+t/deptracker.t
 t/encode_json.t
 t/flatten2hash.t
 t/helpers.t
@@ -113,7 +118,7 @@ t/javascript-console.t
 t/javascript-environment.t
 t/js_unescape.t
 t/locate_repo.t
-t/master.md
+t/main.md
 t/minimal-theme/README.md
 t/minimal-theme/_init.yaml
 t/minimal-theme/_views/default.html

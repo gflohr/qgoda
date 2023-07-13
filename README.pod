@@ -1,0 +1,196 @@
+L<![GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)|https://www.gnu.org/licenses/gpl-3.0>
+L<![Price](https://img.shields.io/badge/price-FREE-0098f7.svg)|https://github.com/gflohr/qgoda/blob/master/LICENSE>
+L<![Travis (.org)](https://img.shields.io/travis/gflohr/qgoda.svg)|https://travis-ci.org/gflohr/qgoda>
+L<![Coverage Status](https://coveralls.io/repos/github/gflohr/qgoda/badge.svg?branch=master)|https://coveralls.io/github/gflohr/qgoda?branch=master>
+L<![Twitter Follow](https://img.shields.io/twitter/follow/qgoda_cms.svg?style=social&label=Follow)|https://twitter.com/qgoda_cms>
+
+
+=head1 Qgoda
+
+Qgoda (pronounce: yagoda!) is an extensible static site generator.
+
+=for html <img src="https://raw.githubusercontent.com/gflohr/qgoda-site/master/images/github/banner.jpeg" alt="Qgoda Logo" />
+
+
+=head2 Description
+
+Qgoda is considered feature-complete and ready for beta testing.
+Incompatible changes will try to be avoided but are possible.
+
+The documentation is currently being written.  You can check out the
+current state at L<http://www.qgoda.net/.>
+
+
+=head2 Main Features
+
+Qgoda is comparable to L<Jekyll|https://jekyllrb.com/> 
+or L<Hugo|https://gohugo.io/> but with a strong focus on:
+
+=over
+
+=item -
+
+Flexible site structures with arbitrary taxonomies.
+
+
+=item -
+
+Listings with pagination for arbitrary taxonomies and filters.
+
+
+=item -
+
+Extensibility with plug-ins written in Perl, Python, Ruby,
+  or Java.
+
+
+=item -
+
+Built-in multi-language features based on GNU gettext, both
+  for template code and --- optionally --- for content.
+
+
+=item -
+
+Integration of tools from the NodeJS eco system such as
+  L<npm|https://www.npmjs.com/>, L<yarn|https://yarnpkg.com/>,
+  L<webpack|https://webpack.js.org/>, L<Gulp|https://gulpjs.com/>,
+  L<Browsersync|https://www.browsersync.io/>, L<PostCSS|http://postcss.org/>,
+  ...
+
+
+=item -
+
+Integration of arbitrary other tools and helpers.
+
+
+=back
+
+
+=head2 Template Languages
+
+Qgoda uses L<Markdown|https://daringfireball.net/projects/markdown/syntax>
+and the L<Template Toolkit|http://www.template-toolkit.org/> by default for
+processing content, although it is possible to change that.
+
+
+=head2 Run Qgoda in Docker Container
+
+Due to missing dependencies, you may have problems installing and running
+Qgoda on your platform (especially on Microsoft Windows systems).  You can
+instead try using a Qgoda Docker image:
+
+=over
+
+=item 1.
+
+Install Docker.  On Linux/Unix systems, Docker will be available from
+your package manager.  On Mac OS X you can install Docker with Mac Ports
+or Homebrew.  On Windows, get a pre-compiled binary from
+L<https://www.docker.com/get-docker.>
+
+
+
+=item 2.
+
+Start Docker.  You may want to start the docker daemon automatically.
+Check your vendor's documentation for that!
+
+
+
+=item 3.
+
+In a shell, run C<docker run --rm -it -v $(pwd):/data gflohr/qgoda>.
+
+You may have to add the user that runs the command to the group "docker"
+if you get an error like "permission denied".
+
+
+
+=item 4.
+
+You may want to create an alias, so that you do not have to type in
+the Docker commands all the time.  Depending on your operating system,
+you have to open C<~/.bash_profile>, C<~/.bashrc>, C<~/.alias>, C<~/.zshrc>
+or similar and add this line:
+
+
+
+=back
+
+
+ alias qgoda='docker run --rm -it -v $(pwd):/data gflohr/qgoda'
+
+=head2 Contribute
+
+Qgoda uses L<Github|https://github.com/> as the collaboration platform.
+Fork the L<Qgoda repository|https://github.com/gflohr/qgoda> and send
+a pull request with your changes.
+
+Apart from adding or fixing Perl code, the following contributions are
+welcome:
+
+=over
+
+=item *
+
+Corrections to the documentation.  Please use the
+L<github repository issue tracker|https://github.com/gflohr/qgoda-site/issues>
+for errors that you have found.
+
+
+=item *
+
+Translate Qgoda to your language.  Please use the L<Qgoda issue
+tracker|https://github.com/gflohr/qgoda/issues> for getting in
+touch first.
+
+
+=item *
+
+Contribute a new Qgoda theme!  You can use one of the following
+github repositories for examples:
+
+=over
+
+=item *
+
+L<https://github.com/gflohr/qgoda-default>
+
+
+=item *
+
+L<https://github.com/gflohr/qgoda-multilang>
+
+
+=item *
+
+L<https://github.com/gflohr/qgoda-essential>
+
+
+=item *
+
+L<https://github.com/gflohr/qgoda-minimal>
+
+
+=back
+
+
+
+=item *
+
+L<Star qgoda's github repository|https://github.com/gflohr/qgoda/stargazers>.  This will also push up
+Qgoda (and Perl and Template Toolkit) on Netlify's
+L<staticgen.com|https://www.staticgen.com/>.
+
+
+=back
+
+
+=head2 Copyright
+
+Copyright (C) 2016-2020 Guido Flohr L<mailto:guido.flohr@cantanea.com>, all
+rights reserved.
+
+Qgoda is available under the terms and conditions of the GNU General
+Public License version 3 or later.
