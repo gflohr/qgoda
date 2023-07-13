@@ -20,6 +20,8 @@ package Qgoda::HTMLFilter::Generator;
 
 use strict;
 
+#VERSION
+
 use Qgoda;
 
 sub new {

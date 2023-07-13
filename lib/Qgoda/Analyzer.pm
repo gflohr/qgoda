@@ -20,6 +20,8 @@ package Qgoda::Analyzer;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 use Date::Parse;
 use File::Spec;

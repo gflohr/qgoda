@@ -20,6 +20,8 @@ package Qgoda::Logger;
 
 use strict;
 
+#VERSION
+
 use POSIX qw (setlocale LC_TIME strftime);
 use Time::HiRes qw(gettimeofday);
 use Term::ANSIColor qw(colored);

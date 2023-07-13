@@ -20,6 +20,8 @@ package Qgoda::Schema;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use Cwd;
 use JSON::PP;

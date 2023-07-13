@@ -20,6 +20,8 @@ package Qgoda::PostProcessor;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 
 sub new {

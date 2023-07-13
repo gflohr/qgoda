@@ -20,6 +20,8 @@ package Qgoda::Init::copy;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 use File::Spec;
 use File::Find qw(find);

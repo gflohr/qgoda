@@ -20,6 +20,8 @@ package Qgoda::Command::Dump;
 
 use strict;
 
+#VERSION
+
 use Qgoda;
 
 use base 'Qgoda::Command';

@@ -20,6 +20,8 @@ package Qgoda::HTMLFilter::TOC;
 
 use strict;
 
+#VERSION
+
 use Qgoda;
 use Qgoda::Util qw(html_escape slugify empty write_file);
 use Locale::TextDomain qw(qgoda);

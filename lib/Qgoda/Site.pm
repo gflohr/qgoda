@@ -20,6 +20,8 @@ package Qgoda::Site;
 
 use strict;
 
+#VERSION
+
 # FIXME! This is only needed for debugging the filter cache.  Remove it,
 # once the filter cache is stable.
 use MIME::Base64 qw(encode_base64);

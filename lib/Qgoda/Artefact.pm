@@ -20,6 +20,8 @@ package Qgoda::Artefact;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 
 sub new {

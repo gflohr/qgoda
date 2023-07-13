@@ -20,6 +20,8 @@ package Qgoda::TT2::Plugin::Qgoda;
 
 use strict;
 
+#VERSION
+
 use base qw(Template::Plugin);
 
 use Locale::TextDomain qw('qgoda');

@@ -98,12 +98,13 @@ requires:
   perl: '5.018'
   strict: '0'
   vars: '0'
+  version: '0'
   warnings: '0'
 resources:
   bugtracker: https://github.com/gflohr/qgoda/issues
   homepage: http://www.qgoda.net/
   repository: git://github.com/gflohr/qgoda.git
-version: 0.9.8
+version: v0.10.0
 x_generated_by_perl: v5.34.0
 x_serialization_backend: 'YAML::Tiny version 1.73'
 x_spdx_expression: GPL-3.0-only

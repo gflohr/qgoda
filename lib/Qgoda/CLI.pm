@@ -20,6 +20,8 @@ package Qgoda::CLI;
 
 use strict;
 
+#VERSION
+
 use IO::Handle;
 use Locale::TextDomain qw(qgoda);
 use Getopt::Long 2.36 qw(GetOptionsFromArray);

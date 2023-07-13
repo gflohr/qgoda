@@ -20,6 +20,8 @@ package Qgoda::Repository;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 
 use File::Spec;
@@ -151,11 +153,15 @@ package URI::git_Phttp;
 
 use strict;
 
+#VERSION
+
 use base qw(URI::git);
 
 package URI::git_Phttps;
 
 use strict;
+
+#VERSION
 
 use base qw(URI::git);
 
@@ -163,11 +169,15 @@ package URI::git_Pssh;
 
 use strict;
 
+#VERSION
+
 use base qw(URI::git);
 
 package URI::git_Pfile;
 
 use strict;
+
+#VERSION
 
 use base qw(URI::file);
 

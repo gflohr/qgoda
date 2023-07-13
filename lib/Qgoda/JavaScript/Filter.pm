@@ -20,6 +20,8 @@ package Qgoda::JavaScript::Filter;
 
 use strict;
 
+#VERSION
+
 use Filter::Util::Call;
 use Locale::TextDomain qw(qgoda);
 
@@ -30,6 +32,8 @@ sub import {
 package $package;
 
 use strict;
+
+#VERSION
 
 my \$code;
 

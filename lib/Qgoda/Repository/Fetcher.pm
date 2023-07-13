@@ -20,6 +20,8 @@ package Qgoda::Repository::Fetcher;
 
 use strict;
 
+#VERSION
+
 sub new {
 	my ($class) = @_;
 

@@ -20,6 +20,8 @@ package Qgoda::Plugger::Inline;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use Inline;
 

@@ -18,6 +18,8 @@
 
 use strict;
 
+#VERSION
+
 use Qgoda::CLI;
 
 Qgoda::CLI->new->dispatch;

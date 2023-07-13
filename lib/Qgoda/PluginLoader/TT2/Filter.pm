@@ -20,6 +20,8 @@ package Qgoda::PluginLoader::TT2::Filter;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use Template::Plugin::Filter;
 
@@ -98,7 +100,9 @@ sub Qgoda::PluginLoader::TT2::Filter::INC {
 
 	return if !exists $self->{__modules}->{$filename};
 
-	my $data = 'use strict; 1;';
+	my $data = 'use strict;
+
+#VERSION 1;';
 
 	open my $fh, '<', \$data;
 

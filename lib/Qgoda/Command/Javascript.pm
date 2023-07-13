@@ -20,6 +20,8 @@ package Qgoda::Command::Javascript;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use JSON;
 use Storable;

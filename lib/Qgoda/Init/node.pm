@@ -20,6 +20,8 @@ package Qgoda::Init::node;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 use File::Spec;
 

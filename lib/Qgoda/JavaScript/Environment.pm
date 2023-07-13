@@ -20,6 +20,8 @@ package Qgoda::JavaScript::Environment;
 
 use strict;
 
+#VERSION
+
 use Qgoda::Util qw(empty);
 use JavaScript::Duktape::XS 0.000074;
 use Cpanel::JSON::XS qw(decode_json);

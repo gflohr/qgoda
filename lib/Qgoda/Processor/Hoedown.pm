@@ -20,6 +20,8 @@ package Qgoda::Processor::Hoedown;
 
 use strict;
 
+#VERSION
+
 use base qw(Qgoda::Processor);
 
 use Text::Markdown::Hoedown qw(markdown);

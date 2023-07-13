@@ -20,6 +20,8 @@ package Qgoda::HTMLFilter::CleanUp;
 
 use strict;
 
+#VERSION
+
 use Qgoda;
 
 sub new {

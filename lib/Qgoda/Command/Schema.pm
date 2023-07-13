@@ -20,6 +20,8 @@ package Qgoda::Command::Schema;
 
 use strict;
 
+#VERSION
+
 use YAML::XS;
 use JSON;
 use Data::Dumper;

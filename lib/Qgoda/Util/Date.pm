@@ -20,6 +20,8 @@ package Qgoda::Util::Date;
 
 use strict;
 
+#VERSION
+
 use Date::Parse qw(str2time);
 use POSIX qw(strftime);
 use Locale::TextDomain qw('qgoda');

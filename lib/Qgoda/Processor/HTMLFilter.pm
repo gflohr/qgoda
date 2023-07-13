@@ -20,6 +20,8 @@ package Qgoda::Processor::HTMLFilter;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use HTML::Parser;
 use Scalar::Util qw(reftype);

@@ -20,6 +20,8 @@ package Qgoda::Locale::XGettext;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use Cwd qw(getcwd realpath);
 use Scalar::Util qw(reftype);

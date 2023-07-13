@@ -20,6 +20,8 @@ package Qgoda::Repository::Fetcher::Git;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use Git;
 use File::Path qw(rmtree);

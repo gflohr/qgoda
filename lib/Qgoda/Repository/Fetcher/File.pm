@@ -20,6 +20,8 @@ package Qgoda::Repository::Fetcher::File;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use File::Copy::Recursive qw(dircopy);
 use File::Spec;

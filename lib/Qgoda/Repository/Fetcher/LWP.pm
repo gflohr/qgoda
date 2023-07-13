@@ -20,6 +20,8 @@ package Qgoda::Repository::Fetcher::LWP;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use LWP::UserAgent;
 use File::Temp;

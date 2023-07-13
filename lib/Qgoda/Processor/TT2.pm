@@ -20,6 +20,8 @@ package Qgoda::Processor::TT2;
 
 use strict;
 
+#VERSION
+
 use Template;
 use Locale::TextDomain qw(qgoda);
 use File::Spec;
@@ -91,6 +93,8 @@ sub process {
 package Qgoda::Template::Provider;
 
 use strict;
+
+#VERSION
 
 use Template::Constants;
 use Locale::TextDomain qw(qgoda);

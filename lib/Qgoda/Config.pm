@@ -20,6 +20,8 @@ package Qgoda::Config;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 use File::Spec;
 use Cwd;

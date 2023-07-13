@@ -20,6 +20,8 @@ package Qgoda::DependencyTracker;
 
 use strict;
 
+#VERSION
+
 sub new {
 	my ($class) = @_;
 

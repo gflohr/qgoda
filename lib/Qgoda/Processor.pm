@@ -20,6 +20,8 @@ package Qgoda::Processor;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 use Scalar::Util qw(blessed);
 use URI;

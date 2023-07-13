@@ -20,6 +20,8 @@ package Qgoda::Plugger::Perl;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw(qgoda);
 
 use Qgoda;

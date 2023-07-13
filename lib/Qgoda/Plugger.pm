@@ -20,6 +20,8 @@ package Qgoda::Plugger;
 
 use strict;
 
+#VERSION
+
 sub native {
 	return;
 }

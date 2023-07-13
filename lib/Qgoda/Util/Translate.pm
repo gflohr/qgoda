@@ -20,6 +20,8 @@ package Qgoda::Util::Translate;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain 1.30 qw(qgoda);
 use Locale::gettext_dumb;
 use Storable qw(dclone);

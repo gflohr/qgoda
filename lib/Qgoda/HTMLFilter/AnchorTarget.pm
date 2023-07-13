@@ -20,6 +20,8 @@ package Qgoda::HTMLFilter::AnchorTarget;
 
 use strict;
 
+#VERSION
+
 use Qgoda::Util qw(empty);
 
 sub new {

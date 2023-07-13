@@ -20,6 +20,8 @@ package Qgoda::Builder;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 use POSIX qw(setlocale);
 use Locale::Util qw(web_set_locale);

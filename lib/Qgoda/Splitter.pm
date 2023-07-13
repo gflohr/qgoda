@@ -20,6 +20,8 @@ package Qgoda::Splitter;
 
 use strict;
 
+#VERSION
+
 use Locale::TextDomain qw('qgoda');
 use Scalar::Util qw(reftype);
 

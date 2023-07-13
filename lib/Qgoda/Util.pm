@@ -20,6 +20,8 @@ package Qgoda::Util;
 
 use strict;
 
+#VERSION
+
 use IO::File;
 use File::Path qw(make_path);
 use File::Basename qw(fileparse);

@@ -325,6 +325,7 @@ my %WriteMakefileArgs = (
     "overload" => 0,
     "strict" => 0,
     "vars" => 0,
+    "version" => 0,
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
@@ -338,7 +339,7 @@ my %WriteMakefileArgs = (
     "lib" => 0,
     "utf8" => 0
   },
-  "VERSION" => "0.9.8",
+  "VERSION" => "v0.10.0",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -429,6 +430,7 @@ my %FallbackPrereqs = (
   "strict" => 0,
   "utf8" => 0,
   "vars" => 0,
+  "version" => 0,
   "warnings" => 0
 );
 

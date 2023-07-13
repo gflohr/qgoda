@@ -20,6 +20,8 @@ package Qgoda::Asset;
 
 use strict;
 
+#VERSION
+
 use Qgoda::Util qw(merge_data);
 
 sub new {

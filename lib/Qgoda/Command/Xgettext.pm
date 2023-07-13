@@ -20,6 +20,8 @@ package Qgoda::Command::Xgettext;
 
 use strict;
 
+#VERSION
+
 use Qgoda;
 use Qgoda::Locale::XGettext;
 use Qgoda::Util qw(empty);

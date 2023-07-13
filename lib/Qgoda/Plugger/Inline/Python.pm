@@ -20,6 +20,8 @@ package Qgoda::Plugger::Inline::Python;
 
 use strict;
 
+#VERSION
+
 use base qw(Qgoda::Plugger::Inline);
 
 1;
