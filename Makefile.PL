@@ -222,11 +222,11 @@ sub pm_to_blib {
 }
 
 sub realclean {
-	my ($self) = @_;
+	my ($self, @args) = @_;
 
 	my $npm_installed = File::Spec->catfile('$(QGODA_DIR)', 'npm_installed');
 	my $node_modules = File::Spec->catdir('$(QGODA_DIR)', 'node_modules');
-	my $code = $self->SUPER::realclean(@_);
+	my $code = $self->SUPER::realclean(@args);
 	$code =~ s/[ \t\r\n]*$/\n/;
 	$code .= "\t\- \$(RM_F) $npm_installed\n";
 	$code .= "\t\- \$(RM_RF) $node_modules\n";
