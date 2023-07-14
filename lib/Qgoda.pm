@@ -281,10 +281,11 @@ sub watch {
 
 		$logger->debug(__x("waiting for changes in '{dir}'",
 						   dir => $config->{srcdir}));
-		AnyEvent::Filesys::Watcher->new(
-			directories => $config->{srcdir},
+		my $watcher;
+		$watcher= AnyEvent::Filesys::Watcher->new(
+			dirs => [$config->{srcdir}],
 			interval => $config->{latency},
-			callback => sub { $self->__onFilesysChange(\%options, @_) },
+			cb => sub { $self->__onFilesysChange(\%options, @_) },
 			filter => sub { $self->__filesysChangeFilter(@_) },
 		);
 
@@ -847,8 +848,8 @@ sub __onFilesysChange {
 
 	foreach my $event (@events) {
 		$logger->info(__x("file '{filename}' has changed",
-						  filename => $event->{path}));
-		push @files, $event->{path};
+						  filename => $event->path));
+		push @files, $event->path;
 	}
 
 	return if !@files;
