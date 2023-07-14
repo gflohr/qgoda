@@ -1,4 +1,7 @@
 {{$NEXT}}
+	- Broken watch mode fixed (GitHub issue #108).
+
+0.10.0 - 2023-07-14
 	- Switch to AnyEvent::Filesys::Watcher:
 	  * support for MSWin32
 	  * less dependencies because not based on Moo

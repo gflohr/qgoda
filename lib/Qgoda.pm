@@ -21,7 +21,7 @@ package Qgoda;
 use strict;
 
 use version;
-our $VERSION = 'v0.10.0'; #VERSION
+our $VERSION = 'v0.10.1'; #VERSION
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
