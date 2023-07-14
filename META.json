@@ -127,7 +127,7 @@
       "bugtracker" : {
          "web" : "https://github.com/gflohr/qgoda/issues"
       },
-      "homepage" : "http://www.qgoda.net/",
+      "homepage" : "https://www.qgoda.net/",
       "repository" : {
          "type" : "git",
          "url" : "git://github.com/gflohr/qgoda.git",

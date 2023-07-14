@@ -102,7 +102,7 @@ requires:
   warnings: '0'
 resources:
   bugtracker: https://github.com/gflohr/qgoda/issues
-  homepage: http://www.qgoda.net/
+  homepage: https://www.qgoda.net/
   repository: git://github.com/gflohr/qgoda.git
 version: v0.10.0
 x_generated_by_perl: v5.34.0
