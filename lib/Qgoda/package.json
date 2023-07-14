@@ -7,7 +7,7 @@
   "author": "Guido Flohr <guido.flohr@cantanea.com>",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "ajv": "^6.5.4",
+    "ajv": "^6.12.3",
     "ajv-i18n": "^3.3.0",
     "js-yaml": "3.13.1",
     "lodash": "^4.17.21"
