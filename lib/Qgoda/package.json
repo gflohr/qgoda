@@ -1,6 +1,6 @@
 {
   "name": "qgoda",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "The Qgoda Static Site Generator",
   "main": "index.js",
   "repository": "https://github.com/gflohr/qgoda",

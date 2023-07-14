@@ -134,7 +134,7 @@
          "web" : "http://github.com/gflohr/qgoda.git"
       }
    },
-   "version" : "v0.10.0",
+   "version" : "v0.10.1",
    "x_generated_by_perl" : "v5.34.0",
    "x_serialization_backend" : "Cpanel::JSON::XS version 4.26",
    "x_spdx_expression" : "GPL-3.0-only"
