@@ -30,7 +30,8 @@ use Encode;
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
 use Qgoda::Util::FileSpec qw(
-	absolute_path abs2rel catdir catfile curdir rel2abs splitpath
+	absolute_path abs2rel catdir catfile catpath curdir rel2abs splitpath
+	updir
 );
 
 my $repodir;
@@ -42,7 +43,7 @@ BEGIN {
 		}
 	}
     my ($volume, $directory) = splitpath __FILE__;
-	$repodir = File::Spec->catpath($volume, $directory, '..');
+	$repodir = catpath $volume, $directory, updir;
 	$repodir = absolute_path(rel2abs($repodir));
 }
 

@@ -24,7 +24,7 @@ use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
 use Qgoda::Util::FileSpec qw(
-	absolute_path abs2rel catdir catfile rel2abs splitpath
+	absolute_path abs2rel catdir catfile catpath rel2abs splitpath
 );
 
 # FIXME! This assumes that we are a top-level package. Instead,
@@ -785,7 +785,7 @@ sub __prune {
 		if ($directories{$outfile} || $site->getArtefact($outfile)) {
 			# Mark the containing directory as generated.
 			my ($volume, $directory, $filename) = splitpath $outfile;
-			my $container = File::Spec->catpath($volume, $directory, '');
+			my $container = catpath $volume, $directory, '';
 			$container =~ s{/$}{};
 			$directories{$container} = 1;
 		} elsif (-d $outfile) {
