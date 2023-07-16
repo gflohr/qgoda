@@ -23,7 +23,9 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
-use Qgoda::Util::FileSpec qw(absolute_path abs2rel catdir catfile rel2abs);
+use Qgoda::Util::FileSpec qw(
+	absolute_path abs2rel catdir catfile rel2abs splitpath
+);
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
@@ -782,7 +784,7 @@ sub __prune {
 	foreach my $outfile (@outfiles) {
 		if ($directories{$outfile} || $site->getArtefact($outfile)) {
 			# Mark the containing directory as generated.
-			my ($volume, $directory, $filename) = File::Spec->splitpath($outfile);
+			my ($volume, $directory, $filename) = splitpath $outfile;
 			my $container = File::Spec->catpath($volume, $directory, '');
 			$container =~ s{/$}{};
 			$directories{$container} = 1;
