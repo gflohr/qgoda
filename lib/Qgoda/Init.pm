@@ -23,7 +23,6 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
 use JSON '2.90';
 use Scalar::Util qw(weaken reftype);
 

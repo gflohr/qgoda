@@ -20,7 +20,6 @@ package TestSite;
 
 use strict;
 
-use File::Spec;
 use File::Path;
 use File::Find;
 use File::Globstar::ListMatch;

@@ -22,9 +22,9 @@ use strict;
 
 #VERSION
 
-use Template;
 use Locale::TextDomain qw(qgoda);
-use File::Spec;
+
+use Template;
 
 use Qgoda::Util qw(empty);
 use Qgoda::Util::FileSpec qw(abs2rel catfile rel2abs);

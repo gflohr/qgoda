@@ -25,8 +25,7 @@ use strict;
 use base qw(Template::Plugin);
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
-use Cwd;
+
 use URI;
 use Scalar::Util qw(reftype);
 use JSON 2.0 qw(encode_json decode_json);
@@ -42,6 +41,7 @@ use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
 use Qgoda::Util::FileSpec qw(
 	absolute_path abs2rel catfile rel2abs splitpath filename_is_absolute
+	canonpath splitdir updir
 );
 use Qgoda::Util::Date;
 use Qgoda::Builder;
@@ -247,7 +247,7 @@ sub bustCache {
 
 	require Qgoda;
 	my $srcdir = Qgoda->new->config->{srcdir};
-	my $fullpath = File::Spec->canonpath(catfile($srcdir, $path));
+	my $fullpath = canonpath(catfile($srcdir, $path));
 
 	my @stat = stat $fullpath or return $uri;
 	if (defined $query) {
@@ -870,12 +870,12 @@ sub loadJSON {
 
 	my $absolute = rel2abs($filename, Qgoda->new->config->{srcdir});
 	my ($volume, $directories, undef) = splitpath $absolute;
-	my @directories = File::Spec->splitdir($absolute);
+	my @directories = splitdir $absolute;
 	map {
-		$_ eq File::Spec->updir and
+		$_ eq updir and
 			die __x("'{filenname}'): '{updir}' is not allowed!\n",
-					filename => $filename, updir => File::Spec->updir);
-	} File::Spec->splitdir($absolute);
+					filename => $filename, updir => updir);
+	} @directories;
 
 	my $json = read_file $filename or return;
 	my $data = eval { decode_json $json };

@@ -23,7 +23,7 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw(qgoda);
-use File::Spec;
+
 use JSON qw(decode_json);
 use Scalar::Util qw(reftype);
 

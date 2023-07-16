@@ -23,8 +23,7 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
-use Cwd;
+
 use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
@@ -32,7 +31,7 @@ use Encode;
 use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase
 				   safe_yaml_load);
-use Qgoda::Util::FileSpec qw(absolute_path abs2rel);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel canonpath);
 use Qgoda::JavaScript::Environment;
 use Qgoda::Schema;
 
@@ -135,8 +134,8 @@ sub new {
 	# Clean up certain variables or overwrite them unconditionally.
 	$config->{srcdir} = absolute_path;
 	$config->{paths}->{site} =
-		File::Spec->canonpath(absolute_path($config->{paths}->{site}));
-	$config->{paths}->{views} = File::Spec->canonpath($config->{paths}->{views});
+		canonpath(absolute_path($config->{paths}->{site}));
+	$config->{paths}->{views} = canonpath($config->{paths}->{views});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
 		if 0 == @{$config->{po}->{tt2}};

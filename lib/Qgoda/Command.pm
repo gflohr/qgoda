@@ -22,7 +22,6 @@ use strict;
 
 #VERSION
 
-use File::Spec;
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
 use Qgoda::CLI;

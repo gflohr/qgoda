@@ -22,7 +22,6 @@ use lib 't';
 use TestSite;
 use Test::More;
 use File::Basename qw(dirname);
-use File::Spec;
 
 use Qgoda::CLI;
 use Qgoda::Splitter;

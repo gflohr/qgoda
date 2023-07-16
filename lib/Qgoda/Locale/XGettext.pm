@@ -25,7 +25,6 @@ use strict;
 use Locale::TextDomain qw(qgoda);
 use Cwd qw(getcwd realpath);
 use Scalar::Util qw(reftype);
-use File::Spec;
 use Locale::XGettext 0.7;
 
 use Qgoda;

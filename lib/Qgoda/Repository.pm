@@ -24,7 +24,6 @@ use strict;
 
 use Locale::TextDomain qw(qgoda);
 
-use File::Spec;
 use File::HomeDir;
 use File::Temp;
 
