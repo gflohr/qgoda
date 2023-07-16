@@ -98,7 +98,7 @@ use strict;
 use Template::Constants;
 use Locale::TextDomain qw(qgoda);
 
-use Qgoda::Util::FileSpec qw(abs2rel catfile);
+use Qgoda::Util::FileSpec qw(abs2rel catfile filename_is_absolute);
 
 use base qw(Template::Provider);
 
@@ -119,7 +119,7 @@ sub fetch {
 		my $is_absolute;
 		my $path;
 
-		if (File::Spec->file_name_is_absolute($name)) {
+		if (filename_is_absolute $name) {
 			$is_absolute = 1;
 			$path = $name if -e $name;
 		} elsif ($name !~ m/$Template::Provider::RELATIVE_PATH/o) {
@@ -127,7 +127,7 @@ sub fetch {
 				my $try = catfile($search, $name);
 				if (-e $try) {
 					$path = $try;
-					$is_absolute = File::Spec->file_name_is_absolute($path);
+					$is_absolute = filename_is_absolute $path;
 					last;
 				}
 			}

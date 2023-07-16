@@ -40,7 +40,9 @@ use Data::Dump;
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
-use Qgoda::Util::FileSpec qw(absolute_path abs2rel catfile rel2abs splitpath);
+use Qgoda::Util::FileSpec qw(
+	absolute_path abs2rel catfile rel2abs splitpath filename_is_absolute
+);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -864,7 +866,7 @@ sub loadJSON {
 
 	die __x("loadJSON('{filenname}'): absolute paths are not allowed!\n",
 			filename => $filename)
-		if File::Spec->file_name_is_absolute($filename);
+		if filename_is_absolute $filename;
 
 	my $absolute = rel2abs($filename, Qgoda->new->config->{srcdir});
 	my ($volume, $directories, undef) = splitpath $absolute;

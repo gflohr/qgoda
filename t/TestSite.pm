@@ -31,14 +31,14 @@ use Qgoda;
 use Qgoda::Util qw(empty write_file);
 use Qgoda::Util::FileSpec qw(
 	absolute_path abs2rel catdir catfile catpath curdir rel2abs splitpath
-	updir
+	updir filename_is_absolute
 );
 
 my $repodir;
 BEGIN {
 	# Make @INC absolute.
 	foreach my $path (@INC) {
-		if (!File::Spec->file_name_is_absolute($path)) {
+		if (!filename_is_absolute $path) {
 			$path = absolute_path $path;
 		}
 	}
