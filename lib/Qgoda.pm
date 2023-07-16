@@ -285,11 +285,23 @@ sub watch {
 		$logger->debug(__x("waiting for changes in '{dir}'",
 						   dir => $config->{srcdir}));
 		my $watcher;
+		my %extra;
+		if ('MSWin32' eq $^O || 'cygwin' eq $^O) {
+			# Filesys::Notify::Win32::ReadDirectoryChanges creates so-called
+			# "interpreter" threads for watching the filesystem for changes
+			# and they lead to all kinds of spurious errors.
+			#
+			# Also, either that module or the Duktape binding causes error
+			# messages about freeing a non-existing shared string
+			# "perl_module_resolver".
+			$extra{backend} = 'Fallback';
+		}
 		$watcher= AnyEvent::Filesys::Watcher->new(
 			dirs => [$config->{srcdir}],
 			interval => $config->{latency},
 			cb => sub { $self->__onFilesysChange(\%options, @_) },
 			filter => sub { $self->__filesysChangeFilter(@_) },
+			%extra
 		);
 
 		my $reason = $self->{__stop}->recv;
