@@ -23,7 +23,7 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
-use Qgoda::Util::FileSpec qw(absolute_path abs2rel catdir catfile);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel catdir catfile rel2abs);
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
@@ -598,7 +598,7 @@ sub scan {
 			$logger->debug(__"skip source directory scan and use dependencies");
 			$self->{__outfiles} = $deptracker->outfiles;
 			foreach my $relpath (@$dirty) {
-				my $path = File::Spec->rel2abs($relpath, $config->{srcdir});
+				my $path = rel2abs($relpath, $config->{srcdir});
 				my $asset = Qgoda::Asset->new($path, $relpath);
 				$site->addDirtyAsset($asset);
 			}
@@ -966,7 +966,7 @@ sub __initVersionControlled {
 
 	my $srcdir = $config->{srcdir};
 	foreach my $relpath (@files) {
-		my $abspath = File::Spec->rel2abs($relpath, $srcdir);
+		my $abspath = rel2abs($relpath, $srcdir);
 		$version_controlled->{absolute}->{$abspath} = $relpath;
 		$version_controlled->{relative}->{$relpath} = $abspath;
 	}
@@ -1014,7 +1014,7 @@ sub versionControlled {
 
 	my $no_scm = $self->__initNoSCMPatterns or return;
 
-	$path = File::Spec->rel2abs($path, $self->config->{srcdir});
+	$path = rel2abs($path, $self->config->{srcdir});
 	return $self if $no_scm->match($path);
 
 	return;

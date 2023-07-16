@@ -30,6 +30,7 @@ use Locale::XGettext 0.7;
 
 use Qgoda;
 use Qgoda::Util qw(read_file flatten2hash);
+use Qgoda::Util::FileSpec qw(rel2abs);
 use Qgoda::Util::Translate qw(get_mains);
 use Qgoda::CLI;
 use Qgoda::Splitter;
@@ -49,7 +50,7 @@ sub extractFromNonFiles {
 	my ($self) = @_;
 
 	my $podir = getcwd;
-	my $srcdir = File::Spec->rel2abs($self->option('srcdir'));
+	my $srcdir = rel2abs($self->option('srcdir'));
 
 	if (!chdir $srcdir) {
 		die __x("error changing working directory to '{dir}': {error}\n",
@@ -65,12 +66,12 @@ sub extractFromNonFiles {
 	my %mains = get_mains;
 	my %mains_paths;
 	foreach my $relpath (keys %mains) {
-		my $abs = realpath(File::Spec->rel2abs($relpath, $srcdir));
+		my $abs = realpath(rel2abs($relpath, $srcdir));
 		$mains_paths{$abs} = $relpath;
 	}
 
 	foreach my $filename (@{$self->{__qgoda_files}}) {
-		my $abs = realpath(File::Spec->rel2abs($filename, $podir));
+		my $abs = realpath(rel2abs($filename, $podir));
 		if (exists $mains_paths{$abs}) {
 			my $relpath = $mains_paths{$abs};
 			my $translations = $mains{$relpath};
@@ -104,7 +105,7 @@ sub __extractFromMain {
 
 	my $main_asset = $site->getAssetByRelpath($main);
 	if (!$main_asset) {
-		my $path = File::Spec->rel2abs($main, $self->option('srcdir'));
+		my $path = rel2abs($main, $self->option('srcdir'));
 		$main_asset = Qgoda::Asset->new($path, $main);
 	}
 	my $splitter = Qgoda::Splitter->new($main_asset->getPath);

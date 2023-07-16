@@ -40,7 +40,7 @@ use Data::Dump;
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
-use Qgoda::Util::FileSpec qw(absolute_path abs2rel catfile);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel catfile rel2abs);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -866,7 +866,7 @@ sub loadJSON {
 			filename => $filename)
 		if File::Spec->file_name_is_absolute($filename);
 
-	my $absolute = File::Spec->rel2abs($filename, Qgoda->new->config->{srcdir});
+	my $absolute = rel2abs($filename, Qgoda->new->config->{srcdir});
 	my ($volume, $directories, undef) = File::Spec->splitpath($absolute);
 	my @directories = File::Spec->splitdir($absolute);
 	map {

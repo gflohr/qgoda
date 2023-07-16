@@ -27,7 +27,7 @@ use Locale::TextDomain qw(qgoda);
 use File::Spec;
 
 use Qgoda::Util qw(empty);
-use Qgoda::Util::FileSpec qw(abs2rel catfile);
+use Qgoda::Util::FileSpec qw(abs2rel catfile rel2abs);
 
 use base qw(Qgoda::Processor);
 
@@ -75,7 +75,7 @@ sub process {
 	my $qgoda = Qgoda->new;
 	my $srcdir = $qgoda->config->{srcdir};
 	my $viewdir = $qgoda->config->{paths}->{views};
-	my $absviewdir = File::Spec->rel2abs($viewdir, $srcdir);
+	my $absviewdir = rel2abs($viewdir, $srcdir);
 	my $gettext_filename = abs2rel($filename, $absviewdir);
 	my $vars = {
 		asset => $asset,

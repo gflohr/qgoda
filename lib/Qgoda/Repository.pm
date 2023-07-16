@@ -30,6 +30,7 @@ use File::Temp;
 
 use Qgoda;
 use Qgoda::Util qw(read_file write_file is_archive);
+use Qgoda::Util::FileSpec qw(rel2abs);
 
 use URI;
 
@@ -40,7 +41,7 @@ sub new {
 
 	# This is a mess!  Re-write it from scratch ...
 	if ($uri =~ m{^\.\.?\\/}) {
-		$uri = 'file://' . File::Spec->rel2abs($uri);
+		$uri = 'file://' . rel2abs($uri);
 		$uri =~ s{\\}{/}g;
 		$uri = URI->new($uri);
 	} elsif ($uri =~ s{^~([^/\\]*)}{}) {
