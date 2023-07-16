@@ -862,22 +862,21 @@ sub encodeJSON {
 }
 
 sub loadJSON {
-	my ($self, $filename) = @_;
+	my ($self, $path) = @_;
 
 	die __x("loadJSON('{filenname}'): absolute paths are not allowed!\n",
-			filename => $filename)
-		if filename_is_absolute $filename;
+			filename => $path)
+		if filename_is_absolute $path;
 
-	my $absolute = rel2abs($filename, Qgoda->new->config->{srcdir});
-	my ($volume, $directories, undef) = splitpath $absolute;
-	my @directories = splitdir $absolute;
+	my @directories = splitdir $path;
+	my $updir = updir;
 	map {
-		$_ eq updir and
+		$_ eq $updir and
 			die __x("'{filenname}'): '{updir}' is not allowed!\n",
-					filename => $filename, updir => updir);
+					filename => $path, updir => updir);
 	} @directories;
 
-	my $json = read_file $filename or return;
+	my $json = read_file $path or return;
 	my $data = eval { decode_json $json };
 	return if !defined $data;
 
