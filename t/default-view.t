@@ -21,7 +21,6 @@ use strict;
 use lib 't';
 use TestSite;
 use Test::More;
-use File::Spec;
 
 use Qgoda::CLI;
 
