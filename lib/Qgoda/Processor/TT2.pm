@@ -27,7 +27,7 @@ use Locale::TextDomain qw(qgoda);
 use File::Spec;
 
 use Qgoda::Util qw(empty);
-use Qgoda::Util::FileSpec qw(catfile);
+use Qgoda::Util::FileSpec qw(abs2rel catfile);
 
 use base qw(Qgoda::Processor);
 
@@ -76,7 +76,7 @@ sub process {
 	my $srcdir = $qgoda->config->{srcdir};
 	my $viewdir = $qgoda->config->{paths}->{views};
 	my $absviewdir = File::Spec->rel2abs($viewdir, $srcdir);
-	my $gettext_filename = File::Spec->abs2rel($filename, $absviewdir);
+	my $gettext_filename = abs2rel($filename, $absviewdir);
 	my $vars = {
 		asset => $asset,
 		config => Qgoda->new->config,
@@ -98,7 +98,7 @@ use strict;
 use Template::Constants;
 use Locale::TextDomain qw(qgoda);
 
-use Qgoda::Util::FileSpec qw(catfile);
+use Qgoda::Util::FileSpec qw(abs2rel catfile);
 
 use base qw(Template::Provider);
 
@@ -145,7 +145,7 @@ sub fetch {
 			if ($is_absolute) {
 				my $srcdir = $qgoda->config->{srcdir};
 				my $viewdir = catfile($srcdir, $qgoda->config->{paths}->{views});
-				$path = File::Spec->abs2rel($path, $srcdir);
+				$path = abs2rel($path, $srcdir);
 			} else {
 				$path = catfile($qgoda->config->{paths}->{views}, $path);
 			}

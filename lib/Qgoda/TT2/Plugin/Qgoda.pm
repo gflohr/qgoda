@@ -40,7 +40,7 @@ use Data::Dump;
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
-use Qgoda::Util::FileSpec qw(absolute_path catfile);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel catfile);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -289,7 +289,7 @@ sub __include {
 				path => $_path, error => $!);
 	}
 
-	my $relpath = File::Spec->abs2rel($path, $srcdir);
+	my $relpath = abs2rel($path, $srcdir);
 	my $asset = Qgoda::Asset->new($path, $relpath);
 
 	my %overlay = %$overlay;

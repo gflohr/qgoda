@@ -31,6 +31,7 @@ use File::Globstar qw(globstar);
 use Encode;
 
 use Qgoda::Util qw(empty merge_data flatten2hash front_matter safe_yaml_load);
+use Qgoda::Util::FileSpec qw(abs2rel);
 use Qgoda::Splitter;
 
 use base 'Exporter';
@@ -206,7 +207,7 @@ sub get_mains {
 	}
 
 	foreach my $relpath (keys %mdextra) {
-		my $path = File::Spec->abs2rel($relpath);
+		my $path = abs2rel($relpath);
 		next if $site->{assets}->{$path};
 
 		$logger->debug(__x("creating asset object for '{filename}'",

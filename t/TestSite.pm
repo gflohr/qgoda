@@ -29,7 +29,7 @@ use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
-use Qgoda::Util::FileSpec qw(absolute_path catdir catfile curdir);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel catdir catfile curdir);
 
 my $repodir;
 BEGIN {
@@ -147,7 +147,7 @@ sub tearDown {
 	my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
 	File::Find::finddepth({
 		wanted => sub {
-			my $rel = File::Spec->abs2rel($File::Find::name, $self->{rootdir});
+			my $rel = abs2rel($File::Find::name, $self->{rootdir});
 
 			return if '.' eq $rel;
 			return if $matcher->match($rel);

@@ -23,7 +23,7 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
-use Qgoda::Util::FileSpec qw(absolute_path catdir catfile);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel catdir catfile);
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
@@ -620,7 +620,7 @@ sub scan {
 			if (-f $_) {
 				my $path = absolute_path($_);
 				if (!$config->ignorePath($path)) {
-					my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
+					my $relpath = abs2rel($path, $config->{srcdir});
 					my $asset = Qgoda::Asset->new($path, $relpath);
 					$site->addAsset($asset);
 				}
@@ -820,7 +820,7 @@ sub __filesysChangeFilter {
 
 	if ($filename =~ /_stop$/ && -e $filename) {
 		my $srcdir = $config->{paths}->{srcdir};
-		my $relpath = File::Spec->abs2rel($filename, $srcdir);
+		my $relpath = abs2rel($filename, $srcdir);
 		if ('_stop' eq $relpath) {
 			my $reason = read_file $filename;
 			unlink $filename;

@@ -33,7 +33,7 @@ use Cwd qw(getcwd);
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
 use Qgoda::Util::Translate qw(get_mains);
-use Qgoda::Util::FileSpec qw(catfile);
+use Qgoda::Util::FileSpec qw(abs2rel catfile);
 use Qgoda::CLI;
 use Qgoda::Site;
 
@@ -552,7 +552,7 @@ sub __makePOTFILES {
 	my @files;
 	foreach my $path (keys %files) {
 		my $abspath = File::Spec->rel2abs($path);
-		my $relpath = File::Spec->abs2rel($abspath, $podir);
+		my $relpath = abs2rel($abspath, $podir);
 		if ($config->{scm}) {
 			next unless $qgoda->versionControlled($abspath, 1);
 		}
@@ -599,7 +599,7 @@ sub __makeMDPOTFILES {
 		if ($config->{scm}) {
 			next unless $qgoda->versionControlled($path);
 		}
-		my $relpath = File::Spec->abs2rel($path, $podir);
+		my $relpath = abs2rel($path, $podir);
 		push @files, $relpath;
 	}
 
