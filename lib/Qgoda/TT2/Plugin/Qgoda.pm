@@ -40,6 +40,7 @@ use Data::Dump;
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
+use Qgoda::Util::FileSpec qw(absolute_path);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -282,7 +283,7 @@ sub __include {
 	my $q = Qgoda->new;
 	my $srcdir = $q->config->{srcdir};
 
-	my $path = Cwd::abs_path($_path);
+	my $path = absolute_path $_path;
 	if (!defined $path) {
 		die __x("error including '{path}': {error}.\n",
 				path => $_path, error => $!);

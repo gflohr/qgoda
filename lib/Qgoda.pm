@@ -23,12 +23,12 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
-use Qgoda::Util::FileSpec qw(catdir);
+use Qgoda::Util::FileSpec qw(absolute_path catdir);
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
 use File::Basename qw(fileparse dirname);
-my $package_dir = catdir(Cwd::abs_path(dirname __FILE__), 'Qgoda');
+my $package_dir = catdir(absolute_path(dirname __FILE__), 'Qgoda');
 
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
@@ -38,7 +38,6 @@ use Locale::TextDomain 1.30 qw(qgoda);
 use Locale::Messages;
 use Locale::gettext_dumb;
 use File::Find;
-use Cwd;
 use Scalar::Util qw(reftype blessed);
 use AnyEvent;
 use AnyEvent::Loop;
@@ -619,7 +618,7 @@ sub scan {
 	File::Find::find({
 		wanted => sub {
 			if (-f $_) {
-				my $path = Cwd::abs_path($_);
+				my $path = absolute_path($_);
 				if (!$config->ignorePath($path)) {
 					my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
 					my $asset = Qgoda::Asset->new($path, $relpath);
@@ -629,7 +628,7 @@ sub scan {
 		},
 		preprocess => sub {
 			# Prevent descending into ignored directories.
-			my $path = Cwd::abs_path($File::Find::dir);
+			my $path = absolute_path($File::Find::dir);
 			if ($config->ignorePath($path)) {
 				return;
 			} else {
@@ -647,7 +646,7 @@ sub scan {
 					   outdir => $config->{paths}->{site}));
 	File::Find::find(sub {
 		if ($_ ne '.' && $_ ne '..') {
-			push @outfiles, Cwd::abs_path($_);
+			push @outfiles, absolute_path($_);
 		}
 	}, $config->{paths}->{site});
 

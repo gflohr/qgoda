@@ -25,24 +25,23 @@ use File::Path;
 use File::Find;
 use File::Globstar::ListMatch;
 use YAML::XS;
-use Cwd;
 use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
-use Qgoda::Util::FileSpec qw(catdir);
+use Qgoda::Util::FileSpec qw(absolute_path catdir);
 
 my $repodir;
 BEGIN {
 	# Make @INC absolute.
 	foreach my $path (@INC) {
 		if (!File::Spec->file_name_is_absolute($path)) {
-			$path = Cwd::abs_path($path);
+			$path = absolute_path $path;
 		}
 	}
     my ($volume, $directory) = File::Spec->splitpath(__FILE__);
 	$repodir = File::Spec->catpath($volume, $directory, '..');
-	$repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
+	$repodir = absolute_path(File::Spec->rel2abs($repodir));
 }
 
 sub new {

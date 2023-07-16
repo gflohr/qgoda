@@ -21,14 +21,13 @@ use strict;
 use lib 't';
 use Test::More;
 use File::Path;
-use Cwd;
 
 use Qgoda;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
-use Qgoda::Util::FileSpec qw(catdir updir);
+use Qgoda::Util::FileSpec qw(absolute_path catdir updir);
 
-my $here = Cwd::abs_path();
+my $here = absolute_path;
 
 my $updir = updir;
 my $theme_path = catdir($updir, 'minimal-theme');

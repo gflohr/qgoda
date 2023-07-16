@@ -53,7 +53,7 @@ before
 after
 EOF
 
-# Cwd::abs_path only returns undef if the file is in a non-existing
+# absolute_path only returns undef if the file is in a non-existing
 # directory. This is important for test coverage.
 my $not_existing = <<EOF;
 [% USE q = Qgoda %]
@@ -95,11 +95,11 @@ ok(Qgoda::CLI->new(['build'])->dispatch);
 open STDERR, '>&', $olderr;
 
 ok -e '_site/with-include/index.html';
-is ((read_file '_site/with-include/index.html'), 
+is ((read_file '_site/with-include/index.html'),
     '<p>included 2304</p>', 'include');
 
 ok -e '_site/no-extra/index.html';
-is ((read_file '_site/no-extra/index.html'), 
+is ((read_file '_site/no-extra/index.html'),
     '<p>included</p>', 'include');
 
 my $invalid = qr/^\[\% '' \%\]/;
