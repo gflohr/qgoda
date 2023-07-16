@@ -130,7 +130,7 @@ taxonomies:
   links: 1
   tags: 2
 title: A new Qgoda Powered Site
-track-dependencies: true
+track-dependencies: false
 url: $url
 view: default.html
 EOF

@@ -569,7 +569,7 @@ sub config {
 							   . "mode by re-processing only assets that have "
 							   . "changed or depend on changed files.",
 				type => 'boolean',
-				default => true,
+				default => false,
 			},
 			url => {
 				description => __"The main url of the site.",

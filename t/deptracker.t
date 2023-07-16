@@ -83,6 +83,7 @@ my %test_config = (
 		},
 	},
 	files => {
+		'_config.yaml' => "track-dependencies: true\n",
 		'_views/listing.html' => $listing,
 		'_views/listing-de.html' => $listing_lingua,
 		'_views/listing-en.html' => $listing_lingua,
