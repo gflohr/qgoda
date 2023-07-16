@@ -29,7 +29,7 @@ use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
-use Qgoda::Util::FileSpec qw(absolute_path catdir catfile);
+use Qgoda::Util::FileSpec qw(absolute_path catdir catfile curdir);
 
 my $repodir;
 BEGIN {
@@ -167,7 +167,7 @@ sub tearDown {
 sub findArtefacts {
 	my ($self, $relpath) = @_;
 
-	my $path = catdir(File::Spec->curdir, '_site');
+	my $path = catdir(curdir, '_site');
 	$path = catdir($path, $relpath) if !empty $relpath;
 
 	my @artefacts;

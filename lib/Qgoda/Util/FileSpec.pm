@@ -26,7 +26,7 @@ use File::Spec;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(absolute_path catdir catfile updir);
+@EXPORT_OK = qw(absolute_path catdir catfile updir curdir);
 
 # Wrapper around File::Spec that forces the slash as a path separator.
 
@@ -69,6 +69,10 @@ sub catdir {
 	my $path = File::Spec->catdir(@directories);
 
 	__fixup $path;
+}
+
+sub curdir {
+	File::Spec->curdir;
 }
 
 sub updir {
