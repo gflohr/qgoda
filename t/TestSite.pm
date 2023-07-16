@@ -29,7 +29,7 @@ use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
-use Qgoda::Util::FileSpec qw(absolute_path catdir);
+use Qgoda::Util::FileSpec qw(absolute_path catdir catfile);
 
 my $repodir;
 BEGIN {
@@ -65,7 +65,7 @@ sub setup {
 
 	chdir $repodir or die "cannot chdir to '$repodir': $!\n";
 
-	my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
+	my $rootdir = catfile($repodir, 't', $self->{name});
 	$self->{rootdir} = $rootdir;
     $self->tearDown if -e $self->{rootdir};
 	mkdir $rootdir;

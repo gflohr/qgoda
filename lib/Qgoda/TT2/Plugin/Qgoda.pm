@@ -40,7 +40,7 @@ use Data::Dump;
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
-use Qgoda::Util::FileSpec qw(absolute_path);
+use Qgoda::Util::FileSpec qw(absolute_path catfile);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -245,7 +245,7 @@ sub bustCache {
 
 	require Qgoda;
 	my $srcdir = Qgoda->new->config->{srcdir};
-	my $fullpath = File::Spec->canonpath(File::Spec->catfile($srcdir, $path));
+	my $fullpath = File::Spec->canonpath(catfile($srcdir, $path));
 
 	my @stat = stat $fullpath or return $uri;
 	if (defined $query) {

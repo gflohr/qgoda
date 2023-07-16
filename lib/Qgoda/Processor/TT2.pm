@@ -27,6 +27,7 @@ use Locale::TextDomain qw(qgoda);
 use File::Spec;
 
 use Qgoda::Util qw(empty);
+use Qgoda::Util::FileSpec qw(catfile);
 
 use base qw(Qgoda::Processor);
 
@@ -47,7 +48,7 @@ sub new {
 	# FIXME! Merge options with those from the configuration!
 	my $scm = $config->{scm};
 	my %options = (
-		INCLUDE_PATH => [File::Spec->join($srcdir, $viewdir)],
+		INCLUDE_PATH => [catfile($srcdir, $viewdir)],
 		PLUGIN_BASE => ['Qgoda::TT2::Plugin'],
 		RECURSION => 1,
 		# Needed for qgoda po pot
@@ -94,10 +95,10 @@ package Qgoda::Template::Provider;
 
 use strict;
 
-#VERSION
-
 use Template::Constants;
 use Locale::TextDomain qw(qgoda);
+
+use Qgoda::Util::FileSpec qw(catfile);
 
 use base qw(Template::Provider);
 
@@ -123,7 +124,7 @@ sub fetch {
 			$path = $name if -e $name;
 		} elsif ($name !~ m/$Template::Provider::RELATIVE_PATH/o) {
 			foreach my $search (@{$self->{INCLUDE_PATH}}) {
-				my $try = File::Spec->catfile($search, $name);
+				my $try = catfile($search, $name);
 				if (-e $try) {
 					$path = $try;
 					$is_absolute = File::Spec->file_name_is_absolute($path);
@@ -143,10 +144,10 @@ sub fetch {
 
 			if ($is_absolute) {
 				my $srcdir = $qgoda->config->{srcdir};
-				my $viewdir = File::Spec->join($srcdir, $qgoda->config->{paths}->{views});
+				my $viewdir = catfile($srcdir, $qgoda->config->{paths}->{views});
 				$path = File::Spec->abs2rel($path, $srcdir);
 			} else {
-				$path = File::Spec->join($qgoda->config->{paths}->{views}, $path);
+				$path = catfile($qgoda->config->{paths}->{views}, $path);
 			}
 
 			my $deptracker = $qgoda->getDependencyTracker;

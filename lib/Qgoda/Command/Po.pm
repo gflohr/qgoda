@@ -33,6 +33,7 @@ use Cwd qw(getcwd);
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
 use Qgoda::Util::Translate qw(get_mains);
+use Qgoda::Util::FileSpec qw(catfile);
 use Qgoda::CLI;
 use Qgoda::Site;
 
@@ -128,19 +129,19 @@ sub __checkFiles {
 
 	push @missing, '' if !-e $podir;
 
-	my $makefile = File::Spec->catfile($podir, 'Makefile');
+	my $makefile = catfile($podir, 'Makefile');
 	push @missing, 'Makefile' if !-e $makefile;
 
-	my $package = File::Spec->catfile($podir, 'PACKAGE');
+	my $package = catfile($podir, 'PACKAGE');
 	push @missing, 'PACKAGE' if !-e $package;
 
-	my $plfiles = File::Spec->catfile($podir, 'PLFILES');
+	my $plfiles = catfile($podir, 'PLFILES');
 	push @missing, 'PLFILES' if !-e $plfiles;
 
-	my $git_ignore = File::Spec->catfile($podir, '.gitignore');
+	my $git_ignore = catfile($podir, '.gitignore');
 	push @missing, 'GitIgnore' if !-e $git_ignore;
 
-	my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
+	my $qgoda_inc = catfile($podir, 'qgoda.inc');
 	push @missing, 'QgodaINC' if !-e $qgoda_inc;
 
 	return @missing;
@@ -176,7 +177,7 @@ sub __addMissingPACKAGE {
 
 	my $podir = $config->{paths}->{po};
 
-	my $package = File::Spec->catfile($podir, 'PACKAGE');
+	my $package = catfile($podir, 'PACKAGE');
 	$logger->info(__x("creating '{filename}'", filename => $package));
 
 	my $header_comment = $self->__comment(__(<<EOF));
@@ -271,7 +272,7 @@ sub __addMissingMakefile {
 
 	my $podir = $config->{paths}->{po};
 
-	my $makefile = File::Spec->catfile($podir, 'Makefile');
+	my $makefile = catfile($podir, 'Makefile');
 	$logger->info(__x("creating '{filename}'", filename => $makefile));
 	$logger->info(__x("cloning git repository '{repo}'",
 					  repo => $seed_repo));
@@ -282,7 +283,7 @@ sub __addMissingMakefile {
 
 	Git::command('clone', '--depth', '1', $seed_repo, $tmp);
 
-	my $remote = File::Spec->catfile($tmp, 'po', 'Makefile');
+	my $remote = catfile($tmp, 'po', 'Makefile');
 	$logger->debug(__x("copying '{from}' to '{to}'",
 					   from => $remote, to => $makefile));
 
@@ -303,7 +304,7 @@ sub __addMissingPLFILES {
 
 	my $podir = $config->{paths}->{po};
 
-	my $plfiles = File::Spec->catfile($podir, 'PLFILES');
+	my $plfiles = catfile($podir, 'PLFILES');
 	$logger->info(__x("creating '{filename}'", filename => $plfiles));
 
 	if (!write_file $plfiles, '') {
@@ -324,7 +325,7 @@ sub __addMissingGitIgnore {
 
 	my $podir = $config->{paths}->{po};
 
-	my $gitignore = File::Spec->catfile($podir, '.gitignore');
+	my $gitignore = catfile($podir, '.gitignore');
 	$logger->info(__x("creating '{filename}'", filename => $gitignore));
 
 	my $ignore_list = <<EOF;
@@ -350,7 +351,7 @@ sub __addMissingQgodaINC {
 
 	my $podir = $config->{paths}->{po};
 
-	my $qgoda_inc = File::Spec->catfile($podir, 'qgoda.inc');
+	my $qgoda_inc = catfile($podir, 'qgoda.inc');
 	$logger->info(__x("creating '{filename}'", filename => $qgoda_inc));
 
 	my $include = <<'EOF';
@@ -566,7 +567,7 @@ sub __makePOTFILES {
 	}
 
 	my $potfiles = join "\n", sort @files;
-	my $display_name = File::Spec->catfile($config->{paths}->{po},
+	my $display_name = catfile($config->{paths}->{po},
 										   'POTFILES');
 	$logger->info(__x("writing '{filename}'", filename => $display_name));
 	unless (write_file 'POTFILES', "$potfiles\n") {
@@ -608,7 +609,7 @@ sub __makeMDPOTFILES {
 	}
 
 	my $potfiles = join "\n", sort @files;
-	my $display_name = File::Spec->catfile($config->{paths}->{po},
+	my $display_name = catfile($config->{paths}->{po},
 										   'MDPOTFILES');
 	$logger->info(__x("writing '{filename}'", filename => $display_name));
 	unless (write_file 'MDPOTFILES', "$potfiles\n") {
@@ -773,15 +774,15 @@ sub __makeInstall {
 		}
 	}
 
-	my $targetdir = File::Spec->catfile($srcdir, 'LocaleData');
+	my $targetdir = catfile($srcdir, 'LocaleData');
 	foreach my $lang (@linguas) {
-		my $destdir = File::Spec->catfile($targetdir, $lang, 'LC_MESSAGES');
+		my $destdir = catfile($targetdir, $lang, 'LC_MESSAGES');
 		if (!-e $destdir) {
 			$logger->info(__x("create directory '{directory}'",
 							  directory => $destdir));
 			make_path $destdir if !-e $destdir;
 		}
-		my $dest = File::Spec->catfile($destdir, "$po_config->{textdomain}.mo");
+		my $dest = catfile($destdir, "$po_config->{textdomain}.mo");
 		$logger->info(__x("copy '{from}' to '{to}'",
 						  from => "$lang.gmo", to => $dest));
 		if (!copy "$lang.gmo", "$dest") {

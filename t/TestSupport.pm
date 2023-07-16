@@ -9,6 +9,8 @@ use File::Copy qw(move);
 use Test::More;
 use autodie;
 
+use Qgoda::Util::FileSpec qw(catfile);
+
 use Exporter qw(import);
 our @EXPORT_OK = qw(create_test_files delete_test_files move_test_files
   modify_attrs_on_test_files $dir received_events receive_event);
@@ -20,7 +22,7 @@ sub create_test_files {
 	my (@files) = @_;
 
 	for my $file (@files) {
-		my $full_file = File::Spec->catfile($dir, $file);
+		my $full_file = catfile($dir, $file);
 		my $full_dir = dirname($full_file);
 
 		mkpath $full_dir unless -d $full_dir;
@@ -37,7 +39,7 @@ sub delete_test_files {
 	my (@files) = @_;
 
 	for my $file (@files) {
-		my $full_file = File::Spec->catfile($dir, $file);
+		my $full_file = catfile($dir, $file);
 		if   (-d $full_file) { rmdir $full_file; }
 		else				   { unlink $full_file; }
 	}
@@ -47,8 +49,8 @@ sub move_test_files {
 	my (%files) = @_;
 
 	while (my ($src, $dst) = each %files) {
-		my $full_src = File::Spec->catfile($dir, $src);
-		my $full_dst = File::Spec->catfile($dir, $dst);
+		my $full_src = catfile($dir, $src);
+		my $full_dst = catfile($dir, $dst);
 		move $full_src, $full_dst;
 	}
 }
@@ -57,7 +59,7 @@ sub modify_attrs_on_test_files {
 	my (@files) = @_;
 
 	for my $file (@files) {
-		my $full_file = File::Spec->catfile($dir, $file);
+		my $full_file = catfile($dir, $file);
 		chmod 0750, $full_file or die "Error chmod on $full_file: $!";
 	}
 }

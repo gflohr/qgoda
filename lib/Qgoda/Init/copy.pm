@@ -27,6 +27,8 @@ use File::Spec;
 use File::Find qw(find);
 use File::Copy qw(copy);
 
+use Qgoda::Util::FileSpec qw(catfile);
+
 sub new {
 	my ($class, $init) = @_;
 
@@ -72,7 +74,7 @@ sub run {
 		my (@names) = @_;
 		my $relpath = File::Spec->abs2rel($File::Find::dir, $config->{_srcdir});
 
-		# Do not use File::Spec->catfile! Ignore patterns uses slashes only.
+		# Do not use catfile! Ignore patterns uses slashes only.
 		return grep { !$exclude->match("$relpath/$_") } @names;
 	};
 

@@ -23,7 +23,7 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
-use Qgoda::Util::FileSpec qw(absolute_path catdir);
+use Qgoda::Util::FileSpec qw(absolute_path catdir catfile);
 
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
@@ -149,7 +149,7 @@ sub build {
 		if !empty $config->{scm} && 'git' eq $config->{scm};
 
 	my $textdomain = $config->{po}->{textdomain};
-	my $locale_dir = File::Spec->catfile($config->{srcdir}, 'LocaleData');
+	my $locale_dir = catfile($config->{srcdir}, 'LocaleData');
 	Locale::gettext_dumb::bindtextdomain($textdomain, $locale_dir);
 	if (!empty $config->{po}->{textdomain} && $config->{po}->{reload}) {
 		eval {
@@ -174,7 +174,7 @@ sub build {
 
 	if ($modified + $deleted) {
 		if (!empty $config->{paths}->{timestamp}) {
-			my $timestamp_file = File::Spec->catfile($config->{srcdir},
+			my $timestamp_file = catfile($config->{srcdir},
 													$config->{paths}->{timestamp});
 			if (!write_file($timestamp_file, sprintf "%d\n", time)) {
 					$logger->error(__x("cannot write '{file}': {error}!",
