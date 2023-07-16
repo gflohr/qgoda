@@ -30,6 +30,7 @@ use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
+use Qgoda::Util::FileSpec qw(catdir);
 
 my $repodir;
 BEGIN {
@@ -90,7 +91,7 @@ sub __setupConfig {
 	my ($self) = @_;
 
     my $yaml;
- 
+
 	if (empty $self->{config}) {
 		unlink '_config.yaml';
 		return $self;
@@ -167,8 +168,8 @@ sub tearDown {
 sub findArtefacts {
 	my ($self, $relpath) = @_;
 
-	my $path = File::Spec->catdir(File::Spec->curdir, '_site');
-	$path = File::Spec->catdir($path, $relpath) if !empty $relpath;
+	my $path = catdir(File::Spec->curdir, '_site');
+	$path = catdir($path, $relpath) if !empty $relpath;
 
 	my @artefacts;
 	File::Find::find({

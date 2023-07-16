@@ -20,20 +20,20 @@ use strict;
 
 use lib 't';
 use Test::More;
-use File::Spec;
 use File::Path;
 use Cwd;
 
 use Qgoda;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
+use Qgoda::Util::FileSpec qw(catdir updir);
 
 my $here = Cwd::abs_path();
 
-my $updir = File::Spec->updir;
-my $theme_path = File::Spec->catdir($updir, 'minimal-theme');
+my $updir = updir;
+my $theme_path = catdir($updir, 'minimal-theme');
 
-my $project_dir = File::Spec->catdir('t', 'command-init');
+my $project_dir = catdir('t', 'command-init');
 mkdir $project_dir;
 ok -d $project_dir;
 ok chdir $project_dir;

@@ -25,11 +25,11 @@ use strict;
 use Locale::TextDomain qw('qgoda');
 use POSIX qw(setlocale);
 use Locale::Util qw(web_set_locale);
-use File::Spec;
 
 use Qgoda;
 use Qgoda::Util qw(empty read_file read_body write_file blength);
 use Qgoda::Util::Translate qw(translate_body);
+use Qgoda::Util::FileSpec qw(catdir);
 
 sub new {
 	bless {}, shift;
@@ -136,7 +136,7 @@ sub saveArtefact {
 	my $qgoda = Qgoda->new;
 	my $config = $qgoda->config;
 	$permalink = '/' . $asset->getRelpath if empty $permalink;
-	my $path = File::Spec->catdir($config->{paths}->{site}, $permalink);
+	my $path = catdir($config->{paths}->{site}, $permalink);
 
 	$qgoda->getDependencyTracker->addArtefact($self->{__current}, $path);
 

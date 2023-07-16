@@ -23,10 +23,12 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
+use Qgoda::Util::FileSpec qw(catdir);
+
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
 use File::Basename qw(fileparse dirname);
-my $package_dir = File::Spec->catdir(Cwd::abs_path(dirname __FILE__), 'Qgoda');
+my $package_dir = catdir(Cwd::abs_path(dirname __FILE__), 'Qgoda');
 
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);

@@ -28,6 +28,7 @@ use JSON::PP;
 use File::Spec;
 
 use Qgoda;
+use Qgoda::Util::FileSpec qw(catdir);
 
 use constant true => $JSON::PP::true;
 use constant false => $JSON::PP::false;
@@ -247,7 +248,7 @@ sub config {
 									   . "files, defaults to the absolute path "
 									   . "to '_site' in the current directory.",
 						type => 'string',
-						default => File::Spec->catdir(Cwd::abs_path(''), '_site')
+						default => catdir(Cwd::abs_path(''), '_site')
 					},
 					timestamp => {
 						description => __"Name of the timestamp file containing "
