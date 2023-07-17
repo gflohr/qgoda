@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: qgoda 0.1.1\n"
 "Report-Msgid-Bugs-To: Guido Flohr <guido.flohr@cantanea.com>\n"
 "POT-Creation-Date: 2023-07-17 18:36+0300\n"
-"PO-Revision-Date: 2023-07-17 18:44+0300\n"
+"PO-Revision-Date: 2023-07-17 18:46+0300\n"
 "Last-Translator: Guido Flohr <guido.flohr@cantanea.com>\n"
 "Language-Team: German\n"
 "Language: de\n"
@@ -399,7 +399,7 @@ msgstr "Titelei (Front Matter) nicht abgeschlossen\n"
 #: ../lib/Qgoda/Logger.pm:79
 #, perl-brace-format
 msgid "%a %b %d %H:%M:%S.{trailing} %Y"
-msgstr "%a, %b. %d %Y %H:%M:%S.{trailing}"
+msgstr "%a, %d. %b %Y %H:%M:%S.{trailing}"
 
 #: ../lib/Qgoda/Processor.pm:40
 #, perl-brace-format

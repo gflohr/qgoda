@@ -47,7 +47,7 @@ use AnyEvent::Handle;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use IPC::Signal;
-use POSIX qw(:sys_wait_h);
+use POSIX qw(:sys_wait_h setlocale LC_ALL);
 use Template::Plugin::Gettext 0.7;
 use List::Util 1.45 qw(uniq);
 use YAML::XS 0.67;
@@ -72,8 +72,10 @@ my $qgoda;
 sub new {
 	return $qgoda if $qgoda;
 
-	Locale::Messages->select_package('gettext_pp');
 	my ($class, $options, $params) = @_;
+
+	Locale::Messages->select_package('gettext_pp');
+	my $locale = setlocale LC_ALL, '';
 
 	$options ||= {};
 	$params ||= {};
@@ -89,12 +91,17 @@ sub new {
 	$self->{__load_plugins} = 1;
 	$self->{__post_processors} = {};
 	$self->{__dep_tracker} = Qgoda::DependencyTracker->new;
+	$self->{__locale} = $locale;
 
 	return $qgoda;
 }
 
 sub getDependencyTracker {
 	shift->{__dep_tracker};
+}
+
+sub getLocale {
+	shift->{__locale};
 }
 
 sub reset {
