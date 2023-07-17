@@ -30,7 +30,7 @@ use URI;
 use Scalar::Util qw(reftype);
 use JSON 2.0 qw(encode_json decode_json);
 use Date::Parse qw(str2time);
-use POSIX qw(setlocale LC_ALL);
+use POSIX qw(setlocale LC_ALL LC_TIME);
 use File::Basename qw();
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
@@ -707,6 +707,19 @@ sub strftime {
 
 	$markup = '' if !defined $markup;
 	my $formatted_date = qstrftime $format, $time, $lingua, $markup;
+
+	# If we did not use a UTF-8 locale, try to recode the date on the fly.
+	my $used_locale = POSIX::setlocale(LC_TIME);
+	if ('C' ne $used_locale && 'POSIX' ne $used_locale
+	    && $used_locale =~ /\.([^.]+)$/) {
+		my $charset = $1;
+		if ($charset !~ /^utf-?8/i && $charset ne '65001') {
+			# 65001 is the codepage for utf-8 in MS-DOS.
+			$charset = 'CP' . $charset if $charset =~ /^[0-9]+$/;
+			my $cd = Locale::Recode->new(from => $charset, to => 'utf-8');
+			$cd->recode($formatted_date);
+		}
+	}
 
 	POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
 
