@@ -29,6 +29,10 @@ use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
 use Qgoda::Util::FileSpec qw(absolute_path);
 
+if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+	plan skip_all => 'Test does not work on MS-DOS';
+}
+
 my %assets;
 
 $assets{'old.md'} = {

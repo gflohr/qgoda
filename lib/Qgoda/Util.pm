@@ -33,6 +33,7 @@ use Data::Walk 2.00;
 use Storable qw(freeze);
 use YAML::XS;
 use URI::Escape qw(uri_escape_utf8);
+use Locale::Language;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -773,6 +774,10 @@ sub qstrftime($;$$$) {
 		$lingua = POSIX::setlocale(POSIX::LC_TIME()) || '';
 		# FIXME! This will not work under Windows.  But we can use a mapping
 		# tabel from Locale::Util.
+	}
+	($lingua) = split /[-_]/, $lingua;
+	if ($lingua !~ /^[a-z][a-z]$/) {
+		$lingua = Locale::Language::code2language($lingua);
 	}
 	$lingua = lc substr $lingua, 0, 2;
 
