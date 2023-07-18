@@ -717,6 +717,9 @@ sub strftime {
 			# 65001 is the codepage for utf-8 in MS-DOS.
 			$charset = 'CP' . $charset if $charset =~ /^[0-9]+$/;
 			my $cd = Locale::Recode->new(from => $charset, to => 'utf-8');
+
+			# See https://github.com/gflohr/libintl-perl/issues/12
+			Encode::_utf8_off($formatted_date);
 			$cd->recode($formatted_date);
 		}
 	}
