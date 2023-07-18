@@ -69,7 +69,7 @@ sub __makeMessage {
 	my $prefix = $self->{__prefix};
 	$prefix = '' unless $prefix;
 
-	my ($whole, $trailing) = split(/[^0-9]/, scalar gettimeofday());
+	my ($time, $trailing) = split(/[^0-9]/, scalar gettimeofday());
 	$trailing ||= '';
 	$trailing .= length($trailing) < 5
 			   ? '0' x (5 - length($trailing))
@@ -79,7 +79,7 @@ sub __makeMessage {
 	my $timefmt = __x("\%a \%b \%d \%H:\%M:\%S.{trailing} \%Y",
 	                  trailing => $trailing);
 
-	my $timestamp = strftime $timefmt, localtime;
+	my $timestamp = strftime $timefmt, localtime $time;
 
 	my $client = $self->{__client} || '';
 	$client = "client $client" if $client;
