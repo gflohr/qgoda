@@ -46,7 +46,8 @@ use AnyEvent::Loop;
 use AnyEvent::Handle;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
-use IPC::Signal;
+use Socket;
+use IO::Handle;
 use POSIX qw(:sys_wait_h setlocale LC_ALL);
 use Template::Plugin::Gettext 0.7;
 use List::Util 1.45 qw(uniq);
@@ -380,7 +381,13 @@ sub __startHelper {
 	$logger->info($log_prefix . __x("starting helper: {helper}",
 									helper => $pretty));
 
-	my ($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
+	my ($pid, $cout, $cerr);
+
+	if ('MSWin32' eq $^O) { # FIXME! Cygwin?
+		($pid, $cout, $cerr) = $self->__spawnHelperWin32($log_prefix, @$args);
+	} else {
+		($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
+	}
 
 	$self->{__helpers}->{$pid} = {
 		name => $helper,
@@ -401,6 +408,8 @@ sub __startHelper {
 				$logger->info($log_prefix . $1);
 			}
 		},
+		# Ignore.  Otherwise, AnyEvent::Handle throws ugly errors on MS-DOS.
+		on_eof => sub {},
 	);
 
 	$self->{__helpers}->{$pid}->{aherr} = AnyEvent::Handle->new(
@@ -418,6 +427,8 @@ sub __startHelper {
 				$logger->warning($log_prefix . $1);
 			}
 		},
+		# Ignore.  Otherwise, AnyEvent::Handle throws ugly errors on MS-DOS.
+		on_eof => sub {},
 	);
 
 	return $self;
@@ -434,6 +445,58 @@ sub __spawnHelper {
 		or $logger->fatal($log_prefix . __x("failure starting helper: {error}",
 											error => $!));
 	return $pid, $cout, $cerr;
+}
+
+sub __spawnHelperWin32 {
+	my ($self, $log_prefix, @args) = @_;
+
+	my $logger = $self->logger;
+
+	socketpair my $rout, my $wout, AF_UNIX, SOCK_STREAM, PF_UNSPEC
+		or $logger->fatal($log_prefix
+			. __x("cannot create socket pair: {error}", error => $!));
+	$rout = IO::Handle->new_from_fd($rout, 'r');
+	$wout = IO::Handle->new_from_fd($wout, 'w');
+	shutdown $rout, 1;
+	shutdown $wout, 0;
+	$rout->autoflush(1);
+	$wout->autoflush(1);
+
+	socketpair my $rerr, my $werr, AF_UNIX, SOCK_STREAM, PF_UNSPEC
+		or $logger->fatal($log_prefix
+			. __x("cannot create socket pair: {error}", error => $!));
+	$rerr = IO::Handle->new_from_fd($rerr, 'r');
+	$werr = IO::Handle->new_from_fd($werr, 'w');
+	shutdown $rerr, 1;
+	shutdown $werr, 0;
+	$rerr->autoflush(1);
+	$werr->autoflush(1);
+
+	my $pid = fork;
+
+	if (!defined $pid) {
+		$logger->fatal($log_prefix
+			. __x("cannot fork: {error}", error => $!));
+	} elsif (0 == $pid) {
+		close $rout;
+		close $rerr;
+		open STDOUT, '>&', $wout
+			or $logger->fatal($log_prefix
+			. __x("cannot duplicate standard output: {error}", error => $!));
+		open STDERR, '>&', $werr
+			or $logger->fatal($log_prefix
+			. __x("cannot duplicate standard error: {error}", error => $!));
+
+		exec @args
+			or $logger->fatal($log_prefix
+			. __x("executing '{program}' failed: {error}",
+			      program => $args[0], error => $!));
+	} else {
+		close $wout;
+		close $werr;
+	}
+
+	return $pid, $rout, $rerr;
 }
 
 sub logger {
