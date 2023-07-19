@@ -53,6 +53,7 @@ use Template::Plugin::Gettext 0.7;
 use List::Util 1.45 qw(uniq);
 use YAML::XS 0.67;
 use AnyEvent::Filesys::Watcher;
+use Time::HiRes qw(usleep);
 use boolean;
 $YAML::XS::Boolean = 'JSON::PP';
 
@@ -318,7 +319,46 @@ sub watch {
 		$logger->info(__x("terminating on demand: {reason}",
 						  reason => $reason));
 	};
-	$logger->fatal($@) if $@;
+	my $x = $@;
+
+	$self->__reapChildren;
+
+	$logger->fatal($@) if $x;
+
+	return $self;
+}
+
+sub __reapChildren {
+	my ($self) = @_;
+
+	$self->{__terminating} = 1;
+	
+	my @pids = keys %{$self->{__helpers}} or return;
+
+	my $logger = $self->logger;
+	$logger->info(__"terminating child processes");
+
+	foreach (1 .. 3) {
+		foreach my $pid (@pids) {
+			my $name = $self->{__helpers}->{$pid}->{name};
+			$logger->debug(__x("sending SIGTERM to '{helper}'"));
+			kill TERM => $pid;
+		}
+		foreach (1 .. 1000) {
+			@pids = keys %{$self->{__helpers}} or return;
+		}
+	}
+	
+	foreach my $pid (@pids) {
+		my $name = $self->{__helpers}->{$pid}->{name};
+		$logger->debug(__x("sending SIGKILL to '{helper}'"));
+		kill KILL => $pid;
+	}
+	foreach (1 .. 1000) {
+		@pids = keys %{$self->{__helpers}} or return;
+	}
+	
+	$logger->error(__"giving up waiting for child processes to terminate");
 
 	return $self;
 }
@@ -336,7 +376,23 @@ sub stop {
 sub __startHelpers {
 	my ($self, $helpers) = @_;
 
+	my $logger = $self->logger;
+	
 	$self->{__helpers} = {};
+
+	my $sigchld_handler = sub {
+		my $pid;
+		while (1) {
+			$pid = waitpid -1, WNOHANG;
+			last if $pid <= 0;
+
+			my $helper = delete $self->{__helper}->{$pid};
+			if ($helper && !$self->{__terminating}) {
+				$logger->error(__x{"helper '{helper}' has terminated"},
+					helper => $helper->{name});
+			}
+		}
+	};
 
 	foreach my $helper (sort keys %{$helpers || {}}) {
 		$self->__startHelper($helper, $helpers->{$helper});
@@ -903,6 +959,7 @@ sub __filesysChangeFilter {
 	my ($self, $event) = @_;
 
 	my $path = $event->path;
+
 	# It would be possible to also ignore deleted directories but that is
 	# not very relevant for Qgoda's typical usage.
 	return 1 if $event->isDirectory;
