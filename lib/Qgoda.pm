@@ -287,7 +287,7 @@ sub watch {
 
 		my $config = $self->{__config};
 
-		$self->__startHelpers($config->{helpers});
+		$self->__startHelpers($config->{helpers}) if keys %{$config->{helpers}};
 
 		$self->{__stop} = AnyEvent->condvar;
 
@@ -336,6 +336,16 @@ sub __reapChildren {
 	my @pids = keys %{$self->{__helpers}} or return;
 
 	my $logger = $self->logger;
+
+	if ($^O eq 'MSWin32') {
+		$logger->warning(__(<<EOF));
+The helper processes started by Qgoda cannot be
+terminated on your operating system.  Please close
+this window in order to terminate them.
+EOF
+		return $self;
+	}
+
 	$logger->info(__"terminating child processes");
 
 	foreach (1 .. 3) {
@@ -402,6 +412,8 @@ sub __startHelpers {
 		}
 	};
 	$SIG{CHLD} = $sigchld_handler;
+
+	$SIG{TERM} = $SIG{INT} = $SIG{QUIT} = sub { $self->__reapChildren };
 
 	foreach my $helper (sort keys %{$helpers || {}}) {
 		$self->__startHelper($helper, $helpers->{$helper});
