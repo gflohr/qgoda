@@ -30,10 +30,6 @@ use AnyEvent;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file trim);
 
-if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
-	plan skip_all => 'Test does not work on MS-DOS';
-}
-
 sub wait_for_timestamp();
 
 my $config = <<'EOF';
