@@ -305,9 +305,9 @@ sub watch {
 			$extra{backend} = 'Fallback';
 		}
 		$watcher= AnyEvent::Filesys::Watcher->new(
-			dirs => [$config->{srcdir}],
+			directories => [$config->{srcdir}],
 			interval => $config->{latency},
-			cb => sub { $self->__onFilesysChange(\%options, @_) },
+			callback => sub { $self->__onFilesysChange(\%options, @_) },
 			filter => sub { $self->__filesysChangeFilter(@_) },
 			%extra
 		);
@@ -900,31 +900,30 @@ sub __prune {
 }
 
 sub __filesysChangeFilter {
-	my ($self, $filename) = @_;
+	my ($self, $event) = @_;
 
+	my $path = $event->path;
 	# It would be possible to also ignore deleted directories but that is
 	# not very relevant for Qgoda's typical usage.
-	if (-d $filename) {
-		return;
-	}
+	return 1 if $event->isDirectory;
 
 	my $config = $self->{__config};
 
-	if ($filename =~ /_stop$/ && -e $filename) {
+	if ($path =~ m{_stop$} && -e $path) {
 		my $srcdir = $config->{paths}->{srcdir};
-		my $relpath = abs2rel($filename, $srcdir);
+		my $relpath = abs2rel($path, $srcdir);
 		if ('_stop' eq $relpath) {
-			my $reason = read_file $filename;
-			unlink $filename;
+			my $reason = read_file $path;
+			unlink $path;
 			$self->stop(trim $reason);
 		}
 		return;
 	}
 
-	if ($config->ignorePath($filename, 1)) {
+	if ($config->ignorePath($path, 1)) {
 		my $logger = $self->{__logger};
 		$logger->debug(__x("changed file '{filename}' is ignored",
-						   filename => $filename));
+						   filename => $path));
 		return;
 	}
 
