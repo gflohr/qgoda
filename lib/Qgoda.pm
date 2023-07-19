@@ -332,7 +332,7 @@ sub __reapChildren {
 	my ($self) = @_;
 
 	$self->{__terminating} = 1;
-	
+
 	my @pids = keys %{$self->{__helpers}} or return;
 
 	my $logger = $self->logger;
@@ -341,23 +341,31 @@ sub __reapChildren {
 	foreach (1 .. 3) {
 		foreach my $pid (@pids) {
 			my $name = $self->{__helpers}->{$pid}->{name};
-			$logger->debug(__x("sending SIGTERM to '{helper}'"));
+			$logger->debug(
+				__x("sending SIGTERM to '{helper}'",
+				helper => $name,
+			));
 			kill TERM => $pid;
 		}
 		foreach (1 .. 1000) {
 			@pids = keys %{$self->{__helpers}} or return;
+			usleep 1000;
 		}
 	}
-	
+
 	foreach my $pid (@pids) {
 		my $name = $self->{__helpers}->{$pid}->{name};
-		$logger->debug(__x("sending SIGKILL to '{helper}'"));
+		$logger->debug(
+			__x("sending SIGTERM to '{helper}'",
+			helper => $name,
+		));
 		kill KILL => $pid;
 	}
 	foreach (1 .. 1000) {
 		@pids = keys %{$self->{__helpers}} or return;
+		usleep 1000;
 	}
-	
+
 	$logger->error(__"giving up waiting for child processes to terminate");
 
 	return $self;
@@ -377,7 +385,7 @@ sub __startHelpers {
 	my ($self, $helpers) = @_;
 
 	my $logger = $self->logger;
-	
+
 	$self->{__helpers} = {};
 
 	my $sigchld_handler = sub {
@@ -386,13 +394,14 @@ sub __startHelpers {
 			$pid = waitpid -1, WNOHANG;
 			last if $pid <= 0;
 
-			my $helper = delete $self->{__helper}->{$pid};
+			my $helper = delete $self->{__helpers}->{$pid};
 			if ($helper && !$self->{__terminating}) {
-				$logger->error(__x{"helper '{helper}' has terminated"},
+				$logger->error(__x"helper '{helper}' has terminated",
 					helper => $helper->{name});
 			}
 		}
 	};
+	$SIG{CHLD} = $sigchld_handler;
 
 	foreach my $helper (sort keys %{$helpers || {}}) {
 		$self->__startHelper($helper, $helpers->{$helper});
