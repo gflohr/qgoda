@@ -78,7 +78,6 @@ sub setup {
 	$self->__setupAssets;
 
 	unless ($self->{verbose}) {
-		warn "resetting";
 		eval {
 			Qgoda->reset;
 			Qgoda->new({quiet => 1, log_stderr => 1});
