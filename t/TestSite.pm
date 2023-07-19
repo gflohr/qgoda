@@ -77,11 +77,14 @@ sub setup {
 	$self->__setupFiles;
 	$self->__setupAssets;
 
-	eval {
-		Qgoda->reset;
-		Qgoda->new({quiet => 1, log_stderr => 1});
-	};
-	$self->{__exception} = $@;
+	unless ($self->{verbose}) {
+		warn "resetting";
+		eval {
+			Qgoda->reset;
+			Qgoda->new({quiet => 1, log_stderr => 1});
+		};
+		$self->{__exception} = $@;
+	}
 
 	return $self;
 }
