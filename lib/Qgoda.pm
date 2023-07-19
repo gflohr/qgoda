@@ -380,12 +380,7 @@ sub __startHelper {
 	$logger->info($log_prefix . __x("starting helper: {helper}",
 									helper => $pretty));
 
-	my $cout = gensym;
-	my $cerr = gensym;
-
-	my $pid = open3 undef, $cout, $cerr, @$args
-		or $logger->fatal($log_prefix . __x("failure starting helper: {error}",
-											error => $!));
+	my ($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
 
 	$self->{__helpers}->{$pid} = {
 		name => $helper,
@@ -426,6 +421,19 @@ sub __startHelper {
 	);
 
 	return $self;
+}
+
+sub __spawnHelper {
+	my ($self, $log_prefix, @args) = @_;
+
+	my $cout = gensym;
+	my $cerr = gensym;
+	my $logger = $self->logger;
+
+	my $pid = open3 undef, $cout, $cerr, @args
+		or $logger->fatal($log_prefix . __x("failure starting helper: {error}",
+											error => $!));
+	return $pid, $cout, $cerr;
 }
 
 sub logger {
