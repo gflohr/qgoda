@@ -321,7 +321,9 @@ sub watch {
 	};
 	my $x = $@;
 
-	$self->__reapChildren;
+	$self->__reapChildren('no exit');
+
+	$logger->debug(__"done reaping children");
 
 	$logger->fatal($@) if $x;
 
@@ -329,7 +331,7 @@ sub watch {
 }
 
 sub __reapChildren {
-	my ($self) = @_;
+	my ($self, $no_exit) = @_;
 
 	$self->{__terminating} = 1;
 
@@ -343,40 +345,25 @@ The helper processes started by Qgoda cannot be
 terminated on your operating system.  Please close
 this window in order to terminate them.
 EOF
+
+		exit 1 if !$no_exit;
+
 		return $self;
 	}
 
 	$logger->info(__"terminating child processes");
 
-	foreach (1 .. 3) {
-		foreach my $pid (@pids) {
-			my $name = $self->{__helpers}->{$pid}->{name};
-			$logger->debug(
-				__x("sending SIGTERM to '{helper}'",
-				helper => $name,
-			));
-			kill TERM => $pid;
-		}
-		foreach (1 .. 1000) {
-			@pids = keys %{$self->{__helpers}} or return;
-			usleep 1000;
-		}
-	}
-
 	foreach my $pid (@pids) {
-		my $name = $self->{__helpers}->{$pid}->{name};
+		my $helper = $self->{__helpers}->{$pid} or next;
+		my $name = $helper->{name};
 		$logger->debug(
-			__x("sending SIGTERM to '{helper}'",
-			helper => $name,
+			__x("sending SIGTERM to helper '{helper}' with pid {pid}",
+				helper => $name, pid => $pid,
 		));
-		kill KILL => $pid;
-	}
-	foreach (1 .. 1000) {
-		@pids = keys %{$self->{__helpers}} or return;
-		usleep 1000;
+		kill TERM => $pid;
 	}
 
-	$logger->error(__"giving up waiting for child processes to terminate");
+	exit 1 unless $no_exit;
 
 	return $self;
 }
@@ -399,15 +386,29 @@ sub __startHelpers {
 	$self->{__helpers} = {};
 
 	my $sigchld_handler = sub {
+		$logger->debug(__"SIGCHLD received");
 		my $pid;
 		while (1) {
 			$pid = waitpid -1, WNOHANG;
 			last if $pid <= 0;
 
 			my $helper = delete $self->{__helpers}->{$pid};
-			if ($helper && !$self->{__terminating}) {
-				$logger->error(__x"helper '{helper}' has terminated",
-					helper => $helper->{name});
+			if ($helper) {
+				if ($self->{__terminating}) {
+					$logger->info(__x"helper '{helper}' with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				} else {
+					$logger->error(__x"helper '{helper}' with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				}
+			} else {
+				if ($self->{__terminating}) {
+					$logger->info(__x"child process with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				} else {
+					$logger->info(__x"child process with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				}
 			}
 		}
 	};
@@ -460,11 +461,14 @@ sub __startHelper {
 
 	my ($pid, $cout, $cerr);
 
-	if ('MSWin32' eq $^O) { # FIXME! Cygwin?
+	#if ('MSWin32' eq $^O) { # FIXME! Cygwin?
+	if (1) {
 		($pid, $cout, $cerr) = $self->__spawnHelperWin32($log_prefix, @$args);
 	} else {
 		($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
 	}
+
+	$logger->debug(__x('child process pid {pid}', pid => $pid));
 
 	$self->{__helpers}->{$pid} = {
 		name => $helper,
