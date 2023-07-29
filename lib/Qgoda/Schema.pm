@@ -43,14 +43,6 @@ sub config {
 		description => __"A Qgoda Configuration",
 		type => 'object',
 		additionalProperties => false,
-		patternProperties => {
-			"_.*" => {
-				type => [
-					'string', 'number', 'integer', 'object', 'array',
-					'boolean', 'null'
-				]
-			}
-		},
 		properties => {
 			'analyzers' => {
 				description => __"Additional analyzers to run after the Qgoda "
@@ -376,6 +368,14 @@ sub config {
 					}
 				}
 			},
+			private => {
+				description => __"Site-specific variables.  You can also choose"
+				               . " the namespace 'site' if you prefer.",
+				type => [
+					'string', 'number', 'integer', 'object', 'array',
+					'boolean', 'null'
+				],
+			},
 			processors => {
 				description => __"The processors to use for generating "
 								 . "content.",
@@ -534,6 +534,14 @@ sub config {
 							   . "supported.",
 				type => 'string',
 				const => 'git'
+			},
+			site => {
+				description => __"Site-specific variables.  You can also choose"
+				               . " the namespace 'private' if you prefer.",
+				type => [
+					'string', 'number', 'integer', 'object', 'array',
+					'boolean', 'null'
+				],
 			},
 			srcdir => {
 				description => __"The source directory for all assets. Do "

@@ -25,15 +25,19 @@ use JSON::PP;
 
 my $site = TestSite->new(name => 'config-defaults',
 	config => {
-		# All these are allowed because they start with an underscore.
-		_string => 'Hello, world!',
-		_number => '2.718',
-		_integer => 42,
-		_object => {foo => 'bar'},
-		_array => ['one', 'two', 'three'],
-		_boolean => $JSON::PP::false,
-		_null => undef,
-	}
+		# All these are allowed because.
+		private => {
+			_string => 'Hello, world!',
+			_number => '2.718',
+			_integer => 42,
+		},
+		site => {
+			_object => {foo => 'bar'},
+			_array => ['one', 'two', 'three'],
+			_boolean => $JSON::PP::false,
+			_null => undef,
+		},
+	},
 );
 my $x = $site->exception;
 ok !$x, 'config variables starting with an underscore should be allowed.';
