@@ -44,6 +44,7 @@ use Scalar::Util qw(reftype blessed);
 use AnyEvent;
 use AnyEvent::Loop;
 use AnyEvent::Handle;
+use AnyEvent::Util;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
 use Socket;
@@ -340,11 +341,9 @@ sub __reapChildren {
 	my $logger = $self->logger;
 
 	if ($^O eq 'MSWin32') {
-		$logger->warning(__(<<EOF));
-The helper processes started by Qgoda cannot be
-terminated on your operating system.  Please close
-this window in order to terminate them.
-EOF
+		# It seems that child processes terminate automatically, either
+		# because their standard output and standard error vanishes or
+		# this is built in.  So we just ignore them.
 
 		exit 1 if !$no_exit;
 
@@ -461,8 +460,7 @@ sub __startHelper {
 
 	my ($pid, $cout, $cerr);
 
-	#if ('MSWin32' eq $^O) { # FIXME! Cygwin?
-	if (1) {
+	if ('MSWin32' eq $^O) {
 		($pid, $cout, $cerr) = $self->__spawnHelperWin32($log_prefix, @$args);
 	} else {
 		($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
@@ -531,53 +529,90 @@ sub __spawnHelper {
 sub __spawnHelperWin32 {
 	my ($self, $log_prefix, @args) = @_;
 
+	# See http://www.guido-flohr.net/platform-independent-asynchronous-child-process-ipc/
+	# for an explanation of the code.
+
+	require Win32::Process;
+
 	my $logger = $self->logger;
-
-	socketpair my $rout, my $wout, AF_UNIX, SOCK_STREAM, PF_UNSPEC
+	my ($rout, $wout) = portable_socketpair
 		or $logger->fatal($log_prefix
 			. __x("cannot create socket pair: {error}", error => $!));
-	$rout = IO::Handle->new_from_fd($rout, 'r');
-	$wout = IO::Handle->new_from_fd($wout, 'w');
-	shutdown $rout, 1;
-	shutdown $wout, 0;
-	$rout->autoflush(1);
-	$wout->autoflush(1);
-
-	socketpair my $rerr, my $werr, AF_UNIX, SOCK_STREAM, PF_UNSPEC
+	my ($rerr, $werr) = portable_socketpair
 		or $logger->fatal($log_prefix
 			. __x("cannot create socket pair: {error}", error => $!));
-	$rerr = IO::Handle->new_from_fd($rerr, 'r');
-	$werr = IO::Handle->new_from_fd($werr, 'w');
-	shutdown $rerr, 1;
-	shutdown $werr, 0;
-	$rerr->autoflush(1);
-	$werr->autoflush(1);
 
-	my $pid = fork;
+	my $true = 1;
+	my $FIONBIO = 0x8004667e;
+	ioctl $rout, $FIONBIO, \$true
+    	or $logger->fatal($log_prefix
+			. __x("cannot set helper standard output to non-blocking: {error}",
+			      error => $!));
+	ioctl $rerr, $FIONBIO, \$true
+    	or $logger->fatal($log_prefix
+			. __x("cannot set herlp standard error to non-blocking: {error}",
+			      error => $!));
 
-	if (!defined $pid) {
-		$logger->fatal($log_prefix
-			. __x("cannot fork: {error}", error => $!));
-	} elsif (0 == $pid) {
-		close $rout;
-		close $rerr;
-		open STDOUT, '>&', $wout
-			or $logger->fatal($log_prefix
-			. __x("cannot duplicate standard output: {error}", error => $!));
-		open STDERR, '>&', $werr
-			or $logger->fatal($log_prefix
-			. __x("cannot duplicate standard error: {error}", error => $!));
+	my $saved_log_handle = $logger->logHandle;
 
-		exec @args
-			or $logger->fatal($log_prefix
-			. __x("executing '{program}' failed: {error}",
-			      program => $args[0], error => $!));
-	} else {
-		close $wout;
-		close $werr;
+	open SAVED_OUT, '>&STDOUT'
+    	or $logger->fatal($log_prefix
+			. __x("cannot save standard output handle: {error}",
+			      error => $!));
+	if (!$self->getOption('log_stderr')) {
+		$logger->logHandle(\*SAVED_OUT);
+	}
+	open STDOUT, '>&' . $wout->fileno
+		or $logger->fatal($log_prefix
+			. __x("cannot redirect standard output handle: {error}",
+			      error => $!));
+
+	open SAVED_ERR, '>&STDERR'
+    	or $logger->fatal($log_prefix
+			. __x("cannot save standard output handle: {error}",
+			      error => $!));
+	if ($self->getOption('log_stderr')) {
+		$logger->logHandle(\*SAVED_ERR);
+	}
+	open STDERR, '>&' . $werr->fileno
+		or $logger->fatal($log_prefix
+			. __x("cannot redirect standard output handle: {error}",
+			      error => $!));
+
+	my $command = $self->__makeWin32Command(@args);
+	my $image;
+	if (File::Spec->file_name_is_absolute($args[0])) {
+		$image = $args[0];
 	}
 
+	my $process;
+	Win32::Process::Create($process, $image, $command, 0, 0, '.')
+    	or $logger->fatal($log_prefix
+			. __x("cannot spawn helper process: {command}: {error}",
+			      error => Win32::FormatMessage(Win32::GetLastError())));
+	my $pid = $process->GetProcessID;
+
+	open STDOUT, '>&SAVED_OUT'
+		or $logger->fatal($log_prefix
+			. __x("cannot restore standard output: {error}", error => $!));
+	open STDERR, '>&SAVED_ERR'
+		or $logger->fatal($log_prefix
+			. __x("cannot restore standard output: {error}", error => $!));
+
+	$logger->logHandle($saved_log_handle);
+
 	return $pid, $rout, $rerr;
+}
+
+sub __makeWin32Command {
+	my ($self, @cmd) = @_;
+
+	foreach my $cmd (@cmd) {
+		$cmd =~ s/"/""/g;
+		$cmd = qq{"$cmd"} if $cmd =~ /[\001-\040]/;
+	}
+
+	return join ' ', @cmd;
 }
 
 sub logger {
