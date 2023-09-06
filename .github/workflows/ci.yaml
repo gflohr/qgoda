@@ -18,6 +18,7 @@ jobs:
         # perl-version should always be one behind the latest version.  The
         # latest version is tested in the workflow triggered by the push.
         perl-version:
+        - '5.36'
         - '5.34'
         - '5.32'
         - '5.30'
@@ -30,7 +31,7 @@ jobs:
         - '5.16'
         - '5.14'
         include:
-        - perl-version: '5.36'
+        - perl-version: '5.38'
           os: ubuntu-latest
           coverage: true
 
