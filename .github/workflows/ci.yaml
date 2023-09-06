@@ -95,10 +95,10 @@ jobs:
       run: cpanm --notest --installdeps --verbose .
 
     - name: 'Prepare build'
-      run: perl Build.PL
+      run: perl Makefile.PL
 
     - name: 'Build'
-      run: perl Build
+      run: make
 
     - name: 'Test'
       run: prove -wlmbv
