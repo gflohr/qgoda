@@ -54,14 +54,7 @@ jobs:
 
     - name: 'Install Mac::FSEvents'
       if: matrix.os == 'macos-latest'
-      run: |
-        git clone https://github.com/skaji/Mac-FSEvents.git &&
-        cd Mac-FSEvents &&
-        perl Makefile.PL &&
-        make &&
-        make install &&
-        cd .. &&
-        rm -rf Mac-FSEvents
+      run: cpanm --notest Mac::FSEvents
 
     - name: 'Install Filesys::Notify::Win32::ReadDirectoryChanges'
       if: matrix.os == 'windows-latest'
@@ -74,6 +67,16 @@ jobs:
     - name: 'Install BSD::Resource'
       if: matrix.os == 'macos-latest'
       run: cpanm --notest BSD::Resource
+
+    - name: 'Install JavaScript::Duktape::XS'
+      run: |
+        git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
+        cd JavaScript-Duktape-XS &&
+        perl Makefile.PL &&
+        make &&
+        make install &&
+        cd .. &&
+        rm -rf JavaScript-Duktape-XS
 
     - name: 'Installing other dependencies'
       run: cpanm --notest --installdeps --verbose .
