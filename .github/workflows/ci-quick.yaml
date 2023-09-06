@@ -57,16 +57,14 @@ jobs:
         git clone https://github.com/gflohr/AnyEvent-Filesys-Watcher &&
         cd AnyEvent-Filesys-Watcher &&
         cpanm --notest --verbose . &&
-        cd .. &&
-        rm -rf AnyEvent-Filesys-Watcher
+        cd ..
 
     - name: 'Install JavaScript::Duktape::XS'
       run: |
         git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
         cd JavaScript-Duktape-XS &&
         cpanm --notest --verbose . &&
-        cd .. &&
-        rm -rf JavaScript-Duktape-XS
+        cd ..
 
     - name: 'Install other dependencies'
       run: cpanm --notest --installdeps --verbose .
