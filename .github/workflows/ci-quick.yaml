@@ -52,16 +52,11 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: cpanm --notest BSD::Resource
 
-    - name: 'Install Module::Build'
-      run: cpanm --notest Module::Build
-
     - name: 'AnyEvent::Filesys::Watcher'
       run: |
         git clone https://github.com/gflohr/AnyEvent-Filesys-Watcher &&
         cd AnyEvent-Filesys-Watcher &&
-        perl Build.PL &&
-        ./Build &&
-        ./Build install &&
+        cpanm --notest --installdeps --verbose . &&
         cd .. &&
         rm -rf AnyEvent-Filesys-Watcher
 
@@ -69,9 +64,7 @@ jobs:
       run: |
         git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
         cd JavaScript-Duktape-XS &&
-        perl Makefile.PL &&
-        make &&
-        make install &&
+        cpanm --notest --installdeps --verbose . &&
         cd .. &&
         rm -rf JavaScript-Duktape-XS
 
