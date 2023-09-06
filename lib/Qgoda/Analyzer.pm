@@ -53,6 +53,7 @@ sub analyze {
 						  filename => $path, error => $!);
 	my $config = $qgoda->config;
 	my $meta = collect_defaults $asset->getRelpath, $config->{defaults};
+	$meta->{priority} ||= 0;
 
 	my $front_matter = front_matter $path;
 	my $front_matter_data;

@@ -42,7 +42,6 @@ sub build {
 	my $logger = $qgoda->logger;
 	my $config = $qgoda->config;
 
-	my $site = $qgoda->getSite;
 	my $errors = $site->getErrors;
 
 	# 1st pass, usually Markdown.

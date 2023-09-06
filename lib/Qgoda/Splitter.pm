@@ -34,7 +34,7 @@ sub new {
 	if (!defined $front_matter) {
 		my $error = $! ? $! : __"no front matter";
 		die __x("error reading front matter from '{filename}': {error}\n",
-				filename => $path. error => $error);	
+				filename => $path. error => $error);
 	}
 
 	my $meta = safe_yaml_load $front_matter;
@@ -50,12 +50,12 @@ sub new {
 			}
 		}
 	}
-	
+
 	my $body = read_body $path, '';
 	if (!defined $body) {
 		my $error = $! ? $! : __"no body found";
 		die __x("error reading body from '{filename}': {error}\n",
-				filename => $path. error => $error);	
+				filename => $path. error => $error);
 	}
 
 	my @first =  grep { !empty } split /
@@ -88,7 +88,7 @@ sub new {
 		}
 	}
 
-	my $lineno = 3 + $front_matter =~ y/\n/\n/;
+	$lineno = 3 + $front_matter =~ y/\n/\n/;
 	my @entries;
 	foreach my $chunk (@chunks) {
 		if ($chunk =~ /[^ \011-\015]+$/) {
@@ -136,7 +136,7 @@ sub new {
 
 			$comment =~ s{^[ \011-\015]*}{};
 			$comment =~ s{[ \011-\015]*$}{};
-			
+
 			$entry->{comment} = $comment if !empty $comment;
 
 			# Change to whitespace, if nothing left.
@@ -159,7 +159,7 @@ sub meta {
 sub metaLineNumber {
 	my ($self, $key) = @_;
 
-	return $self->{__front_lines}->{$key} 
+	return $self->{__front_lines}->{$key}
 		if exists $self->{__front_lines}->{$key};
 
 	return;
@@ -168,8 +168,8 @@ sub metaLineNumber {
 sub entries {
 	my ($self) = @_;
 
-	grep { 'whitespace' ne $_->{type} } 
-	grep { 'exclude' ne $_->{type} } 
+	grep { 'whitespace' ne $_->{type} }
+	grep { 'exclude' ne $_->{type} }
 	@{$self->{__entries}};
 }
 
