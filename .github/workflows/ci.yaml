@@ -75,7 +75,8 @@ jobs:
         cd AnyEvent-Filesys-Watcher &&
         cpanm --notest --verbose . &&
         cd .. &&
-        rm -r AnyEvent-Filesys-Watcher
+        rm -r AnyEvent-Filesys-Watcher ||
+        rm -r -fo AnyEvent-Filesys-Watcher
 
     - name: 'Install JavaScript::Duktape::XS'
       run: |
@@ -83,7 +84,8 @@ jobs:
         cd JavaScript-Duktape-XS &&
         cpanm --notest --verbose . &&
         cd .. &&
-        rm -r JavaScript-Duktape-XS
+        rm -r JavaScript-Duktape-XS ||
+        rm -r -fo JavaScript-Duktape-XS
 
     - name: 'Installing other dependencies'
       run: cpanm --notest --installdeps --verbose .
