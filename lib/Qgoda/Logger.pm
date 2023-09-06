@@ -103,7 +103,7 @@ sub __makeMessage {
 
 	my $colored = sub { $_[0] };
 
-	if (IO::Interactive::is_interactive()) {
+	if ($^O ne 'Win32' && IO::Interactive::is_interactive()) {
 		my %colors = (
 			error => 'bold bright_red',
 			warning => 'red',
