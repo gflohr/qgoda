@@ -47,6 +47,7 @@ use AnyEvent::Handle;
 use AnyEvent::Util;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
+use Cwd qw(getcwd);
 use Socket;
 use IO::Handle;
 use POSIX qw(:sys_wait_h setlocale LC_ALL);
@@ -340,16 +341,6 @@ sub __reapChildren {
 
 	my $logger = $self->logger;
 
-	if ($^O eq 'MSWin32') {
-		# It seems that child processes terminate automatically, either
-		# because their standard output and standard error vanishes or
-		# this is built in.  So we just ignore them.
-
-		exit 1 if !$no_exit;
-
-		return $self;
-	}
-
 	$logger->info(__"terminating child processes");
 
 	foreach my $pid (@pids) {
@@ -445,18 +436,8 @@ sub __startHelper {
 		$args->[0] = $exec;
 	}
 
-	my @pretty;
-	foreach my $word (@$args) {
-		if ($word =~ s/([\\\"])/\\$1/g) {
-			$word = qq{"$word"};
-		}
-		push @pretty, $word;
-	}
-
-	my $pretty = join ' ', @pretty;
-
 	$logger->info($log_prefix . __x("starting helper: {helper}",
-									helper => $pretty));
+									helper => $helper));
 
 	my ($pid, $cout, $cerr);
 
@@ -555,6 +536,9 @@ sub __spawnHelperWin32 {
 
 	my $saved_log_handle = $logger->logHandle;
 
+	my $command = $self->__makeWin32Command(@args);
+	my $image = $self->__findWin32Program(@args);
+
 	open SAVED_OUT, '>&STDOUT'
     	or $logger->fatal($log_prefix
 			. __x("cannot save standard output handle: {error}",
@@ -579,16 +563,11 @@ sub __spawnHelperWin32 {
 			. __x("cannot redirect standard output handle: {error}",
 			      error => $!));
 
-	my $command = $self->__makeWin32Command(@args);
-	my $image;
-	if (File::Spec->file_name_is_absolute($args[0])) {
-		$image = $args[0];
-	}
-
 	my $process;
 	Win32::Process::Create($process, $image, $command, 0, 0, '.')
     	or $logger->fatal($log_prefix
 			. __x("cannot spawn helper process: {command}: {error}",
+			      command => $command,
 			      error => Win32::FormatMessage(Win32::GetLastError())));
 	my $pid = $process->GetProcessID;
 
@@ -604,9 +583,36 @@ sub __spawnHelperWin32 {
 	return $pid, $rout, $rerr;
 }
 
+sub __findWin32Program {
+	my ($self, $program) = @_;
+
+	$program =~ s/[ \t].*//;
+	if (File::Spec->file_name_is_absolute($program)) {
+		return $program;
+	} elsif ($program =~ m{[/\\]}) {
+		my $here = getcwd;
+		return File::Spec->catfile($here, $program);
+	}
+
+	foreach my $path (File::Spec->path) {
+		my $try = File::Spec->catfile($path, $program);
+		if ($try =~ /\.(?:exe|com|bat)$/i) {
+			return $try if -e $program;
+		} else {
+			return "$try.exe" if -e "$try.exe";
+			return "$try.com" if -e "$try.com";
+			return "$try.bat" if -e "$try.bat";
+		}
+	}
+
+	# Let the operating system complain.
+	return $program;
+}
+
 sub __makeWin32Command {
 	my ($self, @cmd) = @_;
 
+return join ' ', @cmd;
 	foreach my $cmd (@cmd) {
 		$cmd =~ s/"/""/g;
 		$cmd = qq{"$cmd"} if $cmd =~ /[\001-\040]/;
