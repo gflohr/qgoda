@@ -288,7 +288,11 @@ sub __include {
 				path => $_path, error => $!);
 	}
 
+<<<<<<< Updated upstream
 	my $relpath = File::Spec->abs2rel($path, $srcdir);
+=======
+	my $relpath = canonical_path(File::Spec->abs2rel($path, $srcdir));
+>>>>>>> Stashed changes
 	my $asset = Qgoda::Asset->new($path, $relpath);
 
 	my %overlay = %$overlay;
