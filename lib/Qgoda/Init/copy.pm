@@ -23,9 +23,11 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
+
 use File::Find qw(find);
 use File::Copy qw(copy);
+
+use Qgoda::Util::FileSpec qw(abs2rel catfile);
 
 sub new {
 	my ($class, $init) = @_;
@@ -70,9 +72,9 @@ sub run {
 	# This may come in handy if the directory contains '/node_modules'.
 	my $preprocess = sub {
 		my (@names) = @_;
-		my $relpath = File::Spec->abs2rel($File::Find::dir, $config->{_srcdir});
+		my $relpath = abs2rel($File::Find::dir, $config->{_srcdir});
 
-		# Do not use File::Spec->catfile! Ignore patterns uses slashes only.
+		# Do not use catfile! Ignore patterns uses slashes only.
 		return grep { !$exclude->match("$relpath/$_") } @names;
 	};
 
@@ -80,7 +82,7 @@ sub run {
 		return if '.' eq $_;
 		return if '..' eq $_;
 
-		my $relpath = File::Spec->abs2rel($File::Find::name, $config->{_srcdir});
+		my $relpath = abs2rel($File::Find::name, $config->{_srcdir});
 		next if $exclude->match($relpath);
 
 		if (-d $File::Find::name) {

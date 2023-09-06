@@ -22,15 +22,15 @@ use lib 't';
 use TestSite;
 use Test::More;
 use File::Basename qw(dirname);
-use File::Spec;
 
 use Qgoda::CLI;
 use Qgoda::Splitter;
 use Qgoda::Util qw(read_file);
+use Qgoda::Util::FileSpec qw(catfile);
 
 my $testdir = dirname __FILE__;
 
-my $main_md = File::Spec->catfile($testdir, 'main.md');
+my $main_md = catfile($testdir, 'main.md');
 
 my $splitter = Qgoda::Splitter->new($main_md);
 ok $splitter, 'parse main';

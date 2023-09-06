@@ -18,24 +18,17 @@
 
 use strict;
 
-use lib 't';
-use TestSite;
 use Test::More;
+use Encode;
 
-use Qgoda::CLI;
+use Qgoda::TT2::Plugin::Qgoda;
 
-my $site = TestSite->new(name => 'default-view',
-                         assets => {
-                             'index.md' => {
-                                 title => 'Test for Default View',
-                                 location => '/index.html',
-                                 content => "Isn't that great?\n",
-                             }
-                         });
+# July 16th, 2023 = 16 heinäkuu
+# The Finnish month seems to be 8 bit only.
+my $then = 1689511601;
+my $heinaekuu = Qgoda::TT2::Plugin::Qgoda->strftime('%B', $then, 'fi');
 
-ok (Qgoda::CLI->new(['build'])->dispatch);
-ok -e '_site/index.html';
-
-$site->tearDown;
+ok Encode::is_utf8($heinaekuu), 'utf-8 flag on';
+ok Encode::is_utf8($heinaekuu, 1), 'valid utf-8 flag';
 
 done_testing;

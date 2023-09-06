@@ -23,10 +23,14 @@ use strict;
 use version;
 our $VERSION = 'v0.10.1'; #VERSION
 
+use Qgoda::Util::FileSpec qw(
+	absolute_path abs2rel catdir catfile catpath rel2abs splitpath
+);
+
 # FIXME! This assumes that we are a top-level package. Instead,
 # inpect also __PACKAGE__ and adjust the directory accordingly.
 use File::Basename qw(fileparse dirname);
-my $package_dir = File::Spec->catdir(Cwd::abs_path(dirname __FILE__), 'Qgoda');
+my $package_dir = catdir(absolute_path(dirname __FILE__), 'Qgoda');
 
 use base 'Exporter';
 use vars qw(@EXPORT $VERSION);
@@ -36,19 +40,22 @@ use Locale::TextDomain 1.30 qw(qgoda);
 use Locale::Messages;
 use Locale::gettext_dumb;
 use File::Find;
-use Cwd;
 use Scalar::Util qw(reftype blessed);
 use AnyEvent;
 use AnyEvent::Loop;
 use AnyEvent::Handle;
+use AnyEvent::Util;
 use Symbol qw(gensym);
 use IPC::Open3 qw(open3);
-use IPC::Signal;
-use POSIX qw(:sys_wait_h);
+use Cwd qw(getcwd);
+use Socket;
+use IO::Handle;
+use POSIX qw(:sys_wait_h setlocale LC_ALL);
 use Template::Plugin::Gettext 0.7;
 use List::Util 1.45 qw(uniq);
 use YAML::XS 0.67;
 use AnyEvent::Filesys::Watcher;
+use Time::HiRes qw(usleep);
 use boolean;
 $YAML::XS::Boolean = 'JSON::PP';
 
@@ -69,8 +76,10 @@ my $qgoda;
 sub new {
 	return $qgoda if $qgoda;
 
-	Locale::Messages->select_package('gettext_pp');
 	my ($class, $options, $params) = @_;
+
+	Locale::Messages->select_package('gettext_pp');
+	my $locale = setlocale LC_ALL, '';
 
 	$options ||= {};
 	$params ||= {};
@@ -86,12 +95,17 @@ sub new {
 	$self->{__load_plugins} = 1;
 	$self->{__post_processors} = {};
 	$self->{__dep_tracker} = Qgoda::DependencyTracker->new;
+	$self->{__locale} = $locale;
 
 	return $qgoda;
 }
 
 sub getDependencyTracker {
 	shift->{__dep_tracker};
+}
+
+sub getLocale {
+	shift->{__locale};
 }
 
 sub reset {
@@ -148,7 +162,7 @@ sub build {
 		if !empty $config->{scm} && 'git' eq $config->{scm};
 
 	my $textdomain = $config->{po}->{textdomain};
-	my $locale_dir = File::Spec->catfile($config->{srcdir}, 'LocaleData');
+	my $locale_dir = catfile($config->{srcdir}, 'LocaleData');
 	Locale::gettext_dumb::bindtextdomain($textdomain, $locale_dir);
 	if (!empty $config->{po}->{textdomain} && $config->{po}->{reload}) {
 		eval {
@@ -173,7 +187,7 @@ sub build {
 
 	if ($modified + $deleted) {
 		if (!empty $config->{paths}->{timestamp}) {
-			my $timestamp_file = File::Spec->catfile($config->{srcdir},
+			my $timestamp_file = catfile($config->{srcdir},
 													$config->{paths}->{timestamp});
 			if (!write_file($timestamp_file, sprintf "%d\n", time)) {
 					$logger->error(__x("cannot write '{file}': {error}!",
@@ -275,18 +289,30 @@ sub watch {
 
 		my $config = $self->{__config};
 
-		$self->__startHelpers($config->{helpers});
+		$self->__startHelpers($config->{helpers}) if keys %{$config->{helpers}};
 
 		$self->{__stop} = AnyEvent->condvar;
 
 		$logger->debug(__x("waiting for changes in '{dir}'",
 						   dir => $config->{srcdir}));
 		my $watcher;
+		my %extra;
+		if ('MSWin32' eq $^O || 'cygwin' eq $^O) {
+			# Filesys::Notify::Win32::ReadDirectoryChanges creates so-called
+			# "interpreter" threads for watching the filesystem for changes
+			# and they lead to all kinds of spurious errors.
+			#
+			# Also, either that module or the Duktape binding causes error
+			# messages about freeing a non-existing shared string
+			# "perl_module_resolver".
+			$extra{backend} = 'Fallback';
+		}
 		$watcher= AnyEvent::Filesys::Watcher->new(
-			dirs => [$config->{srcdir}],
+			directories => [$config->{srcdir}],
 			interval => $config->{latency},
-			cb => sub { $self->__onFilesysChange(\%options, @_) },
+			callback => sub { $self->__onFilesysChange(\%options, @_) },
 			filter => sub { $self->__filesysChangeFilter(@_) },
+			%extra
 		);
 
 		my $reason = $self->{__stop}->recv;
@@ -295,7 +321,39 @@ sub watch {
 		$logger->info(__x("terminating on demand: {reason}",
 						  reason => $reason));
 	};
-	$logger->fatal($@) if $@;
+	my $x = $@;
+
+	$self->__reapChildren('no exit');
+
+	$logger->debug(__"done reaping children");
+
+	$logger->fatal($@) if $x;
+
+	return $self;
+}
+
+sub __reapChildren {
+	my ($self, $no_exit) = @_;
+
+	$self->{__terminating} = 1;
+
+	my @pids = keys %{$self->{__helpers}} or return;
+
+	my $logger = $self->logger;
+
+	$logger->info(__"terminating child processes");
+
+	foreach my $pid (@pids) {
+		my $helper = $self->{__helpers}->{$pid} or next;
+		my $name = $helper->{name};
+		$logger->debug(
+			__x("sending SIGTERM to helper '{helper}' with pid {pid}",
+				helper => $name, pid => $pid,
+		));
+		kill TERM => $pid;
+	}
+
+	exit 1 unless $no_exit;
 
 	return $self;
 }
@@ -313,7 +371,40 @@ sub stop {
 sub __startHelpers {
 	my ($self, $helpers) = @_;
 
+	my $logger = $self->logger;
+
 	$self->{__helpers} = {};
+
+	my $sigchld_handler = sub {
+		$logger->debug(__"SIGCHLD received");
+		my $pid;
+		while (1) {
+			$pid = waitpid -1, WNOHANG;
+			last if $pid <= 0;
+
+			my $helper = delete $self->{__helpers}->{$pid};
+			if ($helper) {
+				if ($self->{__terminating}) {
+					$logger->info(__x"helper '{helper}' with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				} else {
+					$logger->error(__x"helper '{helper}' with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				}
+			} else {
+				if ($self->{__terminating}) {
+					$logger->info(__x"child process with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				} else {
+					$logger->info(__x"child process with pid {pid} has terminated",
+						helper => $helper->{name}, pid => $pid);
+				}
+			}
+		}
+	};
+	$SIG{CHLD} = $sigchld_handler;
+
+	$SIG{TERM} = $SIG{INT} = $SIG{QUIT} = sub { $self->__reapChildren };
 
 	foreach my $helper (sort keys %{$helpers || {}}) {
 		$self->__startHelper($helper, $helpers->{$helper});
@@ -345,25 +436,18 @@ sub __startHelper {
 		$args->[0] = $exec;
 	}
 
-	my @pretty;
-	foreach my $word (@$args) {
-		if ($word =~ s/([\\\"])/\\$1/g) {
-			$word = qq{"$word"};
-		}
-		push @pretty, $word;
+	$logger->info($log_prefix . __x("starting helper: {helper}",
+									helper => $helper));
+
+	my ($pid, $cout, $cerr);
+
+	if ('MSWin32' eq $^O) {
+		($pid, $cout, $cerr) = $self->__spawnHelperWin32($log_prefix, @$args);
+	} else {
+		($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
 	}
 
-	my $pretty = join ' ', @pretty;
-
-	$logger->info($log_prefix . __x("starting helper: {helper}",
-									helper => $pretty));
-
-	my $cout = gensym;
-	my $cerr = gensym;
-
-	my $pid = open3 undef, $cout, $cerr, @$args
-		or $logger->fatal($log_prefix . __x("failure starting helper: {error}",
-											error => $!));
+	$logger->debug(__x('child process pid {pid}', pid => $pid));
 
 	$self->{__helpers}->{$pid} = {
 		name => $helper,
@@ -384,6 +468,8 @@ sub __startHelper {
 				$logger->info($log_prefix . $1);
 			}
 		},
+		# Ignore.  Otherwise, AnyEvent::Handle throws ugly errors on MS-DOS.
+		on_eof => sub {},
 	);
 
 	$self->{__helpers}->{$pid}->{aherr} = AnyEvent::Handle->new(
@@ -401,9 +487,138 @@ sub __startHelper {
 				$logger->warning($log_prefix . $1);
 			}
 		},
+		# Ignore.  Otherwise, AnyEvent::Handle throws ugly errors on MS-DOS.
+		on_eof => sub {},
 	);
 
 	return $self;
+}
+
+sub __spawnHelper {
+	my ($self, $log_prefix, @args) = @_;
+
+	my $cout = gensym;
+	my $cerr = gensym;
+	my $logger = $self->logger;
+
+	my $pid = open3 undef, $cout, $cerr, @args
+		or $logger->fatal($log_prefix . __x("failure starting helper: {error}",
+											error => $!));
+	return $pid, $cout, $cerr;
+}
+
+sub __spawnHelperWin32 {
+	my ($self, $log_prefix, @args) = @_;
+
+	# See http://www.guido-flohr.net/platform-independent-asynchronous-child-process-ipc/
+	# for an explanation of the code.
+
+	require Win32::Process;
+
+	my $logger = $self->logger;
+	my ($rout, $wout) = portable_socketpair
+		or $logger->fatal($log_prefix
+			. __x("cannot create socket pair: {error}", error => $!));
+	my ($rerr, $werr) = portable_socketpair
+		or $logger->fatal($log_prefix
+			. __x("cannot create socket pair: {error}", error => $!));
+
+	my $true = 1;
+	my $FIONBIO = 0x8004667e;
+	ioctl $rout, $FIONBIO, \$true
+    	or $logger->fatal($log_prefix
+			. __x("cannot set helper standard output to non-blocking: {error}",
+			      error => $!));
+	ioctl $rerr, $FIONBIO, \$true
+    	or $logger->fatal($log_prefix
+			. __x("cannot set herlp standard error to non-blocking: {error}",
+			      error => $!));
+
+	my $saved_log_handle = $logger->logHandle;
+
+	my $command = $self->__makeWin32Command(@args);
+	my $image = $self->__findWin32Program(@args);
+
+	open SAVED_OUT, '>&STDOUT'
+    	or $logger->fatal($log_prefix
+			. __x("cannot save standard output handle: {error}",
+			      error => $!));
+	if (!$self->getOption('log_stderr')) {
+		$logger->logHandle(\*SAVED_OUT);
+	}
+	open STDOUT, '>&' . $wout->fileno
+		or $logger->fatal($log_prefix
+			. __x("cannot redirect standard output handle: {error}",
+			      error => $!));
+
+	open SAVED_ERR, '>&STDERR'
+    	or $logger->fatal($log_prefix
+			. __x("cannot save standard output handle: {error}",
+			      error => $!));
+	if ($self->getOption('log_stderr')) {
+		$logger->logHandle(\*SAVED_ERR);
+	}
+	open STDERR, '>&' . $werr->fileno
+		or $logger->fatal($log_prefix
+			. __x("cannot redirect standard output handle: {error}",
+			      error => $!));
+
+	my $process;
+	Win32::Process::Create($process, $image, $command, 0, 0, '.')
+    	or $logger->fatal($log_prefix
+			. __x("cannot spawn helper process: {command}: {error}",
+			      command => $command,
+			      error => Win32::FormatMessage(Win32::GetLastError())));
+	my $pid = $process->GetProcessID;
+
+	open STDOUT, '>&SAVED_OUT'
+		or $logger->fatal($log_prefix
+			. __x("cannot restore standard output: {error}", error => $!));
+	open STDERR, '>&SAVED_ERR'
+		or $logger->fatal($log_prefix
+			. __x("cannot restore standard output: {error}", error => $!));
+
+	$logger->logHandle($saved_log_handle);
+
+	return $pid, $rout, $rerr;
+}
+
+sub __findWin32Program {
+	my ($self, $program) = @_;
+
+	$program =~ s/[ \t].*//;
+	if (File::Spec->file_name_is_absolute($program)) {
+		return $program;
+	} elsif ($program =~ m{[/\\]}) {
+		my $here = getcwd;
+		return File::Spec->catfile($here, $program);
+	}
+
+	foreach my $path (File::Spec->path) {
+		my $try = File::Spec->catfile($path, $program);
+		if ($try =~ /\.(?:exe|com|bat)$/i) {
+			return $try if -e $program;
+		} else {
+			return "$try.exe" if -e "$try.exe";
+			return "$try.com" if -e "$try.com";
+			return "$try.bat" if -e "$try.bat";
+		}
+	}
+
+	# Let the operating system complain.
+	return $program;
+}
+
+sub __makeWin32Command {
+	my ($self, @cmd) = @_;
+
+return join ' ', @cmd;
+	foreach my $cmd (@cmd) {
+		$cmd =~ s/"/""/g;
+		$cmd = qq{"$cmd"} if $cmd =~ /[\001-\040]/;
+	}
+
+	return join ' ', @cmd;
 }
 
 sub logger {
@@ -597,7 +812,7 @@ sub scan {
 			$logger->debug(__"skip source directory scan and use dependencies");
 			$self->{__outfiles} = $deptracker->outfiles;
 			foreach my $relpath (@$dirty) {
-				my $path = File::Spec->rel2abs($relpath, $config->{srcdir});
+				my $path = rel2abs($relpath, $config->{srcdir});
 				my $asset = Qgoda::Asset->new($path, $relpath);
 				$site->addDirtyAsset($asset);
 			}
@@ -617,9 +832,9 @@ sub scan {
 	File::Find::find({
 		wanted => sub {
 			if (-f $_) {
-				my $path = Cwd::abs_path($_);
+				my $path = absolute_path($_);
 				if (!$config->ignorePath($path)) {
-					my $relpath = File::Spec->abs2rel($path, $config->{srcdir});
+					my $relpath = abs2rel($path, $config->{srcdir});
 					my $asset = Qgoda::Asset->new($path, $relpath);
 					$site->addAsset($asset);
 				}
@@ -627,7 +842,7 @@ sub scan {
 		},
 		preprocess => sub {
 			# Prevent descending into ignored directories.
-			my $path = Cwd::abs_path($File::Find::dir);
+			my $path = absolute_path($File::Find::dir);
 			if ($config->ignorePath($path)) {
 				return;
 			} else {
@@ -645,7 +860,7 @@ sub scan {
 					   outdir => $config->{paths}->{site}));
 	File::Find::find(sub {
 		if ($_ ne '.' && $_ ne '..') {
-			push @outfiles, Cwd::abs_path($_);
+			push @outfiles, absolute_path($_);
 		}
 	}, $config->{paths}->{site});
 
@@ -781,8 +996,8 @@ sub __prune {
 	foreach my $outfile (@outfiles) {
 		if ($directories{$outfile} || $site->getArtefact($outfile)) {
 			# Mark the containing directory as generated.
-			my ($volume, $directory, $filename) = File::Spec->splitpath($outfile);
-			my $container = File::Spec->catpath($volume, $directory, '');
+			my ($volume, $directory, $filename) = splitpath $outfile;
+			my $container = catpath $volume, $directory, '';
 			$container =~ s{/$}{};
 			$directories{$container} = 1;
 		} elsif (-d $outfile) {
@@ -807,31 +1022,31 @@ sub __prune {
 }
 
 sub __filesysChangeFilter {
-	my ($self, $filename) = @_;
+	my ($self, $event) = @_;
+
+	my $path = $event->path;
 
 	# It would be possible to also ignore deleted directories but that is
 	# not very relevant for Qgoda's typical usage.
-	if (-d $filename) {
-		return;
-	}
+	return 1 if $event->isDirectory;
 
 	my $config = $self->{__config};
 
-	if ($filename =~ /_stop$/ && -e $filename) {
+	if ($path =~ m{_stop$} && -e $path) {
 		my $srcdir = $config->{paths}->{srcdir};
-		my $relpath = File::Spec->abs2rel($filename, $srcdir);
+		my $relpath = abs2rel($path, $srcdir);
 		if ('_stop' eq $relpath) {
-			my $reason = read_file $filename;
-			unlink $filename;
+			my $reason = read_file $path;
+			unlink $path;
 			$self->stop(trim $reason);
 		}
 		return;
 	}
 
-	if ($config->ignorePath($filename, 1)) {
+	if ($config->ignorePath($path, 1)) {
 		my $logger = $self->{__logger};
 		$logger->debug(__x("changed file '{filename}' is ignored",
-						   filename => $filename));
+						   filename => $path));
 		return;
 	}
 
@@ -965,7 +1180,7 @@ sub __initVersionControlled {
 
 	my $srcdir = $config->{srcdir};
 	foreach my $relpath (@files) {
-		my $abspath = File::Spec->rel2abs($relpath, $srcdir);
+		my $abspath = rel2abs($relpath, $srcdir);
 		$version_controlled->{absolute}->{$abspath} = $relpath;
 		$version_controlled->{relative}->{$relpath} = $abspath;
 	}
@@ -1013,7 +1228,7 @@ sub versionControlled {
 
 	my $no_scm = $self->__initNoSCMPatterns or return;
 
-	$path = File::Spec->rel2abs($path, $self->config->{srcdir});
+	$path = rel2abs($path, $self->config->{srcdir});
 	return $self if $no_scm->match($path);
 
 	return;

@@ -26,6 +26,7 @@ use JSON::PP;
 
 use Qgoda::Config;
 use Qgoda::Schema;
+use Qgoda::Util::FileSpec qw(absolute_path);
 
 use constant true => $JSON::PP::true;
 use constant false => $JSON::PP::false;
@@ -39,7 +40,7 @@ $site->tearDown;
 my $schema = Qgoda::Schema->config;
 my $url = $schema->{properties}->{url}->{default};
 
-my $srcdir = Cwd::abs_path() . '/t/config-default';
+my $srcdir = absolute_path . '/t/config-default';
 
 my $expected = <<EOF;
 ---

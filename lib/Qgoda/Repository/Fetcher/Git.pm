@@ -27,6 +27,7 @@ use Git;
 use File::Path qw(rmtree);
 
 use Qgoda;
+use Qgoda::Util::FileSpec qw(catfile);
 
 use base qw(Qgoda::Repository::Fetcher);
 
@@ -41,7 +42,7 @@ sub fetch {
 	# This will die in case of an error.
 	Git::command('clone', '--depth', '1', $uri, $destination);
 
-	my $gitdir = File::Spec->catfile($destination, '.git');
+	my $gitdir = catfile($destination, '.git');
 	$logger->debug(__x("deleting '{directory}'",
 					   directory => $gitdir));
 
