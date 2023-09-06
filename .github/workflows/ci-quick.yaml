@@ -56,7 +56,7 @@ jobs:
       run: |
         git clone https://github.com/gflohr/AnyEvent-Filesys-Watcher &&
         cd AnyEvent-Filesys-Watcher &&
-        cpanm --notest --installdeps --verbose . &&
+        cpanm --notest --verbose . &&
         cd .. &&
         rm -rf AnyEvent-Filesys-Watcher
 
@@ -64,7 +64,7 @@ jobs:
       run: |
         git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
         cd JavaScript-Duktape-XS &&
-        cpanm --notest --installdeps --verbose . &&
+        cpanm --notest --verbose . &&
         cd .. &&
         rm -rf JavaScript-Duktape-XS
 
