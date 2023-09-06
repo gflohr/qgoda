@@ -73,7 +73,7 @@ sub new {
 
 	my $no_console = $args{'no_console'};
 	$self->{__jsout} = '';
-	$self->{__jserr} - '';
+	$self->{__jserr} = '';
 	$self->{__no_output} = $args{'no_output'};
 
 	unless ($no_console) {
