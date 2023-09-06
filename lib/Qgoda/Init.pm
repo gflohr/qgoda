@@ -23,11 +23,11 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
 use JSON '2.90';
 use Scalar::Util qw(weaken reftype);
 
 use Qgoda::Util qw(read_file write_file yaml_error perl_class safe_yaml_load);
+use Qgoda::Util::FileSpec qw(catfile);
 use Qgoda::Repository;
 
 sub new {
@@ -55,8 +55,8 @@ sub init {
 	my $repo = Qgoda::Repository->new($self->{__uri});
 	my ($dir, $tmp) = $repo->fetch;
 
-	my $init_yaml = File::Spec->catfile($dir, '_init.yaml');
-	$init_yaml = File::Spec->catfile($dir, '_init.yml')
+	my $init_yaml = catfile($dir, '_init.yaml');
+	$init_yaml = catfile($dir, '_init.yml')
 		if !-e $init_yaml;
 	my $init;
 	if (-e $init_yaml) {

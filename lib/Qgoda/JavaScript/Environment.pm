@@ -22,12 +22,13 @@ use strict;
 
 #VERSION
 
-use Qgoda::Util qw(empty);
 use JavaScript::Duktape::XS 0.000074;
 use Cpanel::JSON::XS qw(decode_json);
-use File::Spec;
 use File::Basename qw(dirname);
 use Locale::TextDomain qw(qgoda);
+
+use Qgoda::Util qw(empty);
+use Qgoda::Util::FileSpec qw(canonpath);
 
 sub new {
 	my ($class, %args) = @_;
@@ -209,7 +210,7 @@ sub __normalize {
 	my $here = $path =~ s{^./}{};
 
 	# canonpath does string manipulation, but does not remove "..".
-	my $ret = File::Spec->canonpath($path);
+	my $ret = canonpath $path;
 
 	# Let's remove ".." by using a regex.
 	while ($ret =~ s{

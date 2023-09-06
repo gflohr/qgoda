@@ -30,6 +30,12 @@ use AnyEvent;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file trim);
 
+if ($^O eq 'MSWin32') {
+	# Under MS-DOS it is not possible to kill child processes.  Therefore,
+	# if qgoda terminates in a regular manner, it will leave zombies.
+	plan skip_all => "This test does not work on MS-DOS";
+}
+
 sub wait_for_timestamp();
 
 my $config = <<'EOF';

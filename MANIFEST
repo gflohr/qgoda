@@ -76,6 +76,7 @@ lib/Qgoda/Splitter.pm
 lib/Qgoda/TT2/Plugin/Qgoda.pm
 lib/Qgoda/Util.pm
 lib/Qgoda/Util/Date.pm
+lib/Qgoda/Util/FileSpec.pm
 lib/Qgoda/Util/Translate.pm
 lib/Qgoda/package-lock.json
 lib/Qgoda/package.json
@@ -143,6 +144,7 @@ t/tpq-listings.t
 t/tpq-misc.t
 t/tpq-related.t
 t/tpq-sort-by.t
+t/tpq-strftime.t
 t/tpq-taxonomies.t
 t/tpq-vmethods.t
 t/tpq-xref.t

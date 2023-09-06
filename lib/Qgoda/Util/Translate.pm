@@ -31,6 +31,7 @@ use File::Globstar qw(globstar);
 use Encode;
 
 use Qgoda::Util qw(empty merge_data flatten2hash front_matter safe_yaml_load);
+use Qgoda::Util::FileSpec qw(abs2rel rel2abs);
 use Qgoda::Splitter;
 
 use base 'Exporter';
@@ -200,13 +201,13 @@ sub get_mains {
 	}
 
 	foreach my $delete (keys %mddelete) {
-		my $path = File::Spec->rel2abs($delete);
+		my $path = rel2abs($delete);
 		my $asset = $site->{assets}->{$path} or next;
 		$site->removeAsset($asset);
 	}
 
 	foreach my $relpath (keys %mdextra) {
-		my $path = File::Spec->abs2rel($relpath);
+		my $path = abs2rel($relpath);
 		next if $site->{assets}->{$path};
 
 		$logger->debug(__x("creating asset object for '{filename}'",

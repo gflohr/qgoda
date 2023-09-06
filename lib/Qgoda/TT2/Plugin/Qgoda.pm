@@ -25,13 +25,12 @@ use strict;
 use base qw(Template::Plugin);
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
-use Cwd;
+
 use URI;
 use Scalar::Util qw(reftype);
 use JSON 2.0 qw(encode_json decode_json);
 use Date::Parse qw(str2time);
-use POSIX qw(setlocale LC_ALL);
+use POSIX qw(setlocale LC_ALL LC_TIME);
 use File::Basename qw();
 use List::Util qw(pairmap);
 use Locale::Util qw(web_set_locale);
@@ -40,6 +39,10 @@ use Data::Dump;
 use Qgoda;
 use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
+use Qgoda::Util::FileSpec qw(
+	absolute_path abs2rel catfile rel2abs splitpath filename_is_absolute
+	canonpath splitdir updir
+);
 use Qgoda::Util::Date;
 use Qgoda::Builder;
 
@@ -244,7 +247,7 @@ sub bustCache {
 
 	require Qgoda;
 	my $srcdir = Qgoda->new->config->{srcdir};
-	my $fullpath = File::Spec->canonpath(File::Spec->catfile($srcdir, $path));
+	my $fullpath = canonpath(catfile($srcdir, $path));
 
 	my @stat = stat $fullpath or return $uri;
 	if (defined $query) {
@@ -282,17 +285,13 @@ sub __include {
 	my $q = Qgoda->new;
 	my $srcdir = $q->config->{srcdir};
 
-	my $path = Cwd::abs_path($_path);
+	my $path = absolute_path $_path;
 	if (!defined $path) {
 		die __x("error including '{path}': {error}.\n",
 				path => $_path, error => $!);
 	}
 
-<<<<<<< Updated upstream
-	my $relpath = File::Spec->abs2rel($path, $srcdir);
-=======
 	my $relpath = canonical_path(File::Spec->abs2rel($path, $srcdir));
->>>>>>> Stashed changes
 	my $asset = Qgoda::Asset->new($path, $relpath);
 
 	my %overlay = %$overlay;
@@ -709,6 +708,22 @@ sub strftime {
 	$markup = '' if !defined $markup;
 	my $formatted_date = qstrftime $format, $time, $lingua, $markup;
 
+	# If we did not use a UTF-8 locale, try to recode the date on the fly.
+	my $used_locale = POSIX::setlocale(LC_TIME);
+	if ('C' ne $used_locale && 'POSIX' ne $used_locale
+	    && $used_locale =~ /\.([^.]+)$/) {
+		my $charset = $1;
+		if ($charset !~ /^utf-?8/i && $charset ne '65001') {
+			# 65001 is the codepage for utf-8 in MS-DOS.
+			$charset = 'CP' . $charset if $charset =~ /^[0-9]+$/;
+			my $cd = Locale::Recode->new(from => $charset, to => 'utf-8');
+
+			# See https://github.com/gflohr/libintl-perl/issues/12
+			Encode::_utf8_off($formatted_date);
+			$cd->recode($formatted_date);
+		}
+	}
+
 	POSIX::setlocale(LC_ALL, $saved_locale) if defined $saved_locale;
 
 	Encode::_utf8_on($formatted_date);
@@ -863,22 +878,21 @@ sub encodeJSON {
 }
 
 sub loadJSON {
-	my ($self, $filename) = @_;
+	my ($self, $path) = @_;
 
 	die __x("loadJSON('{filenname}'): absolute paths are not allowed!\n",
-			filename => $filename)
-		if File::Spec->file_name_is_absolute($filename);
+			filename => $path)
+		if filename_is_absolute $path;
 
-	my $absolute = File::Spec->rel2abs($filename, Qgoda->new->config->{srcdir});
-	my ($volume, $directories, undef) = File::Spec->splitpath($absolute);
-	my @directories = File::Spec->splitdir($absolute);
+	my @directories = splitdir $path;
+	my $updir = updir;
 	map {
-		$_ eq File::Spec->updir and
+		$_ eq $updir and
 			die __x("'{filenname}'): '{updir}' is not allowed!\n",
-					filename => $filename, updir => File::Spec->updir);
-	} File::Spec->splitdir($absolute);
+					filename => $path, updir => updir);
+	} @directories;
 
-	my $json = read_file $filename or return;
+	my $json = read_file $path or return;
 	my $data = eval { decode_json $json };
 	return if !defined $data;
 

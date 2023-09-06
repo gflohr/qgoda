@@ -23,11 +23,10 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw(qgoda);
-use Cwd;
 use JSON::PP;
-use File::Spec;
 
 use Qgoda;
+use Qgoda::Util::FileSpec qw(absolute_path catdir);
 
 use constant true => $JSON::PP::true;
 use constant false => $JSON::PP::false;
@@ -239,7 +238,7 @@ sub config {
 									   . "files, defaults to the absolute path "
 									   . "to '_site' in the current directory.",
 						type => 'string',
-						default => File::Spec->catdir(Cwd::abs_path(''), '_site')
+						default => catdir(absolute_path(), '_site')
 					},
 					timestamp => {
 						description => __"Name of the timestamp file containing "
@@ -549,7 +548,7 @@ sub config {
 							   . "overwritten at runtime with the absolute "
 							   . "path to the current directory.",
 				type => 'string',
-				const => Cwd::abs_path()
+				const => absolute_path()
 			},
 			taxonomies => {
 				description => __"Key/value pairs of taxonomy names and their "
