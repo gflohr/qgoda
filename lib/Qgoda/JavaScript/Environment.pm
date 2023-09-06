@@ -28,7 +28,7 @@ use File::Basename qw(dirname);
 use Locale::TextDomain qw(qgoda);
 
 use Qgoda::Util qw(empty);
-use Qgoda::Util::FileSpec qw(canonpath);
+use Qgoda::Util::FileSpec qw(canonical_path);
 
 sub new {
 	my ($class, %args) = @_;
@@ -209,8 +209,8 @@ sub __normalize {
 
 	my $here = $path =~ s{^./}{};
 
-	# canonpath does string manipulation, but does not remove "..".
-	my $ret = canonpath $path;
+	# canonical_path does string manipulation, but does not remove "..".
+	my $ret = canonical_path $path;
 
 	# Let's remove ".." by using a regex.
 	while ($ret =~ s{

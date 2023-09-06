@@ -32,7 +32,7 @@ use Encode;
 use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase
 				   safe_yaml_load);
-use Qgoda::Util::FileSpec qw(absolute_path abs2rel canonpath);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel canonical_path);
 use Qgoda::JavaScript::Environment;
 use Qgoda::Schema;
 
@@ -135,8 +135,8 @@ sub new {
 	# Clean up certain variables or overwrite them unconditionally.
 	$config->{srcdir} = absolute_path;
 	$config->{paths}->{site} =
-		canonpath(absolute_path($config->{paths}->{site}));
-	$config->{paths}->{views} = canonpath($config->{paths}->{views});
+		canonical_path(absolute_path($config->{paths}->{site}));
+	$config->{paths}->{views} = canonical_path($config->{paths}->{views});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
 		if 0 == @{$config->{po}->{tt2}};
