@@ -63,6 +63,16 @@ sub __logFunc {
 	return 1;
 }
 
+sub logHandle {
+	my ($self, $fh) = @_;
+
+	if ($fh) {
+		$self->{__log_fh} = $fh;
+	}
+
+	return $self->{__log_fh};
+}
+
 sub __makeMessage {
 	my ($self, $type, @msgs) = @_;
 
