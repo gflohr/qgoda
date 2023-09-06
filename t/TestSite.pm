@@ -20,28 +20,30 @@ package TestSite;
 
 use strict;
 
-use File::Spec;
 use File::Path;
 use File::Find;
 use File::Globstar::ListMatch;
 use YAML::XS;
-use Cwd;
 use Encode;
 
 use Qgoda;
 use Qgoda::Util qw(empty write_file);
+use Qgoda::Util::FileSpec qw(
+	absolute_path abs2rel catdir catfile catpath curdir rel2abs splitpath
+	updir filename_is_absolute
+);
 
 my $repodir;
 BEGIN {
 	# Make @INC absolute.
 	foreach my $path (@INC) {
-		if (!File::Spec->file_name_is_absolute($path)) {
-			$path = Cwd::abs_path($path);
+		if (!filename_is_absolute $path) {
+			$path = absolute_path $path;
 		}
 	}
-    my ($volume, $directory) = File::Spec->splitpath(__FILE__);
-	$repodir = File::Spec->catpath($volume, $directory, '..');
-	$repodir = Cwd::abs_path(File::Spec->rel2abs($repodir));
+    my ($volume, $directory) = splitpath __FILE__;
+	$repodir = catpath $volume, $directory, updir;
+	$repodir = absolute_path(rel2abs($repodir));
 }
 
 sub new {
@@ -61,11 +63,11 @@ sub new {
 sub setup {
 	my ($self) = @_;
 
-	my ($volume, $directory) = File::Spec->splitpath(__FILE__);
+	my ($volume, $directory) = splitpath __FILE__;
 
 	chdir $repodir or die "cannot chdir to '$repodir': $!\n";
 
-	my $rootdir = File::Spec->catfile($repodir, 't', $self->{name});
+	my $rootdir = catfile($repodir, 't', $self->{name});
 	$self->{rootdir} = $rootdir;
     $self->tearDown if -e $self->{rootdir};
 	mkdir $rootdir;
@@ -75,11 +77,13 @@ sub setup {
 	$self->__setupFiles;
 	$self->__setupAssets;
 
-	eval {
-		Qgoda->reset;
-		Qgoda->new({quiet => 1, log_stderr => 1});
-	};
-	$self->{__exception} = $@;
+	unless ($self->{verbose}) {
+		eval {
+			Qgoda->reset;
+			Qgoda->new({quiet => 1, log_stderr => 1});
+		};
+		$self->{__exception} = $@;
+	}
 
 	return $self;
 }
@@ -90,7 +94,7 @@ sub __setupConfig {
 	my ($self) = @_;
 
     my $yaml;
- 
+
 	if (empty $self->{config}) {
 		unlink '_config.yaml';
 		return $self;
@@ -147,7 +151,7 @@ sub tearDown {
 	my $matcher = File::Globstar::ListMatch->new($self->{precious} || []);
 	File::Find::finddepth({
 		wanted => sub {
-			my $rel = File::Spec->abs2rel($File::Find::name, $self->{rootdir});
+			my $rel = abs2rel($File::Find::name, $self->{rootdir});
 
 			return if '.' eq $rel;
 			return if $matcher->match($rel);
@@ -167,8 +171,8 @@ sub tearDown {
 sub findArtefacts {
 	my ($self, $relpath) = @_;
 
-	my $path = File::Spec->catdir(File::Spec->curdir, '_site');
-	$path = File::Spec->catdir($path, $relpath) if !empty $relpath;
+	my $path = catdir(curdir, '_site');
+	$path = catdir($path, $relpath) if !empty $relpath;
 
 	my @artefacts;
 	File::Find::find({

@@ -25,11 +25,11 @@ use strict;
 use Locale::TextDomain qw('qgoda');
 use POSIX qw(setlocale);
 use Locale::Util qw(web_set_locale);
-use File::Spec;
 
 use Qgoda;
 use Qgoda::Util qw(empty read_file read_body write_file blength);
 use Qgoda::Util::Translate qw(translate_body);
+use Qgoda::Util::FileSpec qw(catdir catfile);
 
 sub new {
 	bless {}, shift;
@@ -136,7 +136,7 @@ sub saveArtefact {
 	my $qgoda = Qgoda->new;
 	my $config = $qgoda->config;
 	$permalink = '/' . $asset->getRelpath if empty $permalink;
-	my $path = File::Spec->catdir($config->{paths}->{site}, $permalink);
+	my $path = catdir($config->{paths}->{site}, $permalink);
 
 	$qgoda->getDependencyTracker->addArtefact($self->{__current}, $path);
 
@@ -233,7 +233,7 @@ sub wrapAsset {
 
 	my $srcdir = $qgoda->config->{srcdir};
 	my $view_dir = $qgoda->config->{paths}->{views};
-	my $view_file = File::Spec->join($srcdir, $view_dir, $view);
+	my $view_file = catfile($srcdir, $view_dir, $view);
 	if (-e $view_file && !$qgoda->versionControlled($view_file, 1)) {
 		die __x("view file '{file}' is not under version control.\n",
 				file => $view_file);
@@ -267,10 +267,10 @@ EOF
 			file => $view_file, error => $!)
 		if !defined $content;
 	Encode::_utf8_on($content) if !$asset->{raw};
-	my $template_name = File::Spec->join($view_dir, $view);
+	my $template_name = catfile($view_dir, $view);
 	$qgoda->getDependencyTracker->addUsage(
 		$asset->{relpath},
-		File::Spec->join($view_dir, $view),
+		catfile($view_dir, $view),
 	);
 	foreach my $processor (@processors) {
 		my $short_name = ref $processor;

@@ -22,7 +22,9 @@ use strict;
 
 #VERSION
 
-use POSIX qw (setlocale LC_TIME strftime);
+use Locale::TextDomain qw(qgoda);
+
+use POSIX qw (setlocale LC_ALL strftime);
 use Time::HiRes qw(gettimeofday);
 use Term::ANSIColor qw(colored);
 use IO::Interactive;
@@ -46,11 +48,29 @@ sub new {
 sub __logFunc {
 	my ($self, $type, @msg) = @_;
 
+	require Qgoda;
+	my $locale = Qgoda->new->getLocale;
+
+	my $saved_locale = setlocale LC_ALL;
+	setlocale LC_ALL => $locale;
+
 	my $msg = $self->__makeMessage($type, @msg);
 
 	$self->{__log_fh}->print($msg);
 
+	setlocale LC_ALL, $saved_locale;
+
 	return 1;
+}
+
+sub logHandle {
+	my ($self, $fh) = @_;
+
+	if ($fh) {
+		$self->{__log_fh} = $fh;
+	}
+
+	return $self->{__log_fh};
 }
 
 sub __makeMessage {
@@ -59,18 +79,17 @@ sub __makeMessage {
 	my $prefix = $self->{__prefix};
 	$prefix = '' unless $prefix;
 
-	my ($whole, $trailing) = split(/[^0-9]/, scalar gettimeofday());
+	my ($time, $trailing) = split(/[^0-9]/, scalar gettimeofday());
 	$trailing ||= '';
 	$trailing .= length($trailing) < 5
 			   ? '0' x (5 - length($trailing))
 			   : '';
 
-	my $timefmt = "\%a \%b \%d \%H:\%M:\%S.$trailing \%Y";
+	# TRANSLATORS: The placeholder trailing of for the fractional seconds.
+	my $timefmt = __x("\%a \%b \%d \%H:\%M:\%S.{trailing} \%Y",
+	                  trailing => $trailing);
 
-	my $saved_locale = setlocale LC_TIME;
-	setlocale LC_TIME, 'POSIX';
-	my $timestamp = strftime $timefmt, localtime;
-	setlocale LC_TIME, $saved_locale;
+	my $timestamp = strftime $timefmt, localtime $time;
 
 	my $client = $self->{__client} || '';
 	$client = "client $client" if $client;
@@ -84,7 +103,7 @@ sub __makeMessage {
 
 	my $colored = sub { $_[0] };
 
-	if (IO::Interactive::is_interactive()) {
+	if ($^O ne 'Win32' && IO::Interactive::is_interactive()) {
 		my %colors = (
 			error => 'bold bright_red',
 			warning => 'red',

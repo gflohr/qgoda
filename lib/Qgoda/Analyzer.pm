@@ -24,7 +24,6 @@ use strict;
 
 use Locale::TextDomain qw('qgoda');
 use Date::Parse;
-use File::Spec;
 use File::Basename qw(fileparse);
 use Scalar::Util qw(reftype);
 
@@ -61,7 +60,7 @@ sub analyze {
 		$front_matter_data = safe_yaml_load $front_matter;
 		# Remove this at the end of 2024!
 		if (exists $front_matter_data->{master}) {
-			$front_matter_data->{main} = 
+			$front_matter_data->{main} =
 				delete $front_matter_data->{master};
 		}
 	} else {

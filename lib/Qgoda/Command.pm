@@ -22,11 +22,11 @@ use strict;
 
 #VERSION
 
-use File::Spec;
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
 use Qgoda::CLI;
 use Qgoda::Util qw(class2module);
+use Qgoda::Util::FileSpec qw(filename_is_absolute);
 
 sub new {
 	my ($class) = @_;
@@ -53,7 +53,7 @@ sub parseOptions {
 
 	my %optspec;
 	foreach my $key (keys %specs) {
-		$optspec{$specs{$key}} = 
+		$optspec{$specs{$key}} =
 				ref $options{$key} ? $options{$key} : \$options{$key};
 	}
 
@@ -92,7 +92,7 @@ sub _displayHelp {
 	my $module = class2module ref $self;
 
 	my $path = $INC{$module};
-	$path = './' . $path if !File::Spec->file_name_is_absolute($path);
+	$path = './' . $path if !file_name_is_absolute $path;
 
 	$^W = 1 if $ENV{'PERLDOCDEBUG'};
 	pop @INC if $INC[-1] eq '.';

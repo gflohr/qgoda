@@ -23,11 +23,15 @@ use TestSite;
 
 use Test::More;
 use File::Path;
-use Cwd;
 use Git::Repository 1.321;
 
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file);
+use Qgoda::Util::FileSpec qw(absolute_path);
+
+if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+	plan skip_all => 'Test does not work on MS-DOS';
+}
 
 my %assets;
 
@@ -62,7 +66,7 @@ my $site = TestSite->new(
 	}
 );
 
-my $repo_dir = Cwd::abs_path('.');
+my $repo_dir = absolute_path;
 ok (Git::Repository->run(init => {cwd => $repo_dir}));
 my $repo = Git::Repository->new(work_tree => $repo_dir);
 ok $repo;

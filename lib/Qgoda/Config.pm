@@ -23,8 +23,7 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw('qgoda');
-use File::Spec;
-use Cwd;
+
 use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
@@ -32,6 +31,7 @@ use Encode;
 use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase
 				   safe_yaml_load);
+use Qgoda::Util::FileSpec qw(absolute_path abs2rel canonpath);
 use Qgoda::JavaScript::Environment;
 use Qgoda::Schema;
 
@@ -132,10 +132,10 @@ sub new {
 	my $self = bless $config, $class;
 
 	# Clean up certain variables or overwrite them unconditionally.
-	$config->{srcdir} = Cwd::abs_path('');
+	$config->{srcdir} = absolute_path;
 	$config->{paths}->{site} =
-		File::Spec->canonpath(Cwd::abs_path($config->{paths}->{site}));
-	$config->{paths}->{views} = File::Spec->canonpath($config->{paths}->{views});
+		canonpath(absolute_path($config->{paths}->{site}));
+	$config->{paths}->{views} = canonpath($config->{paths}->{views});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
 		if 0 == @{$config->{po}->{tt2}};
@@ -161,10 +161,10 @@ sub new {
 		'.*',
 	);
 
-	my $viewdir = File::Spec->abs2rel($self->{paths}->{views});
+	my $viewdir = abs2rel($self->{paths}->{views});
 	push @exclude_watch, '!' . quotestar $viewdir
 		if $viewdir !~ m{^\.\./};
-	my $includedir = File::Spec->abs2rel($self->{paths}->{includes});
+	my $includedir = abs2rel($self->{paths}->{includes});
 	push @exclude_watch, '!' . quotestar $includedir
 		if $includedir !~ m{^\.\./};
 
@@ -174,7 +174,7 @@ sub new {
 	push @exclude, @config_exclude;
 	push @exclude_watch, @config_exclude_watch;
 
-	my $outdir = File::Spec->abs2rel($self->{outdir}, $self->{srcdir});
+	my $outdir = abs2rel($self->{outdir}, $self->{srcdir});
 	if ($outdir !~ m{^\.\./}) {
 		push @exclude, quotestar $outdir, 1;
 		push @exclude_watch, quotestar $outdir, 1;
@@ -209,7 +209,7 @@ sub ignorePath {
 	# abs2rel() returns a lone dot for it.
 	return if $path eq $self->{srcdir};
 
-	my $relpath = File::Spec->abs2rel($path, $self->{srcdir});
+	my $relpath = abs2rel($path, $self->{srcdir});
 
 	if ($watch) {
 		return $self if $self->{__q_exclude_watch}->match($relpath);

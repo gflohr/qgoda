@@ -30,6 +30,8 @@ use Scalar::Util qw(reftype);
 use Locale::TextDomain qw(qgoda);
 
 use Qgoda::Util qw(canonical empty);
+use Qgoda::Util::FileSpec qw(rel2abs);
+
 use Qgoda::Artefact;
 
 sub new {
@@ -109,7 +111,7 @@ sub removeAssetByRelpath {
 	my $config = $qgoda->config;
 	my $srcdir = $config->{srcdir};
 
-	my $path = File::Spec->rel2abs($relpath, $srcdir);
+	my $path = rel2abs($relpath, $srcdir);
 	delete $self->{assets}->{$path};
 	delete $self->{__relpaths}->{$relpath};
 

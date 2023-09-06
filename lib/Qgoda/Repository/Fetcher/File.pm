@@ -23,11 +23,12 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw(qgoda);
+
 use File::Copy::Recursive qw(dircopy);
-use File::Spec;
 use Archive::Extract;
 
 use Qgoda;
+use Qgoda::Util::FileSpec qw(catfile no_upwards);
 
 use base qw(Qgoda::Repository::Fetcher);
 
@@ -68,7 +69,7 @@ sub _extractArchive {
 							  directory => $destination,
 							  error => $ae->error));
 
-	my @contents = sort File::Spec->no_upwards(readdir $dh)
+	my @contents = sort no_upwards(readdir $dh)
 		or $logger->fatal(__x("archive '{archive} is empty",
 							  archive => $path));
 
@@ -77,7 +78,7 @@ sub _extractArchive {
 						 archive => $path, first => $contents[0]))
 		if @contents > 1;
 
-	my $first = File::Spec->catfile($destination, $contents[0]);
+	my $first = catfile($destination, $contents[0]);
 	if (-d $contents[0]) {
 		# Properly packaged, return the directory.
 		return $contents[0];

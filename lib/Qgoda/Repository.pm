@@ -24,12 +24,12 @@ use strict;
 
 use Locale::TextDomain qw(qgoda);
 
-use File::Spec;
 use File::HomeDir;
 use File::Temp;
 
 use Qgoda;
 use Qgoda::Util qw(read_file write_file is_archive);
+use Qgoda::Util::FileSpec qw(rel2abs filename_is_absolute);
 
 use URI;
 
@@ -40,7 +40,7 @@ sub new {
 
 	# This is a mess!  Re-write it from scratch ...
 	if ($uri =~ m{^\.\.?\\/}) {
-		$uri = 'file://' . File::Spec->rel2abs($uri);
+		$uri = 'file://' . rel2abs($uri);
 		$uri =~ s{\\}{/}g;
 		$uri = URI->new($uri);
 	} elsif ($uri =~ s{^~([^/\\]*)}{}) {
@@ -54,14 +54,14 @@ sub new {
 		$uri = 'file://' . $home . '/' . $uri;
 		$uri =~ s{\\}{/}g;
 		$uri = URI->new($uri);
-	} elsif (File::Spec->file_name_is_absolute($uri)) {
+	} elsif (filename_is_absolute $uri) {
 		$uri = URI->new('file://' . $uri);
 	}
 
 	if (undef eq $uri->scheme) {
 		my $file = "$uri";
 
-		if (File::Spec->file_name_is_absolute($file)) {
+		if (filename_is_absolute $file) {
 			$uri = URI->new($file, 'file');
 		} else {
 			if ($file =~ /^[_a-zA-Z][_a-zA-Z0-9]*\@/) {

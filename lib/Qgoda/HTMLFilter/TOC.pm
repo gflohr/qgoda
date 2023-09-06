@@ -22,16 +22,18 @@ use strict;
 
 #VERSION
 
+use Locale::TextDomain qw(qgoda);
+
 use Qgoda;
 use Qgoda::Util qw(html_escape slugify empty write_file);
-use Locale::TextDomain qw(qgoda);
+use Qgoda::Util::FileSpec qw(catfile);
 
 sub new {
 	my ($class, %args) = @_;
 
-	my $content_tag = exists $args{content_tag} 
+	my $content_tag = exists $args{content_tag}
 		? $args{content_tag} : 'qgoda-content';
-	my $toc_tag = exists $args{toc_tag} 
+	my $toc_tag = exists $args{toc_tag}
 		? $args{toc_tag} : 'qgoda-toc';
 	my $start = exists $args{start} ? $args{start} : 2;
 	my $end = exists $args{end} ? $args{end} : 6;	my $self = {
@@ -140,7 +142,7 @@ sub end {
 			$slug .= '-';
 		}
 		$self->{__slugs}->{$slug} = 1;
-		
+
 		${$args{output}} .= qq{<a href="#" name="$slug" id="$slug"></a>};
 		push @{$self->{__items}}, {
 		   slug => $slug,
@@ -206,12 +208,12 @@ sub __generateDefaultTemplate {
 	my $config = Qgoda->new->config;
 
 	my $template = 'components/toc.html';
-	my $template_file = File::Spec->catfile($config->{paths}->{views},
+	my $template_file = catfile($config->{paths}->{views},
 											$template);
 	return $template if -e $template_file;
-	my $level_template_file = File::Spec->catfile($config->{paths}->{views},
+	my $level_template_file = catfile($config->{paths}->{views},
 												  'components/toc/level.html');
-	
+
 	my $logger = Qgoda->new->logger;
 	$logger->warning(__x("writing default template '{template}'",
 						 template => $level_template_file));
@@ -238,7 +240,7 @@ __DATA__
 [% IF asset.toc.size %]
 <div class="toc">
   <div class="toc-title">[% gtx.gettext('Table Of Contents') %]</div>
-  [% INCLUDE components/toc/level.html 
+  [% INCLUDE components/toc/level.html
 	  items = asset.toc
 	  depth = 1 %]
 </div>
@@ -247,7 +249,7 @@ __DATA__
 [% IF asset.toc.size %]
 <div class="toc">
   <div class="toc-title">Table Of Contents</div>
-  [% INCLUDE components/toc/level.html 
+  [% INCLUDE components/toc/level.html
 	  items = asset.toc
 	  depth = 1 %]
 </div>
