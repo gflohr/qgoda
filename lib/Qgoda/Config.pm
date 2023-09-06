@@ -27,6 +27,7 @@ use Locale::TextDomain qw('qgoda');
 use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
+use Storable qw(dclone);
 use Encode;
 use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase
@@ -235,7 +236,8 @@ sub __compileDefaults {
 		$pattern = File::Globstar::ListMatch->new($pattern,
 												  !$self->{'case-sensitive'});
 		# Same here.. The default {} should be inserted by ajv.
-		push @defaults, [$pattern, $rule->{values} || {}];
+		my $values = dclone $rule->{values} if exists $rule->{values};
+		push @defaults, [$pattern, $values || {}];
 	}
 
 	return \@defaults;
