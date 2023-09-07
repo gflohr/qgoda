@@ -83,7 +83,7 @@ jobs:
         cd JavaScript-Duktape-XS &&
         cpanm --notest --verbose . &&
         cd .. &&
-        perl -MFile::Path -e "exit not File::Path::rmtree('JavaScript::Duktape::XS')"
+        perl -MFile::Path -e "exit not File::Path::rmtree('JavaScript-Duktape-XS')"
 
     - name: 'Installing other dependencies'
       run: cpanm --notest --installdeps --verbose .
