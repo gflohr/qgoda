@@ -75,8 +75,7 @@ jobs:
         cd AnyEvent-Filesys-Watcher &&
         cpanm --notest --verbose . &&
         cd .. &&
-        rm -r AnyEvent-Filesys-Watcher ||
-        rm -r -fo AnyEvent-Filesys-Watcher
+        perl -MFile::Path -e "File::Path::rmtree('AnyEvent-Filesys-Watcher')"
 
     - name: 'Install JavaScript::Duktape::XS'
       run: |
@@ -84,8 +83,7 @@ jobs:
         cd JavaScript-Duktape-XS &&
         cpanm --notest --verbose . &&
         cd .. &&
-        rm -r JavaScript-Duktape-XS ||
-        rm -r -fo JavaScript-Duktape-XS
+        perl -MFile::Path -e "File::Path::rmtree('JavaScript::Duktape::XS')"
 
     - name: 'Installing other dependencies'
       run: cpanm --notest --installdeps --verbose .
