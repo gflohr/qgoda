@@ -27,7 +27,7 @@ use Qgoda::Util qw(collect_defaults);
 
 my $q = Qgoda->new;
 
-my ($path, $rules, $path, $expect, $got);
+my ($path, $rules, $expect, $got);
 
 sub compile_rules($);
 
@@ -74,7 +74,7 @@ my $original_rules = [
     },
 ];
 $rules = compile_rules $original_rules;
-$original_rules->[0]->{values}->{deeply}->{nested} => 'gotcha';
+$original_rules->[0]->{values}->{deeply}->{nested} = 'gotcha';
 $expect = {
     type => 'post',
     view => 'post.html',

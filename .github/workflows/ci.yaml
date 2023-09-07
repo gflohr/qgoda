@@ -1,0 +1,107 @@
+# FIXME! How can we avoid DRY here? The only difference is that we want to
+# include more Perl versions.
+
+name: CI on Pull Request
+
+on:
+  pull_request:
+    branches: [ 'main' ]
+
+jobs:
+  on-pull-request:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        # perl-version should always be one behind the latest version.  The
+        # latest version is tested in the workflow triggered by the push.
+        perl-version:
+        - '5.36'
+        - '5.34'
+        - '5.32'
+        - '5.30'
+        - '5.28'
+        - '5.26'
+        - '5.24'
+        - '5.22'
+        - '5.20'
+        - '5.18'
+        - '5.16'
+        - '5.14'
+        include:
+        - perl-version: '5.38'
+          os: ubuntu-latest
+          coverage: true
+
+    steps:
+    - name: 'Check out repository'
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: 'Perl version'
+      run: perl -V
+
+    - name: Set up perl
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        perl-version: ${{ matrix.perl }}
+
+    - name: 'Install Linux::Inotify2'
+      if: matrix.os == 'ubuntu-latest'
+      run: cpanm --notest Linux::Inotify2
+
+    - name: 'Install Mac::FSEvents'
+      if: matrix.os == 'macos-latest'
+      run: cpanm --notest Mac::FSEvents
+
+    - name: 'Install Filesys::Notify::Win32::ReadDirectoryChanges'
+      if: matrix.os == 'windows-latest'
+      run: cpanm --notest 'Filesys::Notify::Win32::ReadDirectoryChanges'
+
+    - name: 'Install IO::KQueue'
+      if: matrix.os == 'macos-latest'
+      run: cpanm --notest IO::KQueue
+
+    - name: 'Install BSD::Resource'
+      if: matrix.os == 'macos-latest'
+      run: cpanm --notest BSD::Resource
+
+    - name: 'AnyEvent::Filesys::Watcher'
+      run: |
+        git clone https://github.com/gflohr/AnyEvent-Filesys-Watcher &&
+        cd AnyEvent-Filesys-Watcher &&
+        cpanm --notest --verbose . &&
+        cd .. &&
+        perl -MFile::Path -e "exit not File::Path::rmtree('AnyEvent-Filesys-Watcher')"
+
+    - name: 'Install JavaScript::Duktape::XS'
+      run: |
+        git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
+        cd JavaScript-Duktape-XS &&
+        cpanm --notest --verbose . &&
+        cd .. &&
+        perl -MFile::Path -e "exit not File::Path::rmtree('JavaScript-Duktape-XS')"
+
+    - name: 'Installing other dependencies'
+      run: cpanm --notest --installdeps --verbose .
+
+    - name: 'Prepare build'
+      run: perl Makefile.PL
+
+    - name: 'Build'
+      run: make
+
+    - name: 'Test'
+      run: prove -lmbv
+
+    - name: 'Test with coverage'
+      if: ${{ matrix.coverage }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cpanm -n Devel::Cover::Report::Coveralls
+        cover -test -report Coveralls
+

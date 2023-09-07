@@ -36,7 +36,7 @@ use overload
 sub new {
 	my ($class, $date) = @_;
 
-	my $date = str2time $date;
+	$date = str2time $date;
 	$date ||= 0;
 
 	bless \$date, $class;
@@ -44,7 +44,7 @@ sub new {
 
 sub newFromEpoch {
 	my ($class, $epoch) = @_;
-	
+
 	$epoch = time if !defined $epoch;
 	my $self = $epoch;
 

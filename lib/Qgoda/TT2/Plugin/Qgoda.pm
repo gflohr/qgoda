@@ -41,7 +41,7 @@ use Qgoda::Util qw(collect_defaults merge_data empty read_file html_escape
 				   escape_link qstrftime);
 use Qgoda::Util::FileSpec qw(
 	absolute_path abs2rel catfile rel2abs splitpath filename_is_absolute
-	canonpath splitdir updir
+	canonical_path splitdir updir
 );
 use Qgoda::Util::Date;
 use Qgoda::Builder;
@@ -247,7 +247,7 @@ sub bustCache {
 
 	require Qgoda;
 	my $srcdir = Qgoda->new->config->{srcdir};
-	my $fullpath = canonpath(catfile($srcdir, $path));
+	my $fullpath = canonical_path(catfile($srcdir, $path));
 
 	my @stat = stat $fullpath or return $uri;
 	if (defined $query) {
@@ -291,7 +291,7 @@ sub __include {
 				path => $_path, error => $!);
 	}
 
-	my $relpath = abs2rel($path, $srcdir);
+	my $relpath = canonical_path(File::Spec->abs2rel($path, $srcdir));
 	my $asset = Qgoda::Asset->new($path, $relpath);
 
 	my %overlay = %$overlay;

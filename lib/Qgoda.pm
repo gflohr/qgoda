@@ -182,7 +182,6 @@ sub build {
 
 	my $deleted = $self->__prune($site);
 
-	my $site = $self->getSite;
 	my $modified = scalar keys %{$site->getModified};
 
 	if ($modified + $deleted) {
@@ -1212,7 +1211,7 @@ sub __initNoSCMPatterns {
 	require File::Globstar::ListMatch;
 	return $config->{'no-scm'} =
 			File::Globstar::ListMatch->new($no_scm,
-										   $config->{'case-insensitive'});
+										   ignoreCase => $config->{'case-insensitive'});
 }
 
 sub versionControlled {
