@@ -58,7 +58,7 @@ jobs:
         cd AnyEvent-Filesys-Watcher &&
         cpanm --notest --verbose . &&
         cd .. &&
-        perl -MFile::Path -e "File::Path::rmtree('AnyEvent-Filesys-Watcher')"
+        perl -MFile::Path -e "exit not File::Path::rmtree('AnyEvent-Filesys-Watcher')"
 
     - name: 'Install JavaScript::Duktape::XS'
       run: |
@@ -66,7 +66,7 @@ jobs:
         cd JavaScript-Duktape-XS &&
         cpanm --notest --verbose . &&
         cd .. &&
-        perl -MFile::Path -e "File::Path::rmtree('JavaScript::Duktape::XS')"
+        perl -MFile::Path -e "exit not File::Path::rmtree('JavaScript-Duktape-XS')"
 
     - name: 'Install other dependencies'
       run: cpanm --notest --installdeps --verbose .
