@@ -48,15 +48,25 @@ sub new {
 	my $filename;
 	if (!empty $args{filename}) {
 		$filename = $args{filename};
-	} elsif (-e '_config.yaml') {
-		$filename = '_config.yaml';
-	} elsif (-e '_config.yml') {
-		$filename = '_config.yml';
-	} elsif (-e '_config.json') {
-		$filename = '_config.json';
+	} elsif (-e '_qgoda.yaml') {
+		$filename = '_qgoda.yaml';
+	} elsif (-e '_qgoda.yml') {
+		$filename = '_qgoda.yml';
+	} elsif (-e '_qgoda.json') {
+		$filename = '_qgoda.json';
 	} elsif (!$q->getOption('no-config')) {
-		$logger->warning(__"config file '_config.yaml' not found, "
-						   . "proceeding with defaults.");
+		$logger->warning(__"config file '_qgoda.yaml' not found, "
+		                 . "proceeding with defaults.");
+		if (-e '_config.yaml') {
+			$logger->warning(__"do you have to rename '_config.{extension}' "
+			                 . "to '_qgoda'.{extension}?", extension => 'yaml');
+		} elsif (-e '_config.yml') {
+			$logger->warning(__"do you have to rename '_config.{extension}' "
+			                 . "to '_qgoda'.{extension}?", extension => 'yml');
+		} elsif (-e '_config.json') {
+			$logger->warning(__"do you have to rename '_config.{extension}' "
+			                 . "to '_qgoda'.{extension}?", extension => 'json');
+		}
 	}
 
 	my $yaml = '';
@@ -73,11 +83,23 @@ sub new {
 
 	my $local_filename;
 	if (-e '_localconfig.yaml') {
-		$local_filename = '_localconfig.yaml';
+		$local_filename = '_localqgoda.yaml';
 	} elsif (-e '_localconfig.yml') {
-		$local_filename = '_localconfig.yml';
+		$local_filename = '_localqgoda.yml';
 	} elsif (-e '_localconfig.json') {
-		$local_filename = '_localconfig.json';
+		$local_filename = '_localqgoda.json';
+	} elsif (-e '_config.yaml') {
+		$logger->warning(__"do you have to rename '_localconfig.{extension}' "
+		                 . "to '_localqgoda'.{extension}?",
+		                 extension => 'yaml');
+	} elsif (-e '_config.yml') {
+		$logger->warning(__"do you have to rename '_localconfig.{extension}' "
+		                 . "to '_localqgoda'.{extension}?",
+		                 extension => 'yml');
+	} elsif (-e '_config.json') {
+		$logger->warning(__"do you have to rename '_localconfig.{extension}' "
+		                 . "to '_localqgoda'.{extension}?",
+		                 extension => 'json');
 	}
 
 	my $local_yaml = '';

@@ -26,13 +26,13 @@ my ($site, $x);
 
 $site = TestSite->new(name => 'config-syntax-error',
 	files => {
-		'_config.yaml' => 'foo: "bar',
+		'_qgoda.yaml' => 'foo: "bar',
 	},
 );
 
 $x = $site->exception;
 ok $x, 'syntax error in configuration should throw YAMLException';
-like $x, qr/^_config\.yaml: YAMLException/;
+like $x, qr/^_qgoda\.yaml: YAMLException/;
 
 $site->tearDown.
 

@@ -31,7 +31,7 @@ my $site = TestSite->new(name => 'config-defaults',
 my $x = $site->exception;
 ok $x, 'invalid configuration should throw exception';
 is $x, <<EOF;
-_config.yaml: CONFIG: should NOT have additional properties
+_qgoda.yaml: CONFIG: should NOT have additional properties
 	additionalProperty: owner
 EOF
 

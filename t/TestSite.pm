@@ -96,7 +96,7 @@ sub __setupConfig {
     my $yaml;
 
 	if (empty $self->{config}) {
-		unlink '_config.yaml';
+		unlink '_qgoda.yaml';
 		return $self;
 	} elsif (ref $self->{config}) {
         $yaml = YAML::XS::Dump($self->{config});
@@ -104,7 +104,7 @@ sub __setupConfig {
         $yaml = $self->{config};
     }
 
-	write_file '_config.yaml', $yaml or die;
+	write_file '_qgoda.yaml', $yaml or die;
 
 	return $self;
 }
