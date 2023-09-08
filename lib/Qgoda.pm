@@ -1031,7 +1031,7 @@ sub __filesysChangeFilter {
 
 	my $config = $self->{__config};
 
-	if ($path =~ m{_stop$} && -e $path) {
+	if ($path =~ m{/_stop$} && -e $path) {
 		my $srcdir = $config->{paths}->{srcdir};
 		my $relpath = abs2rel($path, $srcdir);
 		if ('_stop' eq $relpath) {

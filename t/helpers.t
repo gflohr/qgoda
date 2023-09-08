@@ -58,7 +58,7 @@ my $site = TestSite->new(
 	},
 	files => {
 		'_views/default.html' => '[% asset.content %]',
-		'_config.yaml' => $config,
+		'_qgoda.yaml' => $config,
 		'_script.pl' => $script,
 	}
 );

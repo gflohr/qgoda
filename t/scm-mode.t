@@ -72,7 +72,7 @@ my $repo = Git::Repository->new(work_tree => $repo_dir);
 ok $repo;
 # Git::Repository->run returns the command output which is empty (aka false).
 # It will throw an exception in case of errors.
-ok !$repo->run(add => '_config.yaml');
+ok !$repo->run(add => '_qgoda.yaml');
 ok !$repo->run(add => 'old.md');
 ok !$repo->run(add => 'template-added.md');
 ok !$repo->run(add => 'template-not-added.md');
