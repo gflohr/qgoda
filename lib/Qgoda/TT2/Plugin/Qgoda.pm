@@ -964,6 +964,28 @@ sub fileparse {
 	return [File::Basename::fileparse($filename, qr/\.[^.]*/)];
 }
 
+sub qgodaSchema {
+	my ($self) = @_;
+
+	require Qgoda::Schema;
+
+	return Qgoda::Schema->config;
+}
+
+sub toJSON {
+	my ($self, $what, @options) = @_;
+
+	my $json = JSON->new;
+	foreach my $option (@options) {
+		eval { $json->$option };
+		if ($@) {
+			die "unsupported JSON option '$option': $@\n";
+		}
+	}
+
+	return $json->encode($what);
+}
+
 1;
 
 =head1 NAME
