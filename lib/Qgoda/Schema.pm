@@ -471,6 +471,7 @@ sub config {
 			},
 			'post-processors' => {
 				description => __"Modules to run after each build.",
+				type => 'object',
 				additionalProperties => false,
 				default => {
 					modules => [],
