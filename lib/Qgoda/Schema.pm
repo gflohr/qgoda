@@ -483,12 +483,12 @@ sub config {
 						description => __"The post-processor modules.",
 						default => [],
 						type => 'array',
-						patternProperties => {
-							'[_a-zA-Z][_a-zA-Z0-9]*(::[_a-zA-Z][_a-zA-Z0-9]*)*' => {
-								description => __"Name of one "
-												 . "post-processor module.",
-								type => 'string',
-							}
+						items => {
+							description => __"Name of one "
+												. "post-processor module.",
+							type => 'string',
+							pattern =>
+								'[_a-zA-Z][_a-zA-Z0-9]*(::[_a-zA-Z][_a-zA-Z0-9]*)*',
 						}
 					},
 					options => {
