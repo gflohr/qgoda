@@ -35,7 +35,7 @@ sub config {
 	# FIXME! Fill in the variable parts.
 	return {
 		'$schema' => 'http://json-schema.org/draft-07/schema#',
-		'$id' => 'http://www.qgoda.net/schema/Qgoda/v'
+		'$id' => 'http://www.qgoda.net/schema/Qgoda/'
 				 . $Qgoda::VERSION
 				 . '/config.schema.json',
 		title => __"Configuration",
@@ -96,12 +96,7 @@ sub config {
 							additionalProperties => false,
 							default => {},
 							patternProperties => {
-								'.*' => {
-									type => [
-										'string', 'number', 'integer', 'object',
-										'array', 'boolean', 'null'
-									]
-								}
+								'.*' => {},
 							},
 						}
 					}
@@ -140,10 +135,6 @@ sub config {
 				default => {
 					'*' => "[% '' %]\n"
 				},
-				items => {
-					description => __"Chain name or '*' for any chain.",
-
-				}
 			},
 			generator => {
 				description => __"Value for the generator meta tag in "
@@ -175,7 +166,7 @@ sub config {
 				default => 'index'
 			},
 			latency => {
-				descriptions => __"Number of seconds to wait until a rebuild "
+				description => __"Number of seconds to wait until a rebuild "
 								. "is triggered after a file system change in "
 								. "watch mode.",
 				type => 'number',
@@ -193,7 +184,7 @@ sub config {
 				}
 			},
 			'link-score' => {
-				descriptions => __"By which value should two assets be "
+				description => __"By which value should two assets be "
 								. "considered more related if they link to "
 								. "to each other.",
 				type => 'number',
@@ -370,20 +361,18 @@ sub config {
 			private => {
 				description => __"Site-specific variables.  You can also choose"
 				               . " the namespace 'site' if you prefer.",
-				type => [
-					'string', 'number', 'integer', 'object', 'array',
-					'boolean', 'null'
-				],
 			},
 			processors => {
 				description => __"The processors to use for generating "
 								 . "content.",
+				type => 'object',
 				additionalProperties => false,
 				default => {},
 				required => ['chains', 'options', 'triggers'],
 				properties => {
 					chains => {
 						description => __"The processor chains.",
+						type => 'object',
 						default => {
 							html => {
 								modules => ['TT2', 'Strip', 'HTMLFilter']
@@ -401,7 +390,7 @@ sub config {
 							},
 						},
 						patternProperties => {
-							'[_a-zA-z][a-zA-Z0-9]*' => {
+							'[_a-zA-Z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
 												 . "chain.",
 								type => 'object',
@@ -442,12 +431,6 @@ sub config {
 									   . " processor plug-ins",
 						type => 'object',
 						additionalProperties => true,
-						items => {
-							type => [
-								'string', 'number', 'integer', 'object',
-								'array', 'boolean', 'null'
-							]
-						},
 						default => {
 							HTMLFilter => {
 								TOC => {
@@ -467,6 +450,7 @@ sub config {
 						description => __"Filename extenders that trigger a "
 									   . " particular chain if not specified"
 									   . " in front matter or defaults.",
+						type => 'object',
 						default => {
 								htm => 'html',
 								html => 'html',
@@ -489,6 +473,7 @@ sub config {
 			},
 			'post-processors' => {
 				description => __"Modules to run after each build.",
+				type => 'object',
 				additionalProperties => false,
 				default => {
 					modules => [],
@@ -500,12 +485,12 @@ sub config {
 						description => __"The post-processor modules.",
 						default => [],
 						type => 'array',
-						patternProperties => {
-							'[_a-zA-Z][_a-zA-Z0-9]*(::[_a-zA-Z][_a-zA-Z0-9]*)*' => {
-								description => __"Name of one "
-												 . "post-processor module.",
-								type => 'string',
-							}
+						items => {
+							description => __"Name of one "
+												. "post-processor module.",
+							type => 'string',
+							pattern =>
+								'[_a-zA-Z][_a-zA-Z0-9]*(::[_a-zA-Z][_a-zA-Z0-9]*)*',
 						}
 					},
 					options => {
@@ -514,12 +499,7 @@ sub config {
 						type => 'object',
 						additionalProperties => false,
 						patternProperties => {
-							'.*' => {
-								type => [
-									'string', 'number', 'integer', 'object',
-									'array', 'boolean', 'null'
-								]
-							}
+							'.*' => {},
 						},
 						default => {},
 					},
@@ -537,10 +517,6 @@ sub config {
 			site => {
 				description => __"Site-specific variables.  You can also choose"
 				               . " the namespace 'private' if you prefer.",
-				type => [
-					'string', 'number', 'integer', 'object', 'array',
-					'boolean', 'null'
-				],
 			},
 			srcdir => {
 				description => __"The source directory for all assets. Do "
@@ -561,8 +537,11 @@ sub config {
 					links => 1,
 					tags => 2
 				},
-				items => {
-					type => 'string',
+				patternProperties => {
+					'.+' => {
+						type => 'integer',
+						nullable => true,
+					}
 				}
 			},
 			title => {
@@ -585,6 +564,7 @@ sub config {
 			},
 			view => {
 				description => __"The default view template to use.",
+				type => 'string',
 				default => 'default.html',
 				minLength => 1,
 			}
