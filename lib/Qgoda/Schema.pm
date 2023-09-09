@@ -372,6 +372,7 @@ sub config {
 				properties => {
 					chains => {
 						description => __"The processor chains.",
+						type => 'object',
 						default => {
 							html => {
 								modules => ['TT2', 'Strip', 'HTMLFilter']
@@ -430,7 +431,6 @@ sub config {
 									   . " processor plug-ins",
 						type => 'object',
 						additionalProperties => true,
-						items => {},
 						default => {
 							HTMLFilter => {
 								TOC => {
@@ -450,6 +450,7 @@ sub config {
 						description => __"Filename extenders that trigger a "
 									   . " particular chain if not specified"
 									   . " in front matter or defaults.",
+						type => 'object',
 						default => {
 								htm => 'html',
 								html => 'html',
@@ -536,8 +537,11 @@ sub config {
 					links => 1,
 					tags => 2
 				},
-				items => {
-					type => 'string',
+				patternProperties => {
+					'.+' => {
+						type => 'integer',
+						nullable => true,
+					}
 				}
 			},
 			title => {
@@ -560,6 +564,7 @@ sub config {
 			},
 			view => {
 				description => __"The default view template to use.",
+				type => 'string',
 				default => 'default.html',
 				minLength => 1,
 			}
