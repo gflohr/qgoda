@@ -96,12 +96,7 @@ sub config {
 							additionalProperties => false,
 							default => {},
 							patternProperties => {
-								'.*' => {
-									type => [
-										'string', 'number', 'integer', 'object',
-										'array', 'boolean', 'null'
-									]
-								}
+								'.*' => {},
 							},
 						}
 					}
@@ -140,10 +135,6 @@ sub config {
 				default => {
 					'*' => "[% '' %]\n"
 				},
-				items => {
-					description => __"Chain name or '*' for any chain.",
-
-				}
 			},
 			generator => {
 				description => __"Value for the generator meta tag in "
@@ -175,7 +166,7 @@ sub config {
 				default => 'index'
 			},
 			latency => {
-				descriptions => __"Number of seconds to wait until a rebuild "
+				description => __"Number of seconds to wait until a rebuild "
 								. "is triggered after a file system change in "
 								. "watch mode.",
 				type => 'number',
@@ -193,7 +184,7 @@ sub config {
 				}
 			},
 			'link-score' => {
-				descriptions => __"By which value should two assets be "
+				description => __"By which value should two assets be "
 								. "considered more related if they link to "
 								. "to each other.",
 				type => 'number',
@@ -370,10 +361,6 @@ sub config {
 			private => {
 				description => __"Site-specific variables.  You can also choose"
 				               . " the namespace 'site' if you prefer.",
-				type => [
-					'string', 'number', 'integer', 'object', 'array',
-					'boolean', 'null'
-				],
 			},
 			processors => {
 				description => __"The processors to use for generating "
@@ -442,12 +429,7 @@ sub config {
 									   . " processor plug-ins",
 						type => 'object',
 						additionalProperties => true,
-						items => {
-							type => [
-								'string', 'number', 'integer', 'object',
-								'array', 'boolean', 'null'
-							]
-						},
+						items => {},
 						default => {
 							HTMLFilter => {
 								TOC => {
@@ -514,12 +496,7 @@ sub config {
 						type => 'object',
 						additionalProperties => false,
 						patternProperties => {
-							'.*' => {
-								type => [
-									'string', 'number', 'integer', 'object',
-									'array', 'boolean', 'null'
-								]
-							}
+							'.*' => {},
 						},
 						default => {},
 					},
@@ -537,10 +514,6 @@ sub config {
 			site => {
 				description => __"Site-specific variables.  You can also choose"
 				               . " the namespace 'private' if you prefer.",
-				type => [
-					'string', 'number', 'integer', 'object', 'array',
-					'boolean', 'null'
-				],
 			},
 			srcdir => {
 				description => __"The source directory for all assets. Do "
