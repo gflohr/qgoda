@@ -365,6 +365,7 @@ sub config {
 			processors => {
 				description => __"The processors to use for generating "
 								 . "content.",
+				type => 'object',
 				additionalProperties => false,
 				default => {},
 				required => ['chains', 'options', 'triggers'],
@@ -388,7 +389,7 @@ sub config {
 							},
 						},
 						patternProperties => {
-							'[_a-zA-z][a-zA-Z0-9]*' => {
+							'[_a-zA-Z][a-zA-Z0-9]*' => {
 								description => __"Properties of one processor "
 												 . "chain.",
 								type => 'object',
