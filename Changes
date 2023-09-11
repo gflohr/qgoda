@@ -5,6 +5,7 @@
 	- Breaking changes:
       * The name of the configuration file is now "_qgoda.yaml", "_qgoda.yml",
         or "_qgoda.json"!
+      * Likewise, "_localconfig.*" is now "_localqgoda.*".
 	  * Private configuration variables must start with an underscore.
 	- Switch to AnyEvent::Filesys::Watcher:
 	  * support for MSWin32
