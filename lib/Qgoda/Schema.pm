@@ -35,9 +35,9 @@ sub config {
 	# FIXME! Fill in the variable parts.
 	return {
 		'$schema' => 'http://json-schema.org/draft-07/schema#',
-		'$id' => 'https://www.qgoda.net/schema/Qgoda/'
+		'$id' => 'https://www.qgoda.net/schemas/schema-'
 				 . $Qgoda::VERSION
-				 . '/config.schema.json',
+				 . '.json',
 		title => __"Configuration",
 		description => __"A Qgoda Configuration",
 		type => 'object',
