@@ -35,7 +35,7 @@ sub config {
 	# FIXME! Fill in the variable parts.
 	return {
 		'$schema' => 'http://json-schema.org/draft-07/schema#',
-		'$id' => 'https://www.qgoda.net/schemas/schema-'
+		'$id' => 'https://www.qgoda.net/schemas/qgoda-'
 				 . $Qgoda::VERSION
 				 . '.json',
 		title => __"Configuration",
@@ -229,7 +229,7 @@ sub config {
 									   . "files, defaults to the absolute path "
 									   . "to '_site' in the current directory.",
 						type => 'string',
-						default => catdir(absolute_path(), '_site')
+						default => '_site',
 					},
 					timestamp => {
 						description => __"Name of the timestamp file containing "
@@ -524,7 +524,8 @@ sub config {
 							   . "overwritten at runtime with the absolute "
 							   . "path to the current directory.",
 				type => 'string',
-				const => absolute_path()
+				readOnly => true,
+				default => '.'
 			},
 			taxonomies => {
 				description => __"Key/value pairs of taxonomy names and their "
