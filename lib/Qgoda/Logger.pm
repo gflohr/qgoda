@@ -205,4 +205,14 @@ sub client {
 	return $self->{__client};
 }
 
+sub prefix {
+	my ($self, $prefix) = @_;
+
+	if (@_ > 1) {
+		$self->{__prefix} = $prefix;
+	}
+
+	return $self->{__prefix};
+}
+
 1;

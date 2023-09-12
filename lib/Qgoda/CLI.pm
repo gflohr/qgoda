@@ -140,7 +140,7 @@ EOF
   watch                      build, then watch for changes and build on demand
   config                     dump the current configuration and exit
   schema                     dump the configuration JSON schema and exit
-  init                       initialize a new qgoda site
+  init                       initialize a new Qgoda site
   dump                       dump the site structure as JSON (implies --quiet)
   javascript                 evaluate JavaScript code
   js                         same as "javascript" above
@@ -148,6 +148,7 @@ EOF
   xgettext                   extract translatable strings from Markdown
                              files
   po                         various commands for processing translations
+  migrate                    migrate from other software to Qgoda
 EOF
 
 	$msg .= "\n";

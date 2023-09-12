@@ -23,6 +23,7 @@ use strict;
 #VERSION
 
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
+use File::Spec;
 
 use Qgoda::CLI;
 use Qgoda::Util qw(class2module);
@@ -92,7 +93,7 @@ sub _displayHelp {
 	my $module = class2module ref $self;
 
 	my $path = $INC{$module};
-	$path = './' . $path if !file_name_is_absolute $path;
+	$path = './' . $path if !filename_is_absolute $path;
 
 	$^W = 1 if $ENV{'PERLDOCDEBUG'};
 	pop @INC if $INC[-1] eq '.';
