@@ -20,25 +20,35 @@ use strict;
 
 use Test::More;
 
-use Qgoda::Util::Hash qw(set_dot_key);
+use Qgoda::Util::Hash qw(set_dotted get_dotted);
 
 my $got = {};
 my $expect = {};
 
 $expect->{foo}->{bar}->{baz} = 42;
-set_dot_key $got, 'foo.bar.baz', 42;
+set_dotted $got, 'foo.bar.baz', 42;
 is_deeply $got, $expect, 'simple key';
 
 $expect->{foo}->{bad}->{bus} = 2304;
-set_dot_key $got, 'foo.bad.bus', 2304;
+set_dotted $got, 'foo.bad.bus', 2304;
 is_deeply $got, $expect, 'existing intermediate key';
 
 $expect->{foo}->{bar} = 48;
-set_dot_key $got, 'foo.bar', 48;
+set_dotted $got, 'foo.bar', 48;
 is_deeply $got, $expect, 'overwriting intermediate key';
 
 $expect->{foo}->{bad}->{bus} = 1989;
-set_dot_key $got, 'foo.bad.bus', 1989;
+set_dotted $got, 'foo.bad.bus', 1989;
 is_deeply $got, $expect, 'overwriting value';
+
+is_deeply(get_dotted($got, 'foo'), $got->{foo}, 'key foo');
+is_deeply(get_dotted($got, 'foo.bad'), $got->{foo}->{bad}, 'key foo.bad');
+is_deeply(
+	get_dotted($got, 'foo.bad.bus'),
+	$got->{foo}->{bad}->{bus},
+	'key foo.bad.bus'
+);
+is(get_dotted($got, 'la.la.la'), undef, 'not existing');
+
 
 done_testing;

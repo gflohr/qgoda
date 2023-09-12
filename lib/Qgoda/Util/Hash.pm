@@ -26,9 +26,27 @@ use File::Spec;
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
-@EXPORT_OK = qw(set_dot_key);
+@EXPORT_OK = qw(get_dotted set_dotted);
 
-sub set_dot_key($$$) {
+sub get_dotted($$) {
+	my ($hash, $path) = @_;
+
+	my $addr = $hash;
+	my @path = split /\./, $path;
+	my $last = pop @path;
+	foreach my $key (@path) {
+		if (!exists $addr->{$key} || !ref $addr->{$key}) {
+			return;
+		}
+		$addr = $addr->{$key};
+	}
+
+	return if !exists $addr->{$last};
+
+	return $addr->{$last};
+}
+
+sub set_dotted($$$) {
 	my ($hash, $path, $value) = @_;
 
 	my $addr = $hash;

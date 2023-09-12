@@ -26,6 +26,7 @@ use Locale::TextDomain qw('qgoda');
 use YAML;
 
 use Qgoda::Util qw(safe_yaml_load merge_data read_file);
+use Qgoda::Util::Hash qw(set_dotted);
 
 use base qw(Qgoda::Migrator);
 
