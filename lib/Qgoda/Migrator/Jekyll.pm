@@ -26,7 +26,7 @@ use Locale::TextDomain qw('qgoda');
 use YAML;
 
 use Qgoda::Util qw(safe_yaml_load merge_data read_file);
-use Qgoda::Util::Hash qw(set_dotted);
+use Qgoda::Util::Hash qw(get_dotted set_dotted);
 
 use base qw(Qgoda::Migrator);
 
@@ -150,6 +150,8 @@ sub __migrateConfig {
 		$config = merge_data $config, $file_config;
 	}
 
+	$self->__migrateConfigVariables($config);
+
 	$self->writeConfig;
 
 	return $self;
@@ -157,28 +159,47 @@ sub __migrateConfig {
 
 use constant CONFIG_ACTIONS => {
 	source => { call => '__migrateConfigSource' },
-	destination => { set => 'path.site'},
+	destination => { copy => 'path.site'},
 };
 
-sub __migrateConfigSection {
-	my ($self, $config, $prefix) = @_;
+sub __migrateConfigVariables {
+	my ($self, $jekyll_config) = @_;
 
-	$prefix .= '.' if defined $prefix;
 	my $default_action = {
 		call => '__migrateUnhandledConfigVariable',
 	};
-	foreach my $variable (keys %$config) {
-		my $full_variable = "$prefix$variable";
-		my $action = CONFIG_ACTIONS->{$full_variable} || $default_action;
+	my $config = $self->config;
+$DB::single = 1;
+	foreach my $variable (keys %$jekyll_config) {
+		my $action = CONFIG_ACTIONS->{$variable} || $default_action;
 		if ($action->{call}) {
 			my $method = $action->{call};
-			$self->$method($variable, $full_variable, $config);
-		} elsif ($action->{set}) {
-
+			$self->$method($variable, get_dotted $jekyll_config, $variable);
+		} elsif ($action->{copy}) {
+			set_dotted $config, $action->{copy},
+				get_dotted $jekyll_config, $variable;
 		}
 	}
 
 	return $self;
+}
+
+sub __migrateUnhandledConfigVariable {
+	my ($self, $variable, $value) = @_;
+
+	my $config = $self->config;
+	set_dotted $config, "site.$variable", $value;
+
+	return $self;
+}
+
+sub __migrateConfigSource {
+	my ($self, undef, $source) = @_;
+
+	return $self if '.' eq $source;
+
+	$self->logger->fatal(
+		__x("config.source must always be '.', not '{source}'", source => $source));
 }
 
 1;
