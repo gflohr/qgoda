@@ -150,7 +150,8 @@ sub __migrateConfig {
 		$config = merge_data $config, $file_config;
 	}
 
-	$self->__migrateConfigVariables($config);
+	$self->{__jekyll_config} = $config;
+	$self->__migrateConfigVariables;
 
 	$self->writeConfig;
 
@@ -160,24 +161,35 @@ sub __migrateConfig {
 use constant CONFIG_ACTIONS => {
 	source => { call => '__migrateConfigSource' },
 	destination => { copy => 'path.site'},
+	collections_dir => { ignore => 1 },
+	plugins_dir => { ignore => 1 },
+	layouts_dir => { ignore => 1 },
+	data_dir => { ignore => 1 },
+	includes_dir => { ignore => 1 },
+	sass => { ignore => 1 },
+	collections => { ignore => 1 },
+	include => { call => '__migrateExcludeInclude' },
+	exclude => { call => '__migrateExcludeInclude' },
 };
 
 sub __migrateConfigVariables {
-	my ($self, $jekyll_config) = @_;
+	my ($self) = @_;
 
+	my $jekyll_config = $self->{__jekyll_config};
 	my $default_action = {
 		call => '__migrateUnhandledConfigVariable',
 	};
 	my $config = $self->config;
-$DB::single = 1;
 	foreach my $variable (keys %$jekyll_config) {
 		my $action = CONFIG_ACTIONS->{$variable} || $default_action;
 		if ($action->{call}) {
 			my $method = $action->{call};
-			$self->$method($variable, get_dotted $jekyll_config, $variable);
+			$self->$method($variable);
 		} elsif ($action->{copy}) {
 			set_dotted $config, $action->{copy},
 				get_dotted $jekyll_config, $variable;
+		} elsif ($action->{ignore}) {
+			next;
 		}
 	}
 
@@ -185,7 +197,10 @@ $DB::single = 1;
 }
 
 sub __migrateUnhandledConfigVariable {
-	my ($self, $variable, $value) = @_;
+	my ($self, $variable) = @_;
+
+	my $jekyll_config = $self->{__jekyll_config};
+	my $value = get_dotted $jekyll_config, $variable;
 
 	my $config = $self->config;
 	set_dotted $config, "site.$variable", $value;
@@ -194,12 +209,50 @@ sub __migrateUnhandledConfigVariable {
 }
 
 sub __migrateConfigSource {
-	my ($self, undef, $source) = @_;
+	my ($self) = @_;
+
+	my $jekyll_config = $self->{__jekyll_config};
+	my $source = get_dotted $jekyll_config, 'source';
 
 	return $self if '.' eq $source;
 
 	$self->logger->fatal(
 		__x("config.source must always be '.', not '{source}'", source => $source));
+}
+
+sub __migrateExcludeInclude {
+	my ($self) = @_;
+
+	my $config = $self->config;
+	return $self if exists $config->{exclude};
+
+	my $jekyll_config = $self->{__jekyll_config};
+	my $exclude = $jekyll_config->{exclude} || [];
+	my $include = $jekyll_config->{include} || [];
+
+	my %ignore = map { $_ => 1 } qw(
+		Gemfile Gemfile.lock
+		vendor/bundle/ vendor/cache/ vendor/gems/ vendor/ruby/
+	);
+	my @patterns;
+	foreach my $filename (@$exclude) {
+		if ($filename =~ m{/}) {
+			push @patterns, $filename;
+		} else {
+			push @patterns, "/$filename";
+		}
+	}
+	foreach my $filename (@$include) {
+		if ($filename =~ m{/}) {
+			push @patterns, "!$filename";
+		} else {
+			push @patterns, "!/$filename";
+		}
+	}
+
+	$config->{exclude} = \@patterns;
+
+	return;
 }
 
 1;
