@@ -1,10 +1,18 @@
 {{$NEXT}}
+	- Breaking changes:
+	  * The name of the configuration file is now "_qgoda.yaml", "_qgoda.yml",
+	  or "_qgoda.json"!
+	  * Likewise, "_localconfig.*" is now "_localqgoda.*".
 	- Broken watch mode fixed (GitHub issue #108).
+	- Various improvements to the schema.
+	- Most recent schema is always available online at
+	  https://www.qgoda.net/schemas/qgoda.json.
+	- Current schema is always available online at
+	  https://www.qgoda.net/schemas/qgoda-v0.10.1.json (replace v0.10.1 with
+	  current version).
 
 0.10.0 - 2023-07-14
 	- Breaking changes:
-      * The name of the configuration file is now "_qgoda.yaml", "_qgoda.yml",
-        or "_qgoda.json"!
 	  * Private configuration variables must start with an underscore.
 	- Switch to AnyEvent::Filesys::Watcher:
 	  * support for MSWin32
@@ -25,7 +33,7 @@
 	- New template variable `excerpt_html` with the HTML version of the
 	  excerpt.
 	- No longer depends on Moose (because Markdown::Pod has been removed as a
-      depency).
+	  depency).
 
 0.9.8 - 2020-04-13
 	- Use AnyEvent::Filesys::Notify again
