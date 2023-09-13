@@ -409,7 +409,28 @@ sub __migrateConfigPermalink {
 		weekdate => '/:categories/:year/W:week/:short_day/:title:output_ext',
 		none => '/:categories/:title:output_ext',
 	);
-die;
+
+	$permalink = $built_ins{$permalink} if exists $built_ins{$permalink};
+
+	my %transforms = (
+		year => 'date.year',
+		short_year => 'date.shortYear',
+		month => 'date.month',
+		i_month => 'imonth',
+		short_month => 'date.amonthname',
+		long_month => 'date.monthname',
+		day => 'date.day',
+		i_day => 'date.iday',
+		y_day => 'date.yday',
+		week => 'date.week',
+		w_day => 'date.wday',
+		short_day => 'awdayname',
+		long_day => 'wdayname',
+		hour => 'date.hour',
+		# FIXME! Manipulate the meta data for the page header for Jekyll
+		# compatibility mode, see TODO-migration.
+		categories => 'jekyll_categories',
+	);
 }
 
 1;

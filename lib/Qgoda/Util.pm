@@ -224,7 +224,7 @@ sub interpolate($$) {
 		$data = {};
 	}
 
-$DB::single = 1;
+	my $jekyll_post = 'HASH' eq $type && ('posts' eq $type && 'post' eq $type);
 	my $result = '';
 	while ($string =~ s/^([^\{]*)\{//) {
 		$result .= $1;
@@ -243,14 +243,16 @@ $DB::single = 1;
 		    && $data->{date}->isa('Qgoda::Util::Date')) {
 			my $method = $tokens[2]->[1];
 			$value = $data->{date}->$method;
-		} elsif (1 == @tokens
+		} elsif ($jekyll_post
+		         && 1 == @tokens
 		         && 'v' eq $tokens[0]->[0]
 		         && 'jekyll_categories' eq $tokens[0]->[1]
 		         && exists $data->{categories}
 		         && ref $data->{categories}
 		         && 'ARRAY' eq reftype $data->{categories}) {
 			$value = join '/', @{$data->{categories}};
-		} elsif (1 == @tokens
+		} elsif ($jekyll_post
+		         && 1 == @tokens
 		         && 'v' eq $tokens[0]->[0]
 		         && 'jekyll_category_slugs' eq $tokens[0]->[1]
 		         && exists $data->{categories}

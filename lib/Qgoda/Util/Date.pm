@@ -63,6 +63,24 @@ sub year {
 	return 1900 + (localtime $$self)[5]
 }
 
+sub shortYear {
+	my ($self) = @_;
+
+	return (localtime $$self)[5] % 100;
+}
+
+sub wyear {
+	my ($self) = @_;
+
+	return strftime '%G', localtime $$self;
+}
+
+sub week {
+	my ($self) = @_;
+
+	return strftime '%V', localtime $$self;
+}
+
 sub month {
 	my ($self) = @_;
 
@@ -97,6 +115,12 @@ sub iday {
 	my ($self) = @_;
 
 	return (localtime $$self)[3]
+}
+
+sub yday {
+	my ($self) = @_;
+
+	return strftime '%j', localtime $$self;
 }
 
 sub hour {
@@ -146,6 +170,12 @@ sub awdayname {
 	my ($self) = @_;
 
 	return strftime '%a', localtime $$self;
+}
+
+sub wday {
+	my ($self) = @_;
+
+	return (6 + strftime '%a', localtime $$self) % 7;
 }
 
 sub monthname {
