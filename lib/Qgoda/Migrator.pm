@@ -27,11 +27,18 @@ use File::Find qw(find);
 use File::Path qw(remove_tree);
 use YAML::XS;
 
+use Qgoda::Schema;
+use Qgoda::Config;
 use Qgoda::Util qw(write_file);
 use Qgoda::Util::FileSpec qw(catfile);
 
 sub new {
 	my ($class, $args, $global_options, %options) = @_;
+
+	my $schema = Qgoda::Schema->config;
+	my $default_config = Qgoda::Config->processSchema(
+		$schema, '', undef, '', undef
+	);
 
 	my @files;
 	find(sub { push @files, $File::Find::name if !-d $_}, '.');
@@ -43,6 +50,7 @@ sub new {
 		__options => \%options,
 		__files => \@files,
 		__errors => 0,
+		__default_config => $default_config,
 	}, $class;
 
 	my $logger = $self->logger;
@@ -139,6 +147,8 @@ sub options { shift->{__options} }
 sub files { @{shift->{__files}} }
 
 sub config { shift->{__config} }
+
+sub defaultConfig { shift->{__default_config} }
 
 sub writeConfig {
 	my ($self) = @_;

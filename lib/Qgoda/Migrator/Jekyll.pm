@@ -23,7 +23,6 @@ use strict;
 #VERSION
 
 use Locale::TextDomain qw('qgoda');
-use YAML;
 
 use Qgoda::Util qw(safe_yaml_load merge_data read_file);
 use Qgoda::Util::Hash qw(get_dotted set_dotted);
@@ -116,9 +115,11 @@ sub _run {
 
 	my $logger = $self->logger;
 
-	$logger->info('starting migration');
+	$logger->info(__"starting migration");
 
 	$self->__migrateConfig;
+
+	$logger->info(__"migration done");
 
 	return $self;
 }
@@ -127,8 +128,9 @@ sub __migrateConfig {
 	my ($self) = @_;
 
 	my $logger = $self->logger;
+	$logger->info(__"migrating configuration");
 
-	my $config = YAML::Load(DEFAULT_CONFIGURATION);
+	my $config = safe_yaml_load DEFAULT_CONFIGURATION;
 
 	my $config_files = $self->options->{settings}->{config};
 	if (!defined $config_files) {
@@ -168,10 +170,30 @@ use constant CONFIG_ACTIONS => {
 	includes_dir => { ignore => 1 },
 	sass => { ignore => 1 },
 	collections => { ignore => 1 },
+	safe => { ignore => 1 },
 	include => { call => '__migrateConfigExcludeInclude' },
 	exclude => { call => '__migrateConfigExcludeInclude' },
 	keep_files => { call => '__migrateConfigKeepFiles' },
 	encoding => { call => '__migrateConfigEncoding' },
+	markdown_ext => { call => '__migrateConfigMarkdownExt' },
+	strict_front_matter => { call => '__migrateConfigStrictFrontMatter' },
+	show_drafts => { ignore => 1 },
+	limit_posts => { ignore => 1 },
+	future => { ignore => 1 },
+	unpublished => { ignore => 1 },
+	whitelist => { ignore => 1 },
+	plugins => { ignore => 1 },
+	markdown => { ignore => 1 },
+	highlighter => { ignore => 1 },
+	lsi => { ignore => 1 },
+	excerpt_separator => { ignore => 1 },
+	incremental => { ignore => 1 },
+	detach => { ignore => 1 },
+	port => { ignore => 1 },
+	host => { ignore => 1 },
+	baseurl => { call => '__migrateConfigBaseurl' },
+	show_dir_listing => { ignore => 1 },
+	permalink => { call => '__migrateConfigPermalink' }
 };
 
 sub __migrateConfigVariables {
@@ -305,6 +327,89 @@ sub __migrateConfigEncoding {
 	}
 
 	return $self;
+}
+
+sub __migrateConfigMarkdownExt {
+	my ($self) = @_;
+
+	$self->logger(__"configuring markdown extenders");
+
+	my $jekyll_config = $self->{__jekyll_config};
+
+	my $extenders = get_dotted $jekyll_config, 'markdown_ext';
+	my @extenders = split /[ \t]*,[ \t]*/, $extenders;
+
+	my $config = $self->config;
+	$config->{processors} ||= $self->defaultConfig->{processors};
+
+	foreach my $ext (keys %{$config->{processors}->{triggers}}) {
+		my $chain = $config->{processors}->{triggers}->{$ext};
+		if ('markdown' eq $chain) {
+			delete $config->{processors}->{triggers}->{$ext};
+		}
+	}
+
+	foreach my $ext (@extenders) {
+		$config->{processors}->{triggers}->{$ext} = 'markdown';
+	}
+
+	return $self;
+}
+
+sub __migrateConfigStrictFrontMatter {
+	my ($self) = @_;
+
+	my $jekyll_config = $self->{__jekyll_config};
+
+	my $strict = get_dotted $jekyll_config, 'strict_front_matter';
+
+	my $logger = $self->logger;
+
+	$logger->debug(__"checking configuration variable 'strict_front_matter'");
+	if (!$strict) {
+		$logger->warning(
+			__("ignoring config variable 'strict_front_matter'"
+			   . " (front matter must always be syntactically correct)"));
+	}
+
+	return $self;
+}
+
+sub __migrateConfigBaseurl {
+	my ($self) = @_;
+
+	my $jekyll_config = $self->{__jekyll_config};
+
+	my $baseurl = get_dotted $jekyll_config, 'baseurl';
+
+	my $logger = $self->logger;
+
+	$logger->debug(__"checking configuration variable 'baseurl'");
+	return $self if '' eq $baseurl;
+
+	$self->error(
+		__x("config.baseurl must always be '', not '{baseurl}'",
+		    baseurl => $baseurl));
+}
+
+
+sub __migrateConfigPermalink {
+	my ($self) = @_;
+
+	my $jekyll_config = $self->{__jekyll_config};
+
+	my $permalink = get_dotted $jekyll_config, 'permalink';
+
+	my $logger = $self->logger;
+
+	my %built_ins = (
+		date => '/:categories/:year/:month/:day/:title:output_ext',
+		pretty => '/:categories/:year/:month/:day/:title/',
+		ordinal => '/:categories/:year/:y_day/:title:output_ext',
+		weekdate => '/:categories/:year/W:week/:short_day/:title:output_ext',
+		none => '/:categories/:title:output_ext',
+	);
+die;
 }
 
 1;

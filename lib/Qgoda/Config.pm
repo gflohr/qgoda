@@ -117,44 +117,10 @@ sub new {
 		Encode::_utf8_on($yaml);
 	}
 
-	my $jsfile = 'Qgoda/JavaScript/config.js';
-	require $jsfile;
-	my $code = Qgoda::JavaScript::config->code;
-	my $node_modules = $q->nodeModules;
-	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules, no_console => 1);
 	my $schema = Qgoda::Schema->config;
-	$js->vm->set(schema => $schema);
-	$js->vm->set(input => $yaml);
-	$js->vm->set(local_input => $local_yaml);
-	$js->vm->set(filename => $filename);
-	$js->vm->set(local_filename => $local_filename);
-	$js->run($code);
-
-	my $exchange = $js->vm->get('__perl__');
-	my $invalid = $exchange->{output}->{errors};
-	if ($invalid) {
-		my ($filename, $errors) = @$invalid;
-		my $msg = '';
-		if (ref $errors && 'ARRAY' eq ref $errors) {
-			foreach my $error (@$errors) {
-				$msg .= __x("{filename}: CONFIG{dataPath}: ",
-							 filename => $filename,
-							 dataPath => $error->{dataPath});
-				$msg .= "$error->{message}\n";
-				my $params = $error->{params};
-				foreach my $param (keys %{$params || {}}) {
-					$msg .= "\t$param: $params->{$param}\n";
-				}
-			}
-		} else {
-			$msg = "$filename: $errors\n";
-		}
-
-		die $msg;
-	}
-
-	my $config = $js->vm->get('config');
-
+	my $config = $class->processSchema(
+		$schema, $yaml, $filename, $local_yaml, $local_filename,
+	);
 	my $self = bless $config, $class;
 
 	# Clean up certain variables or overwrite them unconditionally.
@@ -219,6 +185,50 @@ sub new {
 	}
 
 	return $self;
+}
+
+sub processSchema {
+	my (undef, $schema, $yaml, $filename, $local_yaml, $local_filename) = @_;
+
+	my $jsfile = 'Qgoda/JavaScript/config.js';
+	require $jsfile;
+	my $code = Qgoda::JavaScript::config->code;
+
+	my $q = Qgoda->new;
+	my $node_modules = $q->nodeModules;
+	my $js = Qgoda::JavaScript::Environment->new(global => $node_modules, no_console => 1);
+
+	$js->vm->set(schema => $schema);
+	$js->vm->set(input => $yaml);
+	$js->vm->set(local_input => $local_yaml);
+	$js->vm->set(filename => $filename);
+	$js->vm->set(local_filename => $local_filename);
+	$js->run($code);
+
+	my $exchange = $js->vm->get('__perl__');
+	my $invalid = $exchange->{output}->{errors};
+	if ($invalid) {
+		my ($filename, $errors) = @$invalid;
+		my $msg = '';
+		if (ref $errors && 'ARRAY' eq ref $errors) {
+			foreach my $error (@$errors) {
+				$msg .= __x("{filename}: CONFIG{dataPath}: ",
+							 filename => $filename,
+							 dataPath => $error->{dataPath});
+				$msg .= "$error->{message}\n";
+				my $params = $error->{params};
+				foreach my $param (keys %{$params || {}}) {
+					$msg .= "\t$param: $params->{$param}\n";
+				}
+			}
+		} else {
+			$msg = "$filename: $errors\n";
+		}
+
+		die $msg;
+	}
+
+	return $js->vm->get('config');
 }
 
 sub ignorePath {
