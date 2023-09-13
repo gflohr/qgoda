@@ -180,6 +180,7 @@ sub __migrateConfigVariables {
 		call => '__migrateUnhandledConfigVariable',
 	};
 	my $config = $self->config;
+	my $logger = $self->logger;
 	foreach my $variable (keys %$jekyll_config) {
 		my $action = CONFIG_ACTIONS->{$variable} || $default_action;
 		if ($action->{call}) {
@@ -189,6 +190,10 @@ sub __migrateConfigVariables {
 			set_dotted $config, $action->{copy},
 				get_dotted $jekyll_config, $variable;
 		} elsif ($action->{ignore}) {
+			$logger->debug(
+				__x("ignoring variable '{variable}'",
+				variable => $variable,
+			));
 			next;
 		}
 	}
@@ -199,6 +204,11 @@ sub __migrateConfigVariables {
 sub __migrateUnhandledConfigVariable {
 	my ($self, $variable) = @_;
 
+	my $logger = $self->logger;
+	$logger->debug(
+		__x("making variable '{variable}' private",
+		    variable => $variable,
+	));
 	my $jekyll_config = $self->{__jekyll_config};
 	my $value = get_dotted $jekyll_config, $variable;
 
@@ -212,12 +222,17 @@ sub __migrateConfigSource {
 	my ($self) = @_;
 
 	my $jekyll_config = $self->{__jekyll_config};
+
 	my $source = get_dotted $jekyll_config, 'source';
 
+	my $logger = $self->logger;
+
+	$logger->debug(__"checking configuration variable 'source'");
 	return $self if '.' eq $source;
 
-	$self->logger->fatal(
-		__x("config.source must always be '.', not '{source}'", source => $source));
+	$logger->fatal(
+		__x("config.source must always be '.', not '{source}'",
+		    source => $source));
 }
 
 sub __migrateExcludeInclude {
@@ -229,6 +244,9 @@ sub __migrateExcludeInclude {
 	my $jekyll_config = $self->{__jekyll_config};
 	my $exclude = $jekyll_config->{exclude} || [];
 	my $include = $jekyll_config->{include} || [];
+
+	my $logger = $self->logger;
+	$logger->debug(__"migrating exclude/include");
 
 	my %ignore = map { $_ => 1 } qw(
 		Gemfile Gemfile.lock
