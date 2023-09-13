@@ -51,6 +51,7 @@ sub tokenize($$);
 sub evaluate($$);
 sub lookup($$);
 sub _globstar($;$);
+sub slugify($;$);
 
 my $unsafe_for_links = "^A-Za-z0-9\-\._~/";
 
@@ -223,20 +224,49 @@ sub interpolate($$) {
 		$data = {};
 	}
 
+$DB::single = 1;
 	my $result = '';
 	while ($string =~ s/^([^\{]*)\{//) {
 		$result .= $1;
 
 		my ($remainder, @tokens) = tokenize $string, $type;
 
-		# Syntax errors can be handled in different ways.
-		# You can handle it gracefully and either leave
-		# everything uninterpolated, or you could replace the
-		# faulty string with the emtpy string or you can throw an
-		# exception.  We just throw an exception.
-		die "syntax error before: '$remainder'\n" if !@tokens;
+		my $value;
+		if (3 == @tokens
+		    && 'v' eq $tokens[0]->[0]
+		    && 'date' eq $tokens[0]->[1]
+		    && '.' eq $tokens[1]->[0]
+		    && '' eq $tokens[1]->[1]
+		    && 'q' eq $tokens[2]->[0]
+		    && exists $data->{date}
+		    && ref $data->{date}
+		    && $data->{date}->isa('Qgoda::Util::Date')) {
+			my $method = $tokens[2]->[1];
+			$value = $data->{date}->$method;
+		} elsif (1 == @tokens
+		         && 'v' eq $tokens[0]->[0]
+		         && 'jekyll_categories' eq $tokens[0]->[1]
+		         && exists $data->{categories}
+		         && ref $data->{categories}
+		         && 'ARRAY' eq reftype $data->{categories}) {
+			$value = join '/', @{$data->{categories}};
+		} elsif (1 == @tokens
+		         && 'v' eq $tokens[0]->[0]
+		         && 'jekyll_category_slugs' eq $tokens[0]->[1]
+		         && exists $data->{categories}
+		         && ref $data->{categories}
+		         && 'ARRAY' eq reftype $data->{categories}) {
+			$value = join '/',  map { slugify $_ } @{$data->{categories}};
+		} else {
+			# Syntax errors can be handled in different ways.
+			# You can handle it gracefully and either leave
+			# everything uninterpolated, or you could replace the
+			# faulty string with the emtpy string or you can throw an
+			# exception.  We just throw an exception.
+			die "syntax error before: '$remainder'\n" if !@tokens;
 
-		my $value = evaluate \@tokens, $data;
+			$value = evaluate \@tokens, $data;
+		}
 		$result .= $value if defined $value;
 		$string = $remainder;
 	}
@@ -712,6 +742,8 @@ sub purify {
 # Maybe we want to remove the utf-8 flag from the returned yaml data again ...
 sub safe_yaml_load {
 	my ($yaml) = @_;
+
+	local $YAML::XS::Boolean = 'JSON::PP';
 
 	return YAML::XS::Load($yaml);
 }
