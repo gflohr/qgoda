@@ -42,6 +42,7 @@ sub new {
 		__global_options => $global_options,
 		__options => \%options,
 		__files => \@files,
+		__errors => 0,
 	}, $class;
 
 	my $logger = $self->logger;
@@ -103,6 +104,30 @@ sub logger {
 	$prefix = 'migrate][' . lc $prefix;
 
 	return $self->{__logger} = Qgoda->new->logger($prefix);
+}
+
+sub error {
+	my ($self, @msg) = @_;
+
+	$self->{__errors} += @msg;
+
+	$self->logger->error(@msg);
+
+	return $self;
+}
+
+sub errors { shift->{__errors} }
+
+sub run {
+	my ($self) = @_;
+
+	$self->_run;
+
+	if ($self->errors) {
+		$self->logger->fatal(__"Please fix the above errors before proceeding");
+	}
+
+	return $self;
 }
 
 sub args { shift->{__args} }

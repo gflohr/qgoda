@@ -111,7 +111,7 @@ sub settings {
 	);
 }
 
-sub run {
+sub _run {
 	my ($self) = @_;
 
 	my $logger = $self->logger;
@@ -168,8 +168,10 @@ use constant CONFIG_ACTIONS => {
 	includes_dir => { ignore => 1 },
 	sass => { ignore => 1 },
 	collections => { ignore => 1 },
-	include => { call => '__migrateExcludeInclude' },
-	exclude => { call => '__migrateExcludeInclude' },
+	include => { call => '__migrateConfigExcludeInclude' },
+	exclude => { call => '__migrateConfigExcludeInclude' },
+	keep_files => { call => '__migrateConfigKeepFiles' },
+	encoding => { call => '__migrateConfigEncoding' },
 };
 
 sub __migrateConfigVariables {
@@ -235,7 +237,7 @@ sub __migrateConfigSource {
 		    source => $source));
 }
 
-sub __migrateExcludeInclude {
+sub __migrateConfigExcludeInclude {
 	my ($self) = @_;
 
 	my $config = $self->config;
@@ -270,7 +272,39 @@ sub __migrateExcludeInclude {
 
 	$config->{exclude} = \@patterns;
 
-	return;
+	return $self;
+}
+
+sub __migrateConfigKeepFiles {
+	my ($self) = @_;
+
+	$self->logger->warning(__"keep_files is not yet supported");
+
+	return $self;
+}
+
+sub __migrateConfigEncoding {
+	my ($self) = @_;
+
+	my $jekyll_config = $self->{__jekyll_config};
+
+	my $encoding = lc get_dotted $jekyll_config, 'encoding';
+
+	my $logger = $self->logger;
+
+	if ('utf-8' eq $encoding || 'utf8' eq $encoding) {
+		$logger->debug(
+			__x("ignoring variable '{variable}'",
+			    variable => 'encoding',
+		));
+	} else {
+		$self->error(
+			__x("unsupported encoding '{encoding}'",
+			    encoding => $encoding,
+		));
+	}
+
+	return $self;
 }
 
 1;
