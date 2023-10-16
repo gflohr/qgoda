@@ -40,6 +40,10 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: cpanm --notest Mac::FSEvents
 
+    - name: 'Install Math::Int64'
+      if: matrix.os == 'windows-latest'
+      run: cpanm --notest --verbose 'Math::Int64'
+
     - name: 'Install Filesys::Notify::Win32::ReadDirectoryChanges'
       if: matrix.os == 'windows-latest'
       run: cpanm --notest 'Filesys::Notify::Win32::ReadDirectoryChanges'
