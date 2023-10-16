@@ -31,6 +31,7 @@ jobs:
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: ${{ matrix.perl }}
+        distribution: strawberry
 
     - name: 'Install Linux::Inotify2'
       if: matrix.os == 'ubuntu-latest'
@@ -39,10 +40,6 @@ jobs:
     - name: 'Install Mac::FSEvents'
       if: matrix.os == 'macos-latest'
       run: cpanm --notest Mac::FSEvents
-
-    - name: 'Install Math::Int64'
-      if: matrix.os == 'windows-latest'
-      run: cpanm --notest --verbose 'Math::Int64'
 
     - name: 'Install Filesys::Notify::Win32::ReadDirectoryChanges'
       if: matrix.os == 'windows-latest'
