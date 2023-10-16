@@ -28,7 +28,7 @@ use URI;
 use URI::Escape qw(uri_unescape);
 
 use Qgoda;
-use Qgoda::Util qw(empty);
+use Qgoda::Util qw(empty trim);
 
 sub new {
 	bless {}, shift;
@@ -47,8 +47,14 @@ sub postMeta {
 	my $case_sensitive = Qgoda->new->config->{'case-senstive'};
 
 	require HTML::TreeBuilder;
-	my $tree = HTML::TreeBuilder->new(implicit_body_p_tag => 1,
-								  ignore_ignorable_whitespace => 1);
+	my $tree = HTML::TreeBuilder->new(
+		implicit_body_p_tag => 1,
+		ignore_ignorable_whitespace => 1,
+		ignore_unknown => 0,
+		store_comments => 1,
+		store_declarations => 1,
+		store_pis => 1,
+	);
 	$tree->parse($content);
 
 	# Collect links.
@@ -76,15 +82,18 @@ sub postMeta {
 	my $excerpt = '';
 	my $excerpt_html = '';
 	my $content_body = $content;
+	my @html_args = (
+		'<>&', # Entities to encode.
+		undef, # Indent char.
+		{}, # Tags with optional end tags. Keep them all.
+	);
 	foreach my $paragraph (@paragraphs) {
-		$excerpt = $paragraph->as_text;
-		$excerpt_html = $paragraph->as_HTML;
-		$excerpt =~ s/^[ \t\r\n]+//;
-		$excerpt =~ s/[ \t\r\n]+$//;
+		$excerpt = trim $paragraph->as_text;
+		$excerpt_html = $paragraph->as_HTML(@html_args);
 		if (!empty $excerpt) {
 			$paragraph->delete;
-			$content_body = $tree->as_HTML;
-			
+			$content_body = $tree->as_HTML(@html_args);
+
 			# We have to remove the html wrapper that was created.
 			$content_body =~ s{.*<body>}{}s;
 			$content_body =~ s{</body>.*?$}{}s;
