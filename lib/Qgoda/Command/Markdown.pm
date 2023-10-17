@@ -30,12 +30,6 @@ use Qgoda::Util qw(read_file);
 
 use base 'Qgoda::Command';
 
-sub _getDefaults { processor => 'Markdown' }
-
-sub _getOptionSpecs {
-	processor => 'processor=s'
-}
-
 sub _run {
 	my ($self, $args, $global_options, %options) = @_;
 
@@ -51,10 +45,10 @@ sub _run {
 	$global_options->{log_stderr} = 1;
 
 	my $q = Qgoda->new($global_options);
-	my ($processor) = $q->_getProcessors($options{processor});
+	my ($processor) = $q->_getProcessors('Markdown');
 	if (!$processor) {
 		die __x("error instantiating processor '{processor}'.\n",
-				processor => $options{processor});
+				processor => 'Markdown');
 	}
 
 	foreach my $arg (@$args) {
@@ -110,12 +104,6 @@ in use within Qgoda.
 
 =over 4
 
-=item -p, --processor=<processor>
-
-Specify the Markdown processor to use, defaults to 'Markdown' which uses
-L<Text::Markdown> for rendering.  The other option is 'Hoedown' if
-L<Text::Markdown::Hoedown> is installed.
-
 =item -h --help
 
 Show this help page and exit.
@@ -124,7 +112,7 @@ Show this help page and exit.
 
 =head1 SEE ALSO
 
-L<Text::Markdown>(3pm), L<Text::Markdown::Hoedown>(3pm), qgoda(1), perl(1)
+L<Text::Markdown::Discount>(3pm), qgoda(1), perl(1)
 
 =head1 QGODA
 

@@ -61,7 +61,6 @@ lib/Qgoda/PluginUtils.pm
 lib/Qgoda/PostProcessor.pm
 lib/Qgoda/Processor.pm
 lib/Qgoda/Processor/HTMLFilter.pm
-lib/Qgoda/Processor/Hoedown.pm
 lib/Qgoda/Processor/Markdown.pm
 lib/Qgoda/Processor/Strip.pm
 lib/Qgoda/Processor/TT2.pm
@@ -110,9 +109,11 @@ t/config-invalid.t
 t/config-private-invalid.t
 t/config-private-valid.t
 t/config-round-trip.t
+t/content-body.t
 t/default-view.t
 t/deptracker.t
 t/encode_json.t
+t/excerpt.t
 t/flatten2hash.t
 t/helpers.t
 t/interpolate.t
@@ -142,10 +143,12 @@ t/tpq-include.t
 t/tpq-links.t
 t/tpq-listings.t
 t/tpq-misc.t
+t/tpq-qgoda-schema.t
 t/tpq-related.t
 t/tpq-sort-by.t
 t/tpq-strftime.t
 t/tpq-taxonomies.t
+t/tpq-to-json.t
 t/tpq-vmethods.t
 t/tpq-xref.t
 t/tt2-args-merge.t
