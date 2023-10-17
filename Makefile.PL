@@ -184,6 +184,7 @@ my %WriteMakefileArgs = (
     "AnyEvent::Filesys::Watcher" => 0,
     "AnyEvent::Handle" => 0,
     "AnyEvent::Loop" => 0,
+    "AnyEvent::Util" => 0,
     "Archive::Extract" => 0,
     "Cpanel::JSON::XS" => 0,
     "Cwd" => 0,
@@ -239,8 +240,7 @@ my %WriteMakefileArgs = (
     "Template::Provider" => 0,
     "Template::Stash" => 0,
     "Term::ANSIColor" => 0,
-    "Text::Markdown" => 0,
-    "Text::Markdown::Hoedown" => 0,
+    "Text::Markdown::Discount" => 0,
     "Text::Unidecode" => 0,
     "Time::HiRes" => 0,
     "URI" => 0,
@@ -281,6 +281,7 @@ my %FallbackPrereqs = (
   "AnyEvent::Filesys::Watcher" => 0,
   "AnyEvent::Handle" => 0,
   "AnyEvent::Loop" => 0,
+  "AnyEvent::Util" => 0,
   "Archive::Extract" => 0,
   "Carp" => 0,
   "Cpanel::JSON::XS" => 0,
@@ -340,8 +341,7 @@ my %FallbackPrereqs = (
   "Template::Stash" => 0,
   "Term::ANSIColor" => 0,
   "Test::More" => 0,
-  "Text::Markdown" => 0,
-  "Text::Markdown::Hoedown" => 0,
+  "Text::Markdown::Discount" => 0,
   "Text::Unidecode" => 0,
   "Time::HiRes" => 0,
   "Time::Local" => 0,
@@ -385,6 +385,10 @@ if ( $^O eq 'darwin' ) {
 
 if ( $^O =~ /bsd/i ) {
 	$WriteMakefileArgs{PREREQ_PM}{'IO::KQueue'} = $FallbackPrereqs{'IO::KQueue'} = '0.34';
+}
+
+if ( $^O eq 'Win32' ) {
+	$WriteMakefileArgs{PREREQ_PM}{'Win32::Process'} = $FallbackPrereqs{'Win32::Process'} = '0';
 }
 
 WriteMakefile(%WriteMakefileArgs);
