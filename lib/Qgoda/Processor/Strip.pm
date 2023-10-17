@@ -24,8 +24,6 @@ use strict;
 
 use base qw(Qgoda::Processor);
 
-use Text::Markdown::Hoedown qw(markdown);
-
 sub new {
 	my ($class, %options) = @_;
 

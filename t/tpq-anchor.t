@@ -161,19 +161,19 @@ like $anchor_en_content,
      qr{<p>lexistsAnchorPost: <a href="/en/greeting/">English Greeting</a></p>},
 	 'lexistsAnchorPost en';
 like $anchor_en_content,
-     qr{<p>existsAnchor broken: </p>},
+     qr{<p>existsAnchor broken: *</p>},
 	 'existsAnchor broken en';
 like $anchor_en_content,
-     qr{<p>lexistsAnchor broken: </p>},
+     qr{<p>lexistsAnchor broken: *</p>},
 	 'lexistsAnchor broken en';
 like $anchor_en_content,
-     qr{<p>existsAnchorPost broken: </p>},
+     qr{<p>existsAnchorPost broken: *</p>},
 	 'existsAnchorPost broken en';
 like $anchor_en_content,
-     qr{<p>lexistsAnchorPost broken: </p>},
+     qr{<p>lexistsAnchorPost broken: *</p>},
 	 'lexistsAnchorPost broken en';
 like $anchor_en_content,
-     qr{<p>broken anchor: </p>},
+     qr{<p>broken anchor: *</p>},
 	 'broken anchor en';
 like $anchor_en_content,
      qr{<p>ambiguous anchor: <a href="[^"]+">.+</p>},
@@ -182,7 +182,7 @@ like $anchor_en_content,
 ok -e './_site/de/anchor/index.html';
 my $anchor_de_content = read_file './_site/de/anchor/index.html';
 Encode::_utf8_on($anchor_de_content);
-like $anchor_de_content,  
+like $anchor_de_content,
      qr{<p>anchor: <a href="/de/ueber/">Über diese Site</a></p>},
 	 'anchor de';
 like $anchor_de_content,
@@ -207,19 +207,19 @@ like $anchor_de_content,
      qr{<p>lexistsAnchorPost: <a href="/de/begruessung/">Deutsche Begrüßung</a></p>},
 	 'lexistsAnchorPost de';
 like $anchor_de_content,
-     qr{<p>existsAnchor broken: </p>},
+     qr{<p>existsAnchor broken: *</p>},
 	 'existsAnchor broken de';
 like $anchor_de_content,
-     qr{<p>lexistsAnchor broken: </p>},
+     qr{<p>lexistsAnchor broken: *</p>},
 	 'lexistsAnchor broken de';
 like $anchor_de_content,
-     qr{<p>existsAnchorPost broken: </p>},
+     qr{<p>existsAnchorPost broken: *</p>},
 	 'existsAnchorPost broken de';
 like $anchor_de_content,
-     qr{<p>lexistsAnchorPost broken: </p>},
+     qr{<p>lexistsAnchorPost broken: *</p>},
 	 'lexistsAnchorPost broken de';
 like $anchor_de_content,
-     qr{<p>broken anchor: </p>},
+     qr{<p>broken anchor: *</p>},
 	 'broken anchor de';
 like $anchor_de_content,
      qr{<p>ambiguous anchor: <a href="[^"]+">.+</p>},

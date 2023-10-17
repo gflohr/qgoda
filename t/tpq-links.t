@@ -136,7 +136,7 @@ like $links_en_content, qr{<p>existsLink: /en/about/</p>}, 'existsLink';
 like $links_en_content, qr{<p>existsLinkPost: /en/greeting/</p>}, 'existsLinkPost';
 like $links_en_content, qr{<p>lexistsLink: /en/about/</p>}, 'lexistsLink';
 like $links_en_content, qr{<p>lexistsLinkPost: /en/greeting/</p>}, 'lexistsLinkPost';
-like $links_en_content, qr{<p>broken link: </p>}, 'broken link';
+like $links_en_content, qr{<p>broken link: *</p>}, 'broken link';
 like $links_en_content, qr{<p>ambiguous link: /en/[a-z]+/</p>}, 'ambiguous link';
 
 ok -e './_site/de/links/index.html';
@@ -149,7 +149,7 @@ like $links_de_content, qr{<p>existsLink: /de/ueber/</p>}, 'existsLink';
 like $links_de_content, qr{<p>existsLinkPost: /de/begruessung/</p>}, 'existsLinkPost';
 like $links_de_content, qr{<p>lexistsLink: /de/ueber/</p>}, 'lexistsLink';
 like $links_de_content, qr{<p>lexistsLinkPost: /de/begruessung/</p>}, 'lexistsLinkPost';
-like $links_de_content, qr{<p>broken link: </p>}, 'broken link';
+like $links_de_content, qr{<p>broken link:*</p>}, 'broken link';
 like $links_de_content, qr{<p>ambiguous link: /de/[a-z]+/</p>}, 'ambiguous link';
 
 $site->tearDown;

@@ -24,7 +24,11 @@ use strict;
 
 use base qw(Qgoda::Processor);
 
-use Text::Markdown qw(markdown);
+use Text::Markdown::Discount qw(markdown);
+
+BEGIN {
+	Text::Markdown::Discount::with_html5_tags();
+}
 
 sub new {
 	my ($class, %options) = @_;
