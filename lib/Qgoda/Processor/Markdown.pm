@@ -42,7 +42,18 @@ sub new {
 sub process {
 	my ($self, $content, $asset, $filename) = @_;
 
-	return markdown $content;
+	# Do not add 0x00001000 (MKD_TOC) here.
+	my $flags =
+		  0x00000004 # do not do Smartypants-style mangling of quotes, dashes, or ellipses.
+		| 0x00004000 # make http://foo.com link even without <>s
+		| 0x00200000 # enable markdown extra-style footnotes
+		| 0x01000000 # enable extra-style definition lists
+		| 0x02000000 # enabled fenced code blocks
+		| 0x08000000 # enable dash and underscore in element names
+		| 0x40000000 # handle embedded LaTex escapes
+		| 0x80000000 # don't combine numbered bulletted lists
+		;
+	return markdown $content, $flags;
 }
 
 1;
