@@ -40,4 +40,31 @@ sub comment {
 	return '';
 }
 
+sub start {
+	my ($self, $chunk, %args) = @_;
+
+	if ('a' eq lc $args{tagname}
+	    && defined $args{attr}->{href}
+	    && $args{attr}->{href} =~ s/[!,.:;?]$//) {
+		$chunk = '<' . $args{tagname};
+
+		my $attrseq = $args{attrseq};
+		my $attr = $args{attr};
+		foreach my $key (@$attrseq) {
+			my $value = $attr->{$key};
+
+			my %escapes = (
+				'"' => '&quot;',
+				'&' => '&amp;'
+			);
+			$value =~ s/(["&])/$escapes{$1}/g;
+			$chunk .= qq{ $key="$value"};
+		}
+
+		$chunk .= '>';
+	}
+
+	return $chunk;
+}
+
 1;
