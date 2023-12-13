@@ -68,6 +68,17 @@ sub start {
 	return $chunk;
 }
 
+sub text {
+	my ($self, $chunk, %args) = @_;
+
+	my $interpunction = $self->{__interpunction};
+	if (length $interpunction) {
+		$chunk =~ s/[$interpunction]$//;
+	}
+
+	return $chunk;
+}
+
 sub end {
 	my ($self, $chunk, %args) = @_;
 
