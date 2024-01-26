@@ -358,6 +358,15 @@ sub config {
 					}
 				}
 			},
+			precious => {
+				description => __"List of file name patterns that should not"
+							   . "be deleted in the output directory.",
+				type => 'array',
+				items => {
+					type => 'string'
+				},
+				default => []
+			},
 			private => {
 				description => __"Site-specific variables.  You can also choose"
 				               . " the namespace 'site' if you prefer.",
