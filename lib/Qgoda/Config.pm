@@ -28,6 +28,7 @@ use Scalar::Util qw(reftype looks_like_number);
 use File::Globstar qw(quotestar);
 use File::Globstar::ListMatch;
 use Storable qw(dclone);
+use Cwd qw(realpath);
 use Encode;
 use boolean;
 use Qgoda::Util qw(read_file empty yaml_error merge_data lowercase
@@ -160,7 +161,7 @@ sub new {
 	# Clean up certain variables or overwrite them unconditionally.
 	$config->{srcdir} = absolute_path;
 	$config->{paths}->{site} =
-		canonical_path(absolute_path($config->{paths}->{site}));
+		canonical_path(absolute_path(realpath($config->{paths}->{site})));
 	$config->{paths}->{views} = canonical_path($config->{paths}->{views});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
@@ -199,6 +200,7 @@ sub new {
 
 	push @exclude, @config_exclude;
 	push @exclude_watch, @config_exclude_watch;
+	my @precious = @{$config->{precious} || []};
 
 	my $outdir = abs2rel($self->{outdir}, $self->{srcdir});
 	if ($outdir !~ m{^\.\./}) {
@@ -212,6 +214,10 @@ sub new {
 		);
 		$self->{__q_exclude_watch} = File::Globstar::ListMatch->new(
 			\@exclude_watch,
+			ignoreCase => !$self->{'case-sensitive'}
+		);
+		$self->{__q_precious} = File::Globstar::ListMatch->new(
+			\@precious,
 			ignoreCase => !$self->{'case-sensitive'}
 		);
 

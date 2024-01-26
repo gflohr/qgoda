@@ -82,6 +82,7 @@ po:
 post-processors:
   modules: []
   options: {}
+precious: []
 processors:
   chains:
     html:

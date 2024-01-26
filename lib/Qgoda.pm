@@ -985,15 +985,21 @@ sub __prune {
 	# Sort the output files by length first.  That ensures that we do a
 	# depth first clean-up.
 	my @outfiles = sort {
-	   length($b) <=> length($a)
+		length($b) <=> length($a)
 	} @{$self->{__outfiles}};
 
 	my $logger = $self->{__logger};
 	my %directories;
 
+	my $outdir = $self->config->{paths}->{site};
+	my $matcher = $self->config->{__q_precious};
 	my $deleted = 0;
 	foreach my $outfile (@outfiles) {
-		if ($directories{$outfile} || $site->getArtefact($outfile)) {
+		my $reloutfile = abs2rel $outfile, $outdir;
+		if ($matcher->match($reloutfile)) {
+			$logger->debug(__x("not pruning precious file '{outfile}'",
+			                   outfile => $outfile));
+		} elsif ($directories{$outfile} || $site->getArtefact($outfile)) {
 			# Mark the containing directory as generated.
 			my ($volume, $directory, $filename) = splitpath $outfile;
 			my $container = catpath $volume, $directory, '';
