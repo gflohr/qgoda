@@ -996,7 +996,6 @@ sub __prune {
 	my $deleted = 0;
 	foreach my $outfile (@outfiles) {
 		my $reloutfile = abs2rel $outfile, $outdir;
-		warn $reloutfile;
 		if ($matcher->match($reloutfile)) {
 			$logger->debug(__x("not pruning precious file '{outfile}'",
 			                   outfile => $outfile));
