@@ -46,6 +46,7 @@ sub new {
 	my $q = Qgoda->new;
 	my $logger = $q->logger('config');
 
+	$DB::single = 1;
 	my $filename;
 	if (!empty $args{filename}) {
 		$filename = $args{filename};
@@ -86,22 +87,22 @@ sub new {
 	}
 
 	my $local_filename;
-	if (-e '_localconfig.yaml') {
+	if (-e '_localqgoda.yaml') {
 		$local_filename = '_localqgoda.yaml';
-	} elsif (-e '_localconfig.yml') {
+	} elsif (-e '_localqgoda.yml') {
 		$local_filename = '_localqgoda.yml';
-	} elsif (-e '_localconfig.json') {
+	} elsif (-e '_localqgoda.json') {
 		$local_filename = '_localqgoda.json';
-	} elsif (-e '_localconfig.yaml') {
-		$logger->warning(__x("do you have to rename '_localconfig.{extension}' "
+	} elsif (-e '_localqgoda.yaml') {
+		$logger->warning(__x("do you have to rename '_localqgoda.{extension}' "
 		                     . "to '_localqgoda'.{extension}?",
 		                     extension => 'yaml'));
-	} elsif (-e '_localconfig.yml') {
-		$logger->warning(__x("do you have to rename '_localconfig.{extension}' "
+	} elsif (-e '_localqgoda.yml') {
+		$logger->warning(__x("do you have to rename '_localqgoda.{extension}' "
 		                     . "to '_localqgoda'.{extension}?",
 		                     extension => 'yaml'));
-	} elsif (-e '_localconfig.json') {
-		$logger->warning(__x("do you have to rename '_localconfig.{extension}' "
+	} elsif (-e '_localqgoda.json') {
+		$logger->warning(__x("do you have to rename '_localqgoda.{extension}' "
 		                     . "to '_localqgoda'.{extension}?",
 		                     extension => 'yaml'));
 	}
