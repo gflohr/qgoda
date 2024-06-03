@@ -106,9 +106,26 @@ sub __fillMeta {
 	my ($self, $asset) = @_;
 
 	my $qgoda = Qgoda->new;
-	my $logger = $qgoda->logger;
-	my $config = $qgoda->config;
 	my $site = $qgoda->getSite;
+
+	$self->__fillDate($asset);
+	$self->__fillLastModified($asset);
+	$self->__fillPathInformation($asset, $site);
+
+	$asset->{title} = $asset->{basename} if !exists $asset->{title};
+	$asset->{slug} = $self->__slug($asset);
+
+	$asset->{view} = $site->getMetaValue(view => $asset);
+	$asset->{type} = $site->getMetaValue(type => $asset);
+
+	return $self;
+}
+
+sub __fillDate {
+	my ($self, $asset) = @_;
+
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
 
 	my $date = $asset->{date};
 	if (defined $date) {
@@ -134,13 +151,31 @@ sub __fillMeta {
 
 	$asset->{date} = Qgoda::Util::Date->newFromEpoch($date);
 
-	$self->__fillPathInformation($asset, $site);
+	return $self;
+}
 
-	$asset->{title} = $asset->{basename} if !exists $asset->{title};
-	$asset->{slug} = $self->__slug($asset);
+sub __fillLastModified {
+	my ($self, $asset) = @_;
 
-	$asset->{view} = $site->getMetaValue(view => $asset);
-	$asset->{type} = $site->getMetaValue(type => $asset);
+	my $qgoda = Qgoda->new;
+	my $logger = $qgoda->logger;
+
+	my $date = $asset->{last_modified};
+	if (defined $date) {
+		if ($date !~ /^-?[1-9][0-9]*$/) {
+			$date = str2time $date;
+			if (!defined $date) {
+				$logger->error(__x("{filename}: cannot parse last modification date '{date}'",
+								   date => $asset->{date}));
+			}
+		}
+	}
+
+	if (!defined $date) {
+		$date = $asset->{date};
+	}
+
+	$asset->{last_modified} = Qgoda::Util::Date->newFromEpoch($date);
 
 	return $self;
 }
