@@ -829,6 +829,9 @@ sub scan {
 	$logger->debug(__x("scanning source directory '{srcdir}'",
 					   srcdir => $config->{srcdir}));
 	File::Find::find({
+		# FIXME! This must be configurable.  It should also be configurable
+		# whether follow_fast or follow_skip should be used.
+		follow => 1,
 		wanted => sub {
 			if (-f $_) {
 				my $path = absolute_path($_);
