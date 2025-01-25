@@ -85,4 +85,4 @@ jobs:
       run: perl Makefile.PL
 
     - name: 'Build, test, and install'
-      run: cpanm .
+      run: cpanm --verbose .
