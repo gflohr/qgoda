@@ -86,11 +86,11 @@ sub new {
 	}
 
 	my $local_filename;
-	if (-e '_localconfig.yaml') {
+	if (-e '_localqgoda.yaml') {
 		$local_filename = '_localqgoda.yaml';
-	} elsif (-e '_localconfig.yml') {
+	} elsif (-e '_localqgoda.yml') {
 		$local_filename = '_localqgoda.yml';
-	} elsif (-e '_localconfig.json') {
+	} elsif (-e '_localqgoda.json') {
 		$local_filename = '_localqgoda.json';
 	} elsif (-e '_localconfig.yaml') {
 		$logger->warning(__x("do you have to rename '_localconfig.{extension}' "
