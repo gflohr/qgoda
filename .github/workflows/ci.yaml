@@ -101,11 +101,8 @@ jobs:
     - name: 'Prepare build'
       run: perl Makefile.PL
 
-    - name: 'Build'
-      run: make
-
-    - name: 'Test'
-      run: prove -lmbv
+    - name: 'Build, test, and install'
+      run: cpanm .
 
     - name: 'Test with coverage'
       if: ${{ matrix.coverage }}
