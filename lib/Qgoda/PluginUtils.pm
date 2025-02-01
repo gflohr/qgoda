@@ -76,8 +76,12 @@ sub load_plugins {
 			next if !$package->{qgoda};
 
 			my (undef, $subdir) = splitpath $package_json;
-			use Data::Dumper;
-			$plugins{$subdir} = {
+			my $name = $package->{name};
+			if (!length $name) {
+				my @name = splitdir $subdir;
+				$name = $name[-1];
+			}
+			$plugins{$name} = {
 				package_dir => $subdir,
 				package_json => $package_json,
 			};
