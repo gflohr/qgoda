@@ -136,6 +136,7 @@ sub write_file($$) {
 		my $is_dir = -d $dirpart;
 		my $exists_path = -e $path;
 		my $is_dir_path = -d $path;
+		warn "make_path";
 		warn <<"EOF";
 path: $path
 	dirpart: *$dirpart*
