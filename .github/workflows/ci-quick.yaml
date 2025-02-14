@@ -33,6 +33,10 @@ jobs:
         perl-version: ${{ matrix.perl }}
         distribution: strawberry
 
+
+    - name: Test File::Path::make_path
+      run: perl -M File::Path -e "File::Path::make_path('tmp'); File::Path::make_path('tmp/level-1'); File::Path::make_path('tmp/level-1/level-2')"
+
     - name: 'Install Linux::Inotify2'
       if: matrix.os == 'ubuntu-latest'
       run: cpanm --notest Linux::Inotify2
