@@ -22,7 +22,7 @@ use lib 't';
 use TestSite;
 use Test::More;
 
-my $site = TestSite->new(name => 'config-defaults',
+my $site = TestSite->new(name => 'config-invalid',
 	config => {
 		po => {
 			# This should now be tt2.

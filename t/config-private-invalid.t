@@ -22,7 +22,7 @@ use lib 't';
 use TestSite;
 use Test::More;
 
-my $site = TestSite->new(name => 'config-defaults',
+my $site = TestSite->new(name => 'config-private-invalid',
 	config => {
 		# Not allowed.
 		owner => 'me',

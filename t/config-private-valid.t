@@ -23,7 +23,7 @@ use TestSite;
 use Test::More;
 use JSON::PP;
 
-my $site = TestSite->new(name => 'config-defaults',
+my $site = TestSite->new(name => 'config-private-valid',
 	config => {
 		# All these are allowed because.
 		private => {
