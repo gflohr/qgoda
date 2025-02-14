@@ -160,6 +160,7 @@ sub new {
 
 	# Clean up certain variables or overwrite them unconditionally.
 	$config->{srcdir} = absolute_path;
+	warn "srcdir: $config->{srcdir}";
 	$config->{paths}->{site} =
 		canonical_path(absolute_path(realpath($config->{paths}->{site})));
 	$config->{paths}->{views} = canonical_path($config->{paths}->{views});
@@ -223,6 +224,8 @@ sub new {
 
 		$self->{defaults} = $self->__compileDefaults($self->{defaults});
 	}
+
+	warn "self->{srcdir}: $self->{srcdir}";
 
 	return $self;
 }
