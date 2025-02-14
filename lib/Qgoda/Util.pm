@@ -130,6 +130,7 @@ sub write_file($$) {
 
 	my ($volume, $directory) = File::Spec->splitpath($path);
 	my $dirpart = File::Spec->catpath($volume, $directory);
+	$dirpart =~ s{[/\\]$}{}; # Necessary under Windows.
 
 	if (!empty $dirpart && !-e $dirpart) {
 		make_path $dirpart;
