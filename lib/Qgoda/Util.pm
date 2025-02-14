@@ -132,21 +132,7 @@ sub write_file($$) {
 	my $dirpart = File::Spec->catpath($volume, $directory);
 
 	if (!empty $dirpart && !-e $dirpart) {
-		my $exists = -e $dirpart;
-		my $is_dir = -d $dirpart;
-		my $exists_path = -e $path;
-		my $is_dir_path = -d $path;
-		warn "make_path";
-		warn <<"EOF";
-path: $path
-	dirpart: *$dirpart*
-	dir exists: $exists
-	dir is dir: $is_dir
-	path exists: $exists_path
-	path is dir: $is_dir_path
-EOF
 		make_path $dirpart;
-		warn "\tdone\n";
 	}
 
 	my $octets;
