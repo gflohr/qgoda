@@ -837,6 +837,9 @@ sub scan {
 				my $path = absolute_path($_);
 				if (!$config->ignorePath($path)) {
 					my $relpath = abs2rel($path, $config->{srcdir});
+				if ($path =~ m{D:/a}) {
+					warn "_: $_, relpath: $relpath, srcdir: $config->{srcdir}\n";
+				}
 					my $asset = Qgoda::Asset->new($path, $relpath);
 					$site->addAsset($asset);
 				}
