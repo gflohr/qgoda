@@ -33,7 +33,12 @@ jobs:
         perl-version: ${{ matrix.perl }}
         distribution: strawberry
 
-    - name: Get absolute directory
+    - name: Get absolute directory with Perl
+      if: matrix.os == 'windows-latest'
+      run: perl -MCwd -e "print Cwd::abs_path()"
+
+    - name: Get absolute directory with Perl
+      if: matrix.os == 'windows-latest'
       run: perl -MCwd -e "print Cwd::abs_path()"
 
     - name: 'Install Linux::Inotify2'
