@@ -27,15 +27,15 @@ jobs:
     - name: 'Perl version'
       run: perl -V
 
-    - name: Test Perl on Windows
-      if: matrix.os == 'windows-latest'
-      run: perl test-windows.pl
-
     - name: Set up perl
       uses: shogo82148/actions-setup-perl@v1
       with:
         perl-version: ${{ matrix.perl }}
         distribution: strawberry
+
+    - name: Test Perl on Windows
+      if: matrix.os == 'windows-latest'
+      run: perl test-windows.pl
 
     - name: 'Install Linux::Inotify2'
       if: matrix.os == 'ubuntu-latest'
