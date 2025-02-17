@@ -1018,6 +1018,7 @@ sub __prune {
 			++$deleted;
 			$logger->debug(__x("pruning file '{file}'",
 							   file => $outfile));
+			print STDERR "removing outfile $outfile\n";
 			$logger->error(__x("cannot remove file '{filename}': {error}",
 							   filename => $outfile, error => $!))
 				if !unlink $outfile;
