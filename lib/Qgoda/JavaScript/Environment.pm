@@ -22,7 +22,7 @@ use strict;
 
 #VERSION
 
-use JavaScript::Duktape::XS 0.000074;
+use JavaScript::Duktape::XS 0.000080;
 use Cpanel::JSON::XS qw(decode_json);
 use File::Basename qw(dirname);
 use Locale::TextDomain qw(qgoda);
