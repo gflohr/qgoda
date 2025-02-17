@@ -33,6 +33,9 @@ jobs:
         perl-version: ${{ matrix.perl }}
         distribution: strawberry
 
+    - name: Test realpath
+      run: perl test-realpath.pl
+
     - name: 'Install Linux::Inotify2'
       if: matrix.os == 'ubuntu-latest'
       run: cpanm --notest Linux::Inotify2
