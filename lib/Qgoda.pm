@@ -860,15 +860,11 @@ sub scan {
 	$self->{__outfiles} = \@outfiles;
 	$logger->debug(__x("scanning output directory '{outdir}'",
 					   outdir => $config->{paths}->{site}));
-	print STDERR "Site dir is $config->{paths}->{site}\n";
 	File::Find::find(sub {
 		if ($_ ne '.' && $_ ne '..') {
 			push @outfiles, absolute_path($_);
 		}
 	}, $config->{paths}->{site});
-
-	use Data::Dumper;
-	print STDERR Dumper $self->{__outfiles};
 
 	return $self;
 }
@@ -1022,7 +1018,6 @@ sub __prune {
 			++$deleted;
 			$logger->debug(__x("pruning file '{file}'",
 							   file => $outfile));
-			print STDERR "removing outfile $outfile\n";
 			$logger->error(__x("cannot remove file '{filename}': {error}",
 							   filename => $outfile, error => $!))
 				if !unlink $outfile;

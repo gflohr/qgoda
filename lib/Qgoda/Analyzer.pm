@@ -48,18 +48,7 @@ sub analyze {
 
 	my $qgoda = Qgoda->new;
 
-use Cwd;
-my $here = getcwd;
 	my $path = $asset->getPath;
-print STDERR "\nHere: $here, path: $path\n";
-open my $fh, '<', $path or print STDERR "$path: $!\n";
-my $content = join '', <$fh>;
-print STDERR $content;
-if (stat $path) {
-	print STDERR "\ncan stat path $path";
-} else {
-	print STDERR "\ncannot stat path $path"
-}
 	stat $path or die __x("cannot read '{filename}': {error}",
 						  filename => $path, error => $!);
 	my $config = $qgoda->config;

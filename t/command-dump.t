@@ -46,16 +46,6 @@ my $site = TestSite->new(name => 'command-dump',
 	assets => \%assets,
 );
 
-use File::Find;
-use Cwd;
-
-my $here = getcwd;
-print STDERR "Site: $here\n";
-File::Find::find(sub {
-	my $slash = -d $File::Find::name ? '/' : '';
-	print STDERR "$File::Find::name$slash\n";
-}, '.');
-
 my ($stdout, $expected);
 
 $stdout = tie *STDOUT, 'MemStream';
@@ -101,13 +91,6 @@ is_deeply $storable, $json;
 
 eval { Qgoda::CLI->new(['dump', '--output-format', 'python'])->dispatch };
 ok $@;
-
-$here = getcwd;
-print STDERR "Before teardown: $here\n";
-File::Find::find(sub {
-	my $slash = -d $File::Find::name ? '/' : '';
-	print STDERR "$File::Find::name$slash\n";
-}, '.');
 
 $site->tearDown;
 
