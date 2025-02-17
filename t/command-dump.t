@@ -102,6 +102,13 @@ is_deeply $storable, $json;
 eval { Qgoda::CLI->new(['dump', '--output-format', 'python'])->dispatch };
 ok $@;
 
+$here = getcwd;
+print STDERR "Before teardown: $here\n";
+File::Find::find(sub {
+	my $slash = -d $File::Find::name ? '/' : '';
+	print STDERR "$File::Find::name$slash\n";
+}, '.');
+
 $site->tearDown;
 
 done_testing;
