@@ -52,6 +52,10 @@ use Cwd;
 my $here = getcwd;
 	my $path = $asset->getPath;
 print STDERR "Here: $here, path: $path\n";
+open my $fh, '<', $path or warn "$path: $!\n";
+my $content = join '', <$fh>;
+print STDERR $content;
+
 	stat $path or die __x("cannot read '{filename}': {error}",
 						  filename => $path, error => $!);
 	my $config = $qgoda->config;
