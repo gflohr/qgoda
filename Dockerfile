@@ -6,7 +6,7 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
     NODE_VERSION=18
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    make gcc git curl apt-transport-https gnupg dumb-init cpanminus \
+    make gcc curl apt-transport-https gnupg dumb-init cpanminus \
 	build-essential libc-dev \
     libmoo-perl libanyevent-perl libwww-perl libtemplate-perl libyaml-perl \
     libfile-copy-recursive-perl libipc-signal-perl libcpanel-json-xs-perl \
@@ -24,7 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install a specific JavaScript::Duktape::XS version
 WORKDIR /root
-RUN cpanm --verbose GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz
+RUN cpanm https://github.com/gflohr/AnyEvent-Filesys-Watcher/releases/???
+RUN cpanm GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz
 
 # Copy source code and install dependencies
 COPY . /root/qgoda/
