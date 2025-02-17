@@ -52,7 +52,7 @@ use Cwd;
 my $here = getcwd;
 	my $path = $asset->getPath;
 print STDERR "Here: $here, path: $path\n";
-open my $fh, '<', $path or warn "$path: $!\n";
+open my $fh, '<', $path or print STDERR "$path: $!\n";
 my $content = join '', <$fh>;
 print STDERR $content;
 
