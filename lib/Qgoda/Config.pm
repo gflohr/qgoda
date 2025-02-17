@@ -155,13 +155,20 @@ sub new {
 	}
 
 	my $config = $js->vm->get('config');
+	print STDERR "Raw config\n";
+	use Data::Dumper; print STDERR Dumper $config;
 
 	my $self = bless $config, $class;
 
 	# Clean up certain variables or overwrite them unconditionally.
 	$config->{srcdir} = absolute_path;
+	my $r = realpath($config->{paths}->{site});
+	print STDERR "Realpath: $r\n";
+	my $a = absolute_path(realpath($config->{paths}->{site}));
+	print STDERR "Absolute path: $a\n";
 	$config->{paths}->{site} =
 		canonical_path(absolute_path(realpath($config->{paths}->{site})));
+	print STDERR "Site path: $config->{paths}->{site}";
 	$config->{paths}->{views} = canonical_path($config->{paths}->{views});
 
 	$config->{po}->{tt2} = [$config->{paths}->{views}]
