@@ -1,5 +1,5 @@
 FROM ubuntu:jammy
-MAINTAINER Qgoda (https://github.com/gflohr/qgoda/issues)
+LABEL org.opencontainers.image.authors="guido.flohr@cantanea.com"
 
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
     DEBIAN_FRONTEND=noninteractive \
@@ -7,6 +7,7 @@ ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     make gcc git curl apt-transport-https gnupg dumb-init cpanminus \
+	build-essential libc-dev \
     libmoo-perl libanyevent-perl libwww-perl libtemplate-perl libyaml-perl \
     libfile-copy-recursive-perl libipc-signal-perl libcpanel-json-xs-perl \
     libinline-perl libdata-walk-perl libfile-homedir-perl libarchive-extract-perl \
@@ -23,7 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Install a specific JavaScript::Duktape::XS version
 WORKDIR /root
-RUN cpanm GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz
+RUN cpanm --verbose GONZUS/JavaScript-Duktape-XS-0.000074.tar.gz
 
 # Copy source code and install dependencies
 COPY . /root/qgoda/
