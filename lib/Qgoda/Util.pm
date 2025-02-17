@@ -24,7 +24,7 @@ use strict;
 
 use IO::File;
 use File::Path qw(make_path);
-use File::Basename qw(fileparse);
+use File::Spec;
 use Locale::TextDomain qw(qgoda);
 use Scalar::Util qw(reftype looks_like_number);
 use Encode 2.12;
@@ -128,8 +128,12 @@ sub read_body($$) {
 sub write_file($$) {
 	my ($path, $data) = @_;
 
-	my (undef, $directory) = fileparse $path;
-	make_path $directory unless -e $directory;
+	my ($volume, $directory) = File::Spec->splitpath($path);
+	my $dirpart = File::Spec->catpath($volume, $directory);
+
+	if (!empty $dirpart && !-e $dirpart) {
+		make_path $dirpart;
+	}
 
 	my $octets;
 	if (Encode::is_utf8($data)) {

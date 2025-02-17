@@ -42,7 +42,7 @@ $assets{'b'} = {
 	content => 'this is b'
 };
 
-my $site = TestSite->new(name => 'config-defaults',
+my $site = TestSite->new(name => 'command-dump',
 	assets => \%assets,
 );
 

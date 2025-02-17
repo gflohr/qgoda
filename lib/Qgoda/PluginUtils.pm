@@ -26,9 +26,10 @@ use Locale::TextDomain qw(qgoda);
 
 use JSON qw(decode_json);
 use Scalar::Util qw(reftype);
+use File::Globstar qw(globstar quotestar);
 
 use Qgoda::Util qw(read_file empty);
-use Qgoda::Util::FileSpec qw(catfile);
+use Qgoda::Util::FileSpec qw(catfile catpath splitdir splitpath);
 
 use base 'Exporter';
 use vars qw(@EXPORT_OK);
@@ -58,27 +59,40 @@ sub load_plugins {
 	# Allow loading local Perl plug-ins.
 	push @INC, $config->{srcdir};
 
-	my $modules_dir = catfile($config->{srcdir}, 'node_modules');
+	# Resolve plug-ins in node-modules.
+	my ($volume, $directories) = splitpath $config->{srcdir}, 1;
+	my @directories = splitdir $directories;
 	my %plugins;
-	if (opendir my $dh, 'node_modules') {
-		foreach my $subdir (grep { -e catfile('node_modules',
-														  $_, 'package.json') }
-							grep !/^\./, readdir $dh) {
-			my $package_dir = catfile('node_modules', $subdir);
-			my $package_json = catfile($package_dir,
-												  'package.json');
+	while (@directories) {
+		my $directory = catfile @directories, 'node_modules';
+		my $path = quotestar catpath $volume, $directory;
+
+		my @package_jsons = globstar "$path/*/package.json";
+		push @package_jsons, globstar "$path/@*/*/package.json";
+
+		foreach my $package_json (@package_jsons) {
 			my $package = eval { decode_json read_file $package_json }
 				or next;
 			next if !$package->{qgoda};
-			$plugins{$subdir} = {
-				package_dir => $package_dir,
+
+			my (undef, $subdir) = splitpath $package_json;
+			my $name = $package->{name};
+			if (!length $name) {
+				my @name = splitdir $subdir;
+				$name = $name[-1];
+			}
+			$plugins{$name} = {
+				package_dir => $subdir,
 				package_json => $package_json,
 			};
 		}
+		pop @directories;
 	}
+
 	foreach my $name (keys %plugins) {
-		$logger->info(__x("plugin '{name}' found in 'node_modules'.",
-						  name => $name));
+		$logger->info(__x("plugin '{name}' found in '{directory}'.",
+						  name => $name,
+						  directory => $plugins{$name}->{package_dir}));
 	}
 
 	my $plugin_dir = $config->{paths}->{plugins};
