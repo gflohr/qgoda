@@ -860,11 +860,15 @@ sub scan {
 	$self->{__outfiles} = \@outfiles;
 	$logger->debug(__x("scanning output directory '{outdir}'",
 					   outdir => $config->{paths}->{site}));
+	print STDERR "Site dir is $config->{paths}->{site}\n";
 	File::Find::find(sub {
 		if ($_ ne '.' && $_ ne '..') {
 			push @outfiles, absolute_path($_);
 		}
 	}, $config->{paths}->{site});
+
+	use Data::Dumper;
+	print STDERR Dumper $self->{__outfiles};
 
 	return $self;
 }
