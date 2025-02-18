@@ -51,9 +51,6 @@ RUN git clone https://github.com/gonzus/JavaScript-Duktape-XS && \
 	cpanm --notest . && \
 	cd .. && rm -rf JavaScript-Duktape-XS
 
-# Not yet on CPAN.
-RUN cpanm --notest https://github.com/gflohr/AnyEvent-Filesys-Watcher/releases/download/v0.1.0/AnyEvent-Filesys-Watcher-v0.1.0.tar.gz
-
 # Copy source code and install dependencies
 COPY . /root/qgoda/
 WORKDIR /root/qgoda/
