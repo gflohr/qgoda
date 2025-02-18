@@ -1,8 +1,6 @@
 FROM alpine:latest AS builder
 LABEL org.opencontainers.image.authors="guido.flohr@cantanea.com"
 
-ENV NODE_VERSION=22
-
 RUN apk add \
 	binutils \
 	curl \
@@ -60,8 +58,9 @@ FROM alpine:latest AS runtime
 
 ARG WITH_NODE
 
-RUN apk add --no-cache perl dumb-init \
-	&& if [ -n "$WITH_NODE" ]; then apk add --no-cache nodejs="$WITH_NODE" npm; fi
+RUN apk add --no-cache perl dumb-init && \
+	test -n "$WITH_NODE" && \
+	apk add --no-cache nodejs npm
 
 # Create a non-root user
 RUN addgroup -S qgoda && adduser -S qgoda -G qgoda

@@ -61,9 +61,9 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: .
           file: ./Dockerfile
-          build-args: ${{ matrix.variant == '-node' && format('WITH_NODE={0}', env.NODE_VERSION) || '' }}
+          build-args: ${{ matrix.variant == '-node' && 'WITH_NODE=true' || '' }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }},${{ env.IMAGE_NAME }}:latest${{ matrix.variant == '-node' && format('-node{0}', env.NODE_VERSION) || '' }}
+          tags: ${{ steps.meta.outputs.tags }},${{ env.IMAGE_NAME }}:latest${{ matrix.variant }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -76,9 +76,9 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: .
           file: ./Dockerfile
-          build-args: ${{ matrix.variant == '-node' && format('WITH_NODE={0}', env.NODE_VERSION) || '' }}
+          build-args: ${{ matrix.variant == '-node' && 'WITH_NODE=true' || '' }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}${{ matrix.variant == '-node' && format('-node{0}', env.NODE_VERSION) || '' }}
+          tags: ${{ steps.meta.outputs.tags }}${{ matrix.variant }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
