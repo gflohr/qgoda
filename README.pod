@@ -189,7 +189,7 @@ L<staticgen.com|https://www.staticgen.com/>.
 
 =head2 Copyright
 
-Copyright (C) 2016-2020 Guido Flohr L<mailto:guido.flohr@cantanea.com>, all
+Copyright (C) 2016-2025 Guido Flohr L<mailto:guido.flohr@cantanea.com>, all
 rights reserved.
 
 Qgoda is available under the terms and conditions of the GNU General
