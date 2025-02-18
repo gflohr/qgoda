@@ -56,9 +56,12 @@ COPY . /root/qgoda/
 WORKDIR /root/qgoda/
 RUN cpanm --notest . && rm -rf /root/qgoda /root/.cpanm
 
-FROM alpine:latest
+FROM alpine:latest AS runtime
 
-RUN apk add --no-cache perl dumb-init
+ARG WITH_NODE
+
+RUN apk add --no-cache perl dumb-init \
+	&& if [ -n "$WITH_NODE" ]; then apk add --no-cache nodejs="$WITH_NODE" npm; fi
 
 # Create a non-root user
 RUN addgroup -S qgoda && adduser -S qgoda -G qgoda

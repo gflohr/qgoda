@@ -15,11 +15,15 @@ env:
   REGISTRY: docker.io
   IMAGE_NAME: ${{ github.repository }}
   VERSION_TAG: ${{ github.event.inputs.version_tag || github.ref_name }}
+  NODE_VERSION: 22
 
 jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant: [ "", "-node" ]
     permissions:
       contents: read
       packages: write
@@ -57,8 +61,9 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: .
           file: ./Dockerfile
+          build-args: ${{ matrix.variant == '-node' && format('WITH_NODE={0}', env.NODE_VERSION) || '' }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }},${{ env.IMAGE_NAME }}:latest
+          tags: ${{ steps.meta.outputs.tags }},${{ env.IMAGE_NAME }}${{ matrix.variant == '-node' && format('-node{0}', env.NODE_VERSION) || '' }}:latest
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -71,8 +76,9 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: .
           file: ./Dockerfile
+          build-args: ${{ matrix.variant == '-node' && format('WITH_NODE={0}', env.NODE_VERSION) || '' }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }},${{ env.IMAGE_NAME }}${{ matrix.variant == '-node' && format('-node{0}', env.NODE_VERSION) || '' }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
