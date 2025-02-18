@@ -59,8 +59,7 @@ FROM alpine:latest AS runtime
 ARG WITH_NODE
 
 RUN apk add --no-cache perl dumb-init && \
-	test -n "$WITH_NODE" && \
-	apk add --no-cache nodejs npm
+	if [ -n "$WITH_NODE" ]; then apk add --no-cache nodejs npm; fi
 
 # Create a non-root user
 RUN addgroup -S qgoda && adduser -S qgoda -G qgoda
