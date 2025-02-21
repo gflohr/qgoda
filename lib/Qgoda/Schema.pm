@@ -51,6 +51,7 @@ sub config {
 				items => {
 					description => __"Name of the analyzer without the leading "
 								   . "Qgoda::Analyzer::",
+					type => 'string',
 				},
 			},
 			'case-sensitive' => {
@@ -158,6 +159,12 @@ sub config {
 					}
 				},
 				default => {}
+			},
+			'pre-build' => {
+				'#ref' => '#/defs/buildTasks',
+			},
+			'post-build' => {
+				'#ref' => '#/defs/buildTasks',
 			},
 			index => {
 				description => __"Basename of a file that is considered to be "
@@ -578,8 +585,42 @@ sub config {
 				default => 'default.html',
 				minLength => 1,
 			}
-		}
-	}
+		},
+		'$defs' => {
+			buildTasks => {
+				type => 'array',
+				items => {
+					type => 'object',
+					required => [qw(name run)],
+					additionalProperties => false,
+					properties => {
+						name => {
+							type => 'string',
+							description => 'Task identifier for the logging.',
+							minLength => 1,
+						},
+						run => {
+							'description' => 'Either a complete command line or'
+								. ' an array consisting of a command followed'
+								. ' by an array of arguments.',
+							'oneOf' => [
+								{
+									type =>'string',
+									minLength => 1,
+								},
+								{
+									type => 'array',
+									items => {
+										type => 'string',
+									},
+								},
+							],
+						},
+					},
+				},
+			},
+		},
+	},
 };
 
 1;
