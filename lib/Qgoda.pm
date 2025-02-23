@@ -70,6 +70,7 @@ use Qgoda::Util qw(empty strip_suffix interpolate normalize_path write_file
 				   read_file);
 use Qgoda::PluginUtils qw(load_plugins);
 use Qgoda::DependencyTracker;
+use Qgoda::BuildTask;
 
 my $qgoda;
 
@@ -130,10 +131,131 @@ sub initPlugins {
 	return $self;
 }
 
+sub __initBuildTasks {
+	my ($self) = @_;
+
+	my $config = $self->{__config};
+
+	$self->{__preBuildTasks} = [];
+	if ($config->{'pre-build'}) {
+		foreach my $task (@{$config->{'pre-build'}}) {
+			push @{$self->{__preBuildTasks}}, Qgoda::BuildTask->new(
+				name => $task->{name},
+				run => $task->{run},
+			);
+		}
+	}
+
+	$self->{__postBuildTasks} = [];
+	if ($config->{'post-build'}) {
+		foreach my $task (@{$config->{'post-build'}}) {
+			push @{$self->{__postBuildTasks}}, Qgoda::BuildTask->new(
+				name => $task->{name},
+				run => $task->{run},
+			);
+		}
+	}
+}
+
+sub __runBuildTasks {
+	my ($self, $tasks, $prefix) = @_;
+
+	foreach my $task (@$tasks) {
+		$self->__runBuildTask($task, $prefix);
+	}
+
+	return $self;
+}
+
+sub __runBuildTask {
+	my ($self, $task, $prefix) = @_;
+
+	my $logger = $self->logger;
+
+	my $helper = $task->name;
+	my $log_prefix = "[helper][$helper] ";
+
+	my $safe_helper = $helper;
+	$safe_helper =~ s/[^a-z0-9]+/_/;
+
+	my $args = $task->run;
+	$args = [$args] if !ref $args;
+
+	my $exec = $ENV{"QGODA_HELPER_$safe_helper"};
+	if (defined $exec && $exec ne '') {
+		if ($>) {
+			$logger->fatal($log_prefix
+				. __x("Environment variable '{variable}' ignored when running as root",
+					variable => "QGODA_HELPER_$helper"));
+		}
+		$args->[0] = $exec;
+	}
+
+	$logger->info($log_prefix . __x("starting helper: {helper}", helper => $helper));
+
+	my ($pid, $cout, $cerr);
+	my $win32process;
+	if ($^O eq 'MSWin32') {
+		($pid, $cout, $cerr, $win32process) = $self->__spawnHelperWin32($log_prefix, @$args);
+	} else {
+		($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
+	}
+
+	$logger->debug(__x('child process pid {pid}', pid => $pid));
+
+	my $finished_cv;
+	$finished_cv = AE::cv;
+
+	my %handles = (1 => 1, 2 => 2);
+	my $ahout = AnyEvent::Handle->new(
+		fh => $cout,
+		on_error => sub {
+			my ($handle, $fatal, $msg) = @_;
+			my $method = $fatal ? 'error' : 'warning';
+			$logger->$method($log_prefix . $msg);
+		},
+		on_read => sub {
+			my ($handle) = @_;
+			while ($handle->{rbuf} =~ s{(.*?)\n}{}) {
+				$logger->info($log_prefix . $1);
+			}
+		},
+		on_eof => sub {
+			delete $handles{1};
+			$finished_cv->send if !%handles;
+		},
+	);
+
+	my $aherr = AnyEvent::Handle->new(
+		fh => $cerr,
+		on_error => sub {
+			my ($handle, $fatal, $msg) = @_;
+			my $method = $fatal ? 'error' : 'warning';
+			$logger->$method($log_prefix . $msg);
+		},
+		on_read => sub {
+			my ($handle) = @_;
+			while ($handle->{rbuf} =~ s{(.*?)\n}{}) {
+				$logger->warning($log_prefix . $1);
+			}
+		},
+		on_eof => sub {
+			delete $handles{2};
+			$finished_cv->send if !%handles;
+		},
+	);
+
+	# Wait for the child process to finish.
+	$finished_cv->recv;
+
+	return $self;
+}
+
 sub build {
 	my ($self, %options) = @_;
 
 	$self->initPlugins;
+	$self->__initBuildTasks;
 
 	if (!$self->{__build_options}) {
 		$self->{__build_options} = {%options};
@@ -176,7 +298,9 @@ sub build {
 	$self->__analyze($site) or return;
 	$self->__locate($site) or return;
 
+	$self->__runBuildTasks($self->{__preBuildTasks}, 'pre-build');
 	$self->__build($site, %options);
+	$self->__runBuildTasks($self->{__postBuildTasks}, 'post-build');
 
 	return $self if $options{dry_run};
 
@@ -579,7 +703,7 @@ sub __spawnHelperWin32 {
 
 	$logger->logHandle($saved_log_handle);
 
-	return $pid, $rout, $rerr;
+	return $pid, $rout, $rerr, $process;
 }
 
 sub __findWin32Program {

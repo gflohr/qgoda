@@ -37,16 +37,29 @@ my %config = (
 	'post-build' => [],
 );
 
-foreach (0 .. 9) {
+foreach my $count (0 .. 9) {
 	push @{$config{'pre-build'}}, {
-		name => "pre$_",
-		run => qq{perl -e 'open my \$fh, ">>", "build.log" or die \$!; print \$fh "pre$_\n";'},
+		name => "pre$count",
+		run => $count % 2
+			? "$^X build-task.pl build.log pre $count"
+			: [$^X, 'build-task.pl', 'build.log', 'pre', $count],
 	};
 	push @{$config{'post-build'}}, {
-		name => "post$_",
-		run => qq{perl -e 'open my \$fh, ">>", "build.log" or die \$!; print \$fh "post$_\n";'},
+		name => "post$count",
+		run => $count % 2
+			? "$^X build-task.pl build.log post $count"
+			: [$^X, 'build-task.pl', 'build.log', 'post', $count],
 	};
 }
+
+my $build_task = <<'EOF';
+use strict;
+
+my ($filename, $type, $count) = @ARGV;
+
+open my $fh, '>>', $filename;
+$fh->print("$type$count\n");
+EOF
 
 my $site = TestSite->new(
 	name => 'command-build',
@@ -54,9 +67,10 @@ my $site = TestSite->new(
 	assets => {
 		'start.md' => {
 			content => "initial\n",
-		}
+		},
 	},
 	files => {
+		'build-task.pl' => $build_task,
 		'_views/default.html' => '[% asset.content %]'
 	}
 );
@@ -66,27 +80,11 @@ Qgoda::CLI->new(['build'])->dispatch;
 my $expected = '<p>initial</p>';
 my $got = read_file '_site/start/index.html';
 
-is $got, $expected;
-
-# The log in the output directory only contains the pre steps
-$got = read_file './build.log';
-$expected = <<"EOF";
-pre0
-pre1
-pre2
-pre3
-pre4
-pre5
-pre6
-pre7
-pre8
-pre9
-EOF
-is $got, $expected, 'build.log in _site directory incorrect';
+is $got, $expected, 'normal file built';
 
 # The log in the source directory also contains the post steps.
-$got = read_file './build.log';
-$expected = <<"EOF";
+my $got = read_file './build.log';
+my $expected = <<"EOF";
 pre0
 pre1
 pre2
@@ -108,7 +106,7 @@ post7
 post8
 post9
 EOF
-is $got, $expected, 'build.log in source directory incorrect';
+is $got, $expected, 'build.log in source directory correct';
 
 $site->tearDown;
 
