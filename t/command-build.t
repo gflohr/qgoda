@@ -30,8 +30,6 @@ use AnyEvent;
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file trim);
 
-sub wait_for_timestamp();
-
 my %config = (
 	'pre-build' => [],
 	'post-build' => [],
@@ -51,6 +49,10 @@ foreach my $count (0 .. 9) {
 			: [$^X, 'build-task.pl', 'build.log', 'post', $count],
 	};
 }
+
+# Remove the build.log so that we can comment out the tear down step during
+# development.
+unlink 'build.log';
 
 my $build_task = <<'EOF';
 use strict;
@@ -82,9 +84,11 @@ my $got = read_file '_site/start/index.html';
 
 is $got, $expected, 'normal file built';
 
+# The log in the
+
 # The log in the source directory also contains the post steps.
-my $got = read_file './build.log';
-my $expected = <<"EOF";
+$got = read_file './build.log';
+$expected = <<"EOF";
 pre0
 pre1
 pre2
@@ -108,6 +112,22 @@ post9
 EOF
 is $got, $expected, 'build.log in source directory correct';
 
-$site->tearDown;
+# The log in the _site directory only contains the pre steps.
+$got = read_file './_site/build.log';
+$expected = <<"EOF";
+pre0
+pre1
+pre2
+pre3
+pre4
+pre5
+pre6
+pre7
+pre8
+pre9
+EOF
+is $got, $expected, 'build.log in _site directory correct';
+
+#$site->tearDown;
 
 done_testing;

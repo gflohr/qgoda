@@ -279,6 +279,7 @@ sub build {
 		$self->setSite($site);
 	}
 
+	$self->__runBuildTasks($self->{__preBuildTasks}, 'pre-build');
 	$self->scan($site);
 	$self->__initVersionControlled($site)
 		if !empty $config->{scm} && 'git' eq $config->{scm};
@@ -298,7 +299,6 @@ sub build {
 	$self->__analyze($site) or return;
 	$self->__locate($site) or return;
 
-	$self->__runBuildTasks($self->{__preBuildTasks}, 'pre-build');
 	$self->__build($site, %options);
 	$self->__runBuildTasks($self->{__postBuildTasks}, 'post-build');
 
