@@ -21,7 +21,7 @@ package Qgoda;
 use strict;
 
 use version;
-our $VERSION = 'v0.10.1'; #VERSION
+our $VERSION = 'v0.11.0'; #VERSION
 
 use Qgoda::Util::FileSpec qw(
 	absolute_path abs2rel catdir catfile catpath rel2abs splitpath

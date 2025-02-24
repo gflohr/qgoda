@@ -4,7 +4,7 @@
       "Guido Flohr <guido.flohr@cantanea.com>"
    ],
    "dynamic_config" : 1,
-   "generated_by" : "Dist::Zilla version 6.030, CPAN::Meta::Converter version 2.150010",
+   "generated_by" : "Dist::Zilla version 6.032, CPAN::Meta::Converter version 2.150010",
    "license" : [
       "gpl_3"
    ],
@@ -64,7 +64,7 @@
             "Inline" : "0",
             "JSON" : "2.0",
             "JSON::PP" : "0",
-            "JavaScript::Duktape::XS" : "0.000074",
+            "JavaScript::Duktape::XS" : "0.000081",
             "LWP::UserAgent" : "0",
             "List::Util" : "1.45",
             "Locale::Language" : "0",
@@ -135,9 +135,9 @@
          "web" : "http://github.com/gflohr/qgoda.git"
       }
    },
-   "version" : "v0.10.1",
-   "x_generated_by_perl" : "v5.34.0",
-   "x_serialization_backend" : "Cpanel::JSON::XS version 4.26",
+   "version" : "v0.11.0",
+   "x_generated_by_perl" : "v5.40.0",
+   "x_serialization_backend" : "Cpanel::JSON::XS version 4.38",
    "x_spdx_expression" : "GPL-3.0-only"
 }
 
