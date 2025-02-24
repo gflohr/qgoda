@@ -219,7 +219,7 @@ sub __runBuildTask {
 		($pid, $cout, $cerr) = $self->__spawnHelper($log_prefix, @$args);
 	}
 
-	$logger->debug(__x('child process pid {pid}', pid => $pid));
+	$logger->debug($log_prefix . __x('child process pid {pid}', pid => $pid));
 
 	my $ahout = AnyEvent::Handle->new(
 		fh => $cout,
@@ -304,7 +304,7 @@ sub __runBuildTask {
 		return;
 	}
 
-	$logger->info($log_prefix, __"helper terminated");
+	$logger->info($log_prefix . __"helper terminated");
 
 	return $self;
 }
