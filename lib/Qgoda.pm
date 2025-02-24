@@ -161,7 +161,7 @@ sub __runBuildTasks {
 	my ($self, $tasks, $prefix) = @_;
 
 	foreach my $task (@$tasks) {
-		$self->__runBuildTask($task, $prefix);
+		$self->__runBuildTask($task, $prefix) or return;
 	}
 
 	return $self;
