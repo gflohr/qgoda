@@ -5,12 +5,13 @@
 	  * Likewise, "_localconfig.*" is now "_localqgoda.*".
 	  * Hoedown has been replaced with Markdown. Please update your config
 	    files!
+	- New configuration variables `pre-build` and `post-build` for configuring build tasks
 	- Broken watch mode fixed (GitHub issue #108).
 	- Various improvements to the schema.
 	- Most recent schema is always available online at
 	  https://www.qgoda.net/schemas/qgoda.json.
 	- Current schema is always available online at
-	  https://www.qgoda.net/schemas/qgoda-v0.10.1.json (replace v0.10.1 with
+	  https://www.qgoda.net/schemas/qgoda-v0.11.0.json (replace v0.11.0 with
 	  current version).
 
 0.10.0 - 2023-07-14
