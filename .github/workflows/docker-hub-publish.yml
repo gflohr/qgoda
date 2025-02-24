@@ -70,7 +70,7 @@ jobs:
 
       - name: Build and push versioned Docker image
         id: build-and-push
-        if: ${{ github.event.inputs.is_latest != 'true' && github.events.inputs.is_latest != true }}
+        if: ${{ github.event.inputs.is_latest != 'true' && github.event.inputs.is_latest != true }}
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
