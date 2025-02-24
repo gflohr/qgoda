@@ -80,14 +80,17 @@ jobs:
         cd .. &&
         perl -MFile::Path -e "exit not File::Path::rmtree('text-markdown-discount')"
 
-    - name: 'Installing other dependencies'
+    - name: 'Install other dependencies'
       run: cpanm --notest --installdeps --verbose .
 
     - name: 'Prepare build'
       run: perl Makefile.PL
 
-    - name: 'Build, test, and install'
-      run: cpanm --verbose .
+    - name: Test
+      run: prove -l --verbose
+
+    - name: Install
+      run: cpanm --notest --verbose .
 
     - name: 'Test with coverage'
       if: ${{ matrix.coverage }}
