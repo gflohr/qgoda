@@ -150,8 +150,10 @@ is scalar @lines, 1, 'one line of error log for exit';
 like $lines[0], qr/helper exited with code 42/, 'exit error message';
 
 if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
-	skip 'signals not tested on MS-DOS', 1;
-	ok 1;
+	SKIP: {
+		skip 'signals not tested on MS-DOS', 1;
+		ok 1;
+	}
 } else {
 	unlink 'build.log';
 
