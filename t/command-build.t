@@ -60,7 +60,11 @@ use strict;
 my ($filename, $type, $count) = @ARGV;
 
 open my $fh, '>>', $filename;
-$fh->print("$type$count\n");
+if ($ENV{QGODA_FAILURE_POST_4} && $count eq '4' && $type eq 'post') {
+	exit 42;
+} else {
+	$fh->print("$type$count\n");
+}
 EOF
 
 my $site = TestSite->new(
@@ -94,21 +98,11 @@ pre1
 pre2
 pre3
 pre4
-pre5
-pre6
-pre7
-pre8
-pre9
 post0
 post1
 post2
 post3
 post4
-post5
-post6
-post7
-post8
-post9
 EOF
 is $got, $expected, 'build.log in source directory correct';
 
@@ -120,13 +114,29 @@ pre1
 pre2
 pre3
 pre4
-pre5
-pre6
-pre7
-pre8
-pre9
 EOF
 is $got, $expected, 'build.log in _site directory correct';
+
+unlink 'build.log' or die $!;
+
+$ENV{QGODA_FAILURE_POST_4} = 1;
+Qgoda::CLI->new(['build'])->dispatch;
+delete $ENV{QGODA_FAILURE_POST_4};
+
+# This time we expect a failure on the last task.
+$got = read_file './build.log';
+$expected = <<"EOF";
+pre0
+pre1
+pre2
+pre3
+pre4
+post0
+post1
+post2
+post3
+EOF
+is $got, $expected, 'build.log in source directory correct';
 
 $site->tearDown;
 
