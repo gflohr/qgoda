@@ -68,5 +68,8 @@ jobs:
     - name: 'Prepare build'
       run: perl Makefile.PL
 
+    - name: Test (will be deleted)
+      run: prove -l --verbose
+
     - name: 'Build, test, and install'
       run: cpanm --verbose .
