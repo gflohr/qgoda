@@ -71,22 +71,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: cpanm --notest BSD::Resource
 
-    - name: 'AnyEvent::Filesys::Watcher'
-      run: |
-        git clone https://github.com/gflohr/AnyEvent-Filesys-Watcher &&
-        cd AnyEvent-Filesys-Watcher &&
-        cpanm --notest --verbose . &&
-        cd .. &&
-        perl -MFile::Path -e "exit not File::Path::rmtree('AnyEvent-Filesys-Watcher')"
-
-    - name: 'Install JavaScript::Duktape::XS'
-      run: |
-        git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
-        cd JavaScript-Duktape-XS &&
-        cpanm --notest --verbose . &&
-        cd .. &&
-        perl -MFile::Path -e "exit not File::Path::rmtree('JavaScript-Duktape-XS')"
-
     - name: 'Install Text::Markdown::Discount for MS-DOS'
       if: matrix.os == 'windows-latest'
       run: |
