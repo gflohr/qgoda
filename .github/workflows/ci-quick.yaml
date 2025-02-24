@@ -68,8 +68,8 @@ jobs:
     - name: 'Prepare build'
       run: perl Makefile.PL
 
-    - name: Test
-      run: prove -l --verbose
-
     - name: Install
       run: cpanm --notest --verbose .
+
+    - name: Test
+      run: prove -l --verbose
