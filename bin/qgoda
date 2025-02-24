@@ -22,4 +22,4 @@ use strict;
 
 use Qgoda::CLI;
 
-Qgoda::CLI->new->dispatch;
+Qgoda::CLI->new->dispatch or exit 1;
