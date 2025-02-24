@@ -54,6 +54,7 @@ front-matter-placeholder:
     '*': "[% '' %]\\n"
 generator: Qgoda v$Qgoda::VERSION (https://www.qgoda.net/)
 helpers: {}
+build-task-timeout: 300
 index: index
 latency: 0.5
 link-score: 5

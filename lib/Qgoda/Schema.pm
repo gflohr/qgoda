@@ -166,6 +166,14 @@ sub config {
 			'post-build' => {
 				'#ref' => '#/defs/buildTasks',
 			},
+			'build-task-timeout' => {
+				description => __"Number of seconds to wait before forcibly"
+					. " terminating pre-build or post-build tasks; defaults to"
+					. " 300 seconds.",
+					type => 'number',
+					minimum => 1,
+					default => 300,
+			},
 			index => {
 				description => __"Basename of a file that is considered to be "
 							   . "the index document of a directory.",
