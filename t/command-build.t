@@ -29,6 +29,7 @@ use AnyEvent;
 
 use Qgoda::CLI;
 use Qgoda::Util qw(read_file trim);
+use MemStream;
 
 my %config = (
 	'pre-build' => [],
@@ -62,6 +63,9 @@ my ($filename, $type, $count) = @ARGV;
 open my $fh, '>>', $filename;
 if ($ENV{QGODA_FAILURE_POST_4} && $count eq '4' && $type eq 'post') {
 	exit 42;
+} elsif ($ENV{QGODA_SIGNAL_POST_4} && $count eq '4' && $type eq 'post') {
+	kill 9, $$;
+	sleep 3;
 } else {
 	$fh->print("$type$count\n");
 }
@@ -92,7 +96,7 @@ is $got, $expected, 'normal file built';
 
 # The log in the source directory also contains the post steps.
 $got = read_file './build.log';
-$expected = <<"EOF";
+$expected = <<'EOF';
 pre0
 pre1
 pre2
@@ -108,7 +112,7 @@ is $got, $expected, 'build.log in source directory correct';
 
 # The log in the _site directory only contains the pre steps.
 $got = read_file './_site/build.log';
-$expected = <<"EOF";
+$expected = <<'EOF';
 pre0
 pre1
 pre2
@@ -119,13 +123,15 @@ is $got, $expected, 'build.log in _site directory correct';
 
 unlink 'build.log' or die $!;
 
+my $stderr = tie *STDERR, 'MemStream';
 $ENV{QGODA_FAILURE_POST_4} = 1;
 Qgoda::CLI->new(['build'])->dispatch;
 delete $ENV{QGODA_FAILURE_POST_4};
+untie *STDERR;
 
 # This time we expect a failure on the last task.
 $got = read_file './build.log';
-$expected = <<"EOF";
+$expected = <<'EOF';
 pre0
 pre1
 pre2
@@ -137,6 +143,44 @@ post2
 post3
 EOF
 is $got, $expected, 'build.log in source directory correct';
+
+my @lines = split /\n/, $stderr->buffer;
+
+is scalar @lines, 1, 'one line of error log';
+like $lines[0], qr/helper exited with code 42/, 'exit error message';
+
+if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
+	skip 'signals not tested on MS-DOS', 1;
+	ok 1;
+} else {
+	unlink 'build.log';
+
+	$stderr = tie *STDERR, 'MemStream';
+	$ENV{QGODA_SIGNAL_POST_4} = 1;
+	Qgoda::CLI->new(['build'])->dispatch;
+	delete $ENV{QGODA_SIGNAL_POST_4};
+	untie *STDERR;
+
+	# This time we expect a failure on the last task.
+	$got = read_file './build.log';
+	$expected = <<'EOF';
+pre0
+pre1
+pre2
+pre3
+pre4
+post0
+post1
+post2
+post3
+EOF
+	is $got, $expected, 'build.log in source directory correct';
+
+	@lines = split /\n/, $stderr->buffer;
+
+	is scalar @lines, 1, 'one line of error log';
+	like $lines[0], qr/helper terminated by signal 9/, 'signal message';
+}
 
 $site->tearDown;
 
