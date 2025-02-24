@@ -263,7 +263,10 @@ sub __runBuildTask {
 
 			my $status = Win32::Process::Wait($win32process, 0);
 			if ($status != WAIT_TIMEOUT) {
-				$win32process->GetExitCode($exit_code);
+				while (!defined $exit_code || $exit_code == 259) {
+					$win32process->GetExitCode($exit_code);
+					usleep 0.1;
+				}
 				$finished_cv->send($exit_code);
 			}
 		} else {
