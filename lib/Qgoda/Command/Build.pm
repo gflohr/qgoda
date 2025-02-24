@@ -47,7 +47,7 @@ option '--watch' is not supported, use '{program} watch' instead!'
 EOF
 	}
 
-	Qgoda->new($global_options)->build(%options);
+	Qgoda->new($global_options)->build(%options) or return;
 
 	return $self;
 }

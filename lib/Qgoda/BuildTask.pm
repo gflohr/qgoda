@@ -1,6 +1,6 @@
-#! /usr/bin/env perl
+#! /bin/false
 
-# Copyright (C) 2016-2025 Guido Flohr <guido.flohr@cantanea.com>,
+# Copyright (C) 2016-2023 Guido Flohr <guido.flohr@cantanea.com>,
 # all rights reserved.
 
 # This program is free software: you can redistribute it and/or modify
@@ -16,10 +16,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+package Qgoda::BuildTask;
+
 use strict;
 
 #VERSION
 
-use Qgoda::CLI;
+use Locale::TextDomain qw(qgoda);
 
-Qgoda::CLI->new->dispatch or exit 1;
+sub new {
+	my ($class, %args) = @_;
+
+	my $self = {
+		__name => $args{name},
+		__run => $args{run},
+	};
+
+	bless $self, $class;
+}
+
+sub name {
+	shift->{__name};
+}
+
+sub run {
+	shift->{__run};
+}
+
+1;

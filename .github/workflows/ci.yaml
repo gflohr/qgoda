@@ -71,22 +71,6 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: cpanm --notest BSD::Resource
 
-    - name: 'AnyEvent::Filesys::Watcher'
-      run: |
-        git clone https://github.com/gflohr/AnyEvent-Filesys-Watcher &&
-        cd AnyEvent-Filesys-Watcher &&
-        cpanm --notest --verbose . &&
-        cd .. &&
-        perl -MFile::Path -e "exit not File::Path::rmtree('AnyEvent-Filesys-Watcher')"
-
-    - name: 'Install JavaScript::Duktape::XS'
-      run: |
-        git clone https://github.com/gonzus/JavaScript-Duktape-XS &&
-        cd JavaScript-Duktape-XS &&
-        cpanm --notest --verbose . &&
-        cd .. &&
-        perl -MFile::Path -e "exit not File::Path::rmtree('JavaScript-Duktape-XS')"
-
     - name: 'Install Text::Markdown::Discount for MS-DOS'
       if: matrix.os == 'windows-latest'
       run: |
@@ -96,14 +80,17 @@ jobs:
         cd .. &&
         perl -MFile::Path -e "exit not File::Path::rmtree('text-markdown-discount')"
 
-    - name: 'Installing other dependencies'
+    - name: 'Install other dependencies'
       run: cpanm --notest --installdeps --verbose .
 
     - name: 'Prepare build'
       run: perl Makefile.PL
 
-    - name: 'Build, test, and install'
-      run: cpanm --verbose .
+    - name: Install
+      run: cpanm --notest --verbose .
+
+    - name: Test
+      run: prove -l --verbose
 
     - name: 'Test with coverage'
       if: ${{ matrix.coverage }}
