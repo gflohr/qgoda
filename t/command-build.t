@@ -128,6 +128,6 @@ pre9
 EOF
 is $got, $expected, 'build.log in _site directory correct';
 
-#$site->tearDown;
+$site->tearDown;
 
 done_testing;
