@@ -35,7 +35,7 @@ my %config = (
 	'post-build' => [],
 );
 
-foreach my $count (0 .. 9) {
+foreach my $count (0 .. 4) {
 	push @{$config{'pre-build'}}, {
 		name => "pre$count",
 		run => $count % 2

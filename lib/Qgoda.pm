@@ -191,10 +191,28 @@ sub __runBuildTask {
 		$args->[0] = $exec;
 	}
 
-	$logger->info($log_prefix . __x("starting helper: {helper}", helper => $helper));
+	my $timeout = $self->config->{'build-task-timeout'};
 
-	my ($pid, $cout, $cerr);
-	my $win32process;
+	$logger->info($log_prefix
+		. __x("starting helper: {helper} (timeout: {timeout} seconds)",
+			helper => $helper, timeout => $timeout));
+
+	my $finished_cv;
+	$finished_cv = AE::cv;
+
+	my $pid;
+	my $watcher = AE::timer $timeout, 0, sub {
+		$logger->error($log_prefix . __"helper timed out");
+		if ($pid) {
+			kill 3, $pid;
+			sleep 3;
+			kill 9, $pid;
+		}
+
+		$finished_cv->send(-1);
+	};
+
+	my ($cout, $cerr, $win32process);
 	if ($^O eq 'MSWin32') {
 		($pid, $cout, $cerr, $win32process) = $self->__spawnHelperWin32($log_prefix, @$args);
 	} else {
@@ -203,10 +221,6 @@ sub __runBuildTask {
 
 	$logger->debug(__x('child process pid {pid}', pid => $pid));
 
-	my $finished_cv;
-	$finished_cv = AE::cv;
-
-	my %handles = (1 => 1, 2 => 2);
 	my $ahout = AnyEvent::Handle->new(
 		fh => $cout,
 		on_error => sub {
@@ -220,10 +234,7 @@ sub __runBuildTask {
 				$logger->info($log_prefix . $1);
 			}
 		},
-		on_eof => sub {
-			delete $handles{1};
-			$finished_cv->send if !%handles;
-		},
+		on_eof => sub {},
 	);
 
 	my $aherr = AnyEvent::Handle->new(
@@ -239,14 +250,58 @@ sub __runBuildTask {
 				$logger->warning($log_prefix . $1);
 			}
 		},
-		on_eof => sub {
-			delete $handles{2};
-			$finished_cv->send if !%handles;
-		},
+		on_eof => sub {},
 	);
 
+	my $poller = AE::timer 0, 0.1, sub {
+		my $exit_code;
+
+		if ($^O eq 'MSWin32') {
+			require Win32::Process;
+			use constant WAIT_TIMEOUT => 0x00000102;
+			use constant INFINITE     => 0xFFFFFFFF;
+
+			my $status = Win32::Process::Wait($win32process, 0);
+			if ($status != WAIT_TIMEOUT) {
+				$win32process->GetExitCode($exit_code);
+				$finished_cv->send($exit_code);
+			}
+		} else {
+			my $res = waitpid($pid, WNOHANG);
+			if ($res == $pid) {
+				if ($? & 127) {
+					my $signal = $? & 127;
+					if ($? & 128) {
+						$logger->error($log_prefix
+							. __x('helper terminated by signal {signal}',
+								signal => $signal));
+					} else {
+						$logger->error($log_prefix
+							. __x('helper terminated by signal {signal} (core dumped)',
+								signal => $signal));
+					}
+					$exit_code = -1;
+				} else {
+					$exit_code = $? >> 8;
+				}
+				$finished_cv->send($exit_code);
+			}
+		}
+	};
+
 	# Wait for the child process to finish.
-	$finished_cv->recv;
+	my $exit_code = $finished_cv->recv;
+	if ($exit_code > 0) {
+		$logger->error($log_prefix
+			. __x('helper exited with code {code}',
+				code => $exit_code));
+		return;
+	} elsif ($exit_code < 0) {
+		# Was already reported.
+		return;
+	}
+
+	$logger->info($log_prefix, __"helper terminated");
 
 	return $self;
 }
@@ -279,7 +334,9 @@ sub build {
 		$self->setSite($site);
 	}
 
-	$self->__runBuildTasks($self->{__preBuildTasks}, 'pre-build');
+	if (!$options{dry_run}) {
+		$self->__runBuildTasks($self->{__preBuildTasks}, 'pre-build') or return;
+	}
 	$self->scan($site);
 	$self->__initVersionControlled($site)
 		if !empty $config->{scm} && 'git' eq $config->{scm};
@@ -300,9 +357,9 @@ sub build {
 	$self->__locate($site) or return;
 
 	$self->__build($site, %options);
-	$self->__runBuildTasks($self->{__postBuildTasks}, 'post-build');
-
 	return $self if $options{dry_run};
+
+	$self->__runBuildTasks($self->{__postBuildTasks}, 'post-build') or return;
 
 	my $deleted = $self->__prune($site);
 
