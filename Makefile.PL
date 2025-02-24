@@ -216,7 +216,7 @@ my %WriteMakefileArgs = (
     "Inline" => 0,
     "JSON" => "2.0",
     "JSON::PP" => 0,
-    "JavaScript::Duktape::XS" => "0.000074",
+    "JavaScript::Duktape::XS" => "0.000081",
     "LWP::UserAgent" => 0,
     "List::Util" => "1.45",
     "Locale::Language" => 0,
@@ -270,7 +270,7 @@ my %WriteMakefileArgs = (
     "lib" => 0,
     "utf8" => 0
   },
-  "VERSION" => "v0.10.1",
+  "VERSION" => "v0.11.0",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -315,7 +315,7 @@ my %FallbackPrereqs = (
   "Inline" => 0,
   "JSON" => "2.0",
   "JSON::PP" => 0,
-  "JavaScript::Duktape::XS" => "0.000074",
+  "JavaScript::Duktape::XS" => "0.000081",
   "LWP::UserAgent" => 0,
   "List::Util" => "1.45",
   "Locale::Language" => 0,

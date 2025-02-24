@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-# this test was generated with Dist::Zilla::Plugin::Test::CPAN::Changes 0.012
+# this test was generated with Dist::Zilla::Plugin::Test::CPAN::Changes 0.013
 
 use Test::More 0.96 tests => 1;
 use Test::CPAN::Changes;
