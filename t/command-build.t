@@ -142,11 +142,11 @@ post1
 post2
 post3
 EOF
-is $got, $expected, 'build.log in source directory correct';
+is $got, $expected, 'build.log after exit in source directory correct';
 
 my @lines = split /\n/, $stderr->buffer;
 
-is scalar @lines, 1, 'one line of error log';
+is scalar @lines, 1, 'one line of error log for exit';
 like $lines[0], qr/helper exited with code 42/, 'exit error message';
 
 if ($^O eq 'MSWin32' || $^O eq 'cygwin') {
@@ -174,11 +174,11 @@ post1
 post2
 post3
 EOF
-	is $got, $expected, 'build.log in source directory correct';
+	is $got, $expected, 'build.log after singal in source directory correct';
 
 	@lines = split /\n/, $stderr->buffer;
 
-	is scalar @lines, 1, 'one line of error log';
+	is scalar @lines, 1, 'one line of error log for signal';
 	like $lines[0], qr/helper terminated by signal 9/, 'signal message';
 }
 
