@@ -3,9 +3,7 @@ LABEL org.opencontainers.image.authors="guido.flohr@cantanea.com"
 
 RUN apk add \
 	binutils \
-	curl \
 	gcc \
-	git \
 	make \
 	musl-dev \
 	nodejs \
@@ -43,12 +41,6 @@ RUN apk add \
 
 WORKDIR /root
 
-# Install a specific JavaScript::Duktape::XS version
-RUN git clone https://github.com/gonzus/JavaScript-Duktape-XS && \
-	cd JavaScript-Duktape-XS && \
-	cpanm --notest . && \
-	cd .. && rm -rf JavaScript-Duktape-XS
-
 # Copy source code and install dependencies
 COPY . /root/qgoda/
 WORKDIR /root/qgoda/
@@ -59,7 +51,9 @@ FROM alpine:latest AS runtime
 ARG WITH_NODE
 
 RUN apk add --no-cache perl dumb-init && \
-	if [ -n "$WITH_NODE" ]; then apk add --no-cache nodejs npm; fi
+	if [ -n "$WITH_NODE" ]; then \
+		apk add --no-cache nodejs npm git; \
+	fi
 
 # Create a non-root user
 RUN addgroup -S qgoda && adduser -S qgoda -G qgoda
