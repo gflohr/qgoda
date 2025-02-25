@@ -3,9 +3,7 @@ LABEL org.opencontainers.image.authors="guido.flohr@cantanea.com"
 
 RUN apk add \
 	binutils \
-	curl \
 	gcc \
-	git \
 	make \
 	musl-dev \
 	nodejs \
@@ -42,12 +40,6 @@ RUN apk add \
 	npm install -g yarn
 
 WORKDIR /root
-
-# Install a specific JavaScript::Duktape::XS version
-RUN git clone https://github.com/gonzus/JavaScript-Duktape-XS && \
-	cd JavaScript-Duktape-XS && \
-	cpanm --notest . && \
-	cd .. && rm -rf JavaScript-Duktape-XS
 
 # Copy source code and install dependencies
 COPY . /root/qgoda/
