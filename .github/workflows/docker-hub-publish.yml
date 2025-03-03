@@ -1,8 +1,8 @@
 name: Docker Publish (DockerHub)
 
 on:
-  push:
-    tags: [ 'v*.*.*' ]
+  release:
+    types: [published]
   pull_request:
   workflow_dispatch:
     inputs:
@@ -14,7 +14,6 @@ on:
 env:
   REGISTRY: docker.io
   IMAGE_NAME: ${{ github.repository }}
-  VERSION_TAG: ${{ github.event.inputs.version_tag || github.ref_name }}
   NODE_VERSION: 22
 
 jobs:
@@ -23,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        variant: [ "", "-node" ]
+        variant: ["", "-node"]
     permissions:
       contents: read
       packages: write
@@ -47,38 +46,45 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Extract version info
+        if: github.event_name == 'release'
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"  # Extract '0.11.0' from 'refs/tags/v0.11.0'
+          MAJOR_VERSION="${VERSION%%.*}"      # Extract '0' from '0.11.0'
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "MAJOR_VERSION=$MAJOR_VERSION" >> $GITHUB_ENV
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push latest Docker image
-        id: build-and-push-latest
-        if: ${{ github.event.inputs.is_latest == 'true' || github.event.inputs.is_latest == true }}
-        uses: docker/build-push-action@v6
-        with:
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
-          context: .
-          file: ./Dockerfile
-          build-args: ${{ matrix.variant == '-node' && 'WITH_NODE=true' || '' }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }},${{ env.IMAGE_NAME }}:latest${{ matrix.variant }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Debug tags
+        run: |
+          echo "Meta tags: ${{ steps.meta.outputs.tags }}"
+          echo "Image Name: ${{ env.IMAGE_NAME }}"
+          echo "Matrix variant: ${{ matrix.variant }}"
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "Release version: $VERSION"
+            echo "Major version: $MAJOR_VERSION"
+            echo "Final tags: ${{ env.IMAGE_NAME }}:$VERSION${{ matrix.variant }}, ${{ env.IMAGE_NAME }}:$MAJOR_VERSION${{ matrix.variant }}, ${{ env.IMAGE_NAME }}:latest${{ matrix.variant }}"
+          fi
+        shell: sh
 
-      - name: Build and push versioned Docker image
+      - name: Build Docker image and push for releases
         id: build-and-push
-        if: ${{ github.event.inputs.is_latest != 'true' && github.event.inputs.is_latest != true }}
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           context: .
           file: ./Dockerfile
           build-args: ${{ matrix.variant == '-node' && 'WITH_NODE=true' || '' }}
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}${{ matrix.variant }}
+          push: ${{ github.event_name == 'release' }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ env.VERSION }}${{ matrix.variant }}
+            ${{ env.IMAGE_NAME }}:${{ env.MAJOR_VERSION }}${{ matrix.variant }}
+            ${{ env.IMAGE_NAME }}:latest${{ matrix.variant }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
