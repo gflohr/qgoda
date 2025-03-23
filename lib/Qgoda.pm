@@ -337,9 +337,10 @@ sub build {
 		$self->setSite($site);
 	}
 
-	if (!$options{dry_run}) {
+	if (!$options{dry_run} && !$options{for_watch}) {
 		$self->__runBuildTasks($self->{__preBuildTasks}, 'pre-build') or return;
 	}
+
 	$self->scan($site);
 	$self->__initVersionControlled($site)
 		if !empty $config->{scm} && 'git' eq $config->{scm};
@@ -362,7 +363,9 @@ sub build {
 	$self->__build($site, %options);
 	return $self if $options{dry_run};
 
-	$self->__runBuildTasks($self->{__postBuildTasks}, 'post-build') or return;
+	if (!$options{dry_run} && !$options{for_watch}) {
+		$self->__runBuildTasks($self->{__postBuildTasks}, 'post-build') or return;
+	}
 
 	my $deleted = $self->__prune($site);
 
@@ -418,7 +421,7 @@ sub buildForWatch {
 		$self->getDependencyTracker->compute($changeset);
 	}
 
-	$self->build(%{$options || {}});
+	$self->build(%{$options || {}}, for_watch => 1);
 
 	return $self;
 }
@@ -1016,6 +1019,7 @@ sub scan {
 		# FIXME! This must be configurable.  It should also be configurable
 		# whether follow_fast or follow_skip should be used.
 		follow => 1,
+		follow_skip => 2,
 		wanted => sub {
 			if (-f $_) {
 				my $path = absolute_path($_);
